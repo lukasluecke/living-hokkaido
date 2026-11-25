@@ -14,7 +14,7 @@
         "properties": {
           "id": { "type": "string" },
           "name": { "type": "object", "required": ["en"], "properties": { "en": { "type": "string" }, "ja": { "type": "string" } } },
-          "scale": { "enum": ["keepsake", "room", "building", "neighborhood", "village", "diorama", "institution", "place"] },
+          "scale": { "enum": ["keepsake", "room", "building", "neighborhood", "village", "diorama", "institution", "place", "feature"], "description": "feature: a part of a larger envelope, such as a building or group of figures within a diorama" },
           "parent": { "type": "string", "description": "The envelope this one sits inside." },
           "depicts": { "type": "string", "description": "An envelope this one represents (a diorama depicts a place and time)." },
           "strata": { "type": "array", "items": { "type": "string" } },

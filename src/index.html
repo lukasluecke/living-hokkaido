@@ -359,6 +359,21 @@
   /* Protocol (墨) */
   .protocol { border-top: 3px double var(--ink); color: var(--ink-soft); align-items: center; }
   .protocol .seal { flex: none; }
+
+  /* Zoom lens: a woodblock label for what is centred when you zoom in */
+  .lens { position: fixed; left: 50%; bottom: max(58px, calc(env(safe-area-inset-bottom) + 50px)); z-index: 4;
+    transform: translate(-50%, 8px); opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s;
+    display: flex; align-items: center; gap: 10px; height: auto; max-width: min(420px, calc(100vw - 32px)); padding: 9px 12px 9px 10px;
+    text-align: left; color: var(--ink); background: var(--paper); border: 2.5px solid var(--ink); border-radius: 3px;
+    box-shadow: inset 0 0 0 3px var(--paper), inset 0 0 0 4px var(--ink), 4px 5px 0 rgba(0,0,0,.55);
+    font-family: "Shippori Mincho B1", "Hiragino Mincho ProN", serif; }
+  .lens.on { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+  .lens .seal { width: 30px; height: 30px; font-size: 17px; flex: none; }
+  .lens .lt { display: grid; gap: 2px; min-width: 0; }
+  .lens b { font-size: 15px; font-weight: 800; }
+  .lens small { font: 12px/1.4 system-ui, sans-serif; color: var(--ink-soft); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .lens .lgo { flex: none; font: 700 12px system-ui, sans-serif; color: var(--paper-3); background: var(--l-voice); border: 2px solid var(--ink); padding: 4px 8px; border-radius: 2px; }
+  .lens .lcount { font: 11px system-ui, sans-serif; color: var(--l-time); }
   .protocol .ptext { flex: 1; min-width: 0; line-height: 1.5; }
 </style>
 </head>
@@ -464,6 +479,7 @@
   <div class="track"><div class="fill indeterminate" id="fill"></div></div></div></div>
 <div class="hint hide" id="hint"></div>
 <div class="toast" id="toast"></div>
+<button type="button" class="lens" id="lens" aria-live="polite"><span class="seal" id="lensSeal"></span><span class="lt"><b id="lensName"></b><small id="lensLine"></small><span class="lcount" id="lensCount"></span></span><span class="lgo" id="lensGo"></span></button>
 
 <script type="importmap">
 {
@@ -496,6 +512,7 @@ const $ = (id) => document.getElementById(id);
 const characters = {};
 let hotspots = []; // [{ character, position: [x,y,z] }] in splat-local coordinates
 let startView = null; // { position: [x,y,z], target: [x,y,z] } in splat-local coordinates
+let regions = []; // [{ envelope, position: [x,y,z] }]: scene features that get a zoom label
 async function loadData() {
   try { CHARACTER_IDS = (await (await fetch("../characters/1808/index.json")).json()).characters; }
   catch { CHARACTER_IDS = []; }
@@ -505,7 +522,7 @@ async function loadData() {
   }));
   try {
     const h = await (await fetch("hotspots.json", { cache: "no-store" })).json();
-    hotspots = h.hotspots || []; startView = h.view || null;
+    hotspots = h.hotspots || []; startView = h.view || null; regions = h.regions || [];
   } catch { hotspots = []; }
   // Japanese versions of the sheets (machine translation, characters/1808/ja.json)
   try { CHAR_JA = (await (await fetch("../characters/1808/ja.json")).json()).characters || {}; } catch { CHAR_JA = {}; }
@@ -648,7 +665,7 @@ function updateMarkers() {
 // ---------- Character sheet
 // The record for a figure or for the whole scene, plus the add/correct form.
 function showRecord(list, { envelopes, about }) {
-  const form = Env.renderForm($("sForm"), { envelopes, about, onSaved: () => (active ? openSheet(active, { keepChat: true }) : openScene()) });
+  const form = Env.renderForm($("sForm"), { envelopes, about, onSaved: () => (active ? openSheet(active, { keepChat: true }) : activeRegion ? openRegion(activeRegion) : openScene()) });
   Env.renderRecord($("sKnown"), list, { onCorrect: (o) => { setTab("record"); form?.correct(o); } });
   const unknown = list.filter((o) => o.kind === "absence").length;
   $("sCount").textContent = t("count")(list.length, unknown);
@@ -722,13 +739,33 @@ function openScene() {
   }
   box.hidden = !box.childNodes.length;
   $("sFormPanel").hidden = true;
+  activeRegion = null;
   $("sheet").classList.add("open");
 }
-$("about").addEventListener("click", openScene);
+$("about").addEventListener("click", () => openScene());
+
+// A scene region: an envelope inside the diorama (the building, the curtains…), seen through the splat.
+let activeRegion = null;
+function openRegion(envId) {
+  const env = Env.envelopeById(envId); if (!env) return;
+  active = null; activeRegion = envId;
+  for (const [, m] of markerEls) m.el.dataset.active = "false";
+  $("sheet").dataset.mode = "scene";
+  $("sName").textContent = env.name[LANG] || env.name.en;
+  $("sJa").textContent = (LANG === "ja" ? env.name.en : env.name.ja) || "";
+  $("sCrumb").textContent = Env.breadcrumb(envId);
+  $("sModel").removeAttribute("src");
+  showRecord(Env.inEnvelopes([envId]), { envelopes: [envId, SCENE_ENVELOPE], about: [envId] });
+  const box = $("sSceneForms"); box.innerHTML = "";
+  for (const f of Env.formsOf(SCENE_ENVELOPE)) { const d = document.createElement("div"); Env.renderForms(d, f, { notes: [] }); box.append(...d.childNodes); }
+  box.hidden = !box.childNodes.length;
+  $("sFormPanel").hidden = true;
+  $("sheet").classList.add("open");
+}
 
 function openSheet(id, { keepChat = false } = {}) {
   const c = characters[id]; if (!c) return;
-  active = id;
+  active = id; activeRegion = null;
   for (const [cid, m] of markerEls) m.el.dataset.active = String(cid === id);
   $("sheet").dataset.mode = "figure";
   if (!keepChat || !$("sheet").dataset.tab) setTab("talk");
@@ -791,9 +828,9 @@ const I18N = {
     faction: { aizu: "Aizu clan", shogunate: "shogunate", "wajin-interpreter": "Wajin interpreter", "sakhalin-ainu": "Sakhalin Ainu" },
     status: { "curator-reviewed": "curator reviewed", sourced: "sourced, not yet reviewed", draft: "draft, not yet sourced" },
     speaksThrough: (n) => `speaks through the ${n.toLowerCase()}`, modelAlt: (n) => `3D model of the ${n}`,
-    lForm: "Form", lActors: "Actors",
+    lForm: "Form", lActors: "Actors", lensOpen: "Open",
     layers: { form: "Form: how it can be seen", time: "Time strata: depicted, made, observed, present", actors: "Actors: who is depicted, made it, speaks", types: "Observation types: event, contact, meaning, making", evidence: "Evidence and standing: two separate scores", absence: "Absence: what is unknown, and why", protocol: "Protocol: who may see what", voice: "Voice: speaks only from the record" },
-    tabTalk: "Talk", tabRecord: "Record", count: (n, u) => `${n}${u ? ` · ${u} gaps` : ""}`,
+    tabTalk: "Talk", tabRecord: "Record", count: (n, u) => `${n}${u ? ` · ${u} gap${u > 1 ? "s" : ""}` : ""}`,
     protocol: "Protocol: shown to the project team. Access rules are to be set with the Hokkaido Museum's Ainu Culture Research Center and community bodies.",
   },
   ja: {
@@ -824,7 +861,7 @@ const I18N = {
     status: { "curator-reviewed": "学芸員確認済み", sourced: "出典あり・未確認", draft: "下書き・出典未確認" },
     speaksThrough: (n) => `${n}を介して話す`, modelAlt: (n) => `${n}の3Dモデル`,
     machine: "機械翻訳",
-    lForm: "形態", lActors: "人物",
+    lForm: "形態", lActors: "人物", lensOpen: "開く",
     layers: { form: "形態：どのように見られるか", time: "時代層：描かれた時・作られた時・観察・現在", actors: "人物：描かれた人・作った人・語る人", types: "観察の種類：出来事・接触・意味・制作", evidence: "根拠と立場：二つの別々の評価", absence: "欠落：分からないこと、その理由", protocol: "公開の決まり：誰が何を見られるか", voice: "声：記録だけをもとに語る" },
     tabTalk: "話す", tabRecord: "記録", count: (n, u) => `${n}件${u ? ` · 不明${u}` : ""}`,
     protocol: "公開範囲：プロジェクトチームのみ。閲覧の決まりは、北海道博物館アイヌ民族文化研究センターおよび関係する団体と定める予定。",
@@ -862,7 +899,7 @@ $("lang").addEventListener("click", async () => {
   await Env.loadEnvelope();
   buildMarkers();
   if (!ui.loader.classList.contains("hide") && ui.loader.classList.contains("interactive")) { failed(t("noSplat")); showFigureList(); }
-  if ($("sheet").classList.contains("open")) { if (active) openSheet(active, { keepChat: true }); else openScene(); }
+  if ($("sheet").classList.contains("open")) { if (active) openSheet(active, { keepChat: true }); else if (activeRegion) openRegion(activeRegion); else openScene(); }
   if (EDIT) renderEditor();
 });
 
@@ -1028,28 +1065,39 @@ canvas.addEventListener("dblclick", (e) => {
 // ---------- Edit mode
 let editing = null;
 function toast(text) { const t = $("toast"); t.textContent = text; t.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("on"), 1800); }
+// Figures and scene regions share one list; regions are envelopes with scale "feature".
+const regionEnvelopes = () => Env.state.envelopes.filter((e) => e.scale === "feature");
 function renderEditor() {
   const list = $("edList"); list.innerHTML = "";
-  for (const id of CHARACTER_IDS) {
-    const row = document.createElement("div"); row.className = "row";
-    const b = document.createElement("button"); b.className = "pick"; b.textContent = characters[id] ? listName(characters[id]) : id;
-    b.setAttribute("aria-pressed", String(editing === id));
-    b.addEventListener("click", () => { editing = editing === id ? null : id; renderEditor(); });
-    const mark = document.createElement("span"); mark.className = "placed";
-    mark.textContent = hotspots.some((h) => h.character === id) ? "✓" : "";
-    row.append(b, mark); list.appendChild(row);
-  }
+  const row = (key, label, placed) => {
+    const r = document.createElement("div"); r.className = "row";
+    const b = document.createElement("button"); b.className = "pick"; b.textContent = label;
+    b.setAttribute("aria-pressed", String(editing === key));
+    b.addEventListener("click", () => { editing = editing === key ? null : key; renderEditor(); });
+    const mark = document.createElement("span"); mark.className = "placed"; mark.textContent = placed ? "✓" : "";
+    r.append(b, mark); list.appendChild(r);
+  };
+  for (const id of CHARACTER_IDS) row(id, characters[id] ? listName(characters[id]) : id, hotspots.some((h) => h.character === id));
+  const head = document.createElement("div"); head.className = "k"; head.textContent = "Scene regions (zoom labels)"; list.append(head);
+  for (const e of regionEnvelopes()) row(`region:${e.id}`, e.name[LANG] || e.name.en, regions.some((r) => r.envelope === e.id));
 }
 function placeHotspot(x, y) {
   const hit = hitAt(x, y);
   if (!hit) { toast("Nothing under that point, try again"); return; }
   const local = mesh.worldToLocal(hit.point.clone());
   const position = local.toArray().map((v) => +v.toFixed(4));
-  hotspots = hotspots.filter((h) => h.character !== editing).concat({ character: editing, position });
-  toast(`Placed ${characters[editing].name.en}`);
-  buildMarkers(); renderEditor();
+  if (editing.startsWith("region:")) {
+    const envelope = editing.slice(7);
+    regions = regions.filter((r) => r.envelope !== envelope).concat({ envelope, position });
+    toast(`Placed ${Env.envelopeById(envelope)?.name.en || envelope}`);
+  } else {
+    hotspots = hotspots.filter((h) => h.character !== editing).concat({ character: editing, position });
+    toast(`Placed ${characters[editing].name.en}`);
+    buildMarkers();
+  }
+  renderEditor();
 }
-const exportJson = () => JSON.stringify({ note: "Positions are in splat-local coordinates. Place them with ?edit=1, then paste the exported JSON here.", ...(startView && { view: startView }), hotspots }, null, 2) + "\n";
+const exportJson = () => JSON.stringify({ note: "Positions are in splat-local coordinates. Place them with ?edit=1, then paste the exported JSON here.", ...(startView && { view: startView }), hotspots, regions }, null, 2) + "\n";
 $("edView").addEventListener("click", () => {
   if (!mesh) return;
   const local = (v) => mesh.worldToLocal(v.clone()).toArray().map((n) => +n.toFixed(4));
@@ -1126,6 +1174,61 @@ function hint() {
   h.classList.remove("hide"); clearTimeout(hint.t); hint.t = setTimeout(() => h.classList.add("hide"), 5000);
 }
 
+// ---------- Zoom lens: when you zoom in, label whatever figure or scene region is nearest the centre.
+// Zoomed in on a thing = the camera is nearer to it than ZOOM_IN of its distance in the start view.
+const ZOOM_IN = 0.8;
+const lensTmp = new THREE.Vector3(), lensView = new THREE.Vector3();
+let lensItem = null;
+function lensCandidates() {
+  const out = [];
+  for (const h of hotspots) if (characters[h.character]) out.push({ type: "figure", id: h.character, position: h.position });
+  for (const r of regions) if (Env.envelopeById(r.envelope)) out.push({ type: "region", id: r.envelope, position: r.position });
+  return out;
+}
+function updateLens() {
+  const lens = $("lens");
+  const hide = () => { lens.classList.remove("on"); lensItem = null; };
+  if (!mesh || !home || EDIT || $("sheet").classList.contains("open")) return hide();
+  // A thing counts as zoomed in on when the camera is clearly closer to it than in the start view.
+  let best = null;
+  const reach = Math.min(innerWidth, innerHeight) * 0.3;
+  for (const c of lensCandidates()) {
+    lensTmp.set(...c.position).applyMatrix4(mesh.matrixWorld);
+    if (camera.position.distanceTo(lensTmp) > home.position.distanceTo(lensTmp) * ZOOM_IN) continue;
+    lensView.copy(lensTmp).applyMatrix4(camera.matrixWorldInverse);
+    if (lensView.z >= 0) continue; // behind the camera
+    lensTmp.project(camera);
+    if (Math.abs(lensTmp.x) > 1 || Math.abs(lensTmp.y) > 1) continue;
+    const d = Math.hypot(lensTmp.x * innerWidth / 2, lensTmp.y * innerHeight / 2);
+    if (d < reach && (!best || d < best.d)) best = { ...c, d };
+  }
+  if (!best) return hide();
+  if (lensItem?.id !== best.id || lens.dataset.lang !== LANG) {
+    lensItem = best; lens.dataset.lang = LANG;
+    let name, line, list, layer, seal;
+    if (best.type === "figure") {
+      const c = characters[best.id];
+      name = nameOf(c); line = sheetText(c, "role") || ""; list = Env.about(best.id); layer = "actors"; seal = "人";
+    } else {
+      const e = Env.envelopeById(best.id);
+      name = e.name[LANG] || e.name.en; list = Env.inEnvelopes([best.id]);
+      line = Env.claimOf(list.find((o) => o.kind !== "absence") || list[0] || { claim: "" }) || ""; layer = "form"; seal = "形";
+    }
+    $("lensSeal").textContent = seal; $("lensSeal").dataset.layer = layer;
+    $("lensName").textContent = name; $("lensLine").textContent = line;
+    const gaps = list.filter((o) => o.kind === "absence").length;
+    $("lensCount").textContent = `${t("tabRecord")} ${t("count")(list.length, gaps)}`;
+    $("lensGo").textContent = t("lensOpen");
+  }
+  lens.classList.add("on");
+}
+// ?debug exposes the scene for inspection in the console.
+if (params.has("debug")) window.__omusha = { THREE, camera, controls, getMesh: () => mesh, getHome: () => home, getRegions: () => regions, getHotspots: () => hotspots, updateLens };
+$("lens").addEventListener("click", () => {
+  if (!lensItem) return;
+  if (lensItem.type === "figure") openSheet(lensItem.id); else openRegion(lensItem.id);
+});
+
 // ---------- Go
 Env.setLang(LANG);
 await Promise.all([loadData(), Env.loadEnvelope()]);
@@ -1134,7 +1237,7 @@ if (EDIT) { $("editor").classList.add("on"); renderEditor(); }
 // ?figure=<character id> opens that figure's card straight away (QR codes, demo links)
 if (params.get("figure") && characters[params.get("figure")]) openSheet(params.get("figure"));
 else if (params.has("about")) openScene();
-renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); updateMarkers(); });
+renderer.setAnimationLoop((now) => { controls.update(); renderer.render(scene, camera); updateMarkers(); if (!(now - (updateLens.t || 0) < 200)) { updateLens.t = now; updateLens(); } });
 loadSplat({ url: SRC, fileName: SRC.split("?")[0].split("/").pop() }, SRC.split("/").pop());
 </script>
 </body>

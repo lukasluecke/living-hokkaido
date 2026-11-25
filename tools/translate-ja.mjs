@@ -12,6 +12,31 @@ import { translateJa } from '../translate.mjs';
 const ROOT = path.resolve(import.meta.dirname, '..');
 if (!(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY)) { console.error('Set GEMINI_API_KEY first.'); process.exit(1); }
 
+// --missing: translate only seed observations that envelopes/ja.json does not have yet, and keep
+// everything already there (including hand corrections).
+if (process.argv.includes('--missing')) {
+  const file = path.join(ROOT, 'envelopes/ja.json');
+  const ja = JSON.parse(fs.readFileSync(file, 'utf8'));
+  const todo = fs.readFileSync(path.join(ROOT, 'envelopes/observations.jsonl'), 'utf8').split('\n').filter(Boolean)
+    .map((l) => JSON.parse(l)).filter((o) => !ja.observations[o.id]);
+  const items = {};
+  for (const o of todo) {
+    items[`${o.id}|claim`] = o.claim;
+    if (o.note) items[`${o.id}|note`] = o.note;
+    if (o.absence?.note) items[`${o.id}|absenceNote`] = o.absence.note;
+    if (o.source?.ref) items[`${o.id}|sourceRef`] = o.source.ref;
+  }
+  const t = await translateJa(items);
+  for (const o of todo) {
+    const p = (f) => t[`${o.id}|${f}`];
+    ja.observations[o.id] = { claim: p('claim'), ...(p('note') && { note: p('note') }), ...(p('absenceNote') && { absenceNote: p('absenceNote') }), ...(p('sourceRef') && { sourceRef: p('sourceRef') }) };
+    console.log(o.id, '|', p('claim'));
+  }
+  fs.writeFileSync(file, JSON.stringify(ja, null, 2) + '\n');
+  console.log(`Added ${todo.length} translations to envelopes/ja.json`);
+  process.exit(0);
+}
+
 const index = JSON.parse(fs.readFileSync(path.join(ROOT, 'characters/1808/index.json'), 'utf8')).characters;
 const sheets = index.map((id) => JSON.parse(fs.readFileSync(path.join(ROOT, `characters/1808/${id}.json`), 'utf8')));
 const observations = fs.readFileSync(path.join(ROOT, 'envelopes/observations.jsonl'), 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l));

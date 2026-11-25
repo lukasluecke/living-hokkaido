@@ -12,5 +12,12 @@
     { "character": "elder-chrysanthemum", "position": [2.278, -0.4639, 1.4058] },
     { "character": "elder-leaf-sprigs", "position": [2.6668, -0.292, 1.9926] },
     { "character": "elder-star-flowers", "position": [2.5715, -0.3979, 2.4836] }
+  ],
+  "regions": [
+    { "envelope": "diorama-hall", "position": [5.9531, -2.6321, 1.0591] },
+    { "envelope": "diorama-curtains", "position": [5.5897, -1.4773, 1.4773] },
+    { "envelope": "diorama-tubs", "position": [4.0824, -0.4271, 1.4226] },
+    { "envelope": "diorama-troops", "position": [3.6337, -0.6218, 4.9002] },
+    { "envelope": "diorama-bales", "position": [4.7875, -0.775, -3.871] }
   ]
 }

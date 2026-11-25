@@ -89,6 +89,44 @@ add({ id: id('presentation-history'), envelopes: ['hokkaido-museum', 'omusha-dio
   claim: 'How the museum\'s presentation of this scene, and of the Ainu, has changed since 1971 is not yet recorded here.',
   absence: { cause: 'never-collected' }, source: { type: 'project-note', ref: ENVELOPE_DOC }, evidence: 'none', standing: contributor, perspective: 'project' });
 
+// ---- Features of the diorama (nested envelopes, scale "feature"). Added after the first seed so
+// earlier ids are unchanged. What is visible, what it may stand for, and what is not known.
+const SPLAT = 'Gaussian splat and visitor photos of the diorama, 2026-11-25 (not published)';
+const seen = { role: 'passerby', grantedBy: '' };
+add({ id: id('hall-appearance'), envelopes: ['diorama-hall', 'omusha-diorama'], about: ['diorama-hall'], kind: 'appearance', stratum: 'made-1971',
+  claim: 'A thatched wooden building with a raised floor stands at the centre. Officials and the interpreter sit inside it, looking out over the elders.',
+  source: { type: 'scan', ref: SPLAT }, evidence: 'physical-trace', standing: seen, perspective: 'project' });
+add({ id: id('hall-unrecorded'), envelopes: ['diorama-hall', 'kushun-kotan-1808'], about: ['diorama-hall'], kind: 'absence', stratum: 'depicted-1808',
+  claim: 'Which building at Kushun Kotan this stands for, and what the 1971 makers based it on, is not recorded here.',
+  absence: { cause: 'never-collected', note: 'The museum\'s records and the makers\' sources have not been consulted.' },
+  source: { type: 'project-note', ref: 'This project' }, evidence: 'none', standing: contributor, perspective: 'project' });
+add({ id: id('curtains-appearance'), envelopes: ['diorama-curtains', 'omusha-diorama'], about: ['diorama-curtains'], kind: 'appearance', stratum: 'made-1971',
+  claim: 'White curtains hang across the front of the building and along the fences, each with a large black crest.',
+  source: { type: 'scan', ref: SPLAT }, evidence: 'physical-trace', standing: seen, perspective: 'project' });
+add({ id: id('curtains-crest'), envelopes: ['diorama-curtains', 'kushun-kotan-1808'], about: ['diorama-curtains'], kind: 'meaning', stratum: 'made-1971',
+  claim: 'The crest looks like the three-leaf hollyhock (mitsuba-aoi) of the Tokugawa shogunate, which would mark the ceremony as held in the shogunate\'s name.',
+  source: { type: 'inference', ref: SPLAT }, evidence: 'inference', standing: seen, perspective: 'project',
+  note: 'An identification from the visitor side only. To be checked by a curator.' });
+add({ id: id('tubs-appearance'), envelopes: ['diorama-tubs', 'omusha-diorama'], about: ['diorama-tubs'], kind: 'appearance', stratum: 'made-1971',
+  claim: 'Small round straw-wrapped tubs stand in a row on the ground in front of the seated elders.',
+  source: { type: 'scan', ref: SPLAT }, evidence: 'physical-trace', standing: seen, perspective: 'project' });
+add({ id: id('tubs-meaning'), envelopes: ['diorama-tubs', 'kushun-kotan-1808'], about: ['diorama-tubs', 'ceremony'], kind: 'meaning', stratum: 'depicted-1808',
+  claim: 'They may stand for the rice, sake and tobacco given to the Ainu at an Omusha.',
+  source: { type: 'inference', ref: 'This project, from the record of the ceremony (obs-002)' }, evidence: 'inference', standing: seen, perspective: 'project' });
+add({ id: id('troops-appearance'), envelopes: ['diorama-troops', 'omusha-diorama'], about: ['diorama-troops', 'aizu-soldier'], kind: 'appearance', stratum: 'made-1971',
+  claim: 'On the left, Aizu samurai in armour sit in rows beside striped banners, some holding weapons.',
+  source: { type: 'scan', ref: SPLAT }, evidence: 'physical-trace', standing: seen, perspective: 'project' });
+add({ id: id('troops-unnamed'), envelopes: ['diorama-troops', 'kushun-kotan-1808'], about: ['diorama-troops'], kind: 'absence', stratum: 'depicted-1808',
+  claim: 'The names of the Aizu men present at Kushun Kotan in 1808 are not recorded here.',
+  absence: { cause: 'never-collected', note: 'Aizu clan records have not been consulted.' },
+  source: { type: 'project-note', ref: 'This project' }, evidence: 'none', standing: contributor, perspective: 'project' });
+add({ id: id('bales-appearance'), envelopes: ['diorama-bales', 'omusha-diorama'], about: ['diorama-bales'], kind: 'appearance', stratum: 'made-1971',
+  claim: 'Straw bales are stacked high on the right of the scene.',
+  source: { type: 'scan', ref: SPLAT }, evidence: 'physical-trace', standing: seen, perspective: 'project' });
+add({ id: id('bales-unrecorded'), envelopes: ['diorama-bales', 'kushun-kotan-1808'], about: ['diorama-bales'], kind: 'absence', stratum: 'depicted-1808',
+  claim: 'What the stacked bales held, and whether they were part of the gifts, is not recorded here.',
+  absence: { cause: 'never-collected' }, source: { type: 'project-note', ref: 'This project' }, evidence: 'none', standing: contributor, perspective: 'project' });
+
 const file = path.join(import.meta.dirname, 'observations.jsonl');
 fs.writeFileSync(file, obs.map((o) => JSON.stringify(o)).join('\n') + '\n');
 console.log(`${obs.length} observations -> ${file}`);
