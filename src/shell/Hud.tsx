@@ -6,6 +6,7 @@
 import { useEffect, useRef, useState } from "react";
 import { type Emit, SEASON_IDS, type SeasonState, seasonAt } from "@/contracts";
 import { SoundToggle, type Soundscape } from "@/audio/react";
+import { Icon as LineIcon, UI_ICON } from "@/parts/shared/Icon";
 import s from "./Hud.module.css";
 import type { Station } from "./route";
 
@@ -91,12 +92,19 @@ export function Hud({
                 <button
                   type="button"
                   className={s.station}
+                  title={text}
                   disabled={!st.event}
                   aria-current={st.status === "now" ? "step" : undefined}
                   aria-label={`${text}${st.status === "done" ? ", done" : ""}`}
                   onClick={() => st.event && emit(st.event)}
                 >
-                  <i aria-hidden="true" />
+                  <i aria-hidden="true">
+                    {st.status === "done" ? (
+                      <LineIcon d={UI_ICON.check} size={14} />
+                    ) : (
+                      <LineIcon d={UI_ICON[st.id]} size={14} />
+                    )}
+                  </i>
                   <span className={s.stationLabel}>
                     {st.label}
                     {st.sub && st.status === "now" && (

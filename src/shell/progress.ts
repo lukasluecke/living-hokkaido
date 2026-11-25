@@ -4,6 +4,7 @@ import {
   type ContentPack,
   type ExperienceEvent,
   type JournalState,
+  factHotspots,
   type Stamp,
   seasonAt,
 } from "@/contracts";
@@ -21,8 +22,9 @@ function unlocked(pack: ContentPack, j: JournalState, stamp: Stamp): boolean {
     case "hotspots-read":
       return u.artifactIds.every((id) => {
         const a = pack.artifacts.find((x) => x.id === id);
-        return !!a?.hotspots.every((h) =>
-          j.hotspotsRead.includes(`${id}/${h.id}`),
+        return (
+          !!a &&
+          factHotspots(a).every((h) => j.hotspotsRead.includes(`${id}/${h.id}`))
         );
       });
     case "activities-completed":

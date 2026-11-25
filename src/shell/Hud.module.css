@@ -57,9 +57,9 @@
   align-items: flex-start;
 }
 .seg {
-  width: 40px;
+  width: 28px;
   height: 3px;
-  margin: 8px 2px 0;
+  margin: 14px 2px 0;
   background: var(--fl-ink);
   border-radius: 2px;
 }
@@ -93,24 +93,29 @@ li[data-status="todo"] .seg {
   cursor: default;
 }
 .station i {
-  width: 14px;
-  height: 14px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
   margin-top: 2px;
   border-radius: 50%;
-  border: 3px solid var(--fl-ink);
+  border: 2px solid var(--fl-ink);
   background: var(--fl-card);
+  color: var(--fl-ink);
   transition: transform 160ms ease-out;
 }
 li[data-status="done"] .station i {
   background: var(--fl-ink);
+  color: var(--fl-paper);
 }
 li[data-status="now"] .station {
   color: var(--fl-ink);
 }
 li[data-status="now"] .station i {
-  width: 18px;
-  height: 18px;
+  width: 28px;
+  height: 28px;
   margin-top: 0;
+  color: #fff;
   border-color: var(--fl-season);
   background: var(--fl-season);
   box-shadow: 0 0 0 4px var(--fl-season-soft);
@@ -260,7 +265,17 @@ li[data-status="now"] .station i {
   background: var(--fl-stock2);
 }
 
-/* Phone: no brand; the rail shows only the current station's label. */
+/* The rail shows icons; only the current station shows its label. */
+li:not([data-status="now"]) .stationLabel {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Phone: no brand. */
 @media (max-width: 700px) {
   .hud {
     grid-template-columns: auto 1fr auto;

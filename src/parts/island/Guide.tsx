@@ -9,6 +9,15 @@ import type {
   Location,
 } from "@/contracts";
 import { groupActivities, kindCaption } from "../shared/activityGroups";
+import { Icon, KIND_ICON, KindIcon, UI_ICON } from "../shared/Icon";
+
+const GROUP_ICON: Record<string, string> = {
+  "hands-on": UI_ICON.try,
+  listen: KIND_ICON.story,
+  think: KIND_ICON.quiz,
+  behind: KIND_ICON.trace,
+  more: KIND_ICON.board,
+};
 import c from "./Island.module.css";
 
 type Pack = IslandPartProps["content"];
@@ -26,12 +35,40 @@ export function placeActivities(
   return content.activities.filter((a) => ids.has(a.id));
 }
 
-/** Distinct kind captions, in order: "Build the scene · Game · Listen". */
-export function kindSummary(acts: ActivityDefinition[], max = 3): string {
-  const caps = [...new Set(acts.map((a) => kindCaption(a.kind)))];
-  return caps.length > max
-    ? `${caps.slice(0, max).join(" · ")} · +${caps.length - max}`
-    : caps.join(" · ");
+/** Distinct kinds, in order of first use. */
+export function placeKinds(acts: ActivityDefinition[]): string[] {
+  return [...new Set(acts.map((a) => a.kind))];
+}
+
+/** Distinct kind captions for a screen reader: "Think, Listen, Words". */
+export function kindSummary(acts: ActivityDefinition[]): string {
+  return [...new Set(acts.map((a) => kindCaption(a.kind)))].join(", ");
+}
+
+/**
+ * One home place per activity, for the "All activities" sheet. Some
+ * activities are offered at more than one place (the lake house repeats the
+ * other places' activities); the sheet lists each once, at the open place
+ * with the fewest activities (the most specific one), pack order on a tie.
+ */
+export function activityHomes(
+  content: Pack,
+  open: readonly Location[],
+): { activity: ActivityDefinition; place: Location }[] {
+  const per = open.map((l) => ({ l, acts: placeActivities(content, l.id) }));
+  const out: { activity: ActivityDefinition; place: Location }[] = [];
+  for (const a of content.activities) {
+    let home: (typeof per)[number] | undefined;
+    for (const p of per)
+      if (
+        p.acts.some((x) => x.id === a.id) &&
+        (!home || p.acts.length < home.acts.length)
+      )
+        home = p;
+    if (home) out.push({ activity: a, place: home.l });
+  }
+  // Group by place in pack order, keeping pack order inside a place.
+  return open.flatMap((l) => out.filter((r) => r.place.id === l.id));
 }
 
 export function ActivitySheet({
@@ -59,9 +96,10 @@ export function ActivitySheet({
   // Each activity with the open place it belongs to (first match).
   const rows = useMemo(
     () =>
-      open.flatMap((l) =>
-        placeActivities(content, l.id).map((a) => ({ ...a, place: l })),
-      ),
+      activityHomes(content, open).map((r) => ({
+        ...r.activity,
+        place: r.place,
+      })),
     [content, open],
   );
   const sections =
@@ -69,12 +107,14 @@ export function ActivitySheet({
       ? open
           .map((l) => ({
             key: l.id,
+            icon: undefined as string | undefined,
             label: l.title,
             items: rows.filter((r) => r.place.id === l.id),
           }))
           .filter((s) => s.items.length > 0)
       : groupActivities(rows).map((g) => ({
           key: g.id,
+          icon: GROUP_ICON[g.id],
           label: g.label,
           items: g.items,
         }));
@@ -112,7 +152,10 @@ export function ActivitySheet({
       <div className={c.sheetBody}>
         {sections.map((s) => (
           <div key={s.key} className={c.group}>
-            <h3 className={c.groupTitle}>{s.label}</h3>
+            <h3 className={c.groupTitle}>
+              {s.icon && <Icon d={s.icon} size={16} className={c.groupIcon} />}
+              {s.label}
+            </h3>
             <ul>
               {s.items.map((a) => (
                 <li key={`${s.key}-${a.place.id}-${a.id}`}>
@@ -121,10 +164,14 @@ export function ActivitySheet({
                     className={c.act}
                     onClick={() => onSelect(a.place)}
                   >
-                    <span className={c.actKind}>
-                      {by === "place" ? kindCaption(a.kind) : a.place.title}
+                    <span className={c.actIcon} title={kindCaption(a.kind)}>
+                      <KindIcon kind={a.kind} size={20} />
+                      <span className={c.sr}>{kindCaption(a.kind)}: </span>
                     </span>
                     <span className={c.actTitle}>{a.title}</span>
+                    {by === "kind" && (
+                      <span className={c.actPlace}>{a.place.title}</span>
+                    )}
                   </button>
                 </li>
               ))}

@@ -3,42 +3,18 @@
 // honesty chips, the turn viewer (WebGL only), the summary claim, numbered
 // hotspot rows that match the viewer dots, the activities, one primary action.
 import { useEffect, useRef, useState } from "react";
-import { type ArtifactViewerProps, memoriesForArtifact } from "@/contracts";
+import {
+  type ArtifactViewerProps,
+  factHotspots,
+  memoriesForArtifact,
+  modelNotes,
+} from "@/contracts";
 import { PresentationBadge, RepresentationBadge } from "../shared/Badges";
 import c from "./Card.module.css";
-import { activitySize, kindLabel, primaryActivityId } from "./kinds";
+import { Icon, KindIcon, UI_ICON } from "../shared/Icon";
+import { kindLabel, primaryActivityId } from "./kinds";
 import { Memories } from "./Memories";
 import { Viewer3D } from "./Viewer3D";
-
-/** Small line icons per activity kind (decorative, 20 px, currentColor). */
-const ICON: Record<string, string> = {
-  quiz: "M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.2v.1",
-  sequence: "M5 7h14M5 12h10M5 17h6",
-  weave: "M4 8c4 0 4 8 8 8s4-8 8-8M4 16c4 0 4-8 8-8s4 8 8 8",
-  story: "M5 10v4M9 7v10M13 4v16M17 8v8M21 11v2",
-  words: "M5 6h9M9.5 6v12M14 12h5M16.5 12v6",
-  trace: "M6 4h8l4 4v12H6zM14 4v4h4M9 13h6M9 16h4",
-  map: "M4 6l5-2 6 2 5-2v14l-5 2-6-2-5 2zM9 4v14M15 6v14",
-  board: "M5 5h14v14H5zM5 12h14M12 5v14",
-  canon:
-    "M9 18V6l10-2v12M9 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM19 16a2 2 0 1 1-4 0 2 2 0 0 1 4 0z",
-  pluck: "M6 4v16M10 4v16M14 4v16M18 4v16",
-};
-
-function KindIcon({ kind }: { kind: string }) {
-  return (
-    <svg
-      className={c.icon}
-      viewBox="0 0 24 24"
-      width="20"
-      height="20"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path d={ICON[kind] ?? ICON.quiz} />
-    </svg>
-  );
-}
 
 export function ArtifactViewer({
   artifact,
@@ -78,7 +54,9 @@ export function ArtifactViewer({
   const primaryLabel =
     primary &&
     `${doneActivityIds.includes(primary.id) ? "Again" : "Start"}: ${primary.a?.title ?? "the activity"}`;
-  const readCount = artifact.hotspots.filter((h) => read.includes(h.id)).length;
+  const spots = factHotspots(artifact);
+  const notes = modelNotes(artifact);
+  const readCount = spots.filter((h) => read.includes(h.id)).length;
   const start = (id: string) =>
     emit({ type: "activity.start", activityId: id });
 
@@ -120,13 +98,22 @@ export function ArtifactViewer({
 
       {summary && <p className={c.summary}>{summary.claim.text}</p>}
 
-      {artifact.hotspots.length > 0 && (
+      {notes.map((h) => {
+        const text = claims[h.claimId]?.claim.text;
+        return text ? (
+          <p key={h.id} className={c.modelNote}>
+            <span aria-hidden="true">ⓘ</span> {text}
+          </p>
+        ) : null;
+      })}
+
+      {spots.length > 0 && (
         <section className={c.section} aria-labelledby={`${artifact.id}-look`}>
           <h3 id={`${artifact.id}-look`} className={c.cap}>
-            Look closer · {readCount} of {artifact.hotspots.length}
+            Look closer · {readCount} of {spots.length}
           </h3>
           <ol className={c.spots}>
-            {artifact.hotspots.map((h, i) => {
+            {spots.map((h, i) => {
               const isRead = read.includes(h.id);
               const open = isRead && openId === h.id;
               const text = claims[h.claimId]?.claim.text;
@@ -174,12 +161,11 @@ export function ArtifactViewer({
       {activities.length > 0 && (
         <section className={c.section} aria-labelledby={`${artifact.id}-try`}>
           <h3 id={`${artifact.id}-try`} className={c.cap}>
-            Try with this object
+            Try it · {activities.length}
           </h3>
           <ul className={c.acts}>
             {activities.map(({ id, a }) => {
               const done = doneActivityIds.includes(id);
-              const size = a && activitySize(a);
               const kind = a ? kindLabel(a.kind) : "Try";
               const title = a?.title ?? "Try the activity";
               return (
@@ -190,14 +176,10 @@ export function ArtifactViewer({
                     aria-label={`${kind}: ${title}${done ? " (done)" : ""}`}
                     onClick={() => start(id)}
                   >
-                    <span className={c.actIcon}>
-                      <KindIcon kind={a?.kind ?? "quiz"} />
+                    <span className={c.actIcon} title={kind}>
+                      <KindIcon kind={a?.kind ?? "quiz"} size={20} />
                     </span>
                     <span className={c.actText}>
-                      <span className={c.kind}>
-                        {kind}
-                        {size && ` · ${size}`}
-                      </span>
                       <span className={c.actTitle}>{title}</span>
                     </span>
                     {done ? (
@@ -230,9 +212,17 @@ export function ArtifactViewer({
             type="button"
             className={c.primary}
             title={primaryLabel}
+            aria-label={primaryLabel}
             onClick={() => start(primary.id)}
           >
-            <span className={c.primaryText}>{primaryLabel}</span>
+            {doneActivityIds.includes(primary.id) ? (
+              <Icon d={UI_ICON.check} size={20} />
+            ) : (
+              <KindIcon kind={primary.a?.kind ?? "quiz"} size={20} />
+            )}
+            <span className={c.primaryText}>
+              {primary.a?.title ?? "Start the activity"}
+            </span>
           </button>
         </div>
       )}

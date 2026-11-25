@@ -23,6 +23,7 @@ import { useSoundscape } from "@/audio/react";
 import { Hud } from "./Hud";
 import { record } from "./progress";
 import { parts } from "./registry";
+import { Icon, kindIconPath, UI_ICON } from "@/parts/shared/Icon";
 import { route } from "./route";
 import s from "./Shell.module.css";
 import { SidePanel } from "./SidePanel";
@@ -217,6 +218,20 @@ export function Shell({ pack }: { pack: ContentPack }) {
       : null;
 
   const { stations, next } = route(pack, state, journal);
+  const nextEvent = next?.event;
+  const nextIcon =
+    nextEvent?.type === "activity.start"
+      ? kindIconPath(
+          pack.activities.find((a) => a.id === nextEvent.activityId)?.kind ??
+            "",
+        )
+      : nextEvent?.type === "artifact.focus"
+        ? UI_ICON.look
+        : nextEvent?.type === "journal.open"
+          ? UI_ICON.journal
+          : UI_ICON.place;
+  // The icon says "look" or "try", so the button shows only the name.
+  const nextText = next?.label.replace(/^(Look at|Try|Next): /, "");
   const ink = seasonInk[SEASON_IDS.indexOf(seasonAt(state.season.value))];
 
   const stage =
@@ -260,9 +275,6 @@ export function Shell({ pack }: { pack: ContentPack }) {
         <section className={s.owl} aria-label="Owl guide">
           <OwlMark />
           <div className={s.bubble}>
-            <p className={s.cap} aria-hidden="true">
-              Owl guide
-            </p>
             <p
               key={guideLine}
               className={s.line}
@@ -276,9 +288,12 @@ export function Shell({ pack }: { pack: ContentPack }) {
               <button
                 type="button"
                 className={s.next}
+                aria-label={next.label}
                 onClick={() => emit(next.event)}
               >
-                {next.label}
+                <Icon d={nextIcon} size={18} />
+                <span>{nextText}</span>
+                <Icon d={UI_ICON.go} size={16} className={s.nextGo} />
               </button>
             )}
           </div>

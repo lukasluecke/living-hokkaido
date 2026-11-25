@@ -147,10 +147,7 @@
   line-height: 1.25;
 }
 .tryCard {
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 0;
+  gap: 8px;
   background: var(--fl-season-soft);
   border-color: color-mix(in srgb, var(--fl-season) 30%, var(--fl-line));
 }
@@ -158,12 +155,22 @@
   border-color: var(--fl-season);
   box-shadow: inset 0 0 0 1px var(--fl-season);
 }
-.tryCap {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+.tryIcon {
+  flex: none;
   color: var(--fl-season);
+}
+.tryCount {
+  margin-left: auto;
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--fl-season);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
 }
 .srOnly {
   position: absolute;
