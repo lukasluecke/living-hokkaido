@@ -6,6 +6,7 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { type DetailScenePartProps, SCALE } from "@/contracts";
 import s from "../shared/Fallback.module.css";
 import { Room } from "./Room";
+import attn from "../shared/Attention.module.css";
 import c from "./Scene.module.css";
 
 function useKeys({ scene, emit }: DetailScenePartProps) {
@@ -114,6 +115,24 @@ export function DetailScenePart(props: DetailScenePartProps) {
   // around) does not.
   const down = useRef<[number, number] | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
+  // Tap markers appear once the entry is done; labels show for a few
+  // seconds as a hint. The dots stay and pulse (no hover on touch screens).
+  const [ready, setReady] = useState(false);
+  const [hint, setHint] = useState(false);
+  useEffect(() => {
+    setReady(false);
+    setHint(false);
+  }, [scene.id]);
+  useEffect(() => {
+    if (!ready) return;
+    setHint(true);
+    const t = setTimeout(() => setHint(false), 6000);
+    return () => clearTimeout(t);
+  }, [ready]);
+  const roomEmit: typeof emit = (e) => {
+    if (e.type === "scene.ready") setReady(true);
+    emit(e);
+  };
   useKeys(props);
   if (!prefs.webgl) return <SceneList {...props} />;
   const label = (id: string) => artifacts.find((a) => a.id === id)?.label ?? id;
@@ -142,6 +161,7 @@ export function DetailScenePart(props: DetailScenePartProps) {
         <Suspense fallback={null}>
           <Room
             {...props}
+            emit={roomEmit}
             hovered={hovered}
             setHovered={setHovered}
             overlay={overlay}
@@ -149,6 +169,29 @@ export function DetailScenePart(props: DetailScenePartProps) {
         </Suspense>
       </Canvas>
       <div ref={overlay} className={c.overlay} aria-hidden>
+        {ready &&
+          !focusedArtifactId &&
+          scene.placements.map((p) => (
+            <button
+              key={p.artifactId}
+              type="button"
+              tabIndex={-1}
+              className={c.marker}
+              data-hint={hint || undefined}
+              data-x={p.focusView.target[0]}
+              data-y={p.focusView.target[1] + 0.85}
+              data-z={p.focusView.target[2]}
+              onClick={() =>
+                emit({ type: "artifact.focus", artifactId: p.artifactId })
+              }
+            >
+              <span
+                className={`${c.dot} ${attn.pulse}`}
+                data-still={prefs.reducedMotion || undefined}
+              />
+              <span className={c.markerLabel}>{label(p.artifactId)}</span>
+            </button>
+          ))}
         {hoveredAt && hoveredAt.artifactId !== focusedArtifactId && (
           <span
             className={c.label}

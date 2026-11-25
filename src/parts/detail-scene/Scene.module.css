@@ -7,6 +7,60 @@
   inset: 0;
   pointer-events: none;
 }
+/* Tap marker over each object: a pulsing dot, and its name as a hint after
+   entry. Restyle the pulse in
+   shared/Attention.module.css. */
+.marker {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 8px;
+  border: 0;
+  background: none;
+  font: inherit;
+  pointer-events: auto;
+  cursor: pointer;
+}
+.dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fbf4e6;
+  border: 3px solid #e8c27a;
+  order: 2;
+}
+.markerLabel {
+  background: #fbf4e6;
+  color: #2b2118;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 13px;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgb(31 45 70 / 25%);
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+.marker[data-hint] .markerLabel {
+  opacity: 1;
+}
+/* Desktop: hover already labels objects; keep only a quiet dot. */
+@media (hover: hover) {
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-width: 2px;
+    opacity: 0.85;
+  }
+}
+@media (max-width: 700px) {
+  .markerLabel {
+    font-size: 12px;
+    padding: 2px 8px;
+  }
+}
 .label {
   position: absolute;
   left: 0;
