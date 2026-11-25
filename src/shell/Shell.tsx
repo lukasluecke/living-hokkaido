@@ -159,8 +159,10 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
       for (const id of earned) {
         soundEvent({ type: "stamp.earned", stampId: id });
         setToast(source.stamps.find((x) => x.id === id)?.title ?? id);
+        // The toast already names the stamp; keep a place's own line (for
+        // example its welcome on arrival) and only fall back to this one.
         const stampLine = source.guide.find((g) => g.on === "stamp.earned");
-        if (stampLine) setGuideLine(stampLine.text);
+        if (stampLine && !line) setGuideLine(stampLine.text);
       }
     },
     [pack, source, soundEvent],
