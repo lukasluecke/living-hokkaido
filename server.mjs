@@ -241,7 +241,9 @@ async function talk(body) {
 // Elders and the Ainu woman speak through the interpreter, so the interpreter's voice reads their answers.
 const ELEVEN_KEY = process.env.ELEVENLABS_API_KEY || '';
 const TTS_MODEL = process.env.ELEVENLABS_TTS_MODEL || 'eleven_multilingual_v2';
-const TTS_MODEL_JA = process.env.ELEVENLABS_TTS_MODEL_JA || TTS_MODEL;
+// Japanese: eleven_v3 pronounced a test passage almost perfectly (checked by a Scribe round trip);
+// multilingual_v2, flash and turbo garbled about half of it. v3 takes about 4 s instead of 1 to 2.
+const TTS_MODEL_JA = process.env.ELEVENLABS_TTS_MODEL_JA || 'eleven_v3';
 const TTS_MODELS = ['eleven_multilingual_v2', 'eleven_flash_v2_5', 'eleven_turbo_v2_5', 'eleven_v3'];
 // language_code is honoured by these models and ignored or refused by the others.
 const LANG_CODE_MODELS = new Set(['eleven_flash_v2_5', 'eleven_turbo_v2_5', 'eleven_v3']);
@@ -262,7 +264,7 @@ function voiceFor(id) {
   return c?.voice?.routes_through === 'interpreter' ? VOICES.interpreter : VOICES.narrator;
 }
 const ttsCache = new Map(); // text+voice -> mp3 Buffer, so replays cost no credits
-const forSpeech = (t) => t.replace(/\s*\[[^\]]*\]/g, '').replace(/\s*【[^】]*】/g, '').replace(/^\(Through the interpreter\)\s*/i, 'Through the interpreter. ').replace(/^（通辞を介して）\s*/, '通辞を介して。').trim();
+const forSpeech = (t) => t.replace(/\s*\[[^\]]*\]/g, '').replace(/\s*【[^】]*】/g, '').replace(/^\(Through the interpreter\)\s*/i, 'Through the interpreter. ').replace(/^（通辞を介して）\s*/, 'つうじを介して。').replace(/通辞/g, 'つうじ').trim();
 let voiceWindow = { start: 0, count: 0 };
 const voiceLimited = () => {
   const now = Date.now();
