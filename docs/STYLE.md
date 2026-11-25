@@ -38,7 +38,7 @@ live in `src/design/tokens.ts`; use them instead of new hex values.
 | Object and building parts | `material.*` (cloth, band, wood, fiber, bark, roof …) |
 | Season colours | `season.sky / sun / sea / ground / foliage / accent` (4 values each) |
 
-Contrast: overlay text ≥ 4.5:1 on paper. Do not use colour as the only signal
+Contrast: overlay text ≥ 4.5:1 on paper. Small text in the season colour uses `--fl-season-text` (season ink mixed with 30 % ink), not `--fl-season`: spring pink alone is 3.8:1. Do not use colour as the only signal
 (earned stamps also change icon, focus also shows an outline).
 
 ## Light

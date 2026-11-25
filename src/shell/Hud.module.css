@@ -129,7 +129,7 @@ li[data-status="now"] .station i {
   border-radius: 6px;
 }
 .sub {
-  color: var(--fl-season);
+  color: var(--fl-season-text);
 }
 
 /* Right tools */
@@ -167,7 +167,7 @@ li[data-status="now"] .station i {
   height: 28px;
   border-radius: 50%;
   border: 2px solid var(--fl-season);
-  color: var(--fl-season);
+  color: var(--fl-season-text);
   font-size: 13px;
 }
 .round {

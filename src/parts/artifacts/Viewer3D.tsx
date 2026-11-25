@@ -148,6 +148,8 @@ export function Viewer3D({
       }}
     >
       <Canvas
+        // Screen readers use the HTML buttons over and beside the canvas.
+        aria-hidden
         dpr={q.dpr}
         camera={{ position: [0, 0.35, 2.6], fov: 35 }}
         gl={{ antialias: true }}
@@ -177,7 +179,7 @@ export function Viewer3D({
             type="button"
             data-hotspot={h.id}
             className={`${c.hotspot} ${read.includes(h.id) ? c.read : attn.pulse}`}
-            aria-label={h.title}
+            aria-label={read.includes(h.id) ? `${h.title}, read` : h.title}
             title={h.title}
             onClick={() =>
               emit({

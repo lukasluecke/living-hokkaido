@@ -59,6 +59,8 @@ export function DetailScenePart(props: DetailScenePartProps) {
   return (
     <div className={c.stage}>
       <Canvas
+        // Screen readers use the HTML buttons over and beside the canvas.
+        aria-hidden
         dpr={q.dpr}
         camera={{
           fov: 45,

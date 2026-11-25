@@ -32,6 +32,8 @@ export function IslandPart(props: IslandPartProps) {
   return (
     <div className={c.stage}>
       <Canvas
+        // Screen readers use the HTML buttons over and beside the canvas.
+        aria-hidden
         shadows={q.shadows}
         dpr={q.dpr}
         camera={{

@@ -216,7 +216,7 @@
   height: 34px;
   border-radius: 50%;
   background: var(--fl-season-soft);
-  color: var(--fl-season);
+  color: var(--fl-season-text);
 }
 .icon {
   fill: none;
@@ -236,7 +236,7 @@
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--fl-season);
+  color: var(--fl-season-text);
 }
 .actTitle {
   font-weight: 700;

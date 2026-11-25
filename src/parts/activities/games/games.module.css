@@ -70,6 +70,7 @@
   cursor: pointer;
 }
 .closeGame:focus-visible,
+.facts summary:focus-visible,
 .host:focus-visible {
   outline: 3px solid var(--lh-gold);
   outline-offset: 2px;

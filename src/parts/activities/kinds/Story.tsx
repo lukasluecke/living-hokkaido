@@ -160,7 +160,7 @@ export function Story({
   return (
     <div className={k.root}>
       <div className="story">
-        <aside className="story-side">
+        <div className="story-side">
           <div className="narrator">
             <div className={prefs.reducedMotion ? "still" : ""}>
               <Owl speaking={speaking} size={96} />
@@ -192,9 +192,9 @@ export function Story({
               ))}
             </ol>
           </nav>
-        </aside>
+        </div>
 
-        <section className="story-main" aria-label={a.title}>
+        <section className="story-main">
           <p className="chapter-label">
             Chapter {pos.ch + 1} of {a.chapters.length} · {chapter?.title}
           </p>
