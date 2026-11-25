@@ -20,7 +20,7 @@ describe("Otaru warehouse content", () => {
     const a = hideSeekActivitySchema.parse(otaruHideSeek);
     expect(a.durations).toEqual({
       sceneReveal: 10,
-      disguise: 60,
+      disguise: 80,
       seek: 90,
       reveal: 20,
     });

@@ -54,6 +54,16 @@ test("slope-run parses and an unknown claim is reported", () => {
   assert.ok(validateContentPack(p).some((e) => e.includes("no-such-claim")));
 });
 
+test("slope-run finds must cite a claim of the activity", () => {
+  const s = barkToClothPack.activities.find((x) => x.kind === "slope-run");
+  assert.ok(s && s.kind === "slope-run" && s.finds.length > 0);
+  const p = clone();
+  const raw = p.activities.find((x) => x.kind === "slope-run");
+  assert.ok(raw && raw.kind === "slope-run" && raw.finds);
+  raw.finds[0] = { ...raw.finds[0], claimId: "sapporo-grid-1871" };
+  assert.ok(validateContentPack(p).some((e) => e.includes("find find-")));
+});
+
 test("the vendored game accepts our parsed activities and claims", () => {
   for (const a of barkToClothPack.activities) {
     if (a.kind !== "hide-seek") continue;

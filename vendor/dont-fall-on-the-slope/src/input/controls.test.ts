@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { controlsFrom, DRAG_FULL } from "./controls";
+import { controlsFrom, DRAG_FULL, easeLean } from "./controls";
 
 const none = { left: false, right: false, brace: false };
 
@@ -15,5 +15,16 @@ describe("controlsFrom", () => {
   });
   it("passes brace through", () => {
     expect(controlsFrom({ ...none, brace: true }, null).brace).toBe(true);
+  });
+});
+
+describe("easeLean", () => {
+  it("ramps toward the target and stops on it", () => {
+    let l = 0;
+    l = easeLean(l, 1, 0.05);
+    expect(l).toBeCloseTo(0.35);
+    for (let i = 0; i < 10; i++) l = easeLean(l, 1, 0.05);
+    expect(l).toBe(1);
+    expect(easeLean(0.5, 0, 1)).toBe(0);
   });
 });

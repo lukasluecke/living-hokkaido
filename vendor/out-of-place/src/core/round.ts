@@ -23,7 +23,7 @@ export type PhaseDurations = Record<TimedPhase, number>;
 
 export const DEFAULT_DURATIONS_MS: PhaseDurations = {
   sceneReveal: 10_000,
-  disguise: 60_000,
+  disguise: 80_000,
   seek: 90_000,
   reveal: 20_000,
 };

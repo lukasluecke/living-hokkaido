@@ -19,6 +19,7 @@ import {
   makeProp as makePropAt,
   type Prop,
   type SceneArt,
+  type Walker,
   WORLD_H,
   WORLD_W,
 } from "./common";
@@ -437,6 +438,70 @@ export function buildOtaruWarehouse(): SceneArt {
     return onPier || !inWater;
   };
 
+  // Workers to hide among: paths in iso units on open ground and the pier.
+  const path = (...pts: [number, number][]): Pt[] =>
+    pts.map(([x, y]) => P(x, y));
+  const walkers: Walker[] = [
+    {
+      dress: {
+        top: "indigo",
+        topShade: "indigoLight",
+        lower: "wool",
+        headCloth: "stucco",
+        load: "sack",
+      },
+      path: path([165, 168], [320, 168], [330, 230]),
+      speed: 26,
+    },
+    {
+      dress: {
+        top: "earth",
+        topShade: "earthShade",
+        lower: "indigo",
+        headCloth: "indigoLight",
+      },
+      path: path([330, 210], [440, 210], [450, 320]),
+      speed: 30,
+    },
+    {
+      dress: {
+        top: "tuffShade",
+        topShade: "tuffDark",
+        lower: "barkDark",
+        load: "basket",
+      },
+      path: path([150, 360], [360, 360]),
+      speed: 22,
+    },
+    {
+      dress: {
+        top: "wool",
+        topShade: "woolLight",
+        lower: "bark",
+        headCloth: "tuff",
+      },
+      path: path([335, 90], [460, 90]),
+      speed: 20,
+    },
+    {
+      dress: {
+        top: "strawShade",
+        topShade: "barkDark",
+        lower: "wool",
+        headCloth: "stucco",
+      },
+      path: path([60, 250], [170, 262], [250, 290]),
+      speed: 24,
+    },
+  ];
+
   const [sx, sy] = P(300, 250);
-  return { background, props, composite, spawn: { x: sx, y: sy }, walkable };
+  return {
+    background,
+    props,
+    composite,
+    spawn: { x: sx, y: sy },
+    walkable,
+    walkers,
+  };
 }

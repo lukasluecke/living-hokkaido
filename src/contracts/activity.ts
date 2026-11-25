@@ -405,7 +405,7 @@ export const hideSeekActivitySchema = z
         seek: z.number().int().min(15).max(300),
         reveal: z.number().int().min(5).max(120),
       })
-      .default({ sceneReveal: 10, disguise: 60, seek: 90, reveal: 20 }),
+      .default({ sceneReveal: 10, disguise: 80, seek: 90, reveal: 20 }),
     /** Seconds taken off the seeker's clock for each wrong tap. */
     wrongTapPenalty: z.number().int().min(0).max(60).default(10),
     /** Only pass-and-play (no network play in the visitor app). */
@@ -426,8 +426,8 @@ export const hideSeekActivitySchema = z
 /**
  * Slide down an icy street without touching anything ("Don't Fall on the
  * Slope", vendored from erinalin/dont-fall-on-the-slope). A 3D physics game;
- * the street is generic and illustrative, never a reconstruction. The game
- * shows no history text yet; claims are shown beside it by the renderer.
+ * the street is generic and illustrative, never a reconstruction. History
+ * text comes only from the claims of its `finds`.
  */
 export const slopeRunActivitySchema = z.object({
   ...base,
@@ -438,6 +438,21 @@ export const slopeRunActivitySchema = z.object({
   completion: z.string().min(1),
   /** Street layout seed. Same seed, same street. */
   seed: z.number().int().nonnegative().optional(),
+  /**
+   * Museum labels floating in the street, in street order. Slide through
+   * one to collect it; the end card explains it with its claim. `label` is
+   * a short game name and states no fact.
+   */
+  finds: z
+    .array(
+      z.object({
+        id: idSchema,
+        label: z.string().min(1),
+        claimId: idSchema,
+      }),
+    )
+    .max(12)
+    .default([]),
   /** True while the street is not backed by an approved reconstruction. */
   illustrative: z.boolean().default(true),
 });

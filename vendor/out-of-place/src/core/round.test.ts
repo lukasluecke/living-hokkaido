@@ -27,11 +27,11 @@ describe("round phases", () => {
     expect(secondsLeft(s)).toBe(8);
     s = roundReducer(createRound(), { type: "tick", dtMs: 10_500 });
     expect(s.phase).toBe("disguise");
-    expect(s.remainingMs).toBe(59_500);
+    expect(s.remainingMs).toBe(79_500);
   });
 
   it("waits on the handoff screen until the seeker is ready", () => {
-    let s = roundReducer(createRound(), { type: "tick", dtMs: 70_000 });
+    let s = roundReducer(createRound(), { type: "tick", dtMs: 90_000 });
     expect(s.phase).toBe("handoff");
     s = roundReducer(s, { type: "tick", dtMs: 999_999 });
     expect(s.phase).toBe("handoff");

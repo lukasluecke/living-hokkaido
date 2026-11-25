@@ -82,6 +82,31 @@ describe("physics", () => {
     p.free();
   });
 
+  it("ploughs through a snow pile: slower, but no crash", () => {
+    const track = generateTrack(1);
+    const pile = {
+      id: "p",
+      kind: "snow-pile" as const,
+      x: 0,
+      s: 25,
+      w: 1.6,
+      d: 1.4,
+      h: 0.8,
+      turn: 0,
+      look: 0,
+    };
+    const p = createPhysics(R, { ...track, obstacles: [pile] });
+    const r = run(p, 10);
+    expect(r.hit).toBe("snow-pile");
+    const before = p.speed();
+    // The body keeps going past the pile.
+    for (let i = 0; i < 120; i++) p.step(none, STEP);
+    expect(p.crashed()).toBe(false);
+    expect(p.distance()).toBeGreaterThan(r.d + 2);
+    expect(before).toBeGreaterThan(0);
+    p.free();
+  });
+
   it("stays on the ice through curves and steep sections", () => {
     const track = { ...generateTrack(3), obstacles: [] };
     const p = createPhysics(R, track);

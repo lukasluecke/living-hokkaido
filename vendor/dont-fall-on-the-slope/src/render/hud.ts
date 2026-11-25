@@ -9,6 +9,10 @@ export type CardContent = {
   body: string;
   stats?: string;
   action: string;
+  /** Finds collected this run, each explained by its claim. */
+  finds?: { label: string; text: string; source?: string }[];
+  /** How many finds were missed. */
+  missed?: number;
 };
 
 const font =
@@ -80,6 +84,13 @@ export function createHud(host: HTMLElement, touch: boolean) {
     fontWeight: "700",
     fontVariantNumeric: "tabular-nums",
   });
+  // "Your finds": each collected label with its cited claim.
+  const finds = el("div", {
+    textAlign: "left",
+    margin: "0 0 12px",
+    maxHeight: "40vh",
+    overflowY: "auto",
+  });
   const button = el("button", {
     font: `700 16px ${font}`,
     minHeight: "44px",
@@ -99,7 +110,25 @@ export function createHud(host: HTMLElement, touch: boolean) {
   hint.textContent = touch
     ? "Drag sideways or use the buttons to lean. Hold Brace to slow down."
     : "← → or A D to lean · ↓ or Space to brace · Enter to start";
-  card.append(label, heading, body, stats, button, hint);
+  card.append(label, heading, body, stats, finds, button, hint);
+
+  // Short pop-up when something is collected or ploughed through.
+  const toast = el("div", {
+    position: "absolute",
+    top: "56px",
+    left: "50%",
+    transform: "translateX(-50%)",
+    padding: "8px 16px",
+    borderRadius: "12px",
+    background: css("cream"),
+    color: css("ink"),
+    border: `2px solid ${css("accent")}`,
+    fontWeight: "700",
+    fontSize: "16px",
+    display: "none",
+    whiteSpace: "nowrap",
+  });
+  let toastTimer = 0;
 
   // Touch controls: lean left, brace, lean right. 64px targets.
   const pad = el("div", {
@@ -147,14 +176,24 @@ export function createHud(host: HTMLElement, touch: boolean) {
   live.setAttribute("aria-live", "polite");
   live.setAttribute("role", "status");
 
-  root.append(meter, card, pad);
+  root.append(meter, toast, card, pad);
   host.append(root, live);
 
   return {
     buttons: { left, brace, right, action: button },
-    setMeter(metres: number, best: number) {
-      meter.textContent =
-        best > 0 ? `${metres} m · best ${best} m` : `${metres} m`;
+    setMeter(metres: number, best: number, found?: [number, number]) {
+      const parts = [`${metres} m`];
+      if (best > 0) parts.push(`best ${best} m`);
+      if (found && found[1] > 0) parts.push(`finds ${found[0]}/${found[1]}`);
+      meter.textContent = parts.join(" · ");
+    },
+    toast(text: string) {
+      toast.textContent = text;
+      toast.style.display = "block";
+      window.clearTimeout(toastTimer);
+      toastTimer = window.setTimeout(() => {
+        toast.style.display = "none";
+      }, 1800);
     },
     showCard(kind: string, c: CardContent) {
       label.textContent = kind;
@@ -163,6 +202,51 @@ export function createHud(host: HTMLElement, touch: boolean) {
       stats.textContent = c.stats ?? "";
       stats.style.display = c.stats ? "block" : "none";
       button.textContent = c.action;
+      finds.replaceChildren();
+      const list = c.finds ?? [];
+      if (list.length || c.missed) {
+        finds.append(
+          el(
+            "div",
+            {
+              fontSize: "11px",
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              opacity: "0.65",
+              margin: "4px 0 6px",
+            },
+            "Your finds",
+          ),
+        );
+        for (const f of list) {
+          const item = el("div", {
+            borderLeft: `4px solid ${css("accent")}`,
+            padding: "4px 0 4px 10px",
+            margin: "0 0 8px",
+          });
+          item.append(
+            el("strong", { display: "block", fontSize: "15px" }, f.label),
+            el(
+              "p",
+              { margin: "2px 0", fontSize: "14px", lineHeight: "1.4" },
+              f.text,
+            ),
+          );
+          if (f.source)
+            item.append(
+              el("small", { opacity: "0.7", fontSize: "12px" }, f.source),
+            );
+          finds.append(item);
+        }
+        if (c.missed)
+          finds.append(
+            el(
+              "p",
+              { margin: "0", fontSize: "13px", opacity: "0.75" },
+              `${c.missed} more ${c.missed === 1 ? "label" : "labels"} still on the street.`,
+            ),
+          );
+      }
       card.style.display = "block";
     },
     hideCard() {
@@ -172,6 +256,7 @@ export function createHud(host: HTMLElement, touch: boolean) {
       live.textContent = text;
     },
     destroy() {
+      window.clearTimeout(toastTimer);
       root.remove();
       live.remove();
     },

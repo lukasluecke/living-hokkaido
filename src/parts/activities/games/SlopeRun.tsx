@@ -1,7 +1,8 @@
 "use client";
 // slope-run kind: Don't Fall on the Slope (vendor/dont-fall-on-the-slope).
-// The game shows no history text yet; the cited claims are listed in the
-// panel. Without WebGL the game shows its own HTML card.
+// Finds (museum labels in the street) carry their claim's text and source
+// into the game; the panel also lists every claim. Without WebGL the game
+// shows its own HTML card.
 import { useCallback, useState } from "react";
 import type { Emit } from "@/contracts";
 import { mountSlope } from "@vendor/dont-fall-on-the-slope/src/embed";
@@ -21,7 +22,28 @@ export function SlopeRunActivity({
   };
   const mount = useCallback<MountGame>(
     (host, out) =>
-      mountSlope(host, { activityId: a.id, prefs, emit: out, seed: a.seed }),
+      mountSlope(host, {
+        activityId: a.id,
+        prefs,
+        emit: out,
+        seed: a.seed,
+        finds: a.finds.flatMap((f) => {
+          const c = claims[f.claimId];
+          if (!c) return []; // withdrawn or unknown: no find
+          const cite = c.claim.citations[0];
+          const src = c.sources.find((x) => x.id === cite?.sourceId);
+          return [
+            {
+              id: f.id,
+              label: f.label,
+              text: c.claim.text,
+              source: src
+                ? `${src.title}${cite ? ` · ${cite.locator}` : ""}`
+                : undefined,
+            },
+          ];
+        }),
+      }),
     [a],
   );
   return (
@@ -40,8 +62,8 @@ export function SlopeRunActivity({
       fit="fill"
       controls={
         <>
-          ← → or A D lean, ↓ or Space brace, Enter starts again. On a phone,
-          drag sideways or use the buttons.
+          ← → or A D lean (tap for a small correction), ↓ or Space brace, Enter
+          starts again. On a phone, drag sideways or use the buttons.
         </>
       }
     />
