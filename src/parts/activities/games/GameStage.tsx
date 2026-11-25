@@ -71,6 +71,7 @@ export function GameStage({
   fit,
   controls,
   notes,
+  preload,
 }: {
   activityId: string;
   knowledgeId: string;
@@ -91,6 +92,9 @@ export function GameStage({
   controls: ReactNode;
   /** Optional extra panel content under the Play button (progress). */
   notes?: ReactNode;
+  /** Fetch the game's code (engine, physics) while the panel is open, so
+   *  Play starts quickly. Called once, in idle time. */
+  preload?: () => Promise<unknown>;
 }) {
   const tr = useT();
   const [open, setOpen] = useState(false);
@@ -104,6 +108,22 @@ export function GameStage({
   emitRef.current = emit;
   const mountRef = useRef(mount);
   mountRef.current = mount;
+  const preloadRef = useRef(preload);
+  preloadRef.current = preload;
+
+  useEffect(() => {
+    const w = window as Window & {
+      requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number;
+    };
+    const run = () => {
+      preloadRef.current?.().catch(() => {});
+    };
+    const t = setTimeout(() => {
+      if (w.requestIdleCallback) w.requestIdleCallback(run, { timeout: 2000 });
+      else run();
+    }, 300);
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     if (!open || !host.current) return;
@@ -221,7 +241,7 @@ export function GameStage({
               />
               {loading && !error && (
                 <p className={g.loading} role="status">
-                  Loading the game…
+                  {tr("Loading the game…")}
                 </p>
               )}
               {error && (

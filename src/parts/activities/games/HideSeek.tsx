@@ -49,6 +49,14 @@ export function HideSeekActivity({
       emit={report}
       mount={mount}
       fit="wide"
+      preload={() =>
+        Promise.all([
+          import("@vendor/out-of-place/src/embed"),
+          import("phaser"),
+          import("@vendor/out-of-place/src/scenes/GameScene"),
+          import("@vendor/out-of-place/src/scenes/SelectScene"),
+        ])
+      }
       controls={
         <>
           {tr(
