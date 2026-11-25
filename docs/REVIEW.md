@@ -99,6 +99,16 @@ after the photos (visual reference only):
 | Weave `weave-rows` (`illustrative: true`) | Practitioner input before it shows a real technique |
 | Quizzes `material`, `variation`, `care` | Learning quality and wording |
 
+## Build the scene (activity kind `place`)
+
+| Item | Where | Needs |
+|---|---|---|
+| Four scenes: `place-survey-camp`, `place-cise`, `place-herring-yard`, `place-mine-forest` | `src/content/bark-to-cloth/place-activities.ts` | Check every `say` and `why` against its claim |
+| New claims `survey-tasks` (panel drawing callouts), `sea-diorama-tasks`, `mine-diorama-tasks` | `src/content/bark-to-cloth/land-and-sea.ts` | The two diorama claims are observations of the figures, not panel text (`observed: true`, "weaker source" in the UI). Find a second source |
+| Survey camp: hired guides and porters, "some were Ainu people" | same | Review how this reads; figures carry no ethnic markers and no personal names |
+| `place-cise`: things only, no posed people; the upper seat and its window are not drawn | same | Ainu cultural reviewer |
+| Device voice reads `say` + `ask` (English only) | `src/parts/activities/play/Place.tsx` | Replace with a recorded voice if wanted |
+
 ## Curator voice memories
 
 - [ ] `src/content/bark-to-cloth/memories.ts`: the sample memory is team text

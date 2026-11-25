@@ -14,6 +14,7 @@ import { Words } from "./kinds/Words";
 import { BoardActivity } from "./play/Board";
 import { CanonActivity } from "./play/Canon";
 import { MapActivity } from "./play/Map";
+import { PlaceActivity } from "./play/Place";
 import { PluckActivity } from "./play/Pluck";
 import { Sequence } from "./Sequence";
 import { themeVars } from "./theme";
@@ -32,6 +33,7 @@ const KIND_LABEL: Record<ActivityPartProps["activity"]["kind"], string> = {
   pluck: "Play",
   "hide-seek": "Game",
   "slope-run": "Game",
+  place: "Build the scene",
 };
 
 export function ActivityPart({
@@ -65,6 +67,9 @@ export function ActivityPart({
         <div className={s.badges}>
           <span className={s.kind}>{KIND_LABEL[activity.kind]}</span>
           {presentation && <PresentationBadge value={presentation} />}
+          {activity.kind === "place" && (
+            <span className={s.illustrative}>Illustrative sketch</span>
+          )}
           {activity.kind === "weave" && activity.illustrative && (
             <span className={s.illustrative}>
               Playful illustration · not a real technique
@@ -144,6 +149,14 @@ export function ActivityPart({
       )}
       {activity.kind === "slope-run" && (
         <SlopeRunActivity
+          activity={activity}
+          claims={claims}
+          prefs={prefs}
+          emit={emit}
+        />
+      )}
+      {activity.kind === "place" && (
+        <PlaceActivity
           activity={activity}
           claims={claims}
           prefs={prefs}

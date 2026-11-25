@@ -59,7 +59,7 @@ export const areaArtifacts: ArtifactInput[] = [
       },
       aboutModel([0.27, 0.14, 0], "rim"),
     ],
-    activityIds: ["quiz-sea-products", "quiz-sea-catch"],
+    activityIds: ["place-herring-yard", "quiz-sea-products", "quiz-sea-catch"],
   },
   {
     id: "survey-stake",
@@ -91,7 +91,11 @@ export const areaArtifacts: ArtifactInput[] = [
       },
       aboutModel([0, 0.04, 0.17], "mound"),
     ],
-    activityIds: ["quiz-survey-purpose", "quiz-survey-guides"],
+    activityIds: [
+      "place-survey-camp",
+      "quiz-survey-purpose",
+      "quiz-survey-guides",
+    ],
   },
   {
     id: "set-bow",
@@ -154,7 +158,11 @@ export const areaArtifacts: ArtifactInput[] = [
       },
       aboutModel([0.15, 0.07, 0.05], "chip"),
     ],
-    activityIds: ["quiz-coal-producer", "quiz-winter-logging"],
+    activityIds: [
+      "place-mine-forest",
+      "quiz-coal-producer",
+      "quiz-winter-logging",
+    ],
   },
 ];
 
@@ -300,7 +308,7 @@ export const areaScenes: DetailSceneInput[] = [
         key: 1,
       },
     ],
-    activityIds: ["quiz-sea-products", "quiz-sea-catch"],
+    activityIds: ["place-herring-yard", "quiz-sea-products", "quiz-sea-catch"],
   },
   {
     id: "survey-forest",
@@ -322,7 +330,11 @@ export const areaScenes: DetailSceneInput[] = [
         key: 1,
       },
     ],
-    activityIds: ["quiz-survey-purpose", "quiz-survey-guides"],
+    activityIds: [
+      "place-survey-camp",
+      "quiz-survey-purpose",
+      "quiz-survey-guides",
+    ],
   },
   {
     id: "animal-hills",
@@ -366,6 +378,10 @@ export const areaScenes: DetailSceneInput[] = [
         key: 1,
       },
     ],
-    activityIds: ["quiz-coal-producer", "quiz-winter-logging"],
+    activityIds: [
+      "place-mine-forest",
+      "quiz-coal-producer",
+      "quiz-winter-logging",
+    ],
   },
 ];

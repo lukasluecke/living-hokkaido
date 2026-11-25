@@ -44,6 +44,7 @@ export const lakeHouse: DetailSceneInput = {
     },
   ],
   activityIds: [
+    "place-cise",
     "material",
     "weave-rows",
     "variation",

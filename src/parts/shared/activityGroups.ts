@@ -19,7 +19,11 @@ export type ActivityGroup<A extends GroupableActivity = GroupableActivity> = {
 
 /** Group order and the kinds in each. Kinds not listed go to "More". */
 const GROUPS: { id: ActivityGroupId; label: string; kinds: string[] }[] = [
-  { id: "hands-on", label: "Hands-on", kinds: ["weave", "map", "sequence"] },
+  {
+    id: "hands-on",
+    label: "Hands-on",
+    kinds: ["place", "weave", "map", "sequence"],
+  },
   { id: "listen", label: "Listen and learn", kinds: ["story", "words"] },
   { id: "think", label: "Think about it", kinds: ["quiz"] },
   { id: "behind", label: "Behind the content", kinds: ["trace"] },
@@ -39,6 +43,7 @@ const KIND_CAPTION: Record<string, string> = {
   pluck: "Pluck",
   "hide-seek": "Game",
   "slope-run": "Game",
+  place: "Build the scene",
 };
 
 export function kindCaption(kind: string): string {

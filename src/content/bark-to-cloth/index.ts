@@ -15,6 +15,7 @@ import { memories } from "./memories";
 import { landAndSea } from "./land-and-sea";
 import { hokkaidoMuseum } from "./museum";
 import { houseOverTime, houseTimeline } from "./over-time";
+import { placeActivities } from "./place-activities";
 import {
   lakeHouse,
   listeningGrove,
@@ -47,7 +48,12 @@ export const barkToClothRaw = {
     })),
   ],
   artifacts: [...artifacts, ...areaArtifacts],
-  activities: [...activities, ...areaActivities, ...gameActivities],
+  activities: [
+    ...activities,
+    ...areaActivities,
+    ...gameActivities,
+    ...placeActivities,
+  ],
   stamps,
   guide,
   memories,

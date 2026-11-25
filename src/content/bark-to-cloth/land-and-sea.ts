@@ -152,9 +152,22 @@ export const landAndSea: KnowledgeEntry = {
       ["hm-panel-survey", "Panel text, last sentence (photo 7865)"],
     ),
     c(
+      "survey-tasks",
+      "The panel's drawing of the survey diorama names four tasks: surveying, carrying the things the survey needs, cutting trees that are in the way of the survey, and putting up tents to stay the night.",
+      ["hm-panel-survey", "Panel drawing, four callouts (photo 7865)"],
+    ),
+    c(
       "winter-logging",
       "Hokkaido had many forests of thick trees. In winter, many people worked in the woods, felling trees with large saws and hauling the wood on horse-drawn sleighs.",
       ["hm-panel-mountains", "Panel text, sentences 4–5 (photo 7877)"],
+    ),
+    c(
+      "sea-diorama-tasks",
+      "In the museum's herring diorama, workers carry the catch from the boats up to the yard, and fish lie spread on mats on the ground. This is what the diorama shows; the panel text does not name these tasks.",
+      [
+        "hm-panel-sea",
+        "Herring diorama, observed in photos 7874–7875 (not panel text)",
+      ],
     ),
     // ------------------------------------------------ hills (animals)
     c(
@@ -195,6 +208,14 @@ export const landAndSea: KnowledgeEntry = {
       "coal-producer",
       "Hokkaido became, with Kitakyushu, one of Japan's top coal producers. Coal had become essential for industry and daily life across the country.",
       ["hm-panel-mountains", "Panel text, sentence 3 (photo 7877)"],
+    ),
+    c(
+      "mine-diorama-tasks",
+      "In the museum's coal mine figures, one miner drills the coal face with a machine and another shovels the loose coal. This is what the figures show; the panel text does not name these tasks.",
+      [
+        "hm-panel-mountains",
+        "Mine figures, observed in photos 7878–7880 (not panel text)",
+      ],
     ),
   ],
 };

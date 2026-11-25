@@ -36,6 +36,7 @@ Two layers:
 
 | Version | Change |
 |---|---|
+| 1 (additive) | Activity kind `place` (Build the scene, labs/activities-scene): `stage`, `subject` (`people` or `objects`), `season` default `"summer"`, `steps` with `say`, `claimIds`, `observed` default `false`, optional `season`, `ask`, `figure` (label, hat, colour or thing), `options` (one `right`), `pose`, `poses`, hints and `why`; `illustrative` default `true`. Step claims must be in the activity's `claimIds`. |
 | 1 (additive) | Activity kinds `hide-seek` (Out of Place: `scene`, `prompt`, `captionClaimIds`, `accurateClaimIds`, `anachronismClaimIds` default `[]`, `durations`, `wrongTapPenalty`, `players`, `illustrative` default `true`) and `slope-run` (Don't Fall on the Slope: `prompt`, `completion`, optional `seed`, `illustrative` default `true`). Both games are vendored, see vendor/README.md. |
 | 1 (additive) | `ArtifactViewerProps.doneActivityIds?` (completed activity ids, e.g. `journal.completed`): the object card marks those rows "Done" and starts the first one not done. |
 | 1 (additive) | `DetailScenePartProps.inspectedArtifactIds` (optional): placed artifacts already inspected, for the object tray's progress. |

@@ -507,3 +507,324 @@
     animation: none;
   }
 }
+
+/* Place kind (Build the scene). Stage 16:9, rings and placed figures in %
+   of the stage, pose sheet as a dark spritesheet strip. */
+.place :global(.rail) {
+  display: flex;
+  align-items: center;
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+}
+.place :global(.rail) li {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+.place :global(.rail) li:last-child {
+  flex: none;
+}
+.place :global(.rail) li::after {
+  content: "";
+  flex: 1;
+  height: 3px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--lh-ink) 0 4px,
+    transparent 4px 8px
+  );
+}
+.place :global(.rail) li:last-child::after {
+  display: none;
+}
+.place :global(.rail) li:global(.done)::after {
+  background: var(--lh-ink);
+}
+.place :global(.rail) i {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 3px solid var(--lh-ink);
+  background: #fff;
+  flex: none;
+}
+.place :global(.rail) li:global(.done) i {
+  background: var(--lh-ink);
+}
+.place :global(.rail) li:global(.now) i {
+  width: 18px;
+  height: 18px;
+  border-color: var(--lh-gold-deep);
+  background: var(--lh-gold);
+}
+.place :global(.stage) {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #cdd6d0;
+  touch-action: none;
+}
+.place :global(.stage) > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.place :global(.placed),
+.place :global(.ring) {
+  position: absolute;
+  width: 13%;
+  aspect-ratio: 76 / 100;
+  transform: translate(-50%, -92%);
+  border: 0;
+  background: none;
+  padding: 0;
+}
+.place :global(.placed) svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.place :global(.placed):global(.now) svg {
+  filter: drop-shadow(0 0 5px #e8c27a);
+  animation: placepop 250ms ease-out;
+}
+.place:global(.still) :global(.placed) svg {
+  animation: none;
+}
+@keyframes placepop {
+  from {
+    transform: translateY(-10px);
+  }
+  to {
+    transform: none;
+  }
+}
+.place :global(.ring) {
+  cursor: pointer;
+}
+.place :global(.ring)::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -5%;
+  width: 90%;
+  aspect-ratio: 2 / 1;
+  transform: translateX(-50%);
+  border: 3px dashed #fff;
+  border-radius: 50%;
+  background: rgb(232 194 122 / 30%);
+  box-shadow: 0 0 0 2px rgb(29 42 54 / 45%);
+}
+.place :global(.ring):hover::before,
+.place :global(.ring):global(.over)::before {
+  border-style: solid;
+  border-color: var(--lh-gold);
+  background: rgb(232 194 122 / 55%);
+}
+.place :global(.ring):global(.bad)::before {
+  border-style: solid;
+  border-color: #e0805a;
+}
+.place :global(.ring) :global(.q) {
+  position: absolute;
+  left: 50%;
+  bottom: 22%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #fbfaf6;
+  color: #1d2a36;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  border: 2px solid #1d2a36;
+}
+.place :global(.thing) {
+  width: 9%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+}
+.place :global(.ring):global(.thing)::before {
+  bottom: auto;
+  top: 50%;
+  width: 100%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 10px;
+}
+.place :global(.ring):global(.thing) :global(.q) {
+  bottom: auto;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+.place :global(.sheet) {
+  margin-top: 8px;
+  background: #1d2a36;
+  border-radius: 8px;
+  padding: 8px 10px 10px;
+  color: #e9eef2;
+}
+.place :global(.sheet-head) {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+.place :global(.sheet-head) span {
+  color: #a9b6c2;
+}
+.place :global(.frames) {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border: 1px solid #53606c;
+}
+.place :global(.frame) {
+  font: inherit;
+  font-size: 13px;
+  color: #e9eef2;
+  background: repeating-linear-gradient(45deg, #24323f 0 6px, #213040 6px 12px);
+  border: 1px solid #53606c;
+  padding: 4px 2px 6px;
+  cursor: pointer;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  position: relative;
+  min-height: 44px;
+}
+.place :global(.frame):disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+.place :global(.frame) em {
+  position: absolute;
+  left: 4px;
+  top: 2px;
+  font-style: normal;
+  font-size: 11px;
+  color: #8a98a6;
+}
+.place :global(.frame) svg {
+  width: 48px;
+  height: 64px;
+}
+.place :global(.frame):global(.bad) {
+  outline: 2px solid #e0805a;
+  outline-offset: -2px;
+}
+.place :global(.frame):global(.good) {
+  background: #2f4b6e;
+  outline: 2px solid var(--lh-gold);
+  outline-offset: -2px;
+}
+.place :global(.stepcard) {
+  margin-top: 10px;
+}
+.place :global(.stepno) {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--lh-ink-soft);
+}
+.place :global(.toggle) {
+  font: inherit;
+  font-size: 13px;
+  border: 1.5px solid var(--lh-ink);
+  background: transparent;
+  color: var(--lh-ink);
+  border-radius: 999px;
+  padding: 3px 12px;
+  cursor: pointer;
+}
+.place :global(.caption) {
+  background: #1d2a36;
+  color: #fbfaf6;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 8px 0 4px;
+}
+.place :global(.caption) small {
+  display: block;
+  color: #f0d38a;
+  font-size: 13px;
+  margin-top: 4px;
+}
+.place :global(.ask) {
+  font-weight: 700;
+}
+.place :global(.hand) {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: var(--lh-paper-edge);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin: 6px 0;
+}
+.place :global(.card) {
+  width: 70px;
+  height: 90px;
+  flex: none;
+  padding: 4px;
+  border: 2px solid var(--lh-gold-deep);
+  border-radius: 8px;
+  background: #fff;
+  cursor: grab;
+  touch-action: none;
+}
+.place :global(.card) svg {
+  width: 100%;
+  height: 100%;
+}
+.place :global(.hand) p b {
+  display: block;
+}
+.place :global(.msg) {
+  border-left: 5px solid var(--lh-paper-edge);
+  background: #fff8ea;
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+.place :global(.msg):global(.ok) {
+  border-left-color: #4f7f45;
+}
+.place :global(.msg):global(.no) {
+  border-left-color: #c8562e;
+}
+.place :global(.row) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 4px;
+}
+.place :global(.small) {
+  font-size: 13px;
+}
+.place :global(.recap) ol {
+  padding-left: 20px;
+  margin: 4px 0;
+}
+.place {
+  position: relative;
+}
+.place :global(.ghost) {
+  display: none;
+  position: absolute;
+  z-index: 50;
+  width: 64px;
+  height: 84px;
+  pointer-events: none;
+  transform: translate(-50%, -80%);
+}
+.place :global(.ghost) svg {
+  width: 100%;
+  height: 100%;
+}

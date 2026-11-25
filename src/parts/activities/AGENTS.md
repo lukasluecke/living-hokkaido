@@ -52,3 +52,9 @@ journal stamp appears after completion.
   the stage only). `hide-seek` mounts Out of Place, `slope-run` mounts
   Don't Fall on the Slope. Each game mounts once per Play, so the shell's
   re-renders do not restart it. Do not edit `vendor/` for our look.
+- 2026-11-26: Lukas chose "Build the scene" v2 (labs/activities-scene):
+  kind `place` in `play/Place.tsx`, pure state in `play/placeLogic.ts`,
+  drawings in `play/PlaceArt.tsx`. A guided story, one step at a time; each
+  step hands over ONE figure (named by hat and colour, never a personal
+  name) or thing, with a clue, 2–3 rings and a pose sheet of 4. Ainu home
+  scenes use `subject: "objects"`. Later idea (Lukas): a 2.5D stage.
