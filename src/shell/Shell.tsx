@@ -18,6 +18,7 @@ import {
   seasonAt,
   wrapSeason,
 } from "@/contracts";
+import { SoundToggle, useSoundscape } from "@/audio/react";
 import { record } from "./progress";
 import { parts } from "./registry";
 import s from "./Shell.module.css";
@@ -57,6 +58,9 @@ export function Shell({ pack }: { pack: ContentPack }) {
   );
   const journalRef = useRef(journal);
   journalRef.current = journal;
+  // Sound (src/audio): ambient follows view + season; events play cues.
+  const sound = useSoundscape(state);
+  const soundEvent = sound.onEvent;
 
   useEffect(() => {
     setState((st) => ({ ...st, prefs: detectPrefs() }));
@@ -70,6 +74,7 @@ export function Shell({ pack }: { pack: ContentPack }) {
   const emit = useCallback(
     (e: ExperienceEvent) => {
       setState((st) => reduce(pack, st, e));
+      soundEvent(e);
       // Demo recorder and e2e hook: mirror every event as a DOM event.
       window.dispatchEvent(new CustomEvent("lh:event", { detail: e }));
       const { journal: next, earned } = record(pack, journalRef.current, e);
@@ -91,12 +96,13 @@ export function Shell({ pack }: { pack: ContentPack }) {
       );
       if (line) setGuideLine(line.text);
       for (const id of earned) {
+        soundEvent({ type: "stamp.earned", stampId: id });
         setToast(pack.stamps.find((x) => x.id === id)?.title ?? id);
         const stampLine = pack.guide.find((g) => g.on === "stamp.earned");
         if (stampLine) setGuideLine(stampLine.text);
       }
     },
-    [pack],
+    [pack, soundEvent],
   );
 
   // Demo recorder and e2e hook (scripts/demo-video): scripts send the same
@@ -197,6 +203,7 @@ export function Shell({ pack }: { pack: ContentPack }) {
         <button type="button" onClick={() => emit({ type: "journal.open" })}>
           Journal ({journal.stamps.length}/{pack.stamps.length})
         </button>
+        <SoundToggle sound={sound} />
       </header>
       {guideLine && (
         <p className={s.guide} aria-live="polite">

@@ -11,7 +11,8 @@
     "lint": "biome check . && oxlint src tests",
     "format": "biome format --write .",
     "test": "tsx --test tests/*.test.ts",
-    "check": "npm run typecheck && npm run lint && npm test && npm run build"
+    "check": "npm run typecheck && npm run lint && npm test && npm run build",
+    "audio:generate": "tsx scripts/audio/generate.ts"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.0",
