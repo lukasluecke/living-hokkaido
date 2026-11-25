@@ -1,10 +1,5 @@
 # Demo and submission
 
-## Backup recording
-
-`npm run demo:record` plays the visitor flow and records a video
-(scripts/demo/README.md). Sound is set in `src/audio/manifest.ts`.
-
 ## Story-first submitted video outline
 
 Working outline for reported 5–6 minutes, pending written reconciliation with the deck’s older ≤3-minute limit.
