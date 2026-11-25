@@ -5,11 +5,9 @@
 // photos; visual reference only). Original geometry, MIT. Not reconstructions
 // of real places. Claims: knowledge "land-and-sea". Scene space, metres;
 // the camera looks from +z, so the open side of each set faces +z.
-import { useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { useMemo } from "react";
 import * as THREE from "three";
-import { type SeasonState, seasonWeights } from "@/contracts";
-import { snowCap } from "../../shared/snowCap";
+import type { SeasonState } from "@/contracts";
 import {
   Ground,
   Log,
@@ -18,6 +16,7 @@ import {
   Stump,
   TreeRing,
   useOutdoorMats,
+  useSnow,
 } from "./Outdoor";
 
 type V3 = [number, number, number];
@@ -580,19 +579,6 @@ export function isAreaSetting(kind: string) {
   return (AREA_SETTINGS as readonly string[]).includes(kind);
 }
 
-/** Snow on the top faces of the props in winter (season weight 4). */
-function useSnow(season: SeasonState, mats: THREE.Material[]) {
-  const u = useMemo(() => ({ value: 0 }), []);
-  const s = useRef(season.value);
-  s.current = season.value;
-  useMemo(() => {
-    for (const mat of mats) snowCap(mat, u);
-  }, [mats, u]);
-  useFrame(() => {
-    u.value = seasonWeights(s.current)[3] ?? 0;
-  });
-}
-
 export function AreaStatic({
   kind,
   season,
@@ -621,7 +607,6 @@ export function AreaStatic({
     return [
       ...Object.values(props),
       m.path,
-      m.pine,
       m.stone,
       m.trunk,
       m.wood,
@@ -630,7 +615,8 @@ export function AreaStatic({
       m.fibre,
     ];
   }, [a, m]);
-  useSnow(season, snowy);
+  const steep = useMemo(() => [m.pine], [m]);
+  useSnow(season, snowy, steep);
   if (kind === "area-coast") return <Coast m={m} a={a} />;
   if (kind === "area-forest") return <Forest m={m} a={a} />;
   if (kind === "area-hills") return <Hills m={m} a={a} />;

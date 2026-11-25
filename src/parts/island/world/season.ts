@@ -13,6 +13,9 @@ export const SEASON_NOTES = [
   seasonItem.winter,
 ];
 
+/** Winter weight (0..1) for snow on the props (shared/snowCap.ts). */
+export const SNOW = { value: 0 };
+
 export const U = {
   uW: { value: new Vector4(1, 0, 0, 0) }, // season weights, sum = 1
   uSnowLine: { value: 1300 }, // metres

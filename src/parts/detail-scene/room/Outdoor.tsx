@@ -7,7 +7,8 @@ import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { type SeasonState, seasonWeights } from "@/contracts";
 import { type Season4, season as tone } from "@/design/tokens";
-import { Floor, Outside, Walls } from "./House";
+import { snowCap } from "../../shared/snowCap";
+import { Floor, Walls } from "./House";
 import { rng, woodTexture } from "./textures";
 
 type V3 = [number, number, number];
@@ -59,6 +60,34 @@ export function useOutdoorMats(season: SeasonState) {
   return m;
 }
 export type Mats = ReturnType<typeof useOutdoorMats>;
+
+/** Snow on the top faces of these materials in winter (season weight 4). */
+export function useSnow(
+  season: SeasonState,
+  mats: THREE.Material[],
+  steep: THREE.Material[] = [],
+) {
+  const u = useMemo(() => ({ value: 0 }), []);
+  const s = useRef(season.value);
+  s.current = season.value;
+  useMemo(() => {
+    for (const mat of mats) snowCap(mat, u);
+    for (const mat of steep) snowCap(mat, u, 0.7, 0.32);
+  }, [mats, steep, u]);
+  useFrame(() => {
+    u.value = seasonWeights(s.current)[3] ?? 0;
+  });
+}
+
+/** The outdoor materials that take snow (ground and leaves blend by season). */
+export function useOutdoorSnow(season: SeasonState, m: Mats) {
+  const mats = useMemo(
+    () => [m.path, m.stone, m.trunk, m.wood, m.bark, m.cut, m.fibre],
+    [m],
+  );
+  const steep = useMemo(() => [m.pine], [m]);
+  useSnow(season, mats, steep);
+}
 
 function Tree({
   p,
@@ -254,6 +283,7 @@ export function Stones({
 /** Listening grove: a quiet ring of trees, log seats, one wide old tree. */
 export function GroveStatic({ season }: { season: SeasonState }) {
   const m = useOutdoorMats(season);
+  useOutdoorSnow(season, m);
   return (
     <group name="grove">
       <Ground m={m} patch={3.4} />
@@ -286,6 +316,7 @@ export function GroveStatic({ season }: { season: SeasonState }) {
 /** Makers' clearing: a workbench, a drying rack and a chopping stump. */
 export function ClearingStatic({ season }: { season: SeasonState }) {
   const m = useOutdoorMats(season);
+  useOutdoorSnow(season, m);
   const strands = useMemo(() => {
     const r = rng(23);
     return Array.from({ length: 14 }, (_, i) => ({
@@ -345,11 +376,45 @@ export function ClearingStatic({ season }: { season: SeasonState }) {
   );
 }
 
+/** Land around the lake house and the cabin: season ground and a ring of
+ * mostly pine trees (snow on them in winter). Replaces the old always-snowy
+ * `Outside` of House.tsx. */
+export function Surroundings({
+  season,
+  children,
+}: {
+  season: SeasonState;
+  children?: (m: Mats) => React.ReactNode;
+}) {
+  const m = useOutdoorMats(season);
+  useOutdoorSnow(season, m);
+  return (
+    <group name="outside">
+      <mesh
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[0, -0.02, 0]}
+        material={m.ground}
+        receiveShadow
+      >
+        <circleGeometry args={[22, 48]} />
+      </mesh>
+      <TreeRing m={m} seed={42} inner={7} count={26} pines={0.8} />
+      {children?.(m)}
+    </group>
+  );
+}
+
 /** Scale of the memory cabin against the lake house shell. */
 export const CABIN_SCALE = 0.72;
 
 /** Memory cabin: the house shell at a smaller scale, with plain shelves. */
-export function CabinStatic({ lift }: { lift?: { current: number } }) {
+export function CabinStatic({
+  lift,
+  season,
+}: {
+  lift?: { current: number };
+  season: SeasonState;
+}) {
   const wood = useMemo(
     () =>
       new THREE.MeshStandardMaterial({ map: woodTexture(), roughness: 0.85 }),
@@ -375,7 +440,7 @@ export function CabinStatic({ lift }: { lift?: { current: number } }) {
       <group scale={CABIN_SCALE}>
         <Floor />
         <Walls lift={lift} />
-        <Outside />
+        <Surroundings season={season} />
       </group>
       {/* Plain storage shelves along the back wall. */}
       {[0.45, 0.95, 1.45].map((y) => (
