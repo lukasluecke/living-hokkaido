@@ -371,6 +371,77 @@ export const pluckActivitySchema = z
     "Tune notes must name existing strings",
   );
 
+// ---------------------------------------------------------------- games
+
+/**
+ * Hide and seek in an illustrated historical scene ("Out of Place", vendored
+ * from erinalin/out-of-place, see vendor/README.md). One visitor hides Nuri
+ * (an original clay figure) by painting it with colours sampled from the
+ * scene; a second visitor on the same device looks for it. The reveal shows
+ * what in the scene is period-accurate and what is not there yet, each line
+ * from a claim. Same shape as the game's own contract-proposal.ts.
+ */
+export const hideSeekActivitySchema = z
+  .object({
+    ...base,
+    kind: z.literal("hide-seek"),
+    /** Which illustrated scene the renderer draws. */
+    scene: z.enum(["otaru-herring-warehouse", "sapporo-street"]),
+    /** How to play. Frame text only: it states no historical fact. */
+    prompt: z.string().min(1),
+    /** Claims shown with the scene at the start (the history caption). */
+    captionClaimIds: z.array(idSchema).min(1),
+    /** Claims shown as "period-accurate here" on the reveal card. */
+    accurateClaimIds: z.array(idSchema).min(1),
+    /** Claims about things that are not in the scene yet (anachronisms). */
+    anachronismClaimIds: z.array(idSchema).default([]),
+    /** Shown when a round ends. Must only restate claims. */
+    completion: z.string().min(1),
+    /** Seconds per phase. The handoff between players has no clock. */
+    durations: z
+      .object({
+        sceneReveal: z.number().int().min(3).max(60),
+        disguise: z.number().int().min(15).max(300),
+        seek: z.number().int().min(15).max(300),
+        reveal: z.number().int().min(5).max(120),
+      })
+      .default({ sceneReveal: 10, disguise: 60, seek: 90, reveal: 20 }),
+    /** Seconds taken off the seeker's clock for each wrong tap. */
+    wrongTapPenalty: z.number().int().min(0).max(60).default(10),
+    /** Only pass-and-play (no network play in the visitor app). */
+    players: z.literal("pass-and-play").default("pass-and-play"),
+    /** True while the scene art is not backed by an approved reconstruction. */
+    illustrative: z.boolean().default(true),
+  })
+  .refine(
+    (a) =>
+      [
+        ...a.captionClaimIds,
+        ...a.accurateClaimIds,
+        ...a.anachronismClaimIds,
+      ].every((id) => a.claimIds.includes(id)),
+    "Caption, accurate and anachronism claims must be listed in claimIds",
+  );
+
+/**
+ * Slide down an icy street without touching anything ("Don't Fall on the
+ * Slope", vendored from erinalin/dont-fall-on-the-slope). A 3D physics game;
+ * the street is generic and illustrative, never a reconstruction. The game
+ * shows no history text yet; claims are shown beside it by the renderer.
+ */
+export const slopeRunActivitySchema = z.object({
+  ...base,
+  kind: z.literal("slope-run"),
+  /** How to play. Frame text only: it states no historical fact. */
+  prompt: z.string().min(1),
+  /** Shown when a run ends. Must only restate claims. */
+  completion: z.string().min(1),
+  /** Street layout seed. Same seed, same street. */
+  seed: z.number().int().nonnegative().optional(),
+  /** True while the street is not backed by an approved reconstruction. */
+  illustrative: z.boolean().default(true),
+});
+
 // ---------------------------------------------------------------- place
 
 /**
@@ -474,6 +545,8 @@ export const activitySchema = z.discriminatedUnion("kind", [
   boardActivitySchema,
   canonActivitySchema,
   pluckActivitySchema,
+  hideSeekActivitySchema,
+  slopeRunActivitySchema,
   placeActivitySchema,
 ]);
 export type ActivityDefinition = z.infer<typeof activitySchema>;

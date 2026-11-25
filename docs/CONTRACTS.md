@@ -37,6 +37,9 @@ Two layers:
 | Version | Change |
 |---|---|
 | 1 (additive) | Activity kind `place` (Build the scene, labs/activities-scene): `stage`, `subject` (`people` or `objects`), `season` default `"summer"`, `steps` with `say`, `claimIds`, `observed` default `false`, optional `season`, `ask`, `figure` (label, hat, colour or thing), `options` (one `right`), `pose`, `poses`, hints and `why`; `illustrative` default `true`. Step claims must be in the activity's `claimIds`. |
+| 1 (additive) | Activity kinds `hide-seek` (Out of Place: `scene`, `prompt`, `captionClaimIds`, `accurateClaimIds`, `anachronismClaimIds` default `[]`, `durations`, `wrongTapPenalty`, `players`, `illustrative` default `true`) and `slope-run` (Don't Fall on the Slope: `prompt`, `completion`, optional `seed`, `illustrative` default `true`). Both games are vendored, see vendor/README.md. |
+| 1 (additive) | `ArtifactViewerProps.doneActivityIds?` (completed activity ids, e.g. `journal.completed`): the object card marks those rows "Done" and starts the first one not done. |
+| 1 (additive) | `DetailScenePartProps.inspectedArtifactIds` (optional): placed artifacts already inspected, for the object tray's progress. |
 | 1 (additive) | Activity kinds `canon` (voices, `offset`, `beats`, `structureClaimId`, `lyrics` default `[]`) and `pluck` (strings with gauge and hands, `stringsClaimId`, optional `tune`). Sound is synthetic and illustrative. |
 | 1 (additive) | `ask.ts`: `AskRequest`, `AskAnswer`, `AskAction`; `ContentPack.ask.suggestions` (default `[]`); `AskPartProps` (src/parts/ask, docs/ASK.md). |
 | 1 (additive) | Activity kind `board` (game `stick-grid`, `rulesClaimId`, opponent `owl` by default or `two-players`). |

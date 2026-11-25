@@ -12,12 +12,9 @@
   font-size: 15px;
   border-radius: 14px;
   /* Cover edge, page stack and soft shadow. */
-  border: 6px solid var(--cover);
-  box-shadow:
-    0 0 0 2px var(--ink),
-    4px 6px 0 -1px var(--paper-edge),
-    4px 6px 0 1px var(--ink),
-    0 18px 40px rgb(43 33 24 / 35%);
+  border: 1px solid var(--paper-edge);
+  border-top: 6px solid var(--cover);
+  box-shadow: 0 18px 40px rgb(43 33 24 / 35%);
   animation: open 220ms ease-out;
 }
 .still {

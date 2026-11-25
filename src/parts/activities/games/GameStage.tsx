@@ -1,0 +1,188 @@
+"use client";
+// Thin adapter for the vendored teammate games (vendor/*, see
+// vendor/README.md). The activity panel shows the prompt, the cited claims
+// and a Play button. Play opens a full-screen stage (a portal on
+// document.body, so the side panel's size and transforms do not apply) and
+// mounts the game there once per activity. Esc or "Close game" closes the
+// stage only; the panel's × still closes the activity.
+import { type ReactNode, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import type { CSSProperties } from "react";
+import type { Emit, ResolvedClaim } from "@/contracts";
+import { ui } from "@/design/tokens";
+import { Cite } from "../kinds/shared";
+import p from "../play/play.module.css";
+import g from "./games.module.css";
+
+const stageVars = {
+  "--lh-paper": ui.paper,
+  "--lh-ink": ui.ink,
+  "--lh-gold": ui.gold,
+} as CSSProperties;
+
+/** What a vendored game's mount function returns. */
+export type GameHandle = { ready: Promise<void>; destroy(): void };
+
+/**
+ * Mounts the game into `host`. Called once per stage open. `emit` is stable
+ * for the whole mount and always forwards to the latest host emit.
+ */
+export type MountGame = (host: HTMLElement, emit: Emit) => GameHandle;
+
+export function GameStage({
+  activityId,
+  knowledgeId,
+  title,
+  prompt,
+  claimIds,
+  claims,
+  labels,
+  completion,
+  done,
+  emit,
+  mount,
+  fit,
+  controls,
+}: {
+  activityId: string;
+  knowledgeId: string;
+  title: string;
+  prompt: string;
+  claimIds: string[];
+  claims: Record<string, ResolvedClaim>;
+  /** Honesty labels shown on the panel and on the stage bar. */
+  labels: string[];
+  completion: string;
+  /** True once the game has emitted activity.complete. */
+  done: boolean;
+  emit: Emit;
+  mount: MountGame;
+  /** "wide": a 16:9 game, letterboxed. "fill": the whole stage. */
+  fit: "wide" | "fill";
+  /** Short keyboard help, shown under the prompt. */
+  controls: ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const host = useRef<HTMLDivElement>(null);
+  const play = useRef<HTMLButtonElement>(null);
+  // The shell rebuilds `claims` and may rebuild `emit` on every render
+  // (season clock). Keep the latest in refs; mount only on open.
+  const emitRef = useRef(emit);
+  emitRef.current = emit;
+  const mountRef = useRef(mount);
+  mountRef.current = mount;
+
+  useEffect(() => {
+    if (!open || !host.current) return;
+    setError(null);
+    let handle: GameHandle | null = null;
+    try {
+      handle = mountRef.current(host.current, (e) => emitRef.current(e));
+      handle.ready.catch((err: unknown) =>
+        setError(err instanceof Error ? err.message : String(err)),
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    }
+    return () => handle?.destroy();
+  }, [open]);
+
+  // Esc closes the stage, not the whole activity: catch it on the way
+  // down (window, capture phase), before the shell's window listener and
+  // before the game (which leaves Esc to the host).
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (ev: KeyboardEvent) => {
+      if (ev.key !== "Escape") return;
+      ev.stopPropagation();
+      ev.preventDefault();
+      setOpen(false);
+      requestAnimationFrame(() => play.current?.focus());
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [open]);
+
+  const close = () => {
+    setOpen(false);
+    requestAnimationFrame(() => play.current?.focus());
+  };
+  const reveal = (claimId: string) =>
+    emit({ type: "reveal.open", knowledgeId, claimId });
+
+  return (
+    <div className={p.root}>
+      <p>{prompt}</p>
+      <p className="small-note">{controls}</p>
+      <div className={g.labels}>
+        {labels.map((l) => (
+          <span key={l} className={g.label}>
+            {l}
+          </span>
+        ))}
+      </div>
+      <div className="row">
+        <button
+          ref={play}
+          type="button"
+          className="btn primary"
+          onClick={() => setOpen(true)}
+        >
+          {done ? "Play again" : "Play"}
+        </button>
+      </div>
+      {done && <p className="feedback">{completion}</p>}
+      <details className={g.facts}>
+        <summary>What the game is based on ({claimIds.length})</summary>
+        <ul>
+          {claimIds.map((id) => {
+            const c = claims[id];
+            if (!c) return null;
+            return (
+              <li key={id}>
+                <p>{c.claim.text}</p>
+                <Cite claim={c} onReveal={() => reveal(id)} />
+              </li>
+            );
+          })}
+        </ul>
+      </details>
+      {open &&
+        createPortal(
+          <div
+            className={g.stage}
+            style={stageVars}
+            role="dialog"
+            aria-modal="true"
+            aria-label={title}
+          >
+            <div className={g.bar}>
+              <strong className={g.barTitle}>{title}</strong>
+              {labels.map((l) => (
+                <span key={l} className={g.barLabel}>
+                  {l}
+                </span>
+              ))}
+              <button type="button" className={g.closeGame} onClick={close}>
+                Close game <kbd>Esc</kbd>
+              </button>
+            </div>
+            <div className={g.area}>
+              <div
+                ref={host}
+                className={`${g.host} ${fit === "wide" ? g.wide : ""}`}
+                data-activity={activityId}
+              />
+              {error && (
+                <p className={g.error} role="alert">
+                  The game could not start: {error}
+                </p>
+              )}
+            </div>
+          </div>,
+          document.body,
+        )}
+    </div>
+  );
+}

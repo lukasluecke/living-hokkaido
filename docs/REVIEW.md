@@ -182,3 +182,13 @@ read on site, no URL. Locators name the Q number and the photo id.
 | Game `game-sticks` (Makers' clearing) | `stick-game` | The rules follow one sentence of Q021; details (who starts, a side with no move passes) are our choices. Check with 更科源蔵『アイヌの童戯』(1983) |
 | Canon `canon-ukouk` (Listening grove) | `ukouk`, `ukouk-asahikawa`, `ukouk-words` | Synthetic melody contour is ours, not the song. Shows the Asahikawa song words in full (rights of the preservation societies) |
 | Pluck `pluck-tonkori` (Listening grove) | `tonkori-strings`, `tonkori-open`, `tonkori-tune` | Synthetic pitches are ours, not the tuning. The tab belongs to Ume Nishihira's tune as written down by Tomita Tomoko; ask before public use |
+
+## Teammate games (vendored)
+
+Knowledge in `vendor/out-of-place/content/scenes/*/knowledge.ts`, imported by
+`src/content/bark-to-cloth/games.ts`. Change these upstream (vendor/README.md).
+
+| Entry | Claims | Used by | Needs |
+|---|---|---|---|
+| `otaru-herring-warehouse` | 7 (MLIT/JTA pages, Visit Hokkaido, HRO herring assessment) | `hide-seek-otaru-warehouse`, `slope-run-otaru` | Historian review (Chika); locators are coarse ("page text"); sources `rights: unknown` |
+| `meiji-sapporo-street` | 9 | `hide-seek-sapporo-street` | Same. Ainu people are not depicted in the scene (see `vendor/out-of-place/scenes/sapporo-street.md`); check that choice |

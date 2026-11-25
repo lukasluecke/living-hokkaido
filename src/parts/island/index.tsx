@@ -54,7 +54,48 @@ export function IslandPart(props: IslandPartProps) {
           </button>
         ))}
       </div>
+      {view === "island" && <PlaceTray {...props} onSelect={select} />}
     </div>
+  );
+}
+
+/** Field-label tray: every place as a card. Same action as its pin. */
+function PlaceTray({
+  content,
+  onSelect,
+}: IslandPartProps & { onSelect: (l: Location) => void }) {
+  // Open places first, then the closed ones, each in pack order.
+  const locations = [...content.island.locations].sort(
+    (a, b) => Number(b.status === "open") - Number(a.status === "open"),
+  );
+  const open = locations.filter((l) => l.status === "open").length;
+  return (
+    <nav className={c.tray} aria-label="Places on the island">
+      <div className={c.trayHead}>
+        <span className={c.cap}>Places on the island</span>
+        <span className={c.count}>
+          {open} open · {locations.length - open} soon
+        </span>
+      </div>
+      <ul className={c.cards}>
+        {locations.map((l) => (
+          <li key={l.id}>
+            <button
+              type="button"
+              className={c.card}
+              aria-disabled={l.status !== "open"}
+              data-open={l.status === "open" || undefined}
+              onClick={() => onSelect(l)}
+            >
+              <span className={c.cardTitle}>{l.title}</span>
+              <span className={c.state}>
+                {l.status === "open" ? "Open" : "Soon"}
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </nav>
   );
 }
 

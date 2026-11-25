@@ -45,6 +45,13 @@ journal stamp appears after completion.
   `canon` (ukouk structure: bring in each voice on its mark) and `pluck`
   (tonkori: pluck each open string, then the short tab) use `play/synth.ts`:
   synthetic tones only, never a voice or a recording; the UI says so.
+- 2026-11-25: Erina's games are vendored with git subtree in `vendor/`
+  (vendor/README.md: upstream commits, pull and push steps). `games/` is the
+  thin adapter: `GameStage` shows the prompt, honesty labels and the cited
+  claims, and Play opens a full-screen stage (portal on `<body>`; Esc closes
+  the stage only). `hide-seek` mounts Out of Place, `slope-run` mounts
+  Don't Fall on the Slope. Each game mounts once per Play, so the shell's
+  re-renders do not restart it. Do not edit `vendor/` for our look.
 - 2026-11-26: Lukas chose "Build the scene" v2 (labs/activities-scene):
   kind `place` in `play/Place.tsx`, pure state in `play/placeLogic.ts`,
   drawings in `play/PlaceArt.tsx`. A guided story, one step at a time; each

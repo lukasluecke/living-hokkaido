@@ -6,6 +6,7 @@ import {
 import { activities } from "./activities";
 import { areaActivities, areaArtifacts, areaScenes } from "./area-scenes";
 import { artifacts } from "./artifacts";
+import { gameActivities, gameActivityIdsByScene, gameKnowledge } from "./games";
 import { guide } from "./guide";
 import { locations, overview, owlHome } from "./island";
 import { stamps } from "./journal";
@@ -25,17 +26,34 @@ import {
 export const barkToClothRaw = {
   contractVersion: CONTRACT_VERSION,
   id: "bark-to-cloth",
-  knowledge: [barkToCloth, houseOverTime, hokkaidoMuseum, landAndSea],
+  knowledge: [
+    barkToCloth,
+    houseOverTime,
+    hokkaidoMuseum,
+    landAndSea,
+    ...gameKnowledge,
+  ],
   island: { owlHome, overview, locations },
   scenes: [
     lakeHouse,
     listeningGrove,
     makersClearing,
     memoryCabin,
-    ...areaScenes,
+    ...areaScenes.map((sc) => ({
+      ...sc,
+      activityIds: [
+        ...(sc.activityIds ?? []),
+        ...(gameActivityIdsByScene[sc.id] ?? []),
+      ],
+    })),
   ],
   artifacts: [...artifacts, ...areaArtifacts],
-  activities: [...activities, ...areaActivities, ...placeActivities],
+  activities: [
+    ...activities,
+    ...areaActivities,
+    ...gameActivities,
+    ...placeActivities,
+  ],
   stamps,
   guide,
   memories,

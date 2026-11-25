@@ -17,9 +17,9 @@
   border: 0;
   border-radius: 999px;
   padding: 7px 14px 7px 10px;
-  background: #1f2d46;
-  color: #fbf4e6;
-  box-shadow: 0 4px 14px rgb(43 33 24 / 25%);
+  background: var(--fl-ink, #1f2d46);
+  color: #fff;
+  box-shadow: 0 4px 14px rgb(43 33 24 / 30%);
   cursor: pointer;
 }
 .trigger:hover {
@@ -218,7 +218,7 @@
   border: 1px solid #efe1c2;
   border-radius: 999px;
   padding: 7px 12px;
-  background: #fff;
+  background: var(--fl-card);
   color: #2b2118;
 }
 .form button {
@@ -235,11 +235,11 @@
   opacity: 0.5;
   cursor: default;
 }
-/* Phone: above the scene's object row; hidden behind an open object sheet;
-   the open box is a bottom sheet above everything else. */
+/* Phone: above the bottom tray (places or objects); hidden behind an open
+   object sheet; the open box is a bottom sheet above everything else. */
 @media (max-width: 700px) {
   .trigger {
-    bottom: calc(58px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(124px + env(safe-area-inset-bottom, 0px));
   }
   .trigger[data-sheet] {
     display: none;
