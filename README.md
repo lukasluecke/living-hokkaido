@@ -19,9 +19,9 @@ Hack Hokkaido Build Week, November 2026.
 | Hotspot placement tool (`?edit=1`) | Working |
 | Close-up 3D model per figure | Working (7 elder figures) |
 | Character sheets (12 figures) | Drafts, not yet sourced |
-| Retrieval corpus | Not started |
-| Voice (ElevenLabs) and dialogue | Not started |
-| Fine-tuned behaviour model (Adaption Labs) | Spec written ([training/SPEC.md](training/SPEC.md)) |
+| Talk: ask a figure, answers only from the observation record | Working (Gemini; voice input and read-aloud in the browser) |
+| Preference dataset and held-out eval | Generated, not yet reviewed ([training/](training/)) |
+| Fine-tuned behaviour model (Adaption Labs) | Spec and data ready ([training/SPEC.md](training/SPEC.md)) |
 
 ## The Envelope
 
@@ -43,7 +43,27 @@ museum diorama.
   store (`POST /api/observations`).
 - **Protocol** is a gate on what may be seen (public / team / family / community); Local
   Contexts TK Labels are planned for it.
-- **Voice** (next) will speak only from observations that pass the protocol, citing them.
+- **Voice**: **Talk** on each figure answers only from observations that pass the protocol and
+  have not been superseded, and shows which ones it used. Each factual sentence is labelled
+  documented or inferred, disagreements are given side by side, gaps are answered as gaps with
+  their cause, and Ainu feelings or beliefs are never stated without a source. A curator's
+  correction changes the next answer, with no retraining.
+
+### Talk
+
+`POST /api/talk` with `{ figure, question, history? }` returns `{ answer, cites, grounding }`.
+The rules are in [talk-prompt.mjs](talk-prompt.mjs), shared with the training-data generator so the
+fine-tune learns the same behaviour the live app shows. Needs `GEMINI_API_KEY` on the server
+(`GEMINI_MODEL` optional, default `gemini-flash-latest`).
+
+### Training data
+
+```powershell
+node tools/make-dataset.mjs     # needs GEMINI_API_KEY
+```
+writes `training/data/dpo.jsonl` (prompt, chosen, rejected), `dpo-meta.jsonl` (figure, question,
+failure shown, citations) and `eval.jsonl` (held-out questions with the expected behaviour). The
+batch is **unreviewed**; see [training/CURATION_LOG.md](training/CURATION_LOG.md).
 
 Open **About** in the app, or any figure, to see what is known and what is not.
 

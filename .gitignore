@@ -8,7 +8,7 @@ frames/
 *.ply
 
 # Local additions to the observation record (the deployed site keeps them in the bucket)
-data/
+/data/
 
 # Secrets and local tooling
 .env
