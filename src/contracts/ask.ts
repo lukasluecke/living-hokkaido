@@ -59,8 +59,28 @@ export const askAnswerSchema = z.object({
 export type AskAnswer = z.infer<typeof askAnswerSchema>;
 
 /** Content for the ask box. Additive: old packs parse with no suggestions. */
+const questions = z.array(z.string().min(1).max(ASK_MAX_QUESTION));
+
 export const askContentSchema = z.object({
-  /** Example questions shown as chips. Questions only, never answers. */
-  suggestions: z.array(z.string().min(1).max(ASK_MAX_QUESTION)).default([]),
+  /** Example questions shown as chips on the island overview. Questions
+   *  only, never answers. */
+  suggestions: questions.default([]),
+  /** Questions about one place, shown inside it (additive). */
+  byLocation: z.record(idSchema, questions).default({}),
+  /** Questions about one object, shown while it is in focus (additive). */
+  byArtifact: z.record(idSchema, questions).default({}),
 });
+
+/** The example questions for where the visitor is now. Object first, then
+ *  the place, then the island questions. */
+export function askSuggestionsFor(
+  ask: AskContent,
+  ctx: { locationId: string | null; artifactId: string | null },
+): string[] {
+  const art = ctx.artifactId ? ask.byArtifact[ctx.artifactId] : undefined;
+  if (art?.length) return art;
+  const loc = ctx.locationId ? ask.byLocation[ctx.locationId] : undefined;
+  if (loc?.length) return loc;
+  return ask.suggestions;
+}
 export type AskContent = z.infer<typeof askContentSchema>;
