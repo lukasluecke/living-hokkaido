@@ -4,6 +4,7 @@ import {
   type AskContext,
   askAnswerSchema,
   askRequestSchema,
+  askSuggestionsFor,
   loadContentPack,
   validateContentPack,
 } from "@/contracts";
@@ -28,7 +29,11 @@ const req = (question: string, context = ctx) =>
 test("ask: old packs parse with no suggestions", () => {
   const raw: Record<string, unknown> = structuredClone(barkToClothRaw);
   delete raw.ask;
-  assert.deepEqual(loadContentPack(raw).ask, { suggestions: [] });
+  assert.deepEqual(loadContentPack(raw).ask, {
+    suggestions: [],
+    byLocation: {},
+    byArtifact: {},
+  });
   assert.deepEqual(validateContentPack(barkToClothRaw), []);
 });
 
@@ -59,6 +64,74 @@ test("ask: scripted answers cite real claims and real ids", () => {
     locationId: "lake-house",
     artifactId: "fiber",
   });
+});
+
+test("ask: every place and object question finds a claim there", () => {
+  for (const [locationId, qs] of Object.entries(pack.ask.byLocation)) {
+    const sceneId =
+      pack.island.locations.find((l) => l.id === locationId)?.sceneId ?? null;
+    for (const q of qs) {
+      const a = scriptedAnswer(
+        pack,
+        req(q, { locationId, sceneId, artifactId: null }),
+      );
+      assert.equal(a.known, true, `${locationId}: ${q}`);
+    }
+  }
+  for (const [artifactId, qs] of Object.entries(pack.ask.byArtifact)) {
+    const scene = pack.scenes.find((x) =>
+      x.placements.some((p) => p.artifactId === artifactId),
+    );
+    const loc = pack.island.locations.find((l) => l.sceneId === scene?.id);
+    const art = pack.artifacts.find((a) => a.id === artifactId);
+    for (const q of qs) {
+      const a = scriptedAnswer(
+        pack,
+        req(q, {
+          locationId: loc?.id ?? null,
+          sceneId: scene?.id ?? null,
+          artifactId,
+        }),
+      );
+      assert.equal(a.known, true, `${artifactId}: ${q}`);
+      // The top claim is one the object card itself cites.
+      assert.ok(
+        art?.claimIds.includes(a.citations[0]?.claimId ?? ""),
+        `${artifactId}: ${q} -> ${a.citations[0]?.claimId}`,
+      );
+    }
+  }
+});
+
+test("ask: suggestions follow the visitor (object, place, island)", () => {
+  const island = askSuggestionsFor(pack.ask, {
+    locationId: null,
+    artifactId: null,
+  });
+  assert.deepEqual(island, pack.ask.suggestions);
+  assert.ok(!island.some((q) => q.includes("pattern")));
+  assert.deepEqual(
+    askSuggestionsFor(pack.ask, {
+      locationId: "herring-coast",
+      artifactId: null,
+    }),
+    pack.ask.byLocation["herring-coast"],
+  );
+  assert.deepEqual(
+    askSuggestionsFor(pack.ask, {
+      locationId: "lake-house",
+      artifactId: "garment",
+    }),
+    pack.ask.byArtifact.garment,
+  );
+  const bad = structuredClone(barkToClothRaw) as Record<string, unknown>;
+  bad.ask = {
+    byLocation: { nowhere: ["Why?"] },
+    byArtifact: { nothing: ["Why?"] },
+  };
+  const errors = validateContentPack(bad);
+  assert.ok(errors.some((e) => e.includes("nowhere")));
+  assert.ok(errors.some((e) => e.includes("nothing")));
 });
 
 test("ask: no fitting claim means I don't know yet", () => {

@@ -39,7 +39,11 @@ export const contentPackSchema = z.object({
   /** "Over time" timelines (additive; old packs parse with none). */
   timelines: z.array(timelineSchema).default([]),
   /** "Ask the owl" box: example questions (additive; default none). */
-  ask: askContentSchema.default({ suggestions: [] }),
+  ask: askContentSchema.default({
+    suggestions: [],
+    byLocation: {},
+    byArtifact: {},
+  }),
 });
 export type ContentPack = z.infer<typeof contentPackSchema>;
 export type ContentPackInput = z.input<typeof contentPackSchema>;
@@ -357,6 +361,12 @@ export function validateContentPack(input: unknown): string[] {
     )
       errors.push(`${at}: recording needs an approved, non-placeholder source`);
   }
+  for (const id of Object.keys(p.ask.byLocation))
+    if (!locations.some((l) => l.id === id))
+      errors.push(`ask.byLocation: unknown location "${id}"`);
+  for (const id of Object.keys(p.ask.byArtifact))
+    if (!p.artifacts.some((a) => a.id === id))
+      errors.push(`ask.byArtifact: unknown artifact "${id}"`);
   return errors;
 }
 

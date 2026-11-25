@@ -22,7 +22,10 @@ timeline"). Setup and modes: docs/ASK.md.
   Show the `Draft` badge for research-preview claims.
 - Esc closes the box only (top layer first). Focus goes to the input on open
   and back to the trigger on close. The box hides under overlays.
-- Suggestions come from `pack.ask.suggestions` (questions only).
+- Suggestions follow the visitor (`askSuggestionsFor`): the focused object's
+  questions (`pack.ask.byArtifact`), else the place's (`byLocation`), else
+  the island questions (`suggestions`). Questions only; a test checks that
+  each finds a claim in its place.
 
 ## Limits
 
