@@ -107,7 +107,17 @@ after the photos (visual reference only):
 | New claims `survey-tasks` (panel drawing callouts), `sea-diorama-tasks`, `mine-diorama-tasks` | `src/content/bark-to-cloth/land-and-sea.ts` | The two diorama claims are observations of the figures, not panel text (`observed: true`, "weaker source" in the UI). Find a second source |
 | Survey camp: hired guides and porters, "some were Ainu people" | same | Review how this reads; figures carry no ethnic markers and no personal names |
 | `place-cise`: things only, no posed people; the upper seat and its window are not drawn | same | Ainu cultural reviewer |
+| `place-hills` (Animal hills): things only (sika deer, brown bear, hare, salmon, set bow, bear pelt, Blakiston's fish owl), no posed Ainu figures. Ends on "which beings are kamuy differs by region" and "traditions in which the deer is not a kamuy" | same, drawings in `src/parts/activities/play/PlaceArt.tsx` | Ainu cultural reviewer: how hunting, the poisoned set bow and the fish owl as a placed "thing" read. New claims `traps-prey`, `diet-grown-traded`, `kamuy-region`, `fish-owl-village` (photos 7750, 7727) |
 | Device voice reads `say` + `ask` (English only) | `src/parts/activities/play/Place.tsx` | Replace with a recorded voice if wanted |
+
+## Ask the owl: more claims for the themed areas
+
+Added 2026-11-26 (research preview, paraphrases of photographed panels; check each against `docs/research/hokkaido-museum/transcriptions/panels.md`):
+
+- Coast (`land-and-sea`): `salmon-film-1925`, `salmon-skill-quiet` (7748), `marek-tool`, `kite-tool`, `canoe-1998` (7746–7747, new source `hm-panel-canoe-tools`). The Latin spellings marek and kite are ours (museum prints katakana); language review.
+- Forest: `survey-diorama-scene` (observed in the diorama, not panel text); `grain-shell-tool` in `hokkaido-museum` (7745).
+- Hills: `kamuy-power`, `kamuy-fire`, `kamuy-one-phrase` (Q019, 7806). Belief content: Ainu cultural reviewer.
+- New example questions per area in `src/content/bark-to-cloth/index.ts` (`ask.byLocation`).
 
 ## Curator voice memories
 
@@ -192,3 +202,17 @@ Knowledge in `vendor/out-of-place/content/scenes/*/knowledge.ts`, imported by
 |---|---|---|---|
 | `otaru-herring-warehouse` | 7 (MLIT/JTA pages, Visit Hokkaido, HRO herring assessment) | `hide-seek-otaru-warehouse`, `slope-run-otaru` | Historian review (Chika); locators are coarse ("page text"); sources `rights: unknown` |
 | `meiji-sapporo-street` | 9 | `hide-seek-sapporo-street` (hidden for now, kept in `games.ts`) | Same. Ainu people are not depicted in the scene (see `vendor/out-of-place/scenes/sapporo-street.md`); check that choice |
+
+## Omusha diorama (splat capture)
+
+Added 2026-11-25. Knowledge entry `omusha-diorama` in
+`src/content/bark-to-cloth/omusha.ts`, used by `omusha-look` (Memory cabin).
+Spot positions come from Shaw's `vendor/sapporo-omusha/src/hotspots.json`.
+
+| Item | Needs |
+|---|---|
+| 7 claims from panels 7835 and 7836 (`hm-panel-omusha-*`) | Check the paraphrases against the photos; translations are drafts by Claude. A colonial power scene: check the framing with a historian and with Ainu reviewers |
+| Figure labels from Shaw's character sheets (`name` + `variant`) | The sheets are drafts; check "Sakhalin Ainu" for every figure and the robe names |
+| The splat capture (`sapporo-omusha-capture`, `rights: unknown`) | Written permission from the Hokkaido Museum before the capture is public. Until then it is behind the demo password (Lukas, 2026-11-25) |
+| Shaw's observations and character sheets (`unverified`, `TODO`) | Not used for claims. Import only after a source is attached |
+

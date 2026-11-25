@@ -14,8 +14,10 @@ import { barkToCloth } from "./knowledge";
 import { memories } from "./memories";
 import { landAndSea } from "./land-and-sea";
 import { hokkaidoMuseum } from "./museum";
+import { omushaKnowledge, omushaLook } from "./omusha";
 import { houseOverTime, houseTimeline } from "./over-time";
 import { placeActivities } from "./place-activities";
+import { placeArtifacts, placeObjectActivities } from "./place-objects";
 import {
   lakeHouse,
   listeningGrove,
@@ -31,6 +33,7 @@ export const barkToClothRaw = {
     houseOverTime,
     hokkaidoMuseum,
     landAndSea,
+    omushaKnowledge,
     ...gameKnowledge,
   ],
   island: { owlHome, overview, locations },
@@ -47,12 +50,14 @@ export const barkToClothRaw = {
       ],
     })),
   ],
-  artifacts: [...artifacts, ...areaArtifacts],
+  artifacts: [...artifacts, ...areaArtifacts, ...placeArtifacts],
   activities: [
     ...activities,
     ...areaActivities,
     ...gameActivities,
     ...placeActivities,
+    ...placeObjectActivities,
+    omushaLook,
   ],
   stamps,
   guide,
@@ -93,20 +98,30 @@ export const barkToClothRaw = {
         "What did Ainu people catch in the sea?",
         "What was the catch made into?",
         "Why was salmon fishing banned?",
+        "What is a marek?",
+        "How does a kite harpoon work?",
+        "How was a dugout canoe made in 1998?",
       ],
       "survey-forest": [
         "Why was the land cut into plots?",
         "Who guided the survey?",
         "What wild plants did people gather?",
+        "What does the survey diorama show?",
+        "How was grain harvested?",
       ],
       "animal-hills": [
         "How does a set bow work?",
         "Which animals were hunted?",
         "Is every animal a kamuy?",
+        "What traps did hunters make?",
+        "Which kamuy watches over the village?",
+        "Why is the fire kamuy respected?",
       ],
       "coal-mountain": [
         "When did coal mining begin?",
         "What work was done in the winter woods?",
+        "What do the coal mine figures show?",
+        "Was Hokkaido a big coal producer?",
       ],
     },
     byArtifact: {

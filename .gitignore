@@ -13,3 +13,6 @@ recordings/
 .open-next/
 .wrangler/
 .dev.vars
+
+# Museum captures (never in Git; vendor/README.md, Omusha)
+.museum-assets/

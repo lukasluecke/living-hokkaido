@@ -24,7 +24,11 @@ const GROUPS: { id: ActivityGroupId; label: string; kinds: string[] }[] = [
     label: "Hands-on",
     kinds: ["place", "weave", "map", "sequence"],
   },
-  { id: "listen", label: "Listen and learn", kinds: ["story", "words"] },
+  {
+    id: "listen",
+    label: "Listen and learn",
+    kinds: ["story", "words", "splat-look"],
+  },
   { id: "think", label: "Think about it", kinds: ["quiz"] },
   { id: "behind", label: "Behind the content", kinds: ["trace"] },
 ];
@@ -39,11 +43,12 @@ const KIND_CAPTION: Record<string, string> = {
   words: "Words",
   trace: "Sources",
   board: "Play",
-  canon: "Sing along",
+  canon: "Sing",
   pluck: "Pluck",
   "hide-seek": "Game",
   "slope-run": "Game",
-  place: "Build the scene",
+  place: "Build",
+  "splat-look": "Look closer",
 };
 
 export function kindCaption(kind: string): string {

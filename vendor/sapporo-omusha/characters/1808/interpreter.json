@@ -1,0 +1,22 @@
+{
+  "$schema": "../schema/character.schema.json",
+  "id": "interpreter",
+  "name": {
+    "en": "Wajin interpreter",
+    "ja": "通辞"
+  },
+  "role": "Interpreter seated inside the building, relaying edicts and answers",
+  "faction": "wajin-interpreter",
+  "perspective": "matsumae-account",
+  "status": "draft",
+  "summary": "TODO: one or two sourced sentences.",
+  "knows": [],
+  "does_not_know": [
+    "Anything after 1808"
+  ],
+  "declines": [],
+  "voice": {
+    "register": "Careful, go-between"
+  },
+  "sources": []
+}

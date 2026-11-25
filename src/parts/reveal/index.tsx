@@ -7,6 +7,7 @@
 import type { CSSProperties } from "react";
 import { useEffect, useId, useRef, useState } from "react";
 import type { RevealPartProps } from "@/contracts";
+import { useT } from "@/i18n";
 import { motion, type as font, ui } from "@/design/tokens";
 import { PresentationBadge } from "../shared/Badges";
 import { buildReveal, kindLabel, type RevealModel, rightsLabel } from "./model";
@@ -44,6 +45,7 @@ export function RevealPart({
     reduced ? "back" : "front",
   );
   const dialogRef = useRef<HTMLDivElement>(null);
+  const tr = useT();
   const titleId = useId();
 
   // Focus moves into the reveal, and back to the opener when it closes.
@@ -95,7 +97,7 @@ export function RevealPart({
                 className={s.button}
                 onClick={() => setSide("back")}
               >
-                Turn over
+                {tr("Turn over")}
               </button>
             </div>
           </section>
@@ -111,14 +113,14 @@ export function RevealPart({
                 className={s.button}
                 onClick={() => setSide("front")}
               >
-                Show the front
+                {tr("Show the front")}
               </button>
               <button
                 type="button"
                 className={`${s.button} ${s.primary}`}
                 onClick={close}
               >
-                Close
+                {tr("Close")}
               </button>
             </div>
           </section>
@@ -135,10 +137,11 @@ function Front({
   model: RevealModel | null;
   titleId: string | undefined;
 }) {
+  const t = useT();
   if (!model || model.review.kind === "withdrawn")
     return (
       <h2 id={titleId} className={s.title}>
-        This content is not available.
+        {t("This content is not available.")}
       </h2>
     );
   return (
@@ -151,7 +154,7 @@ function Front({
         <blockquote className={s.quote}>{model.claimText}</blockquote>
       )}
       <PresentationBadge value={model.presentation} />
-      <p className={s.hint}>How do we know? Turn the card over.</p>
+      <p className={s.hint}>{t("How do we know? Turn the card over.")}</p>
     </>
   );
 }
@@ -163,24 +166,28 @@ function Back({
   model: RevealModel | null;
   titleId: string | undefined;
 }) {
+  const t = useT();
   if (!model || model.review.kind === "withdrawn")
     return (
       <>
         <h2 id={titleId} className={s.title}>
-          How this was made
+          {t("How this was made")}
         </h2>
         <p>
-          This content is not available. It may have been withdrawn by its
-          community or source.
+          {t(
+            "This content is not available. It may have been withdrawn by its community or source.",
+          )}
         </p>
       </>
     );
   const { review } = model;
   return (
     <>
-      <p className={s.eyebrow}>From the Living Hokkaido knowledge platform</p>
+      <p className={s.eyebrow}>
+        {t("From the Living Hokkaido knowledge platform")}
+      </p>
       <h2 id={titleId} className={s.title}>
-        How this was made
+        {t("How this was made")}
       </h2>
       <ol className={s.steps}>
         <li className={s.step}>
@@ -188,9 +195,9 @@ function Back({
             1
           </span>
           <div>
-            <h3 className={s.stepTitle}>Source</h3>
+            <h3 className={s.stepTitle}>{t("Source")}</h3>
             {model.sources.length === 0 ? (
-              <p className={s.muted}>No source is recorded.</p>
+              <p className={s.muted}>{t("No source is recorded.")}</p>
             ) : (
               <ul className={s.sources}>
                 {model.sources.map(({ source, locators }) => (
@@ -203,11 +210,11 @@ function Back({
                       <span>{source.title}</span>
                     )}
                     <span className={s.meta}>
-                      {kindLabel[source.kind]} · {rightsLabel(source)}
+                      {t(kindLabel[source.kind])} · {t(rightsLabel(source))}
                     </span>
                     {locators.length > 0 && (
                       <span className={s.locator}>
-                        Where: {locators.join("; ")}
+                        {t("Where:")} {locators.join("; ")}
                       </span>
                     )}
                   </li>
@@ -221,13 +228,14 @@ function Back({
             2
           </span>
           <div>
-            <h3 className={s.stepTitle}>Claim</h3>
+            <h3 className={s.stepTitle}>{t("Claim")}</h3>
             {model.claimText ? (
               <p className={s.claim}>“{model.claimText}”</p>
             ) : (
               <p className={s.muted}>
-                No single claim is selected. These are the sources for this
-                story.
+                {t(
+                  "No single claim is selected. These are the sources for this story.",
+                )}
               </p>
             )}
           </div>
@@ -237,21 +245,22 @@ function Back({
             3
           </span>
           <div>
-            <h3 className={s.stepTitle}>Human review</h3>
+            <h3 className={s.stepTitle}>{t("Human review")}</h3>
             {review.kind === "approved" ? (
               <p>
-                Approved by {review.reviewer} on{" "}
+                {t("Approved by {reviewer} on", { reviewer: review.reviewer })}{" "}
                 <time dateTime={review.reviewedAt}>{review.reviewedAt}</time>.
               </p>
             ) : (
-              <p>Draft. The review pass comes later.</p>
+              <p>{t("Draft. The review pass comes later.")}</p>
             )}
           </div>
         </li>
       </ol>
       <p className={s.note}>
-        A link shows where a fact comes from. It is not permission to reuse the
-        media.
+        {t(
+          "A link shows where a fact comes from. It is not permission to reuse the media.",
+        )}
       </p>
     </>
   );

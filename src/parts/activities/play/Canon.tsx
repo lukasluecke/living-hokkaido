@@ -3,6 +3,7 @@
 // its mark, so the voices follow one melody one after another. The tones
 // are a synthetic illustration of the structure, not the song.
 import { useEffect, useRef, useState } from "react";
+import { useT } from "@/i18n";
 import { Cite, complete, type KindProps } from "../kinds/shared";
 import { CANON_PATTERN, canonOffBy, ON_MARK, patternNote } from "./musicLogic";
 import p from "./play.module.css";
@@ -15,6 +16,7 @@ export function CanonActivity({
   claims,
   emit,
 }: KindProps<"canon">) {
+  const tr = useT();
   const [startAt, setStartAt] = useState<number | null>(null);
   const [beat, setBeat] = useState(0);
   const [entries, setEntries] = useState<number[]>([]);
@@ -82,12 +84,12 @@ export function CanonActivity({
     const off = canonOffBy(at, i, a.offset, a.beats);
     if (Math.abs(off) <= ON_MARK) {
       setEntries([...entries, Math.round(at)]);
-      setNote(`${a.voices[i].label} is in.`);
+      setNote(tr("{voice} is in.", { voice: a.voices[i].label }));
     } else
       setNote(
         off < 0
-          ? "A little early. Wait for the mark."
-          : "A little late. Try on the next mark.",
+          ? tr("A little early. Wait for the mark.")
+          : tr("A little late. Try on the next mark."),
       );
   };
 
@@ -100,11 +102,11 @@ export function CanonActivity({
       <p>{a.prompt}</p>
       <div
         className="canon"
-        aria-label="Voices"
+        aria-label={tr("Voices")}
         style={{ ["--beats" as string]: a.beats }}
       >
         <div className="lane ruler" aria-hidden="true">
-          <span className="lane-label">Beat</span>
+          <span className="lane-label">{tr("Beat")}</span>
           {Array.from({ length: a.beats }, (_, b) => (
             <span
               // biome-ignore lint/suspicious/noArrayIndexKey: fixed beats
@@ -139,7 +141,9 @@ export function CanonActivity({
       <div className="row">
         {!running ? (
           <button type="button" className="btn primary" onClick={start}>
-            {finishedAt !== null ? "Sing again" : `Start ${a.voices[0].label}`}
+            {finishedAt !== null
+              ? tr("Sing again")
+              : tr("Start {voice}", { voice: a.voices[0].label })}
           </button>
         ) : (
           <button
@@ -148,7 +152,9 @@ export function CanonActivity({
             disabled={all}
             onClick={bringIn}
           >
-            {all ? "All voices in" : `Bring in ${a.voices[next].label}`}
+            {all
+              ? tr("All voices in")
+              : tr("Bring in {voice}", { voice: a.voices[next].label })}
           </button>
         )}
         {running && (
@@ -157,7 +163,7 @@ export function CanonActivity({
             className="btn"
             onClick={() => setStartAt(null)}
           >
-            Stop
+            {tr("Stop")}
           </button>
         )}
         <label className="toggle">
@@ -166,7 +172,7 @@ export function CanonActivity({
             checked={sound}
             onChange={(e) => setSound(e.target.checked)}
           />
-          Sound
+          {tr("Sound")}
         </label>
       </div>
       <p className="feedback" aria-live="polite">
@@ -174,12 +180,17 @@ export function CanonActivity({
           ? a.completion
           : note ||
             (running
-              ? `Press when the gold mark lights up (beat ${nextMark(next) + 1}).`
-              : "Start the first voice, then bring in the others on their marks.")}
+              ? tr("Press when the gold mark lights up (beat {n}).", {
+                  n: nextMark(next) + 1,
+                })
+              : tr(
+                  "Start the first voice, then bring in the others on their marks.",
+                ))}
       </p>
       <p className="small-note">
-        Synthetic tones that show the structure only. They are not the song, and
-        no recording is used.
+        {tr(
+          "Synthetic tones that show the structure only. They are not the song, and no recording is used.",
+        )}
       </p>
       <Cite
         claim={claims[a.structureClaimId]}
@@ -187,7 +198,9 @@ export function CanonActivity({
       />
       {a.lyrics.length > 0 && (
         <div className="lyrics">
-          <p className="small-note">The words, as the museum writes them:</p>
+          <p className="small-note">
+            {tr("The words, as the museum writes them:")}
+          </p>
           {a.lyrics.map((l) => (
             <p key={l.text} className="lyric" lang={l.lang}>
               {l.text}

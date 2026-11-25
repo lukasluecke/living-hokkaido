@@ -4,15 +4,27 @@
 import { Canvas } from "@react-three/fiber";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { type IslandPartProps, type Location, SCALE } from "@/contracts";
+import { useT } from "@/i18n";
 import s from "../shared/Fallback.module.css";
+import { QualityGovernor, useQuality } from "../shared/Quality";
 import attn from "../shared/Attention.module.css";
-import { ActivitySheet, kindSummary, placeActivities } from "./Guide";
+import { Icon, KindIcon, UI_ICON } from "../shared/Icon";
+import {
+  ActivitySheet,
+  kindSummary,
+  placeActivities,
+  placeKinds,
+} from "./Guide";
 import c from "./Island.module.css";
+import { FirstFrame, LoadScreen } from "./LoadScreen";
 import { World } from "./World";
 
 export function IslandPart(props: IslandPartProps) {
   const { content, prefs, emit, view } = props;
   const pins = useRef(new Map<string, HTMLElement>());
+  const t = useT();
+  const q = useQuality(SCALE.maxDpr);
+  const [drawn, setDrawn] = useState(false);
   if (!prefs.webgl) return <IslandList {...props} />;
   const select = (l: Location) => {
     if (l.status === "open" && view === "island")
@@ -22,8 +34,10 @@ export function IslandPart(props: IslandPartProps) {
   return (
     <div className={c.stage}>
       <Canvas
-        shadows
-        dpr={[1, SCALE.maxDpr]}
+        // Screen readers use the HTML buttons over and beside the canvas.
+        aria-hidden
+        shadows={q.shadows}
+        dpr={q.dpr}
         camera={{
           position: o.eye,
           fov: o.fov ?? SCALE.defaultFov,
@@ -33,8 +47,16 @@ export function IslandPart(props: IslandPartProps) {
         gl={{ antialias: false, powerPreference: "high-performance" }}
       >
         <Suspense fallback={null}>
-          <World {...props} onSelect={select} pins={pins} fx />
+          <World
+            {...props}
+            onSelect={select}
+            pins={pins}
+            fx
+            extraFx={q.extraFx}
+          />
+          <FirstFrame onDrawn={() => setDrawn(true)} />
         </Suspense>
+        <QualityGovernor />
       </Canvas>
       <div className={c.pins}>
         {content.island.locations.map((l) => (
@@ -51,11 +73,12 @@ export function IslandPart(props: IslandPartProps) {
             onClick={() => select(l)}
           >
             {l.title}
-            {l.status === "open" ? "" : " · soon"}
+            {l.status === "open" ? "" : t(" · soon")}
           </button>
         ))}
       </div>
       {view === "island" && <PlaceTray {...props} onSelect={select} />}
+      <LoadScreen drawn={drawn} />
     </div>
   );
 }
@@ -64,10 +87,26 @@ export function IslandPart(props: IslandPartProps) {
  *  what you can do there, and a sheet that lists every activity. */
 function PlaceTray({
   content,
+  locationId,
   onSelect,
 }: IslandPartProps & { onSelect: (l: Location) => void }) {
+  const t = useT();
   const [sheet, setSheet] = useState(false);
   const opener = useRef<HTMLButtonElement>(null);
+  const tray = useRef<HTMLElement>(null);
+  // Keyboard path: back from a place (Esc), focus was on a button that is
+  // gone; put it on that place's card so Tab goes on from there.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: on mount only
+  useEffect(() => {
+    if (!locationId) return;
+    if (document.activeElement && document.activeElement !== document.body)
+      return;
+    tray.current
+      ?.querySelector<HTMLButtonElement>(
+        `button[data-location="${locationId}"]`,
+      )
+      ?.focus({ preventScroll: true });
+  }, []);
   // Open places first, then the closed ones, each in pack order.
   const locations = [...content.island.locations].sort(
     (a, b) => Number(b.status === "open") - Number(a.status === "open"),
@@ -86,13 +125,13 @@ function PlaceTray({
           onClose={closeSheet}
         />
       )}
-      <nav className={c.tray} aria-label="Places on the island">
+      <nav ref={tray} className={c.tray} aria-label={t("Places on the island")}>
         <div className={c.trayHead}>
-          <span className={c.cap}>Places on the island</span>
+          <span className={c.cap}>{t("Places on the island")}</span>
           <span className={c.count}>
-            {open} open
+            {t("{n} open", { n: open })}
             {locations.length > open
-              ? ` · ${locations.length - open} soon`
+              ? ` · ${t("{n} soon", { n: locations.length - open })}`
               : ""}
           </span>
           <button
@@ -102,33 +141,53 @@ function PlaceTray({
             aria-expanded={sheet}
             onClick={() => (sheet ? closeSheet() : setSheet(true))}
           >
-            All activities
+            <Icon d={UI_ICON.try} size={16} />
+            {t("All activities")}
           </button>
         </div>
         <ul className={c.cards}>
           {locations.map((l) => {
             const acts = placeActivities(content, l.id);
+            const kinds = placeKinds(acts);
+            const shown = kinds.slice(0, 4);
             return (
               <li key={l.id}>
                 <button
                   type="button"
                   className={c.card}
+                  data-location={l.id}
                   aria-disabled={l.status !== "open"}
                   data-open={l.status === "open" || undefined}
+                  aria-label={
+                    l.status === "open" && acts.length > 0
+                      ? `${l.title}, ${t(acts.length === 1 ? "{n} activity" : "{n} activities", { n: acts.length })}: ${kindSummary(acts, t)}`
+                      : undefined
+                  }
                   onClick={() => onSelect(l)}
                 >
                   <span className={c.cardTitle}>{l.title}</span>
                   {l.status === "open" && acts.length > 0 ? (
-                    <span className={c.cardActs}>
-                      <span className={c.state}>
-                        {acts.length}{" "}
-                        {acts.length === 1 ? "activity" : "activities"}
+                    <span className={c.cardActs} aria-hidden="true">
+                      <span className={c.kinds}>
+                        {shown.map((k) => (
+                          <span key={k} className={c.kindChip}>
+                            <KindIcon kind={k} size={16} />
+                          </span>
+                        ))}
+                        {kinds.length > shown.length && (
+                          <span className={c.more}>
+                            +{kinds.length - shown.length}
+                          </span>
+                        )}
                       </span>
-                      <span className={c.kinds}>{kindSummary(acts)}</span>
+                      <span className={c.state}>
+                        <Icon d={UI_ICON.try} size={14} />
+                        {acts.length}
+                      </span>
                     </span>
                   ) : (
                     <span className={c.state}>
-                      {l.status === "open" ? "Open" : "Soon"}
+                      {l.status === "open" ? t("Open") : t("Soon")}
                     </span>
                   )}
                 </button>
@@ -148,6 +207,7 @@ function IslandList({
   prefs,
   emit,
 }: IslandPartProps) {
+  const tr = useT();
   // Stub "flight": a real island emits owl.arrived when the owl lands.
   useEffect(() => {
     if (view !== "travel" || !locationId) return;
@@ -159,9 +219,11 @@ function IslandList({
   }, [view, locationId, prefs.reducedMotion, emit]);
 
   return (
-    <nav className={s.panel} aria-label="Places on the island">
-      <h2>The island</h2>
-      {view === "travel" && <p className={s.muted}>The owl is flying…</p>}
+    <nav className={s.panel} aria-label={tr("Places on the island")}>
+      <h2>{tr("The island")}</h2>
+      {view === "travel" && (
+        <p className={s.muted}>{tr("The owl is flying…")}</p>
+      )}
       <div className={s.row}>
         {content.island.locations.map((l) => (
           <button
@@ -173,7 +235,7 @@ function IslandList({
             onClick={() => emit({ type: "location.select", locationId: l.id })}
           >
             {l.title}
-            {l.status === "soon" ? " · soon" : ""}
+            {l.status === "soon" ? tr(" · soon") : ""}
           </button>
         ))}
       </div>

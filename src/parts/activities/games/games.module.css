@@ -70,6 +70,7 @@
   cursor: pointer;
 }
 .closeGame:focus-visible,
+.facts summary:focus-visible,
 .host:focus-visible {
   outline: 3px solid var(--lh-gold);
   outline-offset: 2px;
@@ -95,6 +96,11 @@
   inset: auto;
   aspect-ratio: 16 / 9;
   width: min(100%, calc((100dvh - 64px) * 16 / 9));
+}
+.loading {
+  position: absolute;
+  color: var(--lh-paper);
+  font-size: 1.1rem;
 }
 .error {
   position: absolute;

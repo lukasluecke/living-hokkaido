@@ -5,6 +5,7 @@ import { Canvas } from "@react-three/fiber";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { type DetailScenePartProps, SCALE } from "@/contracts";
 import s from "../shared/Fallback.module.css";
+import { QualityGovernor, useQuality } from "../shared/Quality";
 import { Room } from "./Room";
 import attn from "../shared/Attention.module.css";
 import c from "./Scene.module.css";
@@ -34,6 +35,7 @@ export function DetailScenePart(props: DetailScenePartProps) {
   // Tap markers appear once the entry is done; labels show for a few
   // seconds as a hint. The dots stay and pulse (no hover on touch screens).
   const [ready, setReady] = useState(false);
+  const q = useQuality(SCALE.maxDpr);
   const [hint, setHint] = useState(false);
   useEffect(() => {
     setReady(false);
@@ -57,7 +59,9 @@ export function DetailScenePart(props: DetailScenePartProps) {
   return (
     <div className={c.stage}>
       <Canvas
-        dpr={[1, SCALE.maxDpr]}
+        // Screen readers use the HTML buttons over and beside the canvas.
+        aria-hidden
+        dpr={q.dpr}
         camera={{
           fov: 45,
           near: 0.05,
@@ -84,6 +88,7 @@ export function DetailScenePart(props: DetailScenePartProps) {
             overlay={overlay}
           />
         </Suspense>
+        <QualityGovernor />
       </Canvas>
       <div ref={overlay} className={c.overlay} aria-hidden>
         {markers &&

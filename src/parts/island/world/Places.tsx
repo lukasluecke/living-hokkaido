@@ -3,10 +3,12 @@
 import { ISLAND, type Location } from "@/contracts";
 import { material } from "@/design/tokens";
 import { useFrame } from "@react-three/fiber";
-import { useRef } from "react";
-import { type Group, Vector3 } from "three";
+import { useLayoutEffect, useRef } from "react";
+import { type Group, type Material, type Mesh, Vector3 } from "three";
+import { snowCap } from "../../shared/snowCap";
 import type { Field } from "./field";
 import { AREAS } from "./island";
+import { SNOW } from "./season";
 
 export function anchorPos(
   field: Field,
@@ -200,6 +202,27 @@ function Building({
         <group position={[0, 0.06, 0]}>
           <Chise open={open} live={live} />
         </group>
+        {/* A dugout canoe at the pad edge (canoe-pole) and a millet
+            garden (crops), as in the lake house scene. */}
+        <mesh
+          position={[0.1, 0.09, 0.56]}
+          rotation={[0, 0.1, Math.PI / 2]}
+          scale={[0.6, 1, 1]}
+          castShadow
+        >
+          <cylinderGeometry args={[0.06, 0.06, 0.5, 8]} />
+          <meshStandardMaterial color={live ? "#8a5a35" : "#6e6a60"} />
+        </mesh>
+        <mesh position={[-0.5, 0.07, 0.38]} receiveShadow>
+          <boxGeometry args={[0.3, 0.025, 0.22]} />
+          <meshStandardMaterial color="#6b5238" />
+        </mesh>
+        {[0.31, 0.38, 0.45].map((z) => (
+          <mesh key={z} position={[-0.5, 0.1, z]}>
+            <boxGeometry args={[0.26, 0.05, 0.025]} />
+            <meshStandardMaterial color={live ? "#7f9a45" : "#77736a"} />
+          </mesh>
+        ))}
       </group>
     );
   const body =
@@ -252,6 +275,15 @@ function Building({
             </mesh>
           ))}
           <Roof open={false} color={roof} />
+          {/* The grove's fish owl on the shelter roof (owl-kamuy). */}
+          <mesh position={[0.12, 0.66, 0]} scale={[1, 1.3, 1]}>
+            <icosahedronGeometry args={[0.045, 0]} />
+            <meshStandardMaterial color="#7d6a55" flatShading />
+          </mesh>
+          <mesh position={[0.12, 0.74, 0.005]}>
+            <icosahedronGeometry args={[0.032, 0]} />
+            <meshStandardMaterial color="#a8957a" flatShading />
+          </mesh>
         </>
       ) : (
         <Roof open={open} color={roof} />
@@ -288,6 +320,20 @@ function HitArea({ r }: { r: number }) {
   );
 }
 
+/** Snow on the top faces of a building in winter (idempotent patch). */
+function Snowy({ children }: { children: React.ReactNode }) {
+  const ref = useRef<Group>(null);
+  useLayoutEffect(() => {
+    ref.current?.traverse((o) => {
+      const mat = (o as Mesh).material as Material | Material[] | undefined;
+      if (!mat) return;
+      // Windows are vertical, so they stay clear.
+      for (const m of Array.isArray(mat) ? mat : [mat]) snowCap(m, SNOW);
+    });
+  });
+  return <group ref={ref}>{children}</group>;
+}
+
 export function PlaceMarker({
   field,
   loc,
@@ -321,7 +367,9 @@ export function PlaceMarker({
       onPointerOut={() => onHover(false)}
     >
       {!area && (
-        <Building kind={loc.building} open={roofOpen} live={live || active} />
+        <Snowy>
+          <Building kind={loc.building} open={roofOpen} live={live || active} />
+        </Snowy>
       )}
       <HitArea r={hitRadius(loc)} />
     </group>

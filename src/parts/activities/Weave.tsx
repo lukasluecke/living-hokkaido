@@ -12,6 +12,7 @@ import {
   useState,
 } from "react";
 import type { ActivityOf, Emit, ResolvedClaim } from "@/contracts";
+import { useT } from "@/i18n";
 import { material, ui } from "@/design/tokens";
 import s from "./Activities.module.css";
 import {
@@ -45,6 +46,7 @@ export function Weave({
   claims: Record<string, ResolvedClaim>;
   emit: Emit;
 }) {
+  const tr = useT();
   const [loom, act] = useReducer(stepLoom, a.rows, startLoom);
   const [drag, setDrag] = useState<number | null>(null);
   const sent = useRef(false);
@@ -119,8 +121,13 @@ export function Weave({
     (loom.phase === "beat" ? endX : loom.phase === "done" ? -60 : startX);
   const status =
     loom.phase === "done"
-      ? `All ${a.rows} rows woven.`
-      : `Row ${row + 1} of ${a.rows}: ${loom.phase === "pass" ? "pass the thread across" : "press the row down"}.`;
+      ? tr("All {n} rows woven.", { n: a.rows })
+      : tr(
+          loom.phase === "pass"
+            ? "Row {n} of {total}: pass the thread across."
+            : "Row {n} of {total}: press the row down.",
+          { n: row + 1, total: a.rows },
+        );
 
   return (
     <div className={s.weave}>
@@ -289,8 +296,9 @@ export function Weave({
       </div>
 
       <p id={`${a.id}-keys`} className={s.hint}>
-        Drag the shuttle across, or use the arrow keys. Then press the row down
-        (↓, or click the bar).
+        {tr(
+          "Drag the shuttle across, or use the arrow keys. Then press the row down (↓, or click the bar).",
+        )}
       </p>
       <output className={s.srOnly} aria-live="polite">
         {status}
@@ -300,11 +308,11 @@ export function Weave({
         <div className={s.actions}>
           <button type="button" className={s.primary} onClick={main}>
             {loom.phase === "pass"
-              ? `Pass the thread ${dir === "ltr" ? "→" : "←"}`
-              : "Press the row down ↓"}
+              ? `${tr("Pass the thread")} ${dir === "ltr" ? "→" : "←"}`
+              : tr("Press the row down ↓")}
           </button>
           <span className={s.muted}>
-            Row {row + 1} of {a.rows}
+            {tr("Row {n} of {total}", { n: row + 1, total: a.rows })}
           </span>
         </div>
       ) : (
@@ -316,7 +324,7 @@ export function Weave({
               className={s.secondary}
               onClick={() => act("reset")}
             >
-              Weave again
+              {tr("Weave again")}
             </button>
           </div>
         </div>

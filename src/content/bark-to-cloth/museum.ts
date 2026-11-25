@@ -125,6 +125,14 @@ export const hokkaidoMuseum: KnowledgeEntry = {
       ["museum-visit-notes", "transcriptions/panels.md, Q024 and 7810 notes"],
     ),
     c(
+      "object-sketch",
+      "The tonkori, the vine rings, the canoe and the lacquer vessel on this island are toy sketches after things seen at the museum. They are not reconstructions of real objects.",
+      [
+        "museum-visit-notes",
+        "src/content/bark-to-cloth/place-objects.ts, header",
+      ],
+    ),
+    c(
       "map-sketch",
       "The map and the plan are sketches made for this demo. Places on them are approximate.",
       ["museum-visit-notes", "README.md, Most useful for the demo"],
@@ -279,6 +287,11 @@ export const hokkaidoMuseum: KnowledgeEntry = {
       "wild-plants",
       "People also gathered wild plants and nuts: wild garlic (gyoja-ninniku), nirinso, acorns, sarunashi berries, and starch from katakuri and the giant lily (oubayuri).",
       ["hm-panel-food", "山菜、木の実など, photo labels (photo 7745)"],
+    ),
+    c(
+      "grain-shell-tool",
+      "To harvest grain, people used tools such as sickles, and also a tool made from a freshwater pearl mussel shell, from the Saru area of Hidaka. A finger goes through its string, and the edge of the shell picks off the ears.",
+      ["hm-panel-food", "穂をつむための道具と使い方, caption (photo 7745)"],
     ),
     c(
       "cise-plan",

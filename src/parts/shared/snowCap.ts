@@ -9,7 +9,14 @@ export type SnowUniform = { value: number };
 
 const PATCHED = "lhSnow";
 
-export function snowCap(m: Material, uSnow: SnowUniform, amount = 0.9) {
+/** `from`: how far up a face must point (normal y) before snow starts;
+ * lower it for steep shapes such as pine cones. */
+export function snowCap(
+  m: Material,
+  uSnow: SnowUniform,
+  amount = 0.9,
+  from = 0.45,
+) {
   if (!(m instanceof MeshStandardMaterial) || m.userData[PATCHED]) return m;
   m.userData[PATCHED] = true;
   const prev = m.onBeforeCompile.bind(m);
@@ -36,12 +43,13 @@ export function snowCap(m: Material, uSnow: SnowUniform, amount = 0.9) {
         "#include <color_fragment>",
         `#include <color_fragment>
         float snowN = fract(sin(dot(floor(vSnowXZ * 6.0), vec2(127.1, 311.7))) * 43758.5453);
-        float snowK = uSnow * smoothstep(0.45, 0.8, vSnowUp) * (0.8 + 0.2 * snowN);
+        float snowK = uSnow * smoothstep(${from.toFixed(2)}, ${(from + 0.35).toFixed(2)}, vSnowUp) * (0.8 + 0.2 * snowN);
         diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.94, 0.96, 1.0), snowK * ${amount.toFixed(2)});`,
       );
   };
   const key = m.customProgramCacheKey.bind(m);
-  m.customProgramCacheKey = () => `${key()}|snow${amount.toFixed(2)}`;
+  m.customProgramCacheKey = () =>
+    `${key()}|snow${amount.toFixed(2)}-${from.toFixed(2)}`;
   m.needsUpdate = true;
   return m;
 }

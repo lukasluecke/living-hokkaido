@@ -4,12 +4,14 @@
 // house plan). Spots are real buttons, so it works by keyboard.
 import { useEffect, useRef, useState } from "react";
 import type { MapSpot } from "@/contracts";
+import { useT } from "@/i18n";
 import { Cite, complete, type KindProps } from "../kinds/shared";
 import { FIGURE_BOX, FigureArt } from "./Figures";
 import { mapFinished, mapScore, startMap, stepMap } from "./mapLogic";
 import p from "./play.module.css";
 
 export function MapActivity({ activity: a, claims, emit }: KindProps<"map">) {
+  const tr = useT();
   const [s, setS] = useState(startMap);
   const [shown, setShown] = useState<string | null>(null);
   const [note, setNote] = useState("");
@@ -33,11 +35,11 @@ export function MapActivity({ activity: a, claims, emit }: KindProps<"map">) {
       return;
     }
     if (s.done.includes(x.id)) return setShown(x.id);
-    if (!s.held) return setNote("First pick a word below.");
+    if (!s.held) return setNote(tr("First pick a word below."));
     const next = stepMap(s, "match", { type: "place", spotId: x.id });
     setNote(
       next.misses > s.misses
-        ? "Not there. Look at the plan again."
+        ? tr("Not there. Look at the plan again.")
         : `${x.romanised ?? x.text}: ${x.gloss}.`,
     );
     if (next.done.length > s.done.length) setShown(x.id);
@@ -86,7 +88,7 @@ export function MapActivity({ activity: a, claims, emit }: KindProps<"map">) {
       </div>
 
       {a.mode === "explore" && s.done.length > 0 && (
-        <ul className="legend" aria-label="Opened">
+        <ul className="legend" aria-label={tr("Opened")}>
           {a.spots
             .filter((x) => s.done.includes(x.id))
             .map((x) => (
@@ -106,7 +108,7 @@ export function MapActivity({ activity: a, claims, emit }: KindProps<"map">) {
 
       {a.mode === "match" && !finished && (
         <fieldset className="chips">
-          <legend>Pick a word, then its place on the plan</legend>
+          <legend>{tr("Pick a word, then its place on the plan")}</legend>
           {left.map((x) => (
             <button
               key={x.id}
@@ -115,7 +117,11 @@ export function MapActivity({ activity: a, claims, emit }: KindProps<"map">) {
               aria-pressed={s.held === x.id}
               onClick={() => {
                 setS(stepMap(s, "match", { type: "hold", spotId: x.id }));
-                setNote(s.held === x.id ? "" : `Where is “${x.gloss}”?`);
+                setNote(
+                  s.held === x.id
+                    ? ""
+                    : tr("Where is “{gloss}”?", { gloss: x.gloss }),
+                );
               }}
             >
               <span lang={x.lang}>{x.text}</span>
@@ -140,7 +146,9 @@ export function MapActivity({ activity: a, claims, emit }: KindProps<"map">) {
             {current.gloss}
             {current.region ? ` · ${current.region}` : ""}
           </p>
-          <span className="draft">Draft · spelling not yet reviewed</span>
+          <span className="draft">
+            {tr("Draft · spelling not yet reviewed")}
+          </span>
           <Cite
             claim={claims[current.claimId]}
             onReveal={() => reveal(current.claimId)}
@@ -153,12 +161,20 @@ export function MapActivity({ activity: a, claims, emit }: KindProps<"map">) {
           ? a.completion
           : note ||
             (a.mode === "explore"
-              ? `Open every place: ${s.done.length} of ${a.spots.length}.`
-              : `${s.done.length} of ${a.spots.length} placed.`)}
+              ? tr("Open every place: {n} of {total}.", {
+                  n: s.done.length,
+                  total: a.spots.length,
+                })
+              : tr("{n} of {total} placed.", {
+                  n: s.done.length,
+                  total: a.spots.length,
+                }))}
       </p>
       {a.placeholder && (
         <p className="small-note">
-          The figure and the places on it are sketches made for this demo.
+          {tr(
+            "The figure and the places on it are sketches made for this demo.",
+          )}
         </p>
       )}
       {finished && (
@@ -173,7 +189,7 @@ export function MapActivity({ activity: a, claims, emit }: KindProps<"map">) {
               setNote("");
             }}
           >
-            Start again
+            {tr("Start again")}
           </button>
         </div>
       )}

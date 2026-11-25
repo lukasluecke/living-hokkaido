@@ -9,6 +9,7 @@ import { type ReactNode, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { CSSProperties } from "react";
 import type { Emit, ResolvedClaim } from "@/contracts";
+import { useT } from "@/i18n";
 import { ui } from "@/design/tokens";
 import { Cite } from "../kinds/shared";
 import p from "../play/play.module.css";
@@ -29,6 +30,32 @@ export type GameHandle = { ready: Promise<void>; destroy(): void };
  */
 export type MountGame = (host: HTMLElement, emit: Emit) => GameHandle;
 
+/**
+ * Wraps a game that loads on demand (a dynamic `import()`), so its code
+ * (Phaser, Rapier, three) is not part of the first page load. The handle
+ * is ready when the code has loaded and the game is ready. Destroy before
+ * the load ends destroys the game as soon as it arrives.
+ */
+export function deferMount(load: Promise<GameHandle>): GameHandle {
+  let handle: GameHandle | null = null;
+  let dead = false;
+  const ready = load.then((h) => {
+    if (dead) {
+      h.destroy();
+      return;
+    }
+    handle = h;
+    return h.ready;
+  });
+  return {
+    ready,
+    destroy() {
+      dead = true;
+      handle?.destroy();
+    },
+  };
+}
+
 export function GameStage({
   activityId,
   knowledgeId,
@@ -44,6 +71,7 @@ export function GameStage({
   fit,
   controls,
   notes,
+  preload,
 }: {
   activityId: string;
   knowledgeId: string;
@@ -64,9 +92,14 @@ export function GameStage({
   controls: ReactNode;
   /** Optional extra panel content under the Play button (progress). */
   notes?: ReactNode;
+  /** Fetch the game's code (engine, physics) while the panel is open, so
+   *  Play starts quickly. Called once, in idle time. */
+  preload?: () => Promise<unknown>;
 }) {
+  const tr = useT();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const host = useRef<HTMLDivElement>(null);
   const play = useRef<HTMLButtonElement>(null);
   // The shell rebuilds `claims` and may rebuild `emit` on every render
@@ -75,20 +108,46 @@ export function GameStage({
   emitRef.current = emit;
   const mountRef = useRef(mount);
   mountRef.current = mount;
+  const preloadRef = useRef(preload);
+  preloadRef.current = preload;
+
+  useEffect(() => {
+    const w = window as Window & {
+      requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number;
+    };
+    const run = () => {
+      preloadRef.current?.().catch(() => {});
+    };
+    const t = setTimeout(() => {
+      if (w.requestIdleCallback) w.requestIdleCallback(run, { timeout: 2000 });
+      else run();
+    }, 300);
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     if (!open || !host.current) return;
     setError(null);
+    setLoading(true);
     let handle: GameHandle | null = null;
+    let live = true;
     try {
       handle = mountRef.current(host.current, (e) => emitRef.current(e));
-      handle.ready.catch((err: unknown) =>
-        setError(err instanceof Error ? err.message : String(err)),
-      );
+      handle.ready
+        .catch((err: unknown) => {
+          if (live) setError(err instanceof Error ? err.message : String(err));
+        })
+        .finally(() => {
+          if (live) setLoading(false);
+        });
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
+      setLoading(false);
     }
-    return () => handle?.destroy();
+    return () => {
+      live = false;
+      handle?.destroy();
+    };
   }, [open]);
 
   // Esc closes the stage, not the whole activity: catch it on the way
@@ -121,7 +180,7 @@ export function GameStage({
       <div className={g.labels}>
         {labels.map((l) => (
           <span key={l} className={g.label}>
-            {l}
+            {tr(l)}
           </span>
         ))}
       </div>
@@ -132,13 +191,15 @@ export function GameStage({
           className="btn primary"
           onClick={() => setOpen(true)}
         >
-          {done ? "Play again" : "Play"}
+          {done ? tr("Play again") : tr("Play")}
         </button>
       </div>
       {done && <p className="feedback">{completion}</p>}
       {notes}
       <details className={g.facts}>
-        <summary>What the game is based on ({claimIds.length})</summary>
+        <summary>
+          {tr("What the game is based on ({n})", { n: claimIds.length })}
+        </summary>
         <ul>
           {claimIds.map((id) => {
             const c = claims[id];
@@ -165,11 +226,11 @@ export function GameStage({
               <strong className={g.barTitle}>{title}</strong>
               {labels.map((l) => (
                 <span key={l} className={g.barLabel}>
-                  {l}
+                  {tr(l)}
                 </span>
               ))}
               <button type="button" className={g.closeGame} onClick={close}>
-                Close game <kbd>Esc</kbd>
+                {tr("Close game")} <kbd>Esc</kbd>
               </button>
             </div>
             <div className={g.area}>
@@ -178,6 +239,11 @@ export function GameStage({
                 className={`${g.host} ${fit === "wide" ? g.wide : ""}`}
                 data-activity={activityId}
               />
+              {loading && !error && (
+                <p className={g.loading} role="status">
+                  {tr("Loading the game…")}
+                </p>
+              )}
               {error && (
                 <p className={g.error} role="alert">
                   The game could not start: {error}

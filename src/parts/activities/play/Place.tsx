@@ -11,6 +11,7 @@ import {
   useState,
 } from "react";
 import type { PlacePose } from "@/contracts";
+import { useT } from "@/i18n";
 import { Cite, complete, deviceVoice, type KindProps } from "../kinds/shared";
 import { Person, POSES, StageArt, ThingArt } from "./PlaceArt";
 import { placeScore, startPlace, stepPlace } from "./placeLogic";
@@ -22,6 +23,7 @@ export function PlaceActivity({
   prefs,
   emit,
 }: KindProps<"place">) {
+  const tr = useT();
   const [st, setSt] = useState(() => startPlace(a));
   const [voice, setVoice] = useState(true);
   const [over, setOver] = useState<number | null>(null);
@@ -128,7 +130,10 @@ export function PlaceActivity({
     >
       <ol
         className="rail"
-        aria-label={`Step ${st.step + 1} of ${a.steps.length}`}
+        aria-label={tr("Step {n} of {total}", {
+          n: st.step + 1,
+          total: a.steps.length,
+        })}
       >
         {a.steps.map((s, i) => (
           <li
@@ -172,7 +177,10 @@ export function PlaceActivity({
               data-ring={k}
               className={`ring ${people ? "" : "thing"} ${st.wrong === k ? "bad" : ""} ${over === k ? "over" : ""}`}
               style={{ left: `${o.x * 100}%`, top: `${o.y * 100}%` }}
-              aria-label={`Put ${fig?.label ?? "it"} at ring ${k + 1}`}
+              aria-label={tr("Put {label} at ring {n}", {
+                label: fig?.label ?? tr("it"),
+                n: k + 1,
+              })}
               onClick={() => act({ type: "ring", index: k })}
             >
               <span className="q">{k + 1}</span>
@@ -183,13 +191,18 @@ export function PlaceActivity({
       {people && (
         <div className="sheet">
           <div className="sheet-head">
-            <b>Pose sheet</b>
+            <b>{tr("Pose sheet")}</b>
             <span>
               {st.phase === "pose"
-                ? `${fig?.label}: what does this person do here? (keys 1–${step.poses.length})`
+                ? tr("{label}: what does this person do here? (keys 1–{n})", {
+                    label: fig?.label ?? "",
+                    n: step.poses.length,
+                  })
                 : st.phase === "place"
-                  ? `First put ${fig?.label} in place.`
-                  : "Pick a pose after placing."}
+                  ? tr("First put {label} in place.", {
+                      label: fig?.label ?? "",
+                    })
+                  : tr("Pick a pose after placing.")}
             </span>
           </div>
           <div className="frames">
@@ -210,7 +223,7 @@ export function PlaceActivity({
                   colour={fig?.colour ?? "#7d8a96"}
                   hat={fig?.hat}
                 />
-                {POSES[pose].label}
+                {tr(POSES[pose].label)}
               </button>
             ))}
           </div>
@@ -220,7 +233,10 @@ export function PlaceActivity({
       <div className="stepcard">
         <div className="stepno">
           <span>
-            Step {st.step + 1} of {a.steps.length}
+            {tr("Step {n} of {total}", {
+              n: st.step + 1,
+              total: a.steps.length,
+            })}
           </span>
           <button
             type="button"
@@ -231,14 +247,16 @@ export function PlaceActivity({
               setVoice(!voice);
             }}
           >
-            Voice {voice ? "on" : "off"}
+            {voice ? tr("Voice on") : tr("Voice off")}
           </button>
         </div>
         <div className="caption">
           {step.say}
           {step.observed && (
             <small>
-              Seen in the museum diorama, not in the panel text · weaker source
+              {tr(
+                "Seen in the museum diorama, not in the panel text · weaker source",
+              )}
             </small>
           )}
         </div>
@@ -250,7 +268,9 @@ export function PlaceActivity({
             <button
               type="button"
               className="card"
-              aria-label={`${fig.label}: drag to a ring, or press a ring`}
+              aria-label={tr("{label}: drag to a ring, or press a ring", {
+                label: fig.label,
+              })}
               onPointerDown={onDown}
               onPointerMove={onMove}
               onPointerUp={onUp}
@@ -260,19 +280,23 @@ export function PlaceActivity({
             </button>
             <p>
               <b>{fig.label}</b>
-              {fig.note ? `${fig.note}. ` : ""}Drag to a ring, or press a ring.
+              {fig.note ? tr("{note}. ", { note: fig.note }) : ""}
+              {tr("Drag to a ring, or press a ring.")}
             </p>
           </div>
         )}
-        {st.hint && <p className="msg no">{st.hint}</p>}
-        {fig && st.phase === "pose" && !st.hint && (
-          <p className="msg ok">Good place. Now pick a pose.</p>
-        )}
-        {fig && done && step.why && <p className="msg ok">{step.why}</p>}
+        {/* Screen readers hear the hint and the result as they change. */}
+        <div aria-live="polite">
+          {st.hint && <p className="msg no">{tr(st.hint)}</p>}
+          {fig && st.phase === "pose" && !st.hint && (
+            <p className="msg ok">{tr("Good place. Now pick a pose.")}</p>
+          )}
+          {fig && done && step.why && <p className="msg ok">{step.why}</p>}
+        </div>
 
         <div className="row">
           <button type="button" className="btn" onClick={() => speak(st.step)}>
-            Listen
+            {tr("Listen")}
           </button>
           {!done && st.tries >= 2 && (
             <button
@@ -280,12 +304,12 @@ export function PlaceActivity({
               className="btn"
               onClick={() => act({ type: "show" })}
             >
-              Show me
+              {tr("Show me")}
             </button>
           )}
           {done && !last && (
             <button type="button" className="btn primary" onClick={next}>
-              Next step
+              {tr("Next step")}
             </button>
           )}
           {done && last && !st.finished && (
@@ -294,18 +318,19 @@ export function PlaceActivity({
               className="btn primary"
               onClick={() => act({ type: "finish" })}
             >
-              See the whole scene
+              {tr("See the whole scene")}
             </button>
           )}
         </div>
         <p className="muted small">
-          Device voice · placeholder. Figures and scenes are illustrative
-          sketches after museum dioramas.
+          {tr(
+            "Device voice · placeholder. Figures and scenes are illustrative sketches after museum dioramas.",
+          )}
         </p>
         {st.finished && (
           <div className="recap">
             <p>
-              <b>Scene rebuilt.</b> {a.completion}
+              <b>{tr("Scene rebuilt.")}</b> {a.completion}
             </p>
             <ol>
               {a.steps
@@ -313,7 +338,7 @@ export function PlaceActivity({
                 .map((s) => (
                   <li key={s.id}>
                     {s.why}
-                    {s.observed ? " (seen in the diorama)" : ""}
+                    {s.observed ? tr(" (seen in the diorama)") : ""}
                   </li>
                 ))}
             </ol>

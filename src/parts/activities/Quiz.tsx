@@ -1,6 +1,7 @@
 "use client";
 // Quiz: pick one option. Wrong picks stay marked; the right pick shows the
 // explanation from the definition and the claims it rests on.
+import { useT } from "@/i18n";
 import { useEffect, useRef, useState } from "react";
 import type { ActivityOf, Emit, ResolvedClaim } from "@/contracts";
 import s from "./Activities.module.css";
@@ -20,6 +21,7 @@ export function Quiz({
   claims: Record<string, ResolvedClaim>;
   emit: Emit;
 }) {
+  const t = useT();
   const [tried, setTried] = useState<number[]>([]);
   const solved = tried.includes(a.answer);
   const sent = useRef(false);
@@ -65,8 +67,10 @@ export function Quiz({
                 {right ? "✓" : wrong ? "✗" : LETTERS[i]}
               </span>
               <span>{o}</span>
-              {wrong && <span className={s.srOnly}> (not this one)</span>}
-              {right && <span className={s.srOnly}> (correct)</span>}
+              {wrong && (
+                <span className={s.srOnly}>{t(" (not this one)")}</span>
+              )}
+              {right && <span className={s.srOnly}>{t(" (correct)")}</span>}
             </button>
           );
         })}
@@ -80,9 +84,9 @@ export function Quiz({
         {solved ? (
           <p>{a.explanation}</p>
         ) : last !== undefined ? (
-          <p>Not quite. Look again and try another one.</p>
+          <p>{t("Not quite. Look again and try another one.")}</p>
         ) : (
-          <p>Choose one answer.</p>
+          <p>{t("Choose one answer.")}</p>
         )}
       </div>
       {solved && <Sources ids={a.claimIds} claims={claims} />}

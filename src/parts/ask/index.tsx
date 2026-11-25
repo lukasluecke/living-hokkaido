@@ -181,6 +181,7 @@ export function AskPart({
         type="button"
         className={s.trigger}
         data-sheet={sheet || undefined}
+        data-island={view === "island" || view === "travel" || undefined}
         onClick={() => setOpen(true)}
         aria-expanded={false}
       >

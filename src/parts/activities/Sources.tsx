@@ -1,4 +1,5 @@
 // Footnotes: the claims an activity is grounded in, with source and locator.
+import { useT } from "@/i18n";
 import type { ResolvedClaim } from "@/contracts";
 import s from "./Activities.module.css";
 
@@ -9,11 +10,12 @@ export function Sources({
   ids: string[];
   claims: Record<string, ResolvedClaim>;
 }) {
+  const t = useT();
   const list = ids.flatMap((id) => (claims[id] ? [claims[id]] : []));
   if (list.length === 0) return null;
   return (
     <details className={s.sources}>
-      <summary>How do we know?</summary>
+      <summary>{t("How do we know?")}</summary>
       <ul>
         {list.map(({ claim, sources }) => (
           <li key={claim.id}>

@@ -1,0 +1,1244 @@
+<!doctype html>
+<html lang="en" translate="no" class="notranslate">
+<head>
+<meta charset="utf-8">
+<!-- The app has its own EN / 日本語 switch; stop browser auto-translate from translating the Japanese back. -->
+<meta name="google" content="notranslate">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0d10">
+<title>Omusha 1808</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;700;800&display=swap">
+<!-- Figure models are Meshopt-compressed (tools/web-model.mjs); model-viewer needs the decoder. -->
+<script>self.ModelViewerElement = { meshoptDecoderLocation: 'https://cdn.jsdelivr.net/npm/meshoptimizer@0.25.0/meshopt_decoder.js' };</script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@4.0.0/dist/model-viewer.min.js"></script>
+<style>
+  :root {
+    --bg: #0b0d10;
+    --panel: rgba(18, 21, 26, 0.86);
+    --panel-solid: #14171c;
+    --line: rgba(255, 255, 255, 0.10);
+    --text: #e8ebef;
+    --muted: #9aa3ad;
+    --accent: #e0b35a;
+    --aizu: #6fa8ff;
+    --ainu: #7fd1a7;
+    --interp: #e0b35a;
+    --warn: #ffb86b;
+    --danger: #ff6b6b;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+    font: 14px/1.45 system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Yu Gothic UI", sans-serif; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; height: 100dvh; touch-action: none; outline: none; }
+
+  .bar { position: fixed; inset: 0 0 auto 0; display: flex; align-items: center; gap: 8px;
+    padding: max(10px, env(safe-area-inset-top)) 16px 10px; pointer-events: none; z-index: 5; }
+  .title { flex: 1; min-width: 0; text-shadow: 0 1px 3px rgba(0,0,0,.7); }
+  .title b { display: block; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .title span { color: var(--muted); font-size: 12px; }
+  .tools { display: flex; gap: 6px; pointer-events: auto; }
+  button, .btn { appearance: none; border: 1px solid var(--line); background: var(--panel); color: var(--text);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-radius: 10px; height: 36px; min-width: 36px;
+    padding: 0 12px; font: inherit; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center;
+    justify-content: center; gap: 6px; }
+  button:hover, .btn:hover { border-color: rgba(255,255,255,.28); }
+  button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+  button:disabled { opacity: .5; cursor: default; }
+  button svg { width: 16px; height: 16px; flex: none; }
+  .label { display: inline; white-space: nowrap; }
+  .tools > * { flex-shrink: 0; }
+  @media (max-width: 560px) { .label { display: none; } button, .btn { padding: 0 10px; } }
+  /* Phones: the toolbar goes under the title so the title keeps its width. */
+  @media (max-width: 480px) { .bar { flex-wrap: wrap; } .title { flex-basis: 100%; } .tools { margin-left: auto; } }
+  input[type=file] { display: none; }
+
+  /* Hotspot markers */
+  #markers { position: fixed; inset: 0; pointer-events: none; z-index: 2; }
+  .marker { position: absolute; left: 0; top: 0; pointer-events: auto; transform: translate(-50%, -50%);
+    display: flex; align-items: center; gap: 6px; border: 0; background: none; padding: 0; height: auto; min-width: 0;
+    backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .marker .dot { width: 22px; height: 22px; border-radius: 50%; background: var(--c, var(--accent));
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--c, var(--accent)) 35%, transparent), 0 2px 8px rgba(0,0,0,.5);
+    animation: pulse 2.4s ease-in-out infinite; }
+  .marker .name { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 3px 8px;
+    font-size: 12px; white-space: nowrap; color: var(--text); }
+  .marker[data-active="true"] .dot { outline: 2px solid #fff; outline-offset: 3px; }
+  .marker.hidden { display: none; }
+  @keyframes pulse { 50% { transform: scale(1.12); } }
+  /* Hidden dots: invisible but still tappable; a faint ring on hover, and the selected one shows. */
+  body.ghost .marker .dot { opacity: 0; animation: none; transition: opacity .15s; }
+  body.ghost .marker:hover .dot, body.ghost .marker:focus-visible .dot { opacity: .45; }
+  body.ghost .marker[data-active="true"] .dot { opacity: 1; }
+  /* Figures sit close together, so names show only on hover, focus or selection. */
+  .marker .name { display: none; }
+  .marker:hover, .marker:focus-visible, .marker[data-active="true"] { z-index: 1; }
+  .marker:hover .name, .marker:focus-visible .name, .marker[data-active="true"] .name { display: block; }
+
+  /* Character sheet: side panel on PC, bottom sheet on phone */
+  .sheet { position: fixed; z-index: 6; background: var(--panel-solid); border: 1px solid var(--line);
+    display: flex; flex-direction: column; transition: transform .25s ease; overflow: hidden;
+    right: 12px; top: 64px; bottom: 12px; width: 360px; border-radius: 16px; transform: translateX(calc(100% + 24px)); }
+  .sheet.open { transform: none; }
+  @media (max-width: 720px) {
+    .sheet { left: 0; right: 0; top: auto; bottom: 0; width: auto; max-height: 62dvh;
+      border-radius: 16px 16px 0 0; transform: translateY(105%); padding-bottom: env(safe-area-inset-bottom); }
+  }
+  .sheet header { display: flex; align-items: flex-start; gap: 10px; padding: 14px 16px 12px; border-bottom: 1px solid var(--line);
+    background: linear-gradient(180deg, rgba(224,179,90,.07), transparent); }
+  .sheet header .who { flex: 1; min-width: 0; display: grid; gap: 3px; }
+  .sheet h2 { margin: 0; font: 600 19px/1.3 "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", Georgia, "Times New Roman", serif; letter-spacing: .01em; }
+  .sheet header .crumb { font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; }
+
+  /* Form layer: the view and its reality basis */
+  :root { --recorded: #7fd1a7; --interpreted: #e0b35a; --symbolic: #b9a2ff; }
+  .hero { display: grid; gap: 8px; }
+  .figure3d { position: relative; }
+  .basis-btn { position: absolute; left: 8px; bottom: 8px; height: auto; padding: 4px 8px 4px 6px; border-radius: 10px;
+    background: rgba(12,14,18,.78); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); gap: 6px; }
+  .basis-btn .more { color: var(--muted); font-size: 12px; }
+  .basis-btn[aria-expanded="true"] { border-color: var(--line); color: var(--text); }
+  .basis { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text); white-space: nowrap; }
+  .basis .ficon { width: 18px; height: 18px; color: var(--bc); }
+  .basis .bk { color: var(--muted); }
+  .basis .bb { color: var(--bc); font-weight: 600; }
+  .basis .meter { display: inline-flex; gap: 2px; }
+  .basis .meter i { width: 5px; height: 10px; border-radius: 2px; background: rgba(255,255,255,.15); }
+  .basis .meter i.on { background: var(--bc); }
+  .basis-recorded { --bc: var(--recorded); } .basis-interpreted { --bc: var(--interpreted); } .basis-symbolic { --bc: var(--symbolic); }
+  .formpanel, .scene-forms { display: grid; gap: 10px; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: rgba(255,255,255,.02); }
+  .formpanel[hidden] { display: none; }
+  .frow { display: grid; gap: 3px; }
+  .frow + .frow { border-top: 1px dashed var(--line); padding-top: 8px; }
+  .fhead { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .fmade { font-size: 11px; color: var(--muted); }
+  .flabel { font-size: 13px; font-weight: 600; }
+  .fnote { font-size: 12px; color: var(--text); opacity: .85; }
+  .funseen { font-size: 12px; color: var(--warn); }
+  .sheet[data-mode="figure"] .scene-only { display: none !important; }
+
+  /* Actor */
+  .ident { display: grid; gap: 6px; }
+  .ident .role { font-size: 14px; line-height: 1.5; }
+  .ident .declines { font-size: 12px; color: var(--muted); } .ident .declines .k { display: inline; margin-right: 6px; }
+
+  /* Voice and record as tabs */
+  .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 12px; background: rgba(255,255,255,.04); border: 1px solid var(--line); }
+  .tabs button { border: 0; background: transparent; height: 34px; border-radius: 9px; gap: 6px; color: var(--muted); font-size: 13px; }
+  .tabs button svg { width: 16px; height: 16px; }
+  .tabs button[aria-selected="true"] { background: var(--panel-solid); color: var(--text); box-shadow: 0 1px 0 rgba(255,255,255,.06), 0 2px 8px rgba(0,0,0,.35); }
+  .tabs .count { font-size: 11px; color: var(--muted); }
+  .sheet[data-mode="figure"][data-tab="talk"] .panel[data-panel="record"],
+  .sheet[data-mode="figure"][data-tab="record"] .panel[data-panel="talk"] { display: none; }
+
+  /* Record as a timeline of strata */
+  #sKnown { display: grid; gap: 8px; }
+  .stratum-h { position: relative; padding-left: 18px; color: var(--accent) !important; font-weight: 600; }
+  .stratum-h::before { content: ""; position: absolute; left: 3px; top: 50%; width: 8px; height: 8px; margin-top: -4px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px rgba(224,179,90,.2); }
+  #sKnown .obs { margin-left: 7px; border-left: 2px solid rgba(224,179,90,.25); border-radius: 0 10px 10px 0; }
+  #sKnown .obs.absence { border-left-color: color-mix(in srgb, var(--warn) 60%, transparent); }
+
+  /* Protocol */
+  .protocol { display: flex; gap: 8px; align-items: flex-start; font-size: 11px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; }
+  .protocol svg { width: 14px; height: 14px; flex: none; margin-top: 1px; }
+  .sheet .ja { color: var(--muted); font-size: 13px; }
+  .sheet .body { padding: 12px 16px 16px; overflow-y: auto; display: grid; gap: 12px; }
+  .chip { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+  .chip.draft { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, transparent); }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .notice { font-size: 12px; color: var(--muted); border-left: 2px solid var(--accent); padding-left: 10px; }
+  .sheet[data-mode="scene"] .fig-only { display: none !important; }
+  .crumb { font-size: 12px; color: var(--muted); }
+  .crumb:empty { display: none; }
+  .known { display: grid; gap: 8px; border-top: 1px solid var(--line); padding-top: 12px; }
+  .known-h { font-weight: 600; font-size: 14px; } .known-h span { color: var(--muted); font-weight: 400; }
+  .legend { font-size: 11px; color: var(--muted); }
+  .stratum-h { margin-top: 6px; text-transform: uppercase; letter-spacing: .04em; font-size: 11px; }
+  .obs { border: 1px solid var(--line); border-radius: 10px; padding: 9px 10px; display: grid; gap: 6px; background: rgba(255,255,255,.02); }
+  .obs .claim { font-size: 13px; }
+  .obs.absence { border-style: dashed; border-color: color-mix(in srgb, var(--warn) 55%, transparent); background: color-mix(in srgb, var(--warn) 6%, transparent); }
+  .obs-unknown { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--warn); font-weight: 700; }
+  .obs .why { font-size: 12px; color: var(--warn); }
+  .obs .src { font-size: 11px; color: var(--muted); overflow-wrap: anywhere; }
+  .chip.stratum { color: var(--text); }
+  .chip.evidence { border-color: color-mix(in srgb, var(--aizu) 50%, transparent); color: var(--aizu); }
+  .chip.standing { border-color: color-mix(in srgb, var(--ainu) 50%, transparent); color: var(--ainu); }
+  .obs-actions { display: flex; gap: 12px; }
+  button.link { all: unset; cursor: pointer; font-size: 12px; color: var(--accent); }
+  button.link:hover { text-decoration: underline; }
+  .hist { border-left: 2px solid var(--line); padding-left: 8px; display: grid; gap: 4px; }
+  details.add { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+  details.add summary { cursor: pointer; font-size: 13px; color: var(--accent); }
+  details.add form { display: grid; gap: 8px; margin-top: 10px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } .grid2:empty { display: none; }
+  label.f { display: grid; gap: 3px; font-size: 11px; color: var(--muted); min-width: 0; }
+  label.f input, label.f select, label.f textarea { font: inherit; font-size: 13px; color: var(--text); background: #0f1216;
+    border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; width: 100%; min-width: 0; }
+  .replacing { font-size: 12px; color: var(--warn); }
+  button.primary { background: var(--accent); color: #111; border-color: var(--accent); font-weight: 600; }
+  .k { color: var(--muted); font-size: 12px; margin-bottom: 2px; }
+  .chat { display: grid; gap: 8px; border-top: 1px solid var(--line); padding-top: 12px; }
+  .sugg { display: flex; flex-wrap: wrap; gap: 6px; }
+  .sugg button { height: auto; min-height: 28px; padding: 4px 10px; font-size: 12px; border-radius: 999px; }
+  .log { display: grid; gap: 8px; }
+  .log:empty { display: none; }
+  .msg { font-size: 13px; line-height: 1.45; padding: 8px 10px; border-radius: 10px; }
+  .msg.q { justify-self: end; max-width: 85%; background: color-mix(in srgb, var(--accent) 18%, transparent); }
+  .msg.a { border: 1px solid var(--line); background: rgba(255,255,255,.03); display: grid; gap: 6px; }
+  .msg.a.unknown { border-style: dashed; border-color: color-mix(in srgb, var(--warn) 55%, transparent); }
+  .msg.err { color: var(--warn); font-size: 12px; }
+  .msg .cited { font-size: 11px; color: var(--muted); display: grid; gap: 2px; }
+  .msg .row2, .voicebar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .voicebar:not(:has(:not([hidden]))) { display: none; }
+  .ask { display: flex; gap: 6px; }
+  .ask input { flex: 1; min-width: 0; font: inherit; font-size: 14px; color: var(--text); background: #0f1216;
+    border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+  .ask .mic[aria-pressed="true"] { background: var(--warn); color: #111; }
+  .figure3d { display: grid; gap: 6px; }
+  .figure3d model-viewer { width: 100%; height: 300px; border-radius: 12px;
+    background: radial-gradient(circle at 50% 40%, #2a2f37, #14171c 70%); --poster-color: transparent; }
+  @media (max-width: 720px) { .figure3d model-viewer { height: 34dvh; } }
+  .figure3d .print { justify-self: start; height: 32px; font-size: 12px; }
+  button.lang { padding: 0 10px; }
+  button.lang .flag { width: 30px; height: 20px; border-radius: 3px; box-shadow: 0 0 0 1px rgba(255,255,255,.35); display: none; }
+  button.lang .flag.on { display: block; }
+  .figure3d .note { font-size: 11px; color: var(--muted); }
+
+  /* Edit mode */
+  .editor { position: fixed; left: 12px; top: 64px; z-index: 6; width: 260px; background: var(--panel-solid);
+    border: 1px solid var(--line); border-radius: 14px; padding: 12px; display: none; gap: 8px;
+    max-height: calc(100dvh - 80px); overflow-y: auto; }
+  .editor .row button.pick { height: auto; min-height: 32px; padding: 6px 10px; text-align: left; }
+  .editor.on { display: grid; }
+  .editor h3 { margin: 0; font-size: 13px; }
+  .editor p { margin: 0; color: var(--muted); font-size: 12px; }
+  .editor .row { display: flex; align-items: center; gap: 6px; }
+  .editor .row button.pick { flex: 1; justify-content: flex-start; }
+  .editor .row .placed { color: var(--ainu); font-size: 12px; width: 16px; text-align: center; }
+
+  .loader { position: fixed; inset: 0; display: grid; place-items: center; pointer-events: none; z-index: 4; }
+  .loader.hide { display: none; }
+  .loader.interactive { pointer-events: auto; }
+  .figlist { display: grid; gap: 6px; margin-top: 12px; max-height: 50dvh; overflow-y: auto; text-align: left; }
+  .figlist button { height: auto; min-height: 40px; padding: 8px 12px; justify-content: space-between; width: 100%; }
+  .figlist small { color: var(--muted); font-size: 11px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px;
+    width: min(340px, calc(100vw - 32px)); text-align: center; }
+  .track { height: 6px; border-radius: 3px; background: rgba(255,255,255,.1); overflow: hidden; margin-top: 10px; }
+  .fill { height: 100%; width: 0%; background: var(--accent); transition: width .15s; }
+  .fill.indeterminate { width: 30%; animation: slide 1.1s ease-in-out infinite; }
+  @keyframes slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(340%); } }
+  .err { color: var(--danger); }
+
+  .hint { position: fixed; left: 50%; bottom: max(14px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 3;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 7px 14px; color: var(--muted);
+    font-size: 12px; white-space: nowrap; transition: opacity .6s; pointer-events: none; max-width: calc(100vw - 32px);
+    overflow: hidden; text-overflow: ellipsis; }
+  .hint.hide { opacity: 0; }
+  .toast { position: fixed; left: 50%; top: 70px; transform: translateX(-50%); z-index: 7; background: var(--panel-solid);
+    border: 1px solid var(--line); border-radius: 10px; padding: 8px 14px; font-size: 13px; display: none; }
+  .toast.on { display: block; }
+
+  /* ================= Woodblock card ================= */
+  /* One pigment per Envelope layer (moku-hanga palette). */
+  :root {
+    --paper: #efe4cc; --paper-2: #e5d6b6; --paper-3: #f7efdc; --ink: #221c16; --ink-soft: #5d5246;
+    --l-form: #2c4f7c;      /* 藍 indigo — Form */
+    --l-time: #a8741f;      /* 黄土 ochre — Time strata */
+    --l-actors: #8f4527;    /* 弁柄 bengara — Actors */
+    --l-types: #4b7a46;     /* 若竹 green — Observation types */
+    --l-evidence: #634a88;  /* 紫 murasaki — Evidence and standing */
+    --l-absence: #7a7168;   /* 鼠 grey — Absence */
+    --l-protocol: #221c16;  /* 墨 sumi — Protocol */
+    --l-voice: #b5322f;     /* 朱 vermilion — Voice */
+  }
+  .sheet {
+    --text: var(--ink); --muted: var(--ink-soft); --line: rgba(34, 28, 22, .22); --panel: var(--paper-3); --panel-solid: var(--paper);
+    --accent: var(--l-voice); --warn: #9c5a12; --recorded: #3f7a4a; --interpreted: #a8741f; --symbolic: #6b55a0;
+    color: var(--ink);
+    background-color: var(--paper);
+    /* washi fibres: low-contrast noise, multiplied into the paper colour */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .28 0 0 0 0 .2 0 0 0 .16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+      radial-gradient(120% 80% at 50% 0%, #f4ead4, transparent 70%);
+    border: 3px solid var(--ink); border-radius: 4px;
+    box-shadow: inset 0 0 0 5px var(--paper), inset 0 0 0 6px var(--ink), 6px 7px 0 rgba(0, 0, 0, .55);
+    font-family: "Shippori Mincho B1", "Hiragino Mincho ProN", "Yu Mincho", Georgia, serif;
+  }
+  @media (max-width: 720px) { .sheet { border-radius: 6px 6px 0 0; border-bottom: 0; box-shadow: inset 0 0 0 5px var(--paper), inset 0 0 0 6px var(--ink), 0 -4px 0 rgba(0,0,0,.45); } }
+  /* kentō registration mark, as cut into the corner of a block */
+  .sheet::before { content: ""; position: absolute; left: 14px; top: 14px; width: 16px; height: 16px; border-left: 3px solid var(--l-voice); border-top: 3px solid var(--l-voice); opacity: .85; pointer-events: none; z-index: 1; }
+  .sheet header { border-bottom: 3px double var(--ink); background: none; padding: 20px 18px 12px 38px; }
+  .sheet h2 { font-family: inherit; font-weight: 800; font-size: 21px; color: var(--ink); letter-spacing: .02em; }
+  .sheet .ja { color: var(--ink-soft); font-size: 13px; }
+  .sheet header .crumb { color: var(--ink-soft); font-family: system-ui, sans-serif; }
+  .sheet header > button { background: var(--paper-3); border: 2px solid var(--ink); border-radius: 2px; color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
+  .sheet .body { padding: 14px 18px 18px; gap: 14px; grid-template-columns: minmax(0, 1fr); overflow-x: hidden; }
+  .sheet .body * { overflow-wrap: anywhere; }
+  .sheet .body > *, .chat, .known, .layer { min-width: 0; grid-template-columns: minmax(0, 1fr); }
+  .sheet header .who { grid-template-columns: minmax(0, 1fr); }
+  .sheet .body > .tabs { grid-template-columns: 1fr 1fr; }
+  .sheet .tabs button, .sheet .tabs button * { white-space: nowrap; overflow-wrap: normal; }
+  .lh { flex-wrap: wrap; } .lh small { flex-basis: 100%; order: 3; margin-left: 30px; }
+  .sugg button { white-space: normal; text-align: left; height: auto; min-height: 28px; }
+  .sheet button { border-radius: 3px; }
+
+  /* Layer key: the eight seals in the header */
+  .layerkey { display: flex; gap: 3px; flex-wrap: nowrap; margin-top: 6px; }
+  .seal { display: inline-grid; place-items: center; width: 21px; height: 21px; flex: none; border-radius: 2px; color: var(--paper-3);
+    background: var(--lc); font: 800 13px/1 "Shippori Mincho B1", serif; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.25); }
+  .layerkey .seal { border: 0; padding: 0; cursor: pointer; transition: transform .1s; }
+  .layerkey .seal:hover { transform: translateY(-2px) rotate(-3deg); }
+  [data-layer="form"] { --lc: var(--l-form); } [data-layer="time"] { --lc: var(--l-time); } [data-layer="actors"] { --lc: var(--l-actors); }
+  [data-layer="types"] { --lc: var(--l-types); } [data-layer="evidence"] { --lc: var(--l-evidence); } [data-layer="absence"] { --lc: var(--l-absence); }
+  [data-layer="protocol"] { --lc: var(--l-protocol); } [data-layer="voice"] { --lc: var(--l-voice); }
+
+  /* Layer headers: seal + name, ruled like a print cartouche */
+  .lh { display: flex; align-items: center; gap: 8px; margin: 0; font: 700 13px/1.2 "Shippori Mincho B1", serif; color: var(--lc); letter-spacing: .04em; }
+  .lh::after { content: ""; flex: 1; height: 0; border-top: 2px solid var(--lc); opacity: .55; }
+  .lh small { font: 500 11px system-ui, sans-serif; color: var(--ink-soft); letter-spacing: 0; }
+  .layer { display: grid; gap: 8px; }
+
+  /* Form (藍) */
+  .figure3d model-viewer { border-radius: 2px; border: 2px solid var(--ink); background: radial-gradient(circle at 50% 38%, #fbf4e3, #dcc9a6 78%); }
+  .basis-btn { background: var(--paper-3); border: 2px solid var(--ink); border-radius: 2px; box-shadow: 2px 2px 0 var(--ink); backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .basis .meter i { background: rgba(34,28,22,.15); border-radius: 1px; }
+  .formpanel, .scene-forms { background: rgba(44,79,124,.06); border: 2px solid var(--l-form); border-radius: 2px; }
+  .frow + .frow { border-top: 1.5px dashed rgba(44,79,124,.45); }
+  .fmade { color: var(--l-form); font-weight: 700; }
+  .funseen { color: #8c4a12; }
+
+  /* Actors (弁柄) */
+  .ident .chips .chip { background: var(--paper-3); border: 1.5px solid var(--l-actors); color: var(--l-actors); }
+  .ident .chips .chip.draft { border-color: #9c5a12; color: #9c5a12; }
+  .ident .role { font-size: 15px; }
+
+  /* Voice (朱) and the record, as print tabs */
+  .tabs { background: var(--paper-2); border: 2px solid var(--ink); border-radius: 2px; }
+  .tabs button { color: var(--ink-soft); font-family: inherit; font-weight: 700; }
+  .tabs button[aria-selected="true"] { color: var(--paper-3); box-shadow: none; }
+  #tabTalk[aria-selected="true"] { background: var(--l-voice); }
+  #tabRecord[aria-selected="true"] { background: var(--l-time); }
+  .tabs button[aria-selected="true"] .count { color: rgba(255,255,255,.85); }
+  .sugg button { background: var(--paper-3); border: 1.5px solid var(--l-voice); color: var(--l-voice); border-radius: 2px; font-family: inherit; }
+  .msg.q { background: var(--l-voice); color: var(--paper-3); border-radius: 2px; }
+  .msg.a { background: var(--paper-3); border: 2px solid var(--ink); border-left: 5px solid var(--l-voice); border-radius: 2px; }
+  .msg.a.unknown { border-style: solid; border-left-color: var(--l-absence);
+    background: repeating-linear-gradient(-45deg, rgba(122,113,104,.10) 0 2px, transparent 2px 7px), var(--paper-3); }
+  .ask input { background: var(--paper-3); color: var(--ink); border: 2px solid var(--ink); border-radius: 2px; font-family: inherit; }
+  .sheet button.primary { background: var(--l-voice); border: 2px solid var(--ink); color: var(--paper-3); box-shadow: 2px 2px 0 var(--ink); }
+  .ask .mic { background: var(--paper-3); border: 2px solid var(--ink); }
+  .notice { border-left: 3px solid var(--l-voice); color: var(--ink-soft); }
+  .chat { border-top: 0; padding-top: 0; }
+
+  /* Time strata (黄土) as a carved timeline */
+  .known { border-top: 0; padding-top: 0; }
+  .stratum-h { color: var(--l-time) !important; font: 700 12px "Shippori Mincho B1", serif !important; letter-spacing: .06em; }
+  .stratum-h::before { background: var(--l-time); border: 2px solid var(--ink); box-shadow: none; width: 10px; height: 10px; margin-top: -5px; left: 1px; border-radius: 50%; }
+  #sKnown .obs { background: var(--paper-3); border: 1.5px solid rgba(34,28,22,.35); border-left: 4px solid var(--l-time); border-radius: 0 2px 2px 0; margin-left: 5px; }
+  #sKnown .obs .claim { font-size: 14px; line-height: 1.55; }
+  /* Observation types (若竹) */
+  .chip.kind { background: var(--l-types); border-color: var(--l-types); color: var(--paper-3); }
+  /* Evidence and standing (紫): two separate marks, never merged */
+  .chip.evidence { background: var(--paper-3); border: 1.5px solid var(--l-evidence); color: var(--l-evidence); }
+  .chip.standing { background: var(--l-evidence); border: 1.5px solid var(--l-evidence); color: var(--paper-3); }
+  .chip.stratum { background: var(--l-time); border-color: var(--l-time); color: var(--paper-3); }
+  .sheet .chip { border-radius: 2px; }
+  .sheet .chip.draft { color: #9c5a12; border-color: rgba(156,90,18,.55); }
+  /* Absence (鼠): cross-hatched, like an uncut area of the block */
+  #sKnown .obs.absence { border-left-color: var(--l-absence); border-style: solid;
+    background: repeating-linear-gradient(-45deg, rgba(122,113,104,.13) 0 2px, transparent 2px 7px), var(--paper-3); }
+  .obs-unknown { color: var(--l-absence) !important; display: flex; align-items: center; gap: 6px; }
+  .obs-unknown::before { content: "欠"; display: inline-grid; place-items: center; width: 18px; height: 18px; background: var(--l-absence); color: var(--paper-3); border-radius: 2px; font: 800 11px "Shippori Mincho B1", serif; }
+  .obs .why { color: var(--ink-soft) !important; }
+  .legend { color: var(--ink-soft); }
+  details.add { background: var(--paper-3); border: 2px solid var(--ink); border-radius: 2px; }
+  details.add summary { color: var(--l-time); font-weight: 700; }
+  label.f input, label.f select, label.f textarea { background: #fbf6ea; color: var(--ink); border: 1.5px solid var(--ink); border-radius: 2px; }
+  .sheet button.link { color: var(--l-form); text-decoration: underline; text-underline-offset: 2px; }
+
+  /* Protocol (墨) */
+  .protocol { border-top: 3px double var(--ink); color: var(--ink-soft); align-items: center; }
+  .protocol .seal { flex: none; }
+
+  /* Zoom lens: a woodblock label for what is centred when you zoom in */
+  .lens { position: fixed; left: 50%; bottom: max(58px, calc(env(safe-area-inset-bottom) + 50px)); z-index: 4;
+    transform: translate(-50%, 8px); opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s;
+    display: flex; align-items: center; gap: 10px; height: auto; max-width: min(420px, calc(100vw - 32px)); padding: 9px 12px 9px 10px;
+    text-align: left; color: var(--ink); background: var(--paper); border: 2.5px solid var(--ink); border-radius: 3px;
+    box-shadow: inset 0 0 0 3px var(--paper), inset 0 0 0 4px var(--ink), 4px 5px 0 rgba(0,0,0,.55);
+    font-family: "Shippori Mincho B1", "Hiragino Mincho ProN", serif; }
+  .lens.on { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+  .lens .seal { width: 30px; height: 30px; font-size: 17px; flex: none; }
+  .lens .lt { display: grid; gap: 2px; min-width: 0; }
+  .lens b { font-size: 15px; font-weight: 800; }
+  .lens small { font: 12px/1.4 system-ui, sans-serif; color: var(--ink-soft); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .lens .lgo { flex: none; font: 700 12px system-ui, sans-serif; color: var(--paper-3); background: var(--l-voice); border: 2px solid var(--ink); padding: 4px 8px; border-radius: 2px; }
+  .lens .lcount { font: 11px system-ui, sans-serif; color: var(--l-time); }
+  .protocol .ptext { flex: 1; min-width: 0; line-height: 1.5; }
+</style>
+</head>
+<body>
+<canvas id="c" tabindex="0"></canvas>
+<div id="markers"></div>
+
+<div class="bar">
+  <div class="title"><b data-i18n="title">Omusha, Kushun Kotan, 1808</b><span data-i18n="subtitle">オムシャ・久春古丹 · tap a figure</span></div>
+  <div class="tools">
+    <label class="btn" title="Open a splat file" data-i18n-title="openTitle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h6l2 2h10v10H3z"/></svg>
+      <span class="label" data-i18n="open">Open</span>
+      <input id="file" type="file" accept=".ply,.spz,.splat,.ksplat,.sog,.zip">
+    </label>
+    <button id="about" title="About this scene: what is known, and what is not" data-i18n-title="aboutTitle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>
+      <span class="label" data-i18n="about">About</span>
+    </button>
+    <button id="lang" class="lang" aria-label="Language / 言語"><svg class="flag" data-l="en" viewBox="0 0 60 30" aria-hidden="true"><clipPath id="ukS"><path d="M0,0v30h60V0z"/></clipPath><clipPath id="ukT"><path d="M30,15h30v15zv15H0zH0V0zV0h30z"/></clipPath><g clip-path="url(#ukS)"><path d="M0,0v30h60V0z" fill="#012169"/><path d="M0,0L60,30M60,0L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0L60,30M60,0L0,30" clip-path="url(#ukT)" stroke="#C8102E" stroke-width="4"/><path d="M30,0v30M0,15h60" stroke="#fff" stroke-width="10"/><path d="M30,0v30M0,15h60" stroke="#C8102E" stroke-width="6"/></g></svg><svg class="flag" data-l="ja" viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#fff"/><circle cx="15" cy="10" r="6" fill="#BC002D"/></svg></button>
+    <button id="dots" aria-pressed="true" title="Show or hide the figure dots (figures stay tappable)" data-i18n-title="dotsTitle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+    </button>
+    <button id="flip" aria-pressed="true" title="Flip upside-down scenes" data-i18n-title="flipTitle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M7 8l5-5 5 5M7 16l5 5 5-5"/></svg>
+    </button>
+    <button id="reset" title="Reset view" data-i18n-title="resetTitle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
+    </button>
+    <button id="fs" title="Fullscreen" data-i18n-title="fsTitle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+    </button>
+  </div>
+</div>
+
+<aside class="sheet" id="sheet" aria-live="polite">
+  <header>
+    <div class="who"><div class="crumb" id="sCrumb"></div><h2 id="sName"></h2><div class="ja" id="sJa"></div><div class="layerkey" id="sLayers"></div></div>
+    <button id="sClose" title="Close" data-i18n-title="close">✕</button>
+  </header>
+  <div class="body">
+    <!-- Form: how this figure or scene can be seen, and how directly that view records it -->
+    <section class="hero layer" id="sFormLayer">
+      <h3 class="lh" data-layer="form"><span class="seal">形</span><span data-i18n="lForm">Form</span></h3>
+      <div class="figure3d fig-only" id="sModelWrap" hidden>
+        <model-viewer id="sModel" camera-controls auto-rotate auto-rotate-delay="1500" rotation-per-second="20deg"
+          touch-action="pan-y" interaction-prompt="none" shadow-intensity="0.7" exposure="1.05" alt="">
+        </model-viewer>
+        <button type="button" class="basis-btn" id="sBasisBtn" aria-expanded="false" aria-controls="sFormPanel"></button>
+      </div>
+      <div class="scene-forms scene-only" id="sSceneForms"></div>
+      <div class="formpanel" id="sFormPanel" hidden>
+        <div class="k" id="sFormH"></div>
+        <div id="sForms"></div>
+        <button class="print" id="sStl" title="Shape only (STL has no colour). Team use only: not for sharing." data-i18n="stl" data-i18n-title="stlTitle">Download for 3D printing (STL)</button>
+      </div>
+    </section>
+    <!-- Actor: who this is -->
+    <section class="ident fig-only layer" id="sActorLayer">
+      <h3 class="lh" data-layer="actors"><span class="seal">人</span><span data-i18n="lActors">Actors</span></h3>
+      <div class="chips" id="sChips"></div>
+      <div class="role" id="sRole"></div>
+      <div class="declines" id="sDeclinesWrap" hidden><span class="k" data-i18n="declines">Will not speculate on</span><span id="sDeclines"></span></div>
+    </section>
+    <!-- Voice and the record -->
+    <nav class="tabs fig-only" role="tablist">
+      <button type="button" role="tab" id="tabTalk" data-tab="talk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v11H9l-5 4z"/></svg><span data-i18n="tabTalk">Talk</span></button>
+      <button type="button" role="tab" id="tabRecord" data-tab="record"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l3 3v15H6z"/><path d="M9 10h6M9 14h6M9 18h4"/></svg><span data-i18n="tabRecord">Record</span><span class="count" id="sCount"></span></button>
+    </nav>
+    <section class="chat fig-only panel" data-panel="talk" id="sChat">
+      <h3 class="lh" data-layer="voice" id="sTalkH"></h3>
+      <div class="row2 voicebar"><span class="chip" id="sVoiceCredit" hidden title="Synthetic voices: not recordings of any person" data-i18n-title="creditTitle">Voices by ElevenLabs · synthetic</span>
+        <button type="button" class="link" id="sAuto" hidden aria-pressed="true">🔊 Voice on</button></div>
+      <div class="sugg" id="sSugg"></div>
+      <div class="log" id="sLog" aria-live="polite"></div>
+      <form class="ask" id="sAsk">
+        <button type="button" class="mic" id="sMic" title="Ask by voice" data-i18n-title="micTitle" hidden>🎙</button>
+        <input id="sQ" maxlength="500" placeholder="Ask this figure something…" autocomplete="off">
+        <button class="primary" id="sSend">Ask</button>
+      </form>
+      <div class="notice" id="sNotice">This voice is a synthetic interpretation built from historical sources. It is not a historical record and does not speak for any person or community.</div>
+    </section>
+    <section class="known panel" data-panel="record">
+      <h3 class="lh" data-layer="time"><span class="seal">時</span><span data-i18n-html="knownH">What is known</span></h3>
+      <div class="legend" data-i18n-html="legend">Every entry shows two separate scores: <b>evidence</b> (how well it is supported) and <b>standing</b> (whose knowledge it is). Nothing is overwritten; corrections keep the history.</div>
+      <div id="sKnown"></div>
+      <div id="sForm"></div>
+    </section>
+    <!-- Protocol: who may see what -->
+    <footer class="protocol" id="sProtocol"></footer>
+  </div>
+</aside>
+
+<aside class="editor" id="editor">
+  <h3>Place hotspots</h3>
+  <p>Pick a figure, then tap the scene where it stands.</p>
+  <div id="edList"></div>
+  <button id="edView" style="width:100%;margin-bottom:8px">Use this view as the start view</button>
+  <div class="row"><button id="edCopy" style="flex:1">Copy JSON</button><button id="edSave" style="flex:1">Download</button></div>
+</aside>
+
+<div class="loader" id="loader"><div class="card"><div id="status">Loading…</div>
+  <div class="track"><div class="fill indeterminate" id="fill"></div></div></div></div>
+<div class="hint hide" id="hint"></div>
+<div class="toast" id="toast"></div>
+<button type="button" class="lens" id="lens" aria-live="polite"><span class="seal" id="lensSeal"></span><span class="lt"><b id="lensName"></b><small id="lensLine"></small><span class="lcount" id="lensCount"></span></span><span class="lgo" id="lensGo"></span></button>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/",
+    "@sparkjsdev/spark": "https://sparkjs.dev/releases/spark/2.4.0/spark.module.js"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { SparkRenderer, SplatMesh } from "@sparkjsdev/spark";
+import * as Env from "./envelope.js";
+const SCENE_ENVELOPE = "omusha-diorama";
+
+// ?src=<splat>  ?edit=1  ?flip=0
+const params = new URLSearchParams(location.search);
+const SRC = params.get("src") || "../assets/omusha.sog";
+const EDIT = params.get("edit") === "1";
+let flipped = params.get("flip") !== "0";
+const isTouch = matchMedia("(pointer: coarse)").matches;
+let CHARACTER_IDS = [];
+const FACTION_COLOR = { "aizu": "var(--aizu)", "shogunate": "var(--aizu)", "wajin-interpreter": "var(--interp)", "sakhalin-ainu": "var(--ainu)" };
+
+const $ = (id) => document.getElementById(id);
+
+// ---------- Data
+const characters = {};
+let hotspots = []; // [{ character, position: [x,y,z] }] in splat-local coordinates
+let startView = null; // { position: [x,y,z], target: [x,y,z] } in splat-local coordinates
+let regions = []; // [{ envelope, position: [x,y,z] }]: scene features that get a zoom label
+async function loadData() {
+  try { CHARACTER_IDS = (await (await fetch("../characters/1808/index.json")).json()).characters; }
+  catch { CHARACTER_IDS = []; }
+  await Promise.all(CHARACTER_IDS.map(async (id) => {
+    try { characters[id] = await (await fetch(`../characters/1808/${id}.json`)).json(); }
+    catch { characters[id] = { id, name: { en: id }, role: "", faction: "", status: "draft" }; }
+  }));
+  try {
+    const h = await (await fetch("hotspots.json", { cache: "no-store" })).json();
+    hotspots = h.hotspots || []; startView = h.view || null; regions = h.regions || [];
+  } catch { hotspots = []; }
+  // Japanese versions of the sheets (machine translation, characters/1808/ja.json)
+  try { CHAR_JA = (await (await fetch("../characters/1808/ja.json")).json()).characters || {}; } catch { CHAR_JA = {}; }
+}
+let CHAR_JA = {};
+
+// ---------- Three / Spark
+const canvas = $("c");
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: "high-performance" });
+// Quality. The capture was trained anti-aliased ("mip"), so a 0.1 px² filter matches it better than
+// Spark's 0.3 default. Phones get full resolution (up to 2x) and a 2.5M splat budget (Spark's Android
+// default is 1M; the scene has about 2.2M). Override for A/B: ?blur=0.3&dpr=1.5&splats=1000000
+const num = (k, d) => (params.has(k) && Number.isFinite(+params.get(k)) ? +params.get(k) : d);
+renderer.setPixelRatio(Math.min(devicePixelRatio, num("dpr", 2)));
+renderer.setClearColor(0x0b0d10);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(55, 1, 0.01, 2000);
+scene.add(new SparkRenderer({ renderer, blurAmount: num("blur", 0.1), lodSplatCount: num("splats", 2.5e6) }));
+
+const controls = new OrbitControls(camera, canvas);
+Object.assign(controls, { enableDamping: true, dampingFactor: 0.08, rotateSpeed: isTouch ? 0.6 : 0.8, screenSpacePanning: true });
+
+function resize() {
+  renderer.setSize(innerWidth, innerHeight, false);
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+}
+addEventListener("resize", resize);
+resize();
+
+let mesh = null, home = null;
+const ui = { loader: $("loader"), status: $("status"), fill: $("fill") };
+function loading(text, pct) {
+  ui.loader.classList.remove("hide"); ui.status.textContent = text; ui.status.classList.remove("err");
+  if (pct == null) { ui.fill.classList.add("indeterminate"); ui.fill.style.width = ""; }
+  else { ui.fill.classList.remove("indeterminate"); ui.fill.style.width = `${Math.round(pct * 100)}%`; }
+}
+function failed(text) {
+  ui.loader.classList.remove("hide"); ui.status.textContent = text; ui.status.classList.add("err");
+  ui.fill.classList.remove("indeterminate"); ui.fill.style.width = "0%";
+}
+
+function applyFlip() {
+  // Postshot / INRIA exports have Y pointing down; 180° about X stands them up.
+  if (mesh) { mesh.quaternion.set(flipped ? 1 : 0, 0, 0, flipped ? 0 : 1); mesh.updateMatrixWorld(true); }
+  $("flip").setAttribute("aria-pressed", String(flipped));
+}
+function frameScene() {
+  if (!mesh) return;
+  mesh.updateMatrixWorld(true);
+  const box = mesh.getBoundingBox(true).clone().applyMatrix4(mesh.matrixWorld);
+  const center = box.getCenter(new THREE.Vector3());
+  const radius = Math.max(box.getSize(new THREE.Vector3()).length() / 2, 0.01);
+  const fov = THREE.MathUtils.degToRad(camera.fov);
+  const dist = (radius / Math.sin(Math.min(fov, fov * camera.aspect) / 2)) * 0.75;
+  camera.position.copy(center).addScaledVector(new THREE.Vector3(0, 0.35, 1).normalize(), dist);
+  camera.near = Math.max(dist / 1000, 0.001); camera.far = dist * 100; camera.updateProjectionMatrix();
+  controls.target.copy(center);
+  if (startView) {
+    camera.position.copy(mesh.localToWorld(new THREE.Vector3(...startView.position)));
+    controls.target.copy(mesh.localToWorld(new THREE.Vector3(...startView.target)));
+  }
+  controls.minDistance = dist * 0.02; controls.maxDistance = dist * 10; controls.update();
+  home = { position: camera.position.clone(), target: controls.target.clone() };
+}
+
+async function loadSplat(opts, label) {
+  loading(t("loading")(label));
+  if (mesh) { scene.remove(mesh); mesh.dispose?.(); mesh = null; }
+  try {
+    const next = new SplatMesh({ ...opts, raycastable: true, onProgress: (e) => {
+      if (e.lengthComputable && e.total) loading(`${t("loading")(label)} ${(e.loaded / 1048576).toFixed(1)} / ${(e.total / 1048576).toFixed(1)} MB`, e.loaded / e.total);
+    } });
+    mesh = next; applyFlip(); scene.add(next);
+    await next.initialized;
+    if (mesh !== next) return;
+    frameScene(); ui.loader.classList.add("hide"); hint();
+  } catch (err) {
+    console.error(err);
+    const missing = !opts.fileBytes && SRC.includes("assets/");
+    failed(missing
+      ? t("noSplat")
+      : t("cantLoad")(label, err?.message || ""));
+    if (missing) showFigureList();
+  }
+}
+
+// Without the scene there are no markers to tap, so list the figures that have something to show.
+function showFigureList() {
+  const card = ui.loader.querySelector(".card");
+  card.querySelector(".figlist")?.remove();
+  const list = document.createElement("div");
+  list.className = "figlist";
+  const add = (label, onClick, sub = "") => {
+    const b = document.createElement("button");
+    b.innerHTML = `<span></span><small></small>`;
+    b.querySelector("span").textContent = label;
+    b.querySelector("small").textContent = sub;
+    b.addEventListener("click", onClick);
+    list.appendChild(b);
+  };
+  add(t("aboutScene"), openScene, t("aboutSceneSub"));
+  for (const id of CHARACTER_IDS) {
+    const c = characters[id]; if (!c) continue;
+    if (!c.model?.src && !Env.about(id).length) continue;
+    add(listName(c), () => openSheet(id), c.model?.src ? t("model3d") : "");
+  }
+  card.appendChild(list);
+  ui.loader.classList.add("interactive");
+}
+
+// ---------- Markers
+const markerEls = new Map();
+let active = null;
+function buildMarkers() {
+  const root = $("markers"); root.innerHTML = ""; markerEls.clear();
+  for (const h of hotspots) {
+    const c = characters[h.character]; if (!c) continue;
+    const el = document.createElement("button");
+    el.className = "marker"; el.title = nameOf(c);
+    el.style.setProperty("--c", FACTION_COLOR[c.faction] || "var(--accent)");
+    el.innerHTML = `<span class="dot"></span><span class="name"></span>`;
+    el.querySelector(".name").textContent = nameOf(c);
+    el.dataset.active = String(active === h.character);
+    el.addEventListener("click", (e) => { e.stopPropagation(); openSheet(h.character); });
+    root.appendChild(el); markerEls.set(h.character, { el, local: new THREE.Vector3(...h.position) });
+  }
+}
+const tmp = new THREE.Vector3();
+function updateMarkers() {
+  if (!mesh) return;
+  for (const [, m] of markerEls) {
+    tmp.copy(m.local).applyMatrix4(mesh.matrixWorld).project(camera);
+    const visible = tmp.z < 1 && Math.abs(tmp.x) < 1.2 && Math.abs(tmp.y) < 1.2;
+    m.el.classList.toggle("hidden", !visible);
+    if (visible) m.el.style.transform = `translate(${(tmp.x + 1) / 2 * innerWidth}px, ${(1 - tmp.y) / 2 * innerHeight}px) translate(-11px, -50%)`;
+  }
+}
+
+// ---------- Character sheet
+// The record for a figure or for the whole scene, plus the add/correct form.
+function showRecord(list, { envelopes, about }) {
+  const form = Env.renderForm($("sForm"), { envelopes, about, onSaved: () => (active ? openSheet(active, { keepChat: true }) : activeRegion ? openRegion(activeRegion) : openScene()) });
+  Env.renderRecord($("sKnown"), list, { onCorrect: (o) => { setTab("record"); form?.correct(o); } });
+  const unknown = list.filter((o) => o.kind === "absence").length;
+  $("sCount").textContent = t("count")(list.length, unknown);
+  $("sProtocol").innerHTML = `<span class="seal" data-layer="protocol">掟</span><span class="ptext"></span>`;
+  $("sProtocol").querySelector(".ptext").textContent = t("protocol");
+}
+// Form layer: the badge on the view, and "How this view was made" behind it.
+function showFormBadge(form, notes = []) {
+  const btn = $("sBasisBtn"), panel = $("sFormPanel");
+  btn.hidden = !form; panel.hidden = true; btn.setAttribute("aria-expanded", "false");
+  if (!form) return;
+  btn.replaceChildren(Env.basisBadge(form), Object.assign(document.createElement("span"), { className: "more", textContent: "ⓘ" }));
+  btn.title = Env.formStrings().how;
+  $("sFormH").textContent = Env.formStrings().how;
+  Env.renderForms($("sForms"), form, { notes });
+}
+$("sBasisBtn").addEventListener("click", () => {
+  const open = $("sFormPanel").hidden;
+  $("sFormPanel").hidden = !open; $("sBasisBtn").setAttribute("aria-expanded", String(open));
+  if (open) $("sFormPanel").scrollIntoView({ behavior: "smooth", block: "nearest" });
+});
+function setTab(tab) {
+  $("sheet").dataset.tab = tab;
+  for (const b of document.querySelectorAll(".tabs [role=tab]")) b.setAttribute("aria-selected", String(b.dataset.tab === tab));
+}
+for (const b of document.querySelectorAll(".tabs [role=tab]")) b.addEventListener("click", () => setTab(b.dataset.tab));
+
+// The eight layers of the Envelope as a row of seals; each takes you to where that layer shows.
+const LAYERS = [
+  ["form", "形"], ["time", "時"], ["actors", "人"], ["types", "類"],
+  ["evidence", "証"], ["absence", "欠"], ["protocol", "掟"], ["voice", "声"],
+];
+function goToLayer(layer) {
+  const scene = $("sheet").dataset.mode === "scene";
+  const target = {
+    form: $("sFormLayer"), actors: scene ? null : $("sActorLayer"), protocol: $("sProtocol"),
+    voice: scene ? null : $("sChat"),
+    time: $("sKnown"), types: $("sKnown").querySelector(".chip.kind"), evidence: $("sKnown").querySelector(".chip.evidence"),
+    absence: $("sKnown").querySelector(".obs.absence"),
+  }[layer];
+  if (!scene) { if (layer === "voice") setTab("talk"); else if (["time", "types", "evidence", "absence"].includes(layer)) setTab("record"); }
+  (target || $("sFormLayer")).scrollIntoView({ behavior: "smooth", block: "start" });
+}
+function renderLayerKey() {
+  const box = $("sLayers"); box.innerHTML = "";
+  for (const [k, s] of LAYERS) {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "seal"; b.dataset.layer = k; b.textContent = s;
+    b.title = t("layers")[k]; b.setAttribute("aria-label", t("layers")[k]);
+    b.addEventListener("click", () => goToLayer(k));
+    box.append(b);
+  }
+}
+function openScene() {
+  active = null;
+  for (const [, m] of markerEls) m.el.dataset.active = "false";
+  const env = Env.envelopeById(SCENE_ENVELOPE);
+  $("sheet").dataset.mode = "scene";
+  $("sName").textContent = (env && (env.name[LANG] || env.name.en)) || t("aboutScene");
+  $("sJa").textContent = (env && (LANG === "ja" ? env.name.en : env.name.ja)) || "";
+  $("sCrumb").textContent = Env.breadcrumb(SCENE_ENVELOPE);
+  $("sModel").removeAttribute("src");
+  // Scene-level record: everything in the diorama, the place it depicts and the museum,
+  // except per-figure appearance notes (those live on each figure's card).
+  const ids = [SCENE_ENVELOPE, env?.depicts, env?.parent].filter(Boolean);
+  showRecord(Env.inEnvelopes(ids).filter((o) => o.kind !== "appearance"), { envelopes: [SCENE_ENVELOPE], about: [] });
+  // Form layer for the scene: the splat (a record of the 1971 diorama), and the 1808 scene's own forms.
+  const box = $("sSceneForms"); box.innerHTML = "";
+  for (const f of [...Env.formsOf(SCENE_ENVELOPE), ...Env.formsOf(env?.depicts)]) {
+    const d = document.createElement("div"); Env.renderForms(d, f, { notes: [] }); box.append(...d.childNodes);
+  }
+  box.hidden = !box.childNodes.length;
+  $("sFormPanel").hidden = true;
+  activeRegion = null;
+  $("sheet").classList.add("open");
+}
+$("about").addEventListener("click", () => openScene());
+
+// A scene region: an envelope inside the diorama (the building, the curtains…), seen through the splat.
+let activeRegion = null;
+function openRegion(envId) {
+  const env = Env.envelopeById(envId); if (!env) return;
+  active = null; activeRegion = envId;
+  for (const [, m] of markerEls) m.el.dataset.active = "false";
+  $("sheet").dataset.mode = "scene";
+  $("sName").textContent = env.name[LANG] || env.name.en;
+  $("sJa").textContent = (LANG === "ja" ? env.name.en : env.name.ja) || "";
+  $("sCrumb").textContent = Env.breadcrumb(envId);
+  $("sModel").removeAttribute("src");
+  showRecord(Env.inEnvelopes([envId]), { envelopes: [envId, SCENE_ENVELOPE], about: [envId] });
+  const box = $("sSceneForms"); box.innerHTML = "";
+  for (const f of Env.formsOf(SCENE_ENVELOPE)) { const d = document.createElement("div"); Env.renderForms(d, f, { notes: [] }); box.append(...d.childNodes); }
+  box.hidden = !box.childNodes.length;
+  $("sFormPanel").hidden = true;
+  $("sheet").classList.add("open");
+}
+
+function openSheet(id, { keepChat = false } = {}) {
+  const c = characters[id]; if (!c) return;
+  active = id; activeRegion = null;
+  for (const [cid, m] of markerEls) m.el.dataset.active = String(cid === id);
+  $("sheet").dataset.mode = "figure";
+  if (!keepChat || !$("sheet").dataset.tab) setTab("talk");
+  $("sCrumb").textContent = Env.breadcrumb(SCENE_ENVELOPE);
+  $("sName").textContent = nameOf(c); $("sJa").textContent = otherNameOf(c);
+  $("sRole").textContent = sheetText(c, "role") || "—";
+  showRecord(Env.about(id), { envelopes: [SCENE_ENVELOPE], about: [id] });
+  const chips = $("sChips"); chips.innerHTML = "";
+  const chip = (text, cls = "") => { const s = document.createElement("span"); s.className = `chip ${cls}`; s.textContent = text; chips.appendChild(s); };
+  chip(t("faction")[c.faction] || c.faction?.replace(/-/g, " ") || "—");
+  chip(c.perspective ? Env.label(c.perspective) : "—");
+  chip(t("status")[c.status] || t("status").draft, c.status === "curator-reviewed" ? "" : "draft");
+  if (LANG === "ja" && CHAR_JA[id]) chip(t("machine"));
+  if (c.voice?.routes_through) chip(t("speaksThrough")(characters[c.voice.routes_through] ? nameOf(characters[c.voice.routes_through]) : "interpreter"));
+  const dec = (LANG === "ja" && CHAR_JA[id]?.declines?.length ? CHAR_JA[id].declines : c.declines) || [];
+  $("sDeclinesWrap").hidden = !dec.length; $("sDeclines").textContent = dec.join(" · ");
+  // Close-up 3D model, when the figure has one
+  const mv = $("sModel");
+  $("sModelWrap").hidden = !c.model?.src;
+  if (c.model?.src) {
+    if (mv.getAttribute("src") !== c.model.src) mv.setAttribute("src", c.model.src);
+    mv.setAttribute("alt", `${t("modelAlt")(nameOf(c))}${sheetText(c, "appearance") ? "：" + sheetText(c, "appearance") : ""}`);
+    mv.cameraOrbit = "0deg 80deg auto";
+    showFormBadge(Env.formsOf(id).find((f) => f.src === c.model.src) || Env.formsOf(id).find((f) => f.src), Env.formNotes(id));
+    $("sStl").dataset.src = c.model.src; $("sStl").dataset.name = id;
+  } else {
+    mv.removeAttribute("src");
+  }
+  if (!keepChat || chat.id !== id) resetChat(id);
+  $("sheet").classList.add("open");
+}
+
+// ---------- Talk: answers come from /api/talk, grounded in the observations that pass the protocol.
+// Language for Talk: answers, voice, voice input and the Talk labels. The record itself stays as written.
+const I18N = {
+  en: {
+    suggAinu: ["What is happening here?", "What did the ceremony mean to you?", "What are you wearing?", "Why can't we see your face?"],
+    sugg: ["What is happening here?", "Who are you?", "What happens after the ceremony?"],
+    grounding: { documented: "from the record", inferred: "partly inferred", unknown: "not in the record", declined: "declined" },
+    talkH: "Talk", talkSub: " · answers only from the record below", ask: "Ask", placeholder: "Ask this figure something…",
+    listening: "Listening… tap 🎙 again to send", transcribing: "Transcribing…", fromRecord: "From the record:", unknown: "Unknown: ",
+    voiceOn: "🔊 Voice on", voiceOff: "🔇 Voice off", replay: "🔊 Replay", making: "… voice", credit: "Voices by ElevenLabs · synthetic",
+    notice: "This voice is a synthetic interpretation built from historical sources. It is not a historical record and does not speak for any person or community.",
+    switched: "English",
+    title: "Omusha, Kushun Kotan, 1808", subtitle: "オムシャ・久春古丹 · tap a figure", open: "Open", about: "About",
+    openTitle: "Open a splat file", aboutTitle: "About this scene: what is known, and what is not",
+    dotsTitle: "Show or hide the figure dots (figures stay tappable)", flipTitle: "Flip upside-down scenes", resetTitle: "Reset view",
+    fsTitle: "Fullscreen", close: "Close", langTitle: "English · tap for 日本語",
+    stl: "Download for 3D printing (STL)", stlTitle: "Shape only (STL has no colour). Team use only: not for sharing.",
+    stlMaking: "Preparing STL…", stlSaved: (mm) => `STL saved: ${mm} mm tall. Scale it in your slicer.`, stlFailed: (m) => `Couldn't make the STL: ${m}`,
+    role: "Role", declines: "Will not speculate on", creditTitle: "Synthetic voices: not recordings of any person", micTitle: "Ask by voice",
+    knownH: "What is known <small>· and what is not</small>",
+    legend: "Every entry shows two separate scores: <b>evidence</b> (how well it is supported) and <b>standing</b> (whose knowledge it is). Nothing is overwritten; corrections keep the history.",
+    aboutScene: "About this scene", aboutSceneSub: "what is known, and what is not", model3d: "3D model",
+    noSplat: "The scene scan (splat) isn't uploaded yet. Meanwhile, open a figure or the record:",
+    loading: (l) => `Loading ${l}…`, cantLoad: (l, m) => `Couldn't load ${l}. ${m}`,
+    hintTouch: "Tap a marker to meet a figure · drag to orbit · pinch to zoom", hintMouse: "Click a marker to meet a figure · drag to orbit · scroll to zoom",
+    dotsOn: "Figure dots shown", dotsOff: "Dots hidden · figures still tappable",
+    micBlocked: "Microphone blocked. Allow it in the browser, or type the question.", notCaught: "Didn't catch that. Try again.",
+    faction: { aizu: "Aizu clan", shogunate: "shogunate", "wajin-interpreter": "Wajin interpreter", "sakhalin-ainu": "Sakhalin Ainu" },
+    status: { "curator-reviewed": "curator reviewed", sourced: "sourced, not yet reviewed", draft: "draft, not yet sourced" },
+    speaksThrough: (n) => `speaks through the ${n.toLowerCase()}`, modelAlt: (n) => `3D model of the ${n}`,
+    lForm: "Form", lActors: "Actors", lensOpen: "Open",
+    layers: { form: "Form: how it can be seen", time: "Time strata: depicted, made, observed, present", actors: "Actors: who is depicted, made it, speaks", types: "Observation types: event, contact, meaning, making", evidence: "Evidence and standing: two separate scores", absence: "Absence: what is unknown, and why", protocol: "Protocol: who may see what", voice: "Voice: speaks only from the record" },
+    tabTalk: "Talk", tabRecord: "Record", count: (n, u) => `${n}${u ? ` · ${u} gap${u > 1 ? "s" : ""}` : ""}`,
+    protocol: "Protocol: shown to the project team. Access rules are to be set with the Hokkaido Museum's Ainu Culture Research Center and community bodies.",
+  },
+  ja: {
+    suggAinu: ["ここでは何が行われていますか？", "この儀式はあなたにとって何を意味しましたか？", "何を着ていますか？", "なぜ顔が見えないのですか？"],
+    sugg: ["ここでは何が行われていますか？", "あなたは誰ですか？", "儀式のあとには何がありますか？"],
+    grounding: { documented: "記録にあり", inferred: "一部推定", unknown: "記録にない", declined: "回答を控える" },
+    talkH: "話す", talkSub: "・下の記録だけをもとに答えます", ask: "質問", placeholder: "この人物に質問する…",
+    listening: "聞いています… もう一度 🎙 で送信", transcribing: "文字にしています…", fromRecord: "記録より：", unknown: "不明：",
+    voiceOn: "🔊 音声オン", voiceOff: "🔇 音声オフ", replay: "🔊 もう一度", making: "… 音声", credit: "音声：ElevenLabs（合成音声）",
+    notice: "この声は歴史資料をもとにした合成の解釈です。歴史記録ではなく、特定の個人や共同体を代弁するものではありません。",
+    switched: "日本語",
+    title: "オムシャ　久春古丹　1808年", subtitle: "Omusha, Kushun Kotan · 人物をタップ", open: "開く", about: "この場面について",
+    openTitle: "スプラットファイルを開く", aboutTitle: "この場面について：分かっていること、分からないこと",
+    dotsTitle: "人物の印を表示／非表示（非表示でもタップできます）", flipTitle: "上下を反転", resetTitle: "視点をリセット",
+    fsTitle: "全画面表示", close: "閉じる", langTitle: "日本語 · タップで English",
+    stl: "3Dプリント用にダウンロード（STL）", stlTitle: "形状のみ（STLには色がありません）。チーム内の利用に限ります。共有しないでください。",
+    stlMaking: "STLを作成しています…", stlSaved: (mm) => `STLを保存しました：高さ${mm}mm。スライサーで拡大縮小してください。`, stlFailed: (m) => `STLを作成できませんでした：${m}`,
+    role: "役割", declines: "推測しないこと", creditTitle: "合成音声です。実在の人物の録音ではありません。", micTitle: "声で質問する",
+    knownH: "分かっていること <small>・分からないこと</small>",
+    legend: "各項目には二つの別々の評価があります：<b>根拠</b>（どの程度裏付けられているか）と<b>立場</b>（誰の知識か）。上書きはされず、訂正しても履歴が残ります。",
+    aboutScene: "この場面について", aboutSceneSub: "分かっていること、分からないこと", model3d: "3Dモデル",
+    noSplat: "場面のスキャン（スプラット）はまだアップロードされていません。その間、人物または記録を開けます：",
+    loading: (l) => `${l} を読み込んでいます…`, cantLoad: (l, m) => `${l} を読み込めませんでした。${m}`,
+    hintTouch: "印をタップして人物に会う · ドラッグで回転 · ピンチで拡大", hintMouse: "印をクリックして人物に会う · ドラッグで回転 · スクロールで拡大",
+    dotsOn: "人物の印を表示", dotsOff: "印を非表示 · 人物はタップできます",
+    micBlocked: "マイクがブロックされています。ブラウザで許可するか、質問を入力してください。", notCaught: "聞き取れませんでした。もう一度どうぞ。",
+    faction: { aizu: "会津藩", shogunate: "幕府", "wajin-interpreter": "和人の通辞", "sakhalin-ainu": "樺太アイヌ" },
+    status: { "curator-reviewed": "学芸員確認済み", sourced: "出典あり・未確認", draft: "下書き・出典未確認" },
+    speaksThrough: (n) => `${n}を介して話す`, modelAlt: (n) => `${n}の3Dモデル`,
+    machine: "機械翻訳",
+    lForm: "形態", lActors: "人物", lensOpen: "開く",
+    layers: { form: "形態：どのように見られるか", time: "時代層：描かれた時・作られた時・観察・現在", actors: "人物：描かれた人・作った人・語る人", types: "観察の種類：出来事・接触・意味・制作", evidence: "根拠と立場：二つの別々の評価", absence: "欠落：分からないこと、その理由", protocol: "公開の決まり：誰が何を見られるか", voice: "声：記録だけをもとに語る" },
+    tabTalk: "話す", tabRecord: "記録", count: (n, u) => `${n}件${u ? ` · 不明${u}` : ""}`,
+    protocol: "公開範囲：プロジェクトチームのみ。閲覧の決まりは、北海道博物館アイヌ民族文化研究センターおよび関係する団体と定める予定。",
+  },
+};
+// Name and sheet text in the current language. Japanese sheet text is a machine translation.
+const nameOf = (c) => (LANG === "ja" ? c.name.ja || c.name.en : c.name.en);
+const listName = (c) => (c.variant ? `${nameOf(c)} (${c.variant[LANG] || c.variant.en})` : nameOf(c));
+const otherNameOf = (c) => (LANG === "ja" ? c.name.en : c.name.ja || "");
+const sheetText = (c, f) => (LANG === "ja" && CHAR_JA[c.id]?.[f]) || (f === "modelLabel" ? c.model?.label : c[f]);
+let LANG = params.get("lang") === "ja" || params.get("lang") === "en" ? params.get("lang") : null;
+try { LANG = LANG || localStorage.getItem("omusha.lang"); } catch { /* storage blocked */ }
+if (LANG !== "ja" && LANG !== "en") LANG = navigator.language?.startsWith("ja") ? "ja" : "en";
+const t = (k) => I18N[LANG][k];
+function applyLang() {
+  document.documentElement.lang = LANG;
+  Env.setLang(LANG);
+  for (const f of $("lang").querySelectorAll(".flag")) f.classList.toggle("on", f.dataset.l === LANG);
+  $("lang").title = t("langTitle");
+  for (const n of document.querySelectorAll("[data-i18n]")) n.textContent = t(n.dataset.i18n);
+  for (const n of document.querySelectorAll("[data-i18n-html]")) n.innerHTML = t(n.dataset.i18nHtml);
+  for (const n of document.querySelectorAll("[data-i18n-title]")) n.title = t(n.dataset.i18nTitle);
+  $("sTalkH").innerHTML = `<span class="seal">声</span>`; $("sTalkH").append(t("talkH"), Object.assign(document.createElement("small"), { textContent: t("talkSub") }));
+  renderLayerKey();
+  $("sSend").textContent = t("ask"); $("sQ").placeholder = t("placeholder");
+  $("sVoiceCredit").textContent = t("credit"); $("sNotice").textContent = t("notice");
+  if (chat.id) renderSuggestions(chat.id);
+  syncVoiceUi();
+}
+$("lang").addEventListener("click", async () => {
+  LANG = LANG === "ja" ? "en" : "ja";
+  try { localStorage.setItem("omusha.lang", LANG); } catch { /* ignore */ }
+  stopSpeaking(); applyLang(); toast(t("switched"));
+  // Re-draw everything that shows names or the record, keeping any conversation in place.
+  await Env.loadEnvelope();
+  buildMarkers();
+  if (!ui.loader.classList.contains("hide") && ui.loader.classList.contains("interactive")) { failed(t("noSplat")); showFigureList(); }
+  if ($("sheet").classList.contains("open")) { if (active) openSheet(active, { keepChat: true }); else if (activeRegion) openRegion(activeRegion); else openScene(); }
+  if (EDIT) renderEditor();
+});
+
+let chat = { id: null, history: [] };
+function resetChat(id) {
+  chat = { id, history: [] };
+  $("sLog").innerHTML = ""; $("sQ").value = "";
+  renderSuggestions(id);
+}
+function renderSuggestions(id) {
+  const sugg = $("sSugg"); sugg.innerHTML = "";
+  for (const q of characters[id]?.faction === "sakhalin-ainu" ? t("suggAinu") : t("sugg")) {
+    const b = document.createElement("button"); b.type = "button"; b.textContent = q;
+    b.addEventListener("click", () => ask(q)); sugg.append(b);
+  }
+}
+const elm = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+// Voice: ElevenLabs through the server when it is set up, the browser's own voice otherwise.
+const voice = { server: false, auto: true, audio: new Audio() };
+try { voice.auto = localStorage.getItem("omusha.autovoice") !== "0"; } catch { /* storage blocked */ }
+fetch("/api/voice-status").then((r) => r.json()).then((s) => { voice.server = !!s.voice; syncVoiceUi(); }).catch(() => {});
+function syncVoiceUi() {
+  $("sVoiceCredit").hidden = !voice.server;
+  $("sAuto").hidden = !voice.server;
+  $("sAuto").setAttribute("aria-pressed", String(voice.auto));
+  $("sAuto").textContent = voice.auto ? t("voiceOn") : t("voiceOff");
+  $("sMic").hidden = !(voice.server && window.MediaRecorder) && !Recognition;
+}
+function stopSpeaking() { voice.audio.pause(); if ("speechSynthesis" in window) speechSynthesis.cancel(); }
+async function speak(text, figure, btn) {
+  stopSpeaking();
+  if (voice.server) {
+    if (btn) btn.textContent = t("making");
+    try {
+      const res = await fetch("/api/speak", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text, figure, lang: LANG }) });
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || `Voice failed (${res.status})`);
+      if (voice.audio.src) URL.revokeObjectURL(voice.audio.src);
+      voice.audio.src = URL.createObjectURL(await res.blob());
+      await voice.audio.play();
+    } catch (err) { toast(err.message); }
+    finally { if (btn) btn.textContent = t("replay"); }
+    return;
+  }
+  if (!("speechSynthesis" in window)) return;
+  const u = new SpeechSynthesisUtterance(text.replace(/\s*\[[^\]]*\]/g, ""));
+  u.lang = LANG === "ja" ? "ja-JP" : "en-GB"; u.rate = 0.95;
+  speechSynthesis.speak(u);
+}
+async function ask(question) {
+  question = question.trim(); if (!question || !chat.id) return;
+  const id = chat.id, log = $("sLog");
+  log.append(elm("div", "msg q", question));
+  const pending = elm("div", "msg a", "…"); log.append(pending);
+  pending.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  $("sSend").disabled = true; $("sQ").value = "";
+  try {
+    const res = await fetch("/api/talk", { method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ figure: id, question, history: chat.history, lang: LANG }) });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || (res.status === 404 ? "Talk needs the Node server (npm start)." : `Failed (${res.status})`));
+    if (chat.id !== id) return;
+    pending.textContent = "";
+    pending.classList.toggle("unknown", data.grounding === "unknown");
+    pending.append(elm("div", "", data.answer));
+    const row = elm("div", "row2");
+    row.append(elm("span", `chip${data.grounding === "documented" ? "" : " draft"}`, t("grounding")[data.grounding] || data.grounding));
+    const say = elm("button", "link", t("replay")); say.type = "button"; say.addEventListener("click", () => speak(data.answer, id, say));
+    row.append(say); pending.append(row);
+    if (voice.server && voice.auto) speak(data.answer, id, say);
+    const cited = (data.cites || []).map((c) => Env.state.all.find((o) => o.id === c)).filter(Boolean);
+    if (cited.length) {
+      const box = elm("div", "cited"); box.append(elm("div", "", t("fromRecord")));
+      for (const o of cited) box.append(elm("div", "", `• ${o.kind === "absence" ? t("unknown") : ""}${Env.claimOf(o)} (${Env.sourceOf(o) || "—"})`));
+      pending.append(box);
+    }
+    chat.history.push({ role: "user", text: question }, { role: "model", text: data.answer });
+  } catch (err) {
+    pending.className = "msg err"; pending.textContent = err.message;
+  } finally {
+    $("sSend").disabled = false;
+  }
+}
+$("sAsk").addEventListener("submit", (e) => { e.preventDefault(); ask($("sQ").value); });
+$("sAuto").addEventListener("click", () => {
+  voice.auto = !voice.auto; if (!voice.auto) stopSpeaking();
+  try { localStorage.setItem("omusha.autovoice", voice.auto ? "1" : "0"); } catch { /* ignore */ }
+  syncVoiceUi();
+});
+// Ask by voice: tap to record, tap again to send (ElevenLabs Scribe, any browser with a mic).
+// Without server voice, fall back to the browser's speech recognition (Chrome, Android).
+const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recording = null;
+$("sMic").addEventListener("click", async () => {
+  const mic = $("sMic");
+  if (recording) { recording.stop(); return; }
+  stopSpeaking();
+  if (voice.server && window.MediaRecorder) {
+    let stream;
+    try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+    catch { toast(t("micBlocked")); return; }
+    const type = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg"].find((t) => MediaRecorder.isTypeSupported(t)) || "";
+    const rec = new MediaRecorder(stream, type ? { mimeType: type } : undefined);
+    const chunks = [];
+    rec.ondataavailable = (e) => e.data.size && chunks.push(e.data);
+    const timer = setTimeout(() => rec.state === "recording" && rec.stop(), 15000);
+    rec.onstop = async () => {
+      clearTimeout(timer); stream.getTracks().forEach((t) => t.stop());
+      recording = null; mic.setAttribute("aria-pressed", "false"); $("sQ").placeholder = t("transcribing");
+      try {
+        const blob = new Blob(chunks, { type: rec.mimeType || "audio/webm" });
+        const res = await fetch(`/api/listen?lang=${LANG}`, { method: "POST", headers: { "content-type": blob.type }, body: blob });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Could not hear that.");
+        if (data.text) { $("sQ").value = data.text; ask(data.text); } else toast(t("notCaught"));
+      } catch (err) { toast(err.message); }
+      finally { $("sQ").placeholder = t("placeholder"); }
+    };
+    recording = rec; rec.start(); mic.setAttribute("aria-pressed", "true");
+    $("sQ").placeholder = t("listening");
+    return;
+  }
+  if (!Recognition) return;
+  const r = new Recognition();
+  r.lang = LANG === "ja" ? "ja-JP" : "en-US"; r.interimResults = true;
+  mic.setAttribute("aria-pressed", "true"); recording = r;
+  r.onresult = (e) => {
+    const x = e.results[e.results.length - 1]; $("sQ").value = x[0].transcript;
+    if (x.isFinal) ask(x[0].transcript);
+  };
+  r.onend = r.onerror = () => { recording = null; mic.setAttribute("aria-pressed", "false"); };
+  r.start();
+});
+applyLang();
+function closeSheet() {
+  active = null; $("sheet").classList.remove("open");
+  for (const [, m] of markerEls) m.el.dataset.active = "false";
+}
+$("sClose").addEventListener("click", closeSheet);
+
+// ---------- Taps on the scene (tap vs drag)
+const raycaster = new THREE.Raycaster();
+function hitAt(x, y) {
+  if (!mesh) return null;
+  raycaster.setFromCamera(new THREE.Vector2((x / innerWidth) * 2 - 1, -(y / innerHeight) * 2 + 1), camera);
+  return raycaster.intersectObject(mesh, false)[0] || null;
+}
+let down = null;
+canvas.addEventListener("pointerdown", (e) => { down = { x: e.clientX, y: e.clientY, t: performance.now() }; });
+canvas.addEventListener("pointerup", (e) => {
+  if (!down) return;
+  const tap = Math.hypot(e.clientX - down.x, e.clientY - down.y) < 6 && performance.now() - down.t < 350;
+  down = null;
+  if (!tap) return;
+  if (EDIT && editing) placeHotspot(e.clientX, e.clientY);
+  else if (active && !isTouch) closeSheet();
+});
+canvas.addEventListener("dblclick", (e) => {
+  if (EDIT) return;
+  const hit = hitAt(e.clientX, e.clientY);
+  if (hit) { controls.target.copy(hit.point); controls.update(); }
+});
+
+// ---------- Edit mode
+let editing = null;
+function toast(text) { const t = $("toast"); t.textContent = text; t.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("on"), 1800); }
+// Figures and scene regions share one list; regions are envelopes with scale "feature".
+const regionEnvelopes = () => Env.state.envelopes.filter((e) => e.scale === "feature");
+function renderEditor() {
+  const list = $("edList"); list.innerHTML = "";
+  const row = (key, label, placed) => {
+    const r = document.createElement("div"); r.className = "row";
+    const b = document.createElement("button"); b.className = "pick"; b.textContent = label;
+    b.setAttribute("aria-pressed", String(editing === key));
+    b.addEventListener("click", () => { editing = editing === key ? null : key; renderEditor(); });
+    const mark = document.createElement("span"); mark.className = "placed"; mark.textContent = placed ? "✓" : "";
+    r.append(b, mark); list.appendChild(r);
+  };
+  for (const id of CHARACTER_IDS) row(id, characters[id] ? listName(characters[id]) : id, hotspots.some((h) => h.character === id));
+  const head = document.createElement("div"); head.className = "k"; head.textContent = "Scene regions (zoom labels)"; list.append(head);
+  for (const e of regionEnvelopes()) row(`region:${e.id}`, e.name[LANG] || e.name.en, regions.some((r) => r.envelope === e.id));
+}
+function placeHotspot(x, y) {
+  const hit = hitAt(x, y);
+  if (!hit) { toast("Nothing under that point, try again"); return; }
+  const local = mesh.worldToLocal(hit.point.clone());
+  const position = local.toArray().map((v) => +v.toFixed(4));
+  if (editing.startsWith("region:")) {
+    const envelope = editing.slice(7);
+    regions = regions.filter((r) => r.envelope !== envelope).concat({ envelope, position });
+    toast(`Placed ${Env.envelopeById(envelope)?.name.en || envelope}`);
+  } else {
+    hotspots = hotspots.filter((h) => h.character !== editing).concat({ character: editing, position });
+    toast(`Placed ${characters[editing].name.en}`);
+    buildMarkers();
+  }
+  renderEditor();
+}
+const exportJson = () => JSON.stringify({ note: "Positions are in splat-local coordinates. Place them with ?edit=1, then paste the exported JSON here.", ...(startView && { view: startView }), hotspots, regions }, null, 2) + "\n";
+$("edView").addEventListener("click", () => {
+  if (!mesh) return;
+  const local = (v) => mesh.worldToLocal(v.clone()).toArray().map((n) => +n.toFixed(4));
+  startView = { position: local(camera.position), target: local(controls.target) };
+  home = { position: camera.position.clone(), target: controls.target.clone() };
+  toast("Start view set. Copy JSON to save it with the markers.");
+});
+$("edCopy").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText(exportJson()); toast("Copied. Paste it into src/hotspots.json"); }
+  catch { toast("Clipboard blocked; use Download"); }
+});
+$("edSave").addEventListener("click", () => {
+  const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(new Blob([exportJson()], { type: "application/json" })), download: "hotspots.json" });
+  a.click(); URL.revokeObjectURL(a.href);
+});
+
+// ---------- Toolbar
+$("file").addEventListener("change", async (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  loadSplat({ fileBytes: new Uint8Array(await f.arrayBuffer()), fileName: f.name }, f.name);
+});
+$("flip").addEventListener("click", () => { flipped = !flipped; applyFlip(); frameScene(); });
+// 3D-print download: unpack the Meshopt web model in the browser and save it as binary STL,
+// scaled to 100 mm tall (generated models have no real-world scale). Shape only; STL has no colour.
+const PRINT_HEIGHT_MM = 100;
+$("sStl").addEventListener("click", async (event) => {
+  const btn = event.currentTarget, label = btn.textContent;
+  btn.disabled = true; btn.textContent = t("stlMaking");
+  try {
+    const [{ GLTFLoader }, { STLExporter }, { MeshoptDecoder }] = await Promise.all([
+      import("three/addons/loaders/GLTFLoader.js"),
+      import("three/addons/exporters/STLExporter.js"),
+      import("three/addons/libs/meshopt_decoder.module.js"),
+    ]);
+    const gltf = await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync(btn.dataset.src);
+    gltf.scene.updateMatrixWorld(true);
+    const size = new THREE.Box3().setFromObject(gltf.scene).getSize(new THREE.Vector3());
+    gltf.scene.scale.multiplyScalar(PRINT_HEIGHT_MM / (size.y || 1));
+    gltf.scene.updateMatrixWorld(true);
+    const stl = new STLExporter().parse(gltf.scene, { binary: true });
+    const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(new Blob([stl], { type: "model/stl" })), download: `${btn.dataset.name}.stl` });
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+    toast(t("stlSaved")(PRINT_HEIGHT_MM));
+  } catch (err) {
+    console.error(err); toast(t("stlFailed")(err.message));
+  } finally {
+    btn.disabled = false; btn.textContent = label;
+  }
+});
+
+// ?dots=0 or the eye button: hide the dots, keep the figures tappable. Remembered per browser.
+let dotsOn = params.get("dots") !== "0";
+try { if (!params.has("dots") && localStorage.getItem("omusha.dots") === "0") dotsOn = false; } catch { /* storage blocked */ }
+function applyDots() {
+  document.body.classList.toggle("ghost", !dotsOn);
+  $("dots").setAttribute("aria-pressed", String(dotsOn));
+}
+$("dots").addEventListener("click", () => {
+  dotsOn = !dotsOn; applyDots();
+  try { localStorage.setItem("omusha.dots", dotsOn ? "1" : "0"); } catch { /* ignore */ }
+  toast(dotsOn ? t("dotsOn") : t("dotsOff"));
+});
+applyDots();
+$("reset").addEventListener("click",() => { if (!home) return; camera.position.copy(home.position); controls.target.copy(home.target); controls.update(); });
+$("fs").addEventListener("click", () => {
+  const el = document.documentElement;
+  if (document.fullscreenElement) document.exitFullscreen?.(); else (el.requestFullscreen || el.webkitRequestFullscreen)?.call(el);
+});
+function hint() {
+  const h = $("hint");
+  h.textContent = EDIT ? "Edit mode: pick a figure, then tap where it stands"
+    : isTouch ? t("hintTouch") : t("hintMouse");
+  h.classList.remove("hide"); clearTimeout(hint.t); hint.t = setTimeout(() => h.classList.add("hide"), 5000);
+}
+
+// ---------- Zoom lens: when you zoom in, label whatever figure or scene region is nearest the centre.
+// Zoomed in on a thing = the camera is nearer to it than ZOOM_IN of its distance in the start view.
+const ZOOM_IN = 0.8;
+const lensTmp = new THREE.Vector3(), lensView = new THREE.Vector3();
+let lensItem = null;
+function lensCandidates() {
+  const out = [];
+  for (const h of hotspots) if (characters[h.character]) out.push({ type: "figure", id: h.character, position: h.position });
+  for (const r of regions) if (Env.envelopeById(r.envelope)) out.push({ type: "region", id: r.envelope, position: r.position });
+  return out;
+}
+function updateLens() {
+  const lens = $("lens");
+  const hide = () => { lens.classList.remove("on"); lensItem = null; };
+  if (!mesh || !home || EDIT || $("sheet").classList.contains("open")) return hide();
+  // A thing counts as zoomed in on when the camera is clearly closer to it than in the start view.
+  let best = null;
+  const reach = Math.min(innerWidth, innerHeight) * 0.3;
+  for (const c of lensCandidates()) {
+    lensTmp.set(...c.position).applyMatrix4(mesh.matrixWorld);
+    if (camera.position.distanceTo(lensTmp) > home.position.distanceTo(lensTmp) * ZOOM_IN) continue;
+    lensView.copy(lensTmp).applyMatrix4(camera.matrixWorldInverse);
+    if (lensView.z >= 0) continue; // behind the camera
+    lensTmp.project(camera);
+    if (Math.abs(lensTmp.x) > 1 || Math.abs(lensTmp.y) > 1) continue;
+    const d = Math.hypot(lensTmp.x * innerWidth / 2, lensTmp.y * innerHeight / 2);
+    if (d < reach && (!best || d < best.d)) best = { ...c, d };
+  }
+  if (!best) return hide();
+  if (lensItem?.id !== best.id || lens.dataset.lang !== LANG) {
+    lensItem = best; lens.dataset.lang = LANG;
+    let name, line, list, layer, seal;
+    if (best.type === "figure") {
+      const c = characters[best.id];
+      name = nameOf(c); line = sheetText(c, "role") || ""; list = Env.about(best.id); layer = "actors"; seal = "人";
+    } else {
+      const e = Env.envelopeById(best.id);
+      name = e.name[LANG] || e.name.en; list = Env.inEnvelopes([best.id]);
+      line = Env.claimOf(list.find((o) => o.kind !== "absence") || list[0] || { claim: "" }) || ""; layer = "form"; seal = "形";
+    }
+    $("lensSeal").textContent = seal; $("lensSeal").dataset.layer = layer;
+    $("lensName").textContent = name; $("lensLine").textContent = line;
+    const gaps = list.filter((o) => o.kind === "absence").length;
+    $("lensCount").textContent = `${t("tabRecord")} ${t("count")(list.length, gaps)}`;
+    $("lensGo").textContent = t("lensOpen");
+  }
+  lens.classList.add("on");
+}
+// ?debug exposes the scene for inspection in the console.
+if (params.has("debug")) window.__omusha = { THREE, camera, controls, getMesh: () => mesh, getHome: () => home, getRegions: () => regions, getHotspots: () => hotspots, updateLens };
+$("lens").addEventListener("click", () => {
+  if (!lensItem) return;
+  if (lensItem.type === "figure") openSheet(lensItem.id); else openRegion(lensItem.id);
+});
+
+// ---------- Go
+Env.setLang(LANG);
+await Promise.all([loadData(), Env.loadEnvelope()]);
+buildMarkers();
+if (EDIT) { $("editor").classList.add("on"); renderEditor(); }
+// ?figure=<character id> opens that figure's card straight away (QR codes, demo links)
+if (params.get("figure") && characters[params.get("figure")]) openSheet(params.get("figure"));
+else if (params.has("about")) openScene();
+renderer.setAnimationLoop((now) => { controls.update(); renderer.render(scene, camera); updateMarkers(); if (!(now - (updateLens.t || 0) < 200)) { updateLens.t = now; updateLens(); } });
+loadSplat({ url: SRC, fileName: SRC.split("?")[0].split("/").pop() }, SRC.split("/").pop());
+</script>
+</body>
+</html>

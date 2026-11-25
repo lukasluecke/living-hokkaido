@@ -43,3 +43,17 @@ test("activity size comes only from the activity data", () => {
   });
   assert.equal(activitySize(seq), "2 steps");
 });
+
+test("model disclaimers are notes, not facts to find", async () => {
+  const { factHotspots, modelNotes } = await import("@/contracts");
+  const { defaultPack } = await import("@/content");
+  for (const a of defaultPack.artifacts) {
+    assert.ok(factHotspots(a).every((h) => h.kind !== "disclaimer"));
+    assert.equal(
+      factHotspots(a).length + modelNotes(a).length,
+      a.hotspots.length,
+    );
+  }
+  const fiber = defaultPack.artifacts.find((a) => a.id === "fiber");
+  assert.ok(fiber && modelNotes(fiber).length === 1);
+});

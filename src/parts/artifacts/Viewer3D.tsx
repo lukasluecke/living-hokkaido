@@ -7,10 +7,12 @@ import { ContactShadows, PresentationControls } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Suspense, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
-import { type Artifact, type Emit, SCALE } from "@/contracts";
+import { type Artifact, type Emit, factHotspots, SCALE } from "@/contracts";
 import { useGlbClone } from "../shared/Glb";
+import { QualityGovernor, useQuality } from "../shared/Quality";
 import { applyLook } from "./model/looks";
 import { builders, type ObjectId } from "./model/models";
+import { useT } from "@/i18n";
 import attn from "../shared/Attention.module.css";
 import c from "./Viewer.module.css";
 
@@ -23,6 +25,7 @@ function frame(g: THREE.Object3D) {
   g.position.sub(centre);
   wrap.add(g);
   wrap.userData.radius = Math.max(size.x, size.y, size.z) / 2;
+  wrap.userData.halfHeight = size.y / 2;
   return wrap;
 }
 
@@ -74,7 +77,12 @@ function Model({
     }),
     [],
   );
-  const scale = (0.9 / (obj.userData.radius || 1)) * 1;
+  // Fit the longest side, but keep tall objects (a stake, a post) inside the
+  // short height of the card viewer (about 0.8 units visible above centre).
+  const scale = Math.min(
+    0.9 / (obj.userData.radius || 1),
+    0.68 / (obj.userData.halfHeight || 1),
+  );
   useFrame(({ camera, size }, dt) => {
     const t = turn.current;
     if (t)
@@ -122,6 +130,8 @@ export function Viewer3D({
   read: string[];
   emit: Emit;
 }) {
+  const t = useT();
+  const q = useQuality(SCALE.maxDpr);
   const yaw = useRef(0);
   const hotspots = useRef<HTMLDivElement>(null);
   // biome-ignore lint/correctness/useExhaustiveDependencies: reset per artifact
@@ -138,7 +148,9 @@ export function Viewer3D({
       }}
     >
       <Canvas
-        dpr={[1, SCALE.maxDpr]}
+        // Screen readers use the HTML buttons over and beside the canvas.
+        aria-hidden
+        dpr={q.dpr}
         camera={{ position: [0, 0.35, 2.6], fov: 35 }}
         gl={{ antialias: true }}
       >
@@ -151,6 +163,7 @@ export function Viewer3D({
           color="#9fb8d8"
         />
         <ModelFromSource artifact={artifact} yaw={yaw} hotspots={hotspots} />
+        <QualityGovernor />
         <ContactShadows
           position={[0, -0.95, 0]}
           opacity={0.35}
@@ -160,13 +173,13 @@ export function Viewer3D({
         />
       </Canvas>
       <div ref={hotspots} className={c.hotspots}>
-        {artifact.hotspots.map((h, i) => (
+        {factHotspots(artifact).map((h, i) => (
           <button
             key={h.id}
             type="button"
             data-hotspot={h.id}
             className={`${c.hotspot} ${read.includes(h.id) ? c.read : attn.pulse}`}
-            aria-label={h.title}
+            aria-label={read.includes(h.id) ? `${h.title}, read` : h.title}
             title={h.title}
             onClick={() =>
               emit({
@@ -183,15 +196,15 @@ export function Viewer3D({
       <div className={c.turn}>
         <button
           type="button"
-          aria-label="Turn left"
+          aria-label={t("Turn left")}
           onClick={() => (yaw.current -= 0.6)}
         >
           ⟲
         </button>
-        <span>Drag to turn</span>
+        <span>{t("Drag to turn")}</span>
         <button
           type="button"
-          aria-label="Turn right"
+          aria-label={t("Turn right")}
           onClick={() => (yaw.current += 0.6)}
         >
           ⟳

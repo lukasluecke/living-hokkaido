@@ -121,3 +121,28 @@ test("place schema needs exactly one right ring and the pose on the sheet", () =
   });
   assert.equal(poseMissing.success, false);
 });
+
+test("place: animal hills shows hunting with things only, ends on kamuy nuance", () => {
+  const h = place("place-hills");
+  assert.equal(h.stage, "hills");
+  assert.equal(h.subject, "objects");
+  for (const s of h.steps) {
+    if (s.figure)
+      assert.ok(s.figure.thing && !s.figure.hat, `${s.id} is a thing`);
+    assert.equal(s.pose, undefined, `${s.id} has no pose`);
+  }
+  const last = h.steps[h.steps.length - 1];
+  assert.ok(last.claimIds.includes("deer-not-kamuy"));
+  const scene = barkToClothPack.scenes.find((x) => x.id === "animal-hills");
+  assert.ok(scene?.activityIds.includes("place-hills"));
+  let s = startPlace(h);
+  for (let i = 0; i < h.steps.length; i++) {
+    if (h.steps[i].figure) {
+      const k = h.steps[i].options.findIndex((o) => o.right);
+      s = stepPlace(h, s, { type: "ring", index: k });
+    }
+    assert.equal(s.phase, "done");
+    s = stepPlace(h, s, { type: i < h.steps.length - 1 ? "next" : "finish" });
+  }
+  assert.ok(s.finished);
+});

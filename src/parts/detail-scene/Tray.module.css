@@ -70,7 +70,7 @@
   white-space: nowrap;
 }
 .progress b {
-  color: var(--fl-season);
+  color: var(--fl-season-text);
   font-weight: 700;
 }
 .cards {
@@ -126,7 +126,7 @@
   height: 22px;
   border-radius: 50%;
   border: 1.5px solid var(--fl-season);
-  color: var(--fl-season);
+  color: var(--fl-season-text);
   background: var(--fl-paper);
   font-size: 12px;
   font-weight: 700;
@@ -139,7 +139,7 @@
 .check {
   margin-left: auto;
   font-size: 12px;
-  color: var(--fl-season);
+  color: var(--fl-season-text);
 }
 .cardLabel {
   font-size: 13px;
@@ -147,10 +147,7 @@
   line-height: 1.25;
 }
 .tryCard {
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 0;
+  gap: 8px;
   background: var(--fl-season-soft);
   border-color: color-mix(in srgb, var(--fl-season) 30%, var(--fl-line));
 }
@@ -158,12 +155,22 @@
   border-color: var(--fl-season);
   box-shadow: inset 0 0 0 1px var(--fl-season);
 }
-.tryCap {
-  font-size: 11px;
+.tryIcon {
+  flex: none;
+  color: var(--fl-season-text);
+}
+.tryCount {
+  margin-left: auto;
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--fl-season);
+  color: #fff;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--fl-season);
 }
 .srOnly {
   position: absolute;
@@ -262,7 +269,7 @@
   height: 32px;
   border-radius: 50%;
   background: var(--fl-season-soft);
-  color: var(--fl-season);
+  color: var(--fl-season-text);
 }
 .icon {
   display: block;
@@ -277,7 +284,7 @@
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--fl-season);
+  color: var(--fl-season-text);
   line-height: 1.4;
 }
 .rowTitle {

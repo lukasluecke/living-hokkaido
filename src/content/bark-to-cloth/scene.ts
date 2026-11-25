@@ -42,6 +42,14 @@ export const lakeHouse: DetailSceneInput = {
       focusView: { eye: [-1.75, 1.6, 0.1], target: [-1.0, 0.95, -2.15] },
       key: 3,
     },
+    {
+      artifactId: "canoe",
+      // Outside the south wall, by the garden (canoe-pole).
+      position: [-1.8, 0, 3.4],
+      rotationY: 0.1,
+      focusView: { eye: [-0.4, 2.3, 6.4], target: [-1.8, 0.3, 3.4] },
+      key: 4,
+    },
   ],
   activityIds: [
     "place-cise",
@@ -54,6 +62,7 @@ export const lakeHouse: DetailSceneInput = {
     "trace-sources",
     "map-cise-plan",
     "quiz-canoe",
+    "quiz-canoe-prayer",
     "quiz-garden",
   ],
 };
@@ -83,6 +92,14 @@ export const listeningGrove: DetailSceneInput = {
       focusView: { eye: [-0.4, 1.6, 0.5], target: [-1.4, 0.5, -1.3] },
       key: 1,
     },
+    {
+      artifactId: "tonkori",
+      // On the right-hand log seat.
+      position: [1.9, 0.4, 0.6],
+      rotationY: -0.9,
+      focusView: { eye: [2.6, 1.6, 2.2], target: [1.9, 0.45, 0.6] },
+      key: 2,
+    },
   ],
   activityIds: [
     "story-owl",
@@ -92,6 +109,9 @@ export const listeningGrove: DetailSceneInput = {
     "story-bark-to-cloth",
     "words-objects",
     "quiz-small-kana",
+    "quiz-tonkori-order",
+    "quiz-tonkori-heart",
+    "quiz-owl-kamuy",
   ],
 };
 
@@ -123,8 +143,23 @@ export const makersClearing: DetailSceneInput = {
       focusView: { eye: [-0.6, 1.9, 0.5], target: [-1.5, 0.85, -1.2] },
       key: 2,
     },
+    {
+      artifactId: "vine-rings",
+      // On the open ground in front, where games are played.
+      position: [0.4, 0, 1.3],
+      rotationY: 0.3,
+      focusView: { eye: [0.9, 1.4, 2.8], target: [0.4, 0.05, 1.3] },
+      key: 3,
+    },
   ],
-  activityIds: ["weave-rows", "game-sticks", "material", "quiz-full-adult"],
+  activityIds: [
+    "weave-rows",
+    "game-sticks",
+    "material",
+    "quiz-full-adult",
+    "quiz-ring-game",
+    "quiz-ring-pole",
+  ],
 };
 
 /** Memory cabin: the curator memory card and the "Over time" slider. */
@@ -155,6 +190,14 @@ export const memoryCabin: DetailSceneInput = {
       focusView: { eye: [2.1, 1.5, 1.7], target: [1.35, 0.95, -0.45] },
       key: 2,
     },
+    {
+      artifactId: "lacquer-vessel",
+      // On the bench (tools-mixed: treasures passed down).
+      position: [0.25, 0.25, 0.9],
+      rotationY: 0.3,
+      focusView: { eye: [0.9, 1.1, 2.1], target: [0.25, 0.4, 0.9] },
+      key: 3,
+    },
   ],
   activityIds: [
     "variation",
@@ -162,6 +205,8 @@ export const memoryCabin: DetailSceneInput = {
     "trace-sources",
     "quiz-ainu-today",
     "sequence-postwar",
+    "quiz-tools-mixed",
+    "omusha-look",
   ],
   timelineIds: ["house-over-time"],
 };

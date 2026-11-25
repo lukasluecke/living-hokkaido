@@ -84,6 +84,13 @@
   color: var(--fl-ink);
   font-size: 16px;
 }
+/* Model disclaimer: a small footnote, not a fact to find. */
+.modelNote {
+  margin: -6px 0 0;
+  color: var(--fl-ink-soft);
+  font-size: 12.5px;
+  line-height: 1.4;
+}
 
 /* Sections */
 .section {
@@ -209,7 +216,7 @@
   height: 34px;
   border-radius: 50%;
   background: var(--fl-season-soft);
-  color: var(--fl-season);
+  color: var(--fl-season-text);
 }
 .icon {
   fill: none;
@@ -229,7 +236,7 @@
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--fl-season);
+  color: var(--fl-season-text);
 }
 .actTitle {
   font-weight: 700;

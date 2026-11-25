@@ -2,7 +2,8 @@
 // Frame for the side slot (object card, activity): a header with previous /
 // next, the title, "n of m" and a close X. On phone the header is a drag
 // handle: drag down to close, swipe sideways for the previous / next object.
-import { type ReactNode, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
+import { useT } from "@/i18n";
 import s from "./SidePanel.module.css";
 
 const CLOSE_PX = 90;
@@ -30,7 +31,26 @@ export function SidePanel({
   header?: boolean;
   children: ReactNode;
 }) {
+  const t = useT();
   const start = useRef<{ x: number; y: number; id: number } | null>(null);
+  const box = useRef<HTMLElement>(null);
+  // Keyboard: move focus into the panel when it opens (so Tab reaches the
+  // card or activity next), and back to where it was when it closes.
+  useEffect(() => {
+    const back = document.activeElement as HTMLElement | null;
+    const el = box.current;
+    if (el && !el.contains(document.activeElement))
+      el.focus({ preventScroll: true });
+    return () => {
+      const a = document.activeElement;
+      if (
+        back?.isConnected &&
+        back !== document.body &&
+        (!a || a === document.body || el?.contains(a))
+      )
+        back.focus({ preventScroll: true });
+    };
+  }, []);
   const [dy, setDy] = useState(0);
   const end = (x: number, y: number) => {
     const p = start.current;
@@ -45,8 +65,12 @@ export function SidePanel({
   };
   return (
     <section
+      ref={box}
       className={s.panel}
-      aria-label={title}
+      tabIndex={-1}
+      data-arrow-steps={onPrev || onNext ? "" : undefined}
+      // With header={false} the child is the named region (no duplicate).
+      aria-label={header ? title : undefined}
       style={
         dy
           ? { transform: `translateY(${dy}px)`, transition: "none" }
@@ -75,8 +99,8 @@ export function SidePanel({
           <button
             type="button"
             className={s.nav}
-            aria-label="Previous object"
-            title="Previous object"
+            aria-label={t("Previous object")}
+            title={t("Previous object")}
             onClick={onPrev}
           >
             ‹
@@ -97,8 +121,8 @@ export function SidePanel({
           <button
             type="button"
             className={s.nav}
-            aria-label="Next object"
-            title="Next object"
+            aria-label={t("Next object")}
+            title={t("Next object")}
             onClick={onNext}
           >
             ›

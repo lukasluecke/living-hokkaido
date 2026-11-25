@@ -1,0 +1,69 @@
+.screen {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 50% 45%,
+    var(--fl-paper) 0%,
+    var(--fl-stock2) 100%
+  );
+  transition: opacity 500ms ease;
+}
+.screen[data-done] {
+  opacity: 0;
+}
+.card {
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+  width: min(320px, calc(100vw - 32px));
+}
+.title {
+  margin: 0;
+  font-family: var(--fl-heading, "Shippori Mincho B1", Georgia, serif);
+  font-size: 28px;
+  color: var(--fl-ink);
+}
+.bar {
+  width: 100%;
+  height: 10px;
+  border: 2px solid var(--fl-edge);
+  border-radius: 999px;
+  background: var(--fl-card);
+  overflow: hidden;
+}
+.bar > span {
+  display: block;
+  height: 100%;
+  background: var(--fl-season);
+  transition: width 400ms ease;
+}
+/* Before scripts run: a gentle moving fill (no motion if reduced). */
+.bar:not([data-js]) > span {
+  animation: wait 1.6s ease-in-out infinite alternate;
+}
+@keyframes wait {
+  from {
+    width: 8%;
+  }
+  to {
+    width: 30%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .screen,
+  .bar > span {
+    transition: none;
+  }
+  .bar:not([data-js]) > span {
+    animation: none;
+  }
+}
+.step {
+  margin: 0;
+  font-size: 15px;
+  color: var(--fl-ink-soft);
+}

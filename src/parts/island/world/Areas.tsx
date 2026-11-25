@@ -27,7 +27,7 @@ import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js
 import { snowCap } from "../../shared/snowCap";
 import type { Field } from "./field";
 import { AREAS, type Area } from "./island";
-import { U } from "./season";
+import { SNOW } from "./season";
 
 type V3 = [number, number, number];
 type PartOpts = {
@@ -511,7 +511,7 @@ const BUILD: Record<Area["id"], (k: Kit) => void> = {
 
 export function Areas({ field, still }: { field: Field; still: boolean }) {
   // Top faces turn white in winter (same season weights as the terrain).
-  const snow = useMemo(() => ({ value: 0 }), []);
+  const snow = SNOW;
   const mat = useMemo(
     () =>
       snowCap(
@@ -542,7 +542,6 @@ export function Areas({ field, still }: { field: Field; still: boolean }) {
   }, [field]);
   const boatRef = useRef<Mesh>(null);
   useFrame(({ clock }) => {
-    snow.value = U.uW.value.w;
     if (!boatRef.current || still) return;
     const t = clock.elapsedTime;
     boatRef.current.position.y = Math.sin(t * 1.3) * 0.025;

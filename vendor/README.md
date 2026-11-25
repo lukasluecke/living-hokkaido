@@ -1,6 +1,6 @@
 # Vendored teammate games
 
-Two games by Erina live here as **git subtrees**: full copies of the upstream
+Two games by Erina and one splat app by Shaw live here as **git subtrees**: full copies of the upstream
 repos, squashed into one commit per sync. The upstream commit of each sync is
 recorded in the squash commit (`git-subtree-split: <sha>`), so git knows
 where the copy came from and can pull and push changes both ways.
@@ -9,6 +9,7 @@ where the copy came from and can pull and push changes both ways.
 |---|---|---|---|
 | `out-of-place/` | `erinalin/out-of-place` (private), branch `main` | `76ecbd8` (2026-11-25) | `hide-seek` |
 | `dont-fall-on-the-slope/` | `erinalin/dont-fall-on-the-slope` (private), branch `main` | `4778ded` (2026-11-25) | `slope-run` |
+| `sapporo-omusha/` | `xjets/sapporo-omusha` (private, MIT, Shaw), branch `main` | `2012845` (2026-11-25) | `splat-look` |
 
 Licence: neither repo has a `LICENSE` file yet. The Out of Place hand-back
 says "MIT with the code". Ask Erina to add a `LICENSE` (MIT, like this repo)
@@ -76,6 +77,46 @@ the diff):
 10. Out of Place, Erina's open M7 task, one commit: Save card (I) saves
    the reveal history card as a 9:16 PNG (`cardImage` in `game/clip.ts`);
    long facts shrink to fit above the honesty footer.
+
+## Sapporo Omusha (Shaw)
+
+A phone web app around a Gaussian splat of the Hokkaido Museum's Omusha
+diorama. We use only its **data**; its viewer page, Node server, Gemini
+Talk and Gather are not built or served here.
+
+| Ours | What it does |
+|---|---|
+| `src/contracts/activity.ts` | `splat-look` kind: asset key, start view, spots in splat-local coordinates |
+| `src/content/bark-to-cloth/omusha.ts` | Imports `src/hotspots.json` and the names in `characters/1808/*.json`; claims are our paraphrases of museum panels 7835/7836, not Shaw's drafts |
+| `src/parts/activities/captures/` | `SplatLook.tsx` (panel, stage, spot list, password form), `splatViewer.ts` (three + Spark 2.4, the same loader and settings as Shaw), `splatLogic.ts` |
+| `src/integrations/museum-assets/`, `src/app/api/museum-assets/` | The splat from a private R2 bucket (`MUSEUM_ASSETS`), only with the demo password (`MUSEUM_ASSET_PASSWORD`) |
+
+**The splat is not in Git** (here or upstream: museum material, NOTICE.md).
+Get `omusha.sog` from Shaw, then:
+
+Both the bucket and the password are optional: without them the deploy
+works and the diorama shows the spot list with a "capture not available"
+note. To turn the capture on, add the binding from the comment in
+`wrangler.jsonc`, then:
+
+```bash
+npx wrangler r2 bucket create living-hokkaido-museum   # once
+npx wrangler r2 object put living-hokkaido-museum/omusha.sog --file omusha.sog --remote
+npx wrangler secret put MUSEUM_ASSET_PASSWORD
+```
+
+For `npm run dev`, put the file in `.museum-assets/omusha.sog` (git-ignored)
+and set `MUSEUM_ASSET_PASSWORD` in `.env.local`. Withdrawal: `npx wrangler r2
+object delete living-hokkaido-museum/omusha.sog --remote`; the viewer then
+shows the spot list only. A new `hotspots.json` from upstream moves the spots
+with the next subtree pull; a new character id needs a line in `omusha.ts`.
+
+Pull:
+
+```bash
+git subtree pull --prefix=vendor/sapporo-omusha \
+  https://github.com/xjets/sapporo-omusha.git main --squash
+```
 
 ## Pull new upstream changes
 

@@ -1,0 +1,29 @@
+{
+  "note": "Positions are in splat-local coordinates. Place them with ?edit=1, then paste the exported JSON here.",
+  "view": {
+    "position": [-4.6551, -5.7327, 0.8524],
+    "target": [2.8189, -0.3208, 0.7766]
+  },
+  "hotspots": [
+    { "character": "elder-maple-leaves", "position": [2.4796, -0.3963, -0.3441] },
+    { "character": "elder-pink-flowers", "position": [2.6863, -0.3328, 0.081] },
+    { "character": "elder-brushstrokes", "position": [2.4887, -0.3721, 0.5362] },
+    { "character": "elder-black-crest", "position": [2.6167, -0.341, 0.9785] },
+    { "character": "elder-chrysanthemum", "position": [2.278, -0.4639, 1.4058] },
+    { "character": "elder-leaf-sprigs", "position": [2.6668, -0.292, 1.9926] },
+    { "character": "elder-star-flowers", "position": [2.5715, -0.3979, 2.4836] },
+    { "character": "ainu-child", "position": [2, -0.5936, -4.1221] },
+    { "character": "ainu-woman", "position": [1.631, -0.5755, -3.6588] },
+    { "character": "ainu-elder", "position": [3.1165, -0.6509, -2.8163] },
+    { "character": "interpreter", "position": [4.6494, -0.6399, -1.015] },
+    { "character": "aizu-soldier", "position": [3.7149, -0.5627, 4.461] },
+    { "character": "aizu-officer", "position": [5.3941, -0.4991, 3.0899] }
+  ],
+  "regions": [
+    { "envelope": "diorama-hall", "position": [5.9531, -2.6321, 1.0591] },
+    { "envelope": "diorama-curtains", "position": [5.5897, -1.4773, 1.4773] },
+    { "envelope": "diorama-troops", "position": [3.6337, -0.6218, 4.9002] },
+    { "envelope": "diorama-bales", "position": [4.7414, -0.7308, -3.9033] },
+    { "envelope": "diorama-tubs", "position": [4.0061, -0.4949, 1.8908] }
+  ]
+}

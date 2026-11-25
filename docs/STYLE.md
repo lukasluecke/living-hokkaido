@@ -38,7 +38,7 @@ live in `src/design/tokens.ts`; use them instead of new hex values.
 | Object and building parts | `material.*` (cloth, band, wood, fiber, bark, roof …) |
 | Season colours | `season.sky / sun / sea / ground / foliage / accent` (4 values each) |
 
-Contrast: overlay text ≥ 4.5:1 on paper. Do not use colour as the only signal
+Contrast: overlay text ≥ 4.5:1 on paper. Small text in the season colour uses `--fl-season-text` (season ink mixed with 30 % ink), not `--fl-season`: spring pink alone is 3.8:1. Do not use colour as the only signal
 (earned stamps also change icon, focus also shows an outline).
 
 ## Light
@@ -123,3 +123,29 @@ detail scene ≤ 150 draw calls / 0.5 M triangles; one artifact ≤ 50 k
 triangles, ≤ 1 MB GLB; initial download ≤ 10 MB. Measure with
 `renderer.info` on a real GPU; container numbers (SwiftShader) do not count
 for fps.
+
+`npm run perf` (after `npm run build`) reports first-load bytes, time to the
+first island frame and fps per place (`scripts/perf/measure.ts`;
+`--headed` for a real GPU, `--query quality=low` for one quality step).
+
+### Quality step-down on slow GPUs
+
+Every canvas puts a `<QualityGovernor />` inside and takes `dpr` (and
+`shadows`) from `useQuality()` (`src/parts/shared/Quality.tsx`). When a
+canvas stays under 40 fps for two 1.5 s windows (after a 2.5 s warm-up),
+the shared tier goes down one step (two steps when a window is under
+20 fps; the next check waits 1 s). Fast machines stay on `full`, so their
+look does not change. The tier lasts for the browser session and never goes
+up by itself. `?quality=full|high|mid|low` fixes the tier (no automatic
+steps).
+
+| Tier | DPR | Tilt-shift, SMAA, bloom | Shadow maps |
+|---|---|---|---|
+| full | 1 to 1.5 | on | on |
+| high | 1 | on | on |
+| mid | 1 | off | on |
+| low | 0.75 | off | off |
+
+Ink lines, toon shading and vignette stay on every tier: they are the look.
+A new canvas must use the same two pieces, and gate any new costly pass
+on `extraFx`.
