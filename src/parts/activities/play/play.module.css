@@ -10,7 +10,9 @@
   line-height: 1.5;
   margin: 6px 0;
 }
-.root button:focus-visible {
+.root button:focus-visible,
+.root input:focus-visible,
+.root summary:focus-visible {
   outline: 3px solid var(--lh-gold-deep);
   outline-offset: 2px;
 }

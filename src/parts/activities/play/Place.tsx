@@ -285,11 +285,14 @@ export function PlaceActivity({
             </p>
           </div>
         )}
-        {st.hint && <p className="msg no">{tr(st.hint)}</p>}
-        {fig && st.phase === "pose" && !st.hint && (
-          <p className="msg ok">{tr("Good place. Now pick a pose.")}</p>
-        )}
-        {fig && done && step.why && <p className="msg ok">{step.why}</p>}
+        {/* Screen readers hear the hint and the result as they change. */}
+        <div aria-live="polite">
+          {st.hint && <p className="msg no">{tr(st.hint)}</p>}
+          {fig && st.phase === "pose" && !st.hint && (
+            <p className="msg ok">{tr("Good place. Now pick a pose.")}</p>
+          )}
+          {fig && done && step.why && <p className="msg ok">{step.why}</p>}
+        </div>
 
         <div className="row">
           <button type="button" className="btn" onClick={() => speak(st.step)}>

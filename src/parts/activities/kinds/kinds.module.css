@@ -223,7 +223,7 @@
   margin: 0 0 8px;
 }
 .root :global(.w) {
-  color: #a8987f;
+  color: #80705a; /* 4.6:1 on card (was #a8987f, 2.7:1) */
   transition: color 0.15s;
 }
 .root :global(.w):global(.past) {

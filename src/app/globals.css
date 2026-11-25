@@ -35,6 +35,9 @@
   --fl-draft-bg: #f6e3b4;
   --fl-season: #c45a78;
   --fl-season-soft: color-mix(in srgb, var(--fl-season) 18%, #fbf4e6);
+  /* Season ink for small text: 30 % ink, so all four seasons reach 4.5:1 on
+     paper and on --fl-season-soft (spring #c45a78 alone is 3.8:1). */
+  --fl-season-text: color-mix(in srgb, var(--fl-season) 70%, var(--fl-ink));
   --fl-radius: 14px;
   --fl-shadow: 4px 5px 0 rgb(43 33 24 / 85%);
   --fl-lift: 0 3px 0 var(--fl-edge);

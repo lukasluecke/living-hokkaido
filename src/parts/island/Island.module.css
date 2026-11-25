@@ -156,7 +156,7 @@
 }
 .card[data-open] .state {
   border-color: var(--fl-season);
-  color: var(--fl-season);
+  color: var(--fl-season-text);
 }
 @media (max-width: 700px) {
   .tray {
