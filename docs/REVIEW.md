@@ -150,3 +150,20 @@ the museum's public collection database.
       2026-11-25). A cultural reviewer still checks them before approval.
 - [ ] Cross-check claims with Pocket Curator (numbers in the catalog). The app
       text stays out of Git.
+
+## Hokkaido Museum activities (Q&A cards, panels, stations)
+
+Added 2026-11-25. Knowledge entry `hokkaido-museum`
+(`src/content/bark-to-cloth/museum.ts`, `research-preview`) and new claims in
+`house-over-time` (`over-time.ts`, sources `hm-panel-today`,
+`hm-panel-population`). Sources: `rights: "unknown"`, `consent: "pending"`,
+read on site, no URL. Locators name the Q number and the photo id.
+
+| Item | Claims | Needs |
+|---|---|---|
+| Latin spellings of katakana (greetings, cise words, sap/sat/sak) | `romanised-by-us`, `greet-*`, `cise-plan` | Language review: spelling, region, recordings |
+| Quizzes `quiz-small-kana`, `quiz-full-adult`, `quiz-canoe`, `quiz-garden`, `quiz-ainu-today` | `small-kana`, `full-adult`, `canoe-pole`, `crops`, `panel-population` … | Check the paraphrases; distractor options state no fact |
+| Sequence `sequence-postwar` | `panel-association-1946`, `panel-tourism-1961`, `panel-reclaiming`, `rights-movement`, `recognition`, `upopoy` | Check the 1961 caption (small print) and the late-1960s wording |
+| Owl story and sakehe | `owl-kamuy`, `sakehe`, `owl-sakehe`, `telling-varies` | Ritual and oral-literature content, included in full (Lukas). Ask about crediting Suteno Orita and the museum; no recording is used |
+| Ukouk syllables, tonkori tune and tab | `ukouk-words`, `tonkori-tune` | Recordings belong to the preservation societies and to Ume Nishihira / Tomita Tomoko; the app plays only synthetic tones |
+| Canoe as a kamuy | `canoe-kamuy` | Ritual context, included in full |
