@@ -10,7 +10,7 @@ Detail scenes (inside a location) and 3D objects are explored in other threads.
 ## Run it
 
 ```bash
-cd experiments/island-world
+cd labs/island
 npm install
 npm run dev          # http://localhost:5173
 npm run bake         # optional: rebuild public/data/hokkaido-512.* from elevation tiles

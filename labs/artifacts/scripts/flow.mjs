@@ -1,4 +1,4 @@
-// Interaction test: click loom, drag to turn, click hotspot 1, put back.
+// Interaction test: click cloth (loom model), drag to turn, click hotspot 1, put back.
 import { createRequire } from "node:module";
 const { chromium } = createRequire(import.meta.url)("playwright");
 const b = await chromium.launch({ args: ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"] });
@@ -7,7 +7,7 @@ const errs = [];
 p.on("pageerror", (e) => errs.push(String(e)));
 await p.goto("http://localhost:5199/?view=inspect&look=toon");
 await p.waitForTimeout(2500);
-await p.mouse.move(790, 440, { steps: 5 }); await p.mouse.down(); await p.mouse.up(); // loom
+await p.mouse.move(790, 440, { steps: 5 }); await p.mouse.down(); await p.mouse.up(); // cloth (loom model)
 await p.waitForTimeout(1500);
 const card = await p.locator("h2").textContent().catch(() => null);
 console.log("picked card:", card);

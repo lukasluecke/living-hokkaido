@@ -5,7 +5,7 @@ import { Suspense, useEffect, useState } from "react";
 import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
 import { label, Studio } from "./shared";
 
-const FILES = (new URLSearchParams(location.search).get("files") ?? "garment.flat.meshopt.glb,loom.flat.meshopt.glb,fiber.flat.meshopt.glb").split(",");
+const FILES = (new URLSearchParams(location.search).get("files") ?? "garment.flat.meshopt.glb,cloth.flat.meshopt.glb,fiber.flat.meshopt.glb").split(",");
 
 function Model({ url, x }: { url: string; x: number }) {
   const { scene } = useGLTF(url, "/draco/", true, (loader) => loader.setMeshoptDecoder(MeshoptDecoder));

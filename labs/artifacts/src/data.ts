@@ -40,12 +40,12 @@ export const objects: ArtifactObject[] = [
     journal: { stampId: "three-objects", unlock: "all-hotspots" },
   },
   {
-    id: "loom",
+    id: "cloth",
     knowledgeId: "bark-to-cloth",
     title: "A woven surface",
     label: "From fiber to cloth",
     claimIds: ["no-technique", "illustrative"],
-    model: { ...sketch, assetId: "loom-sketch", url: "/models/loom.glb", nodes: ["frame", "warp", "woven", "shuttle"] },
+    model: { ...sketch, assetId: "cloth-sketch", url: "/models/cloth.glb", nodes: ["frame", "warp", "woven", "shuttle"] },
     display: { restRotation: [0.5, 0, 0], inspectScale: 1.3, pitchLimit: 0.7 },
     hotspots: [
       { id: "l1", position: [0, 0.12, 0.27], normal: [0, 1, 0.3], node: "woven", title: "The woven part", claimId: "no-technique", kind: "claim" },

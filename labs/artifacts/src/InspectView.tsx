@@ -109,7 +109,7 @@ function HotspotLayer({ rec, read, onNote }: { rec: ArtifactObject; read: Set<st
 
 const SLOTS: Record<ObjectId, THREE.Vector3> = {
   fiber: new THREE.Vector3(-2, 0.62, 0),
-  loom: new THREE.Vector3(0, 0.62, 0),
+  cloth: new THREE.Vector3(0, 0.62, 0),
   garment: new THREE.Vector3(2, 0.62, 0),
 };
 

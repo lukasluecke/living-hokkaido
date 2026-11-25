@@ -6,7 +6,7 @@ built by `npm run check`. It shares the same three / R3F / drei versions, so
 code can move into the app later.
 
 ```bash
-cd experiments/detail-scene
+cd labs/detail-scene
 npm install
 npm run dev        # http://localhost:5180
 ```

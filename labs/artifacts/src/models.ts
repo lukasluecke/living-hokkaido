@@ -5,7 +5,7 @@ import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 
 export type Part = "cloth" | "band" | "wood" | "thread" | "fiber" | "bark" | "tie";
-export type ObjectId = "fiber" | "loom" | "garment";
+export type ObjectId = "fiber" | "cloth" | "garment";
 
 function mesh(geo: THREE.BufferGeometry, part: Part, name: string) {
   const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial());
@@ -155,6 +155,6 @@ function fiber() {
   return g;
 }
 
-export const builders: Record<ObjectId, () => THREE.Group> = { fiber, loom, garment };
+export const builders: Record<ObjectId, () => THREE.Group> = { fiber, cloth: loom, garment };
 
-export const OBJECT_IDS: ObjectId[] = ["fiber", "loom", "garment"];
+export const OBJECT_IDS: ObjectId[] = ["fiber", "cloth", "garment"];
