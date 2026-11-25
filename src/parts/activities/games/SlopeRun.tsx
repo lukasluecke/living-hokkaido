@@ -76,6 +76,15 @@ export function SlopeRunActivity({
       emit={report}
       mount={mount}
       fit="fill"
+      preload={() =>
+        Promise.all([
+          import("@vendor/dont-fall-on-the-slope/src/embed"),
+          import("@vendor/dont-fall-on-the-slope/src/game"),
+          // Compile the physics engine now; the game's own init() call is
+          // then quick (wasm-bindgen keeps the first instance).
+          import("@dimforge/rapier3d-compat").then((R) => R.default.init()),
+        ])
+      }
       notes={
         a.finds.length > 0 && (
           <div className={g.notebook}>

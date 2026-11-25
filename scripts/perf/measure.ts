@@ -108,6 +108,13 @@ async function fps(page: Page, seconds: number) {
   };
 }
 
+// The tier in use: ?quality= when the URL fixes it, else the stored step.
+const TIER_PROBE = `(() => {
+  const q = new URLSearchParams(location.search).get("quality");
+  if (q) return q + " (fixed)";
+  try { return sessionStorage.getItem("lh-quality-v1") ?? "full"; } catch { return "?"; }
+})()`;
+
 const kb = (n = 0) => `${Math.round(n / 1024)} KB`;
 const total = (b: Bytes) => Object.values(b).reduce((a, x) => a + x, 0);
 
@@ -157,9 +164,7 @@ async function main() {
     );
 
     const island = await fps(page, secs);
-    const tier = await page.evaluate(
-      "(() => { try { return sessionStorage.getItem('lh-quality-v1') ?? 'full'; } catch { return '?'; } })()",
-    );
+    const tier = await page.evaluate(TIER_PROBE);
     report.island = { ...island, tier };
     console.log(
       `Island: ${island.fps} fps (p95 frame ${island.p95} ms), quality ${tier}`,
@@ -186,9 +191,7 @@ async function main() {
         const f = await fps(page, secs);
         places[name] = {
           ...f,
-          tier: await page.evaluate(
-            "(() => { try { return sessionStorage.getItem('lh-quality-v1') ?? 'full'; } catch { return '?'; } })()",
-          ),
+          tier: await page.evaluate(TIER_PROBE),
           addedBytes: total(added.bytes),
           addedFiles: added.files,
         };
