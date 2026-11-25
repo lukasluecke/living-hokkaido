@@ -231,3 +231,37 @@ test("ask: no key means no live model; zai preset uses the documented endpoint",
   assert.equal(url, "https://api.z.ai/api/paas/v4/chat/completions");
   assert.equal(auth, "Bearer secret");
 });
+
+test("ask: themed areas answer from their new cited claims", () => {
+  const top = (q: string, locationId: string) => {
+    const sceneId =
+      pack.island.locations.find((l) => l.id === locationId)?.sceneId ?? null;
+    const a = scriptedAnswer(
+      pack,
+      req(q, { locationId, sceneId, artifactId: null }),
+    );
+    return a.citations.map((c) => c.claimId);
+  };
+  assert.ok(
+    top("How does a kite harpoon work?", "herring-coast").includes("kite-tool"),
+  );
+  assert.ok(top("What is a marek?", "herring-coast").includes("marek-tool"));
+  assert.ok(
+    top("How was grain harvested?", "survey-forest").includes(
+      "grain-shell-tool",
+    ),
+  );
+  assert.ok(
+    top("What traps did hunters make?", "animal-hills").includes("traps-prey"),
+  );
+  assert.ok(
+    top("Why is the fire kamuy respected?", "animal-hills").includes(
+      "kamuy-fire",
+    ),
+  );
+  assert.ok(
+    top("Was Hokkaido a big coal producer?", "coal-mountain").includes(
+      "coal-producer",
+    ),
+  );
+});

@@ -12,11 +12,11 @@ export const KIND_LABEL: Record<ActivityKind, string> = {
   trace: "Sources",
   map: "Explore",
   board: "Play",
-  canon: "Sing along",
-  pluck: "Hands-on",
+  canon: "Sing",
+  pluck: "Pluck",
   "hide-seek": "Game",
   "slope-run": "Game",
-  place: "Build the scene",
+  place: "Build",
   "splat-look": "Look closer",
 };
 

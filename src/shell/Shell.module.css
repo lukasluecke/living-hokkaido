@@ -65,6 +65,9 @@
   line-height: 1.4;
 }
 .next {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   margin-top: 10px;
   font: inherit;
   font-size: 14px;
@@ -79,7 +82,14 @@
   text-align: left;
 }
 .next:hover {
-  background: #2a3b4b;
+  background: var(--fl-gold-deep, #dcae5c);
+}
+.next svg {
+  flex: none;
+}
+.nextGo {
+  margin-left: 2px;
+  opacity: 0.7;
 }
 .next:active {
   transform: translateY(1px);

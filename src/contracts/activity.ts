@@ -518,7 +518,22 @@ export const placeStepSchema = z
         colour: z.string().optional(),
         /** Things: which drawing (objects scenes only). */
         thing: z
-          .enum(["cattail", "bark", "mortar", "pot", "weave", "fish"])
+          .enum([
+            "cattail",
+            "bark",
+            "mortar",
+            "pot",
+            "weave",
+            "fish",
+            // Animal hills (stage "hills"): animals and things, no people.
+            "deer",
+            "bear",
+            "hare",
+            "salmon",
+            "set-bow",
+            "pelt",
+            "fish-owl",
+          ])
           .optional(),
       })
       .optional(),
@@ -552,7 +567,13 @@ export const placeActivitySchema = z.object({
   ...base,
   kind: z.literal("place"),
   /** Which drawn stage the renderer shows. Illustrative sketches. */
-  stage: z.enum(["survey-camp", "herring-yard", "cise", "mine-forest"]),
+  stage: z.enum([
+    "survey-camp",
+    "herring-yard",
+    "cise",
+    "mine-forest",
+    "hills",
+  ]),
   subject: z.enum(["people", "objects"]),
   /** Season at the start (mine-forest switches at a step). */
   season: z.enum(["summer", "winter"]).default("summer"),

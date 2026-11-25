@@ -142,14 +142,17 @@
   line-height: 1.2;
 }
 .state {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   border: 1px solid var(--fl-ink-soft);
   color: var(--fl-ink-soft);
-  border-radius: 3px;
-  padding: 1px 6px;
+  border-radius: 999px;
+  padding: 1px 7px;
 }
 .card[data-open] .state {
   border-color: var(--fl-season);
@@ -171,18 +174,38 @@
 }
 
 /* What you can do at a place (card) and the all-activities sheet. */
+/* Kind icons in a row, the activity count at the right. */
 .cardActs {
-  display: grid;
-  gap: 3px;
-  justify-items: start;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  width: 100%;
 }
 .kinds {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.kindChip {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--fl-stock2);
+  color: var(--fl-ink);
+}
+.more {
   font-size: 11px;
-  line-height: 1.25;
+  font-weight: 700;
   color: var(--fl-ink-soft);
 }
 .allActs {
   margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font: inherit;
   font-size: 12px;
   font-weight: 700;
@@ -294,10 +317,12 @@
 .act {
   width: 100%;
   display: grid;
-  gap: 1px;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  column-gap: 8px;
   text-align: left;
   font: inherit;
-  padding: 5px 8px;
+  padding: 5px 8px 5px 5px;
   border: 1px solid var(--fl-line);
   border-radius: var(--fl-radius);
   background: var(--fl-card);
@@ -307,12 +332,32 @@
 .act:hover {
   background: var(--fl-season-soft);
 }
-.actKind {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.actIcon {
+  grid-row: span 2;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--fl-stock2);
+  color: var(--fl-ink);
+}
+.actPlace {
+  grid-column: 2;
+  font-size: 11px;
   color: var(--fl-ink-soft);
+}
+.groupIcon {
+  vertical-align: -3px;
+  margin-right: 6px;
+}
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 .actTitle {
   font-size: 13px;

@@ -7,7 +7,7 @@ import { ContactShadows, PresentationControls } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Suspense, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
-import { type Artifact, type Emit, SCALE } from "@/contracts";
+import { type Artifact, type Emit, factHotspots, SCALE } from "@/contracts";
 import { useGlbClone } from "../shared/Glb";
 import { applyLook } from "./model/looks";
 import { builders, type ObjectId } from "./model/models";
@@ -160,7 +160,7 @@ export function Viewer3D({
         />
       </Canvas>
       <div ref={hotspots} className={c.hotspots}>
-        {artifact.hotspots.map((h, i) => (
+        {factHotspots(artifact).map((h, i) => (
           <button
             key={h.id}
             type="button"
