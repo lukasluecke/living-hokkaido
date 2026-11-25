@@ -4,6 +4,7 @@
 // illustrative: the strings are not in order of pitch, as on the
 // instrument, but these pitches are not its tuning.
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useT } from "@/i18n";
 import { Cite, complete, type KindProps } from "../kinds/shared";
 import { pluckPhase, pluckString, startPluck } from "./musicLogic";
 import p from "./play.module.css";
@@ -20,6 +21,7 @@ export function PluckActivity({
   prefs,
   emit,
 }: KindProps<"pluck">) {
+  const tr = useT();
   const [s, setS] = useState(startPluck);
   const [ringing, setRinging] = useState<number | null>(null);
   const [sound, setSound] = useState(true);
@@ -119,7 +121,11 @@ export function PluckActivity({
               type="button"
               className={`string-hit ${target === i + 1 ? "target" : ""} ${s.tried.includes(i + 1) ? "tried" : ""}`}
               style={{ left: x(i) - 15 }}
-              aria-label={`String ${i + 1}, ${st.gauge}, ${st.hands.join(" or ")} hand`}
+              aria-label={tr("String {n}, {gauge}, {hands} hand", {
+                n: i + 1,
+                gauge: tr(st.gauge),
+                hands: st.hands.map((h) => tr(h)).join(tr(" or ")),
+              })}
               onClick={() => hit(i + 1)}
             >
               <span className="string-num">{i + 1}</span>
@@ -132,8 +138,10 @@ export function PluckActivity({
         <div className="tonkori-side">
           <ol className="steps">
             <li className={phase === "explore" ? "on" : "seen"}>
-              Pluck each string once ({s.tried.length} of {a.strings.length}).
-              Keys 1–{a.strings.length} work too.
+              {tr(
+                "Pluck each string once ({n} of {total}). Keys 1–{total} work too.",
+                { n: s.tried.length, total: a.strings.length },
+              )}
             </li>
             {a.tune && (
               <li
@@ -141,7 +149,7 @@ export function PluckActivity({
                   phase === "tune" ? "on" : phase === "done" ? "seen" : ""
                 }
               >
-                Try the opening of “{a.tune.title}”:
+                {tr("Try the opening of")} “{a.tune.title}”:
                 <span className="tab">
                   {phrases.map((ph) => (
                     <span key={ph[0].i} className="phrase">
@@ -149,7 +157,7 @@ export function PluckActivity({
                         <span
                           key={n.i}
                           className={`tab-note ${n.i < s.next || phase === "done" ? "played" : ""} ${n.i === s.next && phase === "tune" ? "now" : ""}`}
-                          title={`${n.hand} hand`}
+                          title={tr("{hand} hand", { hand: tr(n.hand) })}
                         >
                           {n.string}
                           <small>{n.hand === "left" ? "L" : "R"}</small>
@@ -165,8 +173,8 @@ export function PluckActivity({
             {phase === "done"
               ? a.completion
               : phase === "tune"
-                ? `Next: string ${target}.`
-                : "Thick and thin strings alternate. Play them open."}
+                ? tr("Next: string {n}.", { n: target ?? "" })
+                : tr("Thick and thin strings alternate. Play them open.")}
           </p>
           <label className="toggle">
             <input
@@ -174,11 +182,12 @@ export function PluckActivity({
               checked={sound}
               onChange={(e) => setSound(e.target.checked)}
             />
-            Sound
+            {tr("Sound")}
           </label>
           <p className="small-note">
-            Synthetic tones. The strings are not in order of pitch, as on a
-            tonkori, but these pitches are not its tuning.
+            {tr(
+              "Synthetic tones. The strings are not in order of pitch, as on a tonkori, but these pitches are not its tuning.",
+            )}
           </p>
           <Cite
             claim={claims[a.stringsClaimId]}
@@ -197,7 +206,7 @@ export function PluckActivity({
                 className="btn"
                 onClick={() => setS(startPluck())}
               >
-                Play again
+                {tr("Play again")}
               </button>
             </div>
           )}

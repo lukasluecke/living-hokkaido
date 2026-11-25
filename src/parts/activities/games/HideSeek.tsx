@@ -4,6 +4,7 @@
 // its own boundary and reports only through emit.
 import { useCallback, useState } from "react";
 import type { Emit } from "@/contracts";
+import { useT } from "@/i18n";
 import type { KindProps } from "../kinds/shared";
 import { deferMount, GameStage, type MountGame } from "./GameStage";
 
@@ -13,6 +14,7 @@ export function HideSeekActivity({
   prefs,
   emit,
 }: KindProps<"hide-seek">) {
+  const tr = useT();
   const [done, setDone] = useState(false);
   const report: Emit = (e) => {
     if (e.type === "activity.complete") setDone(true);
@@ -49,8 +51,9 @@ export function HideSeekActivity({
       fit="wide"
       controls={
         <>
-          Mouse, touch or keyboard. Hide: arrows move, E picks a colour, F
-          fills, Z undoes, 1–3 pose. Seek: arrows and Space. Enter goes on.
+          {tr(
+            "Mouse, touch or keyboard. Hide: arrows move, E picks a colour, F fills, Z undoes, 1–3 pose. Seek: arrows and Space. Enter goes on.",
+          )}
         </>
       }
     />
