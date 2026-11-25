@@ -281,11 +281,15 @@ async function loadData() {
 // ---------- Three / Spark
 const canvas = $("c");
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: "high-performance" });
-renderer.setPixelRatio(Math.min(devicePixelRatio, isTouch ? 1.5 : 2));
+// Quality. The capture was trained anti-aliased ("mip"), so a 0.1 px² filter matches it better than
+// Spark's 0.3 default. Phones get full resolution (up to 2x) and a 2.5M splat budget (Spark's Android
+// default is 1M; the scene has about 2.2M). Override for A/B: ?blur=0.3&dpr=1.5&splats=1000000
+const num = (k, d) => (params.has(k) && Number.isFinite(+params.get(k)) ? +params.get(k) : d);
+renderer.setPixelRatio(Math.min(devicePixelRatio, num("dpr", 2)));
 renderer.setClearColor(0x0b0d10);
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(55, 1, 0.01, 2000);
-scene.add(new SparkRenderer({ renderer }));
+scene.add(new SparkRenderer({ renderer, blurAmount: num("blur", 0.1), lodSplatCount: num("splats", 2.5e6) }));
 
 const controls = new OrbitControls(camera, canvas);
 Object.assign(controls, { enableDamping: true, dampingFactor: 0.08, rotateSpeed: isTouch ? 0.6 : 0.8, screenSpacePanning: true });
