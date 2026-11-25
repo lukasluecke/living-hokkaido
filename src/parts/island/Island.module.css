@@ -1,0 +1,33 @@
+.stage {
+  position: absolute;
+  inset: 0;
+}
+.pins {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.pin {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: auto;
+  font: inherit;
+  font-size: 14px;
+  border: 0;
+  border-radius: 999px;
+  line-height: 1.3;
+  padding: 5px 12px;
+  background: #fbf4e6;
+  color: #2b2118;
+  box-shadow: 0 3px 10px rgb(31 45 70 / 30%);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.pin:focus-visible {
+  outline: 3px solid #e8c27a;
+}
+.soon {
+  opacity: 0.7;
+  cursor: default;
+}

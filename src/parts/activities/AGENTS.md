@@ -24,3 +24,7 @@ journal stamp appears after completion.
 ## Decisions
 
 - 2026-11-24: D2 weave chosen as the craft activity (Lukas).
+- 2026-11-25: Weave v1 is a 2D SVG loom (`Weave.tsx`): per row, pass the
+  shuttle (drag, ←/→ or button), then press the row down (↓, click the bar
+  or button). Pure state in `logic.ts`, tested in `tests/activities.test.ts`.
+  Colours from tokens via `theme.ts`; backdrop follows the season blend.

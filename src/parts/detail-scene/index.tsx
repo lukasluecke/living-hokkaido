@@ -1,11 +1,112 @@
 "use client";
-// Detail scene part: HTML fallback stub. Replace with the 3D room (port from
-// labs/detail-scene). Keep the buttons as the keyboard / no-WebGL path.
-import { useEffect } from "react";
-import type { DetailScenePartProps } from "@/contracts";
+// Detail scene part. 3D room from labs/detail-scene when WebGL works; the
+// HTML panel below is the keyboard / no-WebGL path.
+import { Canvas } from "@react-three/fiber";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { type DetailScenePartProps, SCALE } from "@/contracts";
 import s from "../shared/Fallback.module.css";
+import { Room } from "./Room";
+import c from "./Scene.module.css";
 
-export function DetailScenePart({
+function useKeys({ scene, emit }: DetailScenePartProps) {
+  useEffect(() => {
+    const onKey = (ev: KeyboardEvent) => {
+      if (ev.target instanceof HTMLInputElement) return;
+      const p = scene.placements.find((x) => String(x.key) === ev.key);
+      if (p) emit({ type: "artifact.focus", artifactId: p.artifactId });
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [scene, emit]);
+}
+
+export function DetailScenePart(props: DetailScenePartProps) {
+  const { scene, artifacts, focusedArtifactId, emit, prefs } = props;
+  const overlay = useRef<HTMLDivElement>(null);
+  const [hovered, setHovered] = useState<string | null>(null);
+  useKeys(props);
+  if (!prefs.webgl) return <SceneList {...props} />;
+  const label = (id: string) => artifacts.find((a) => a.id === id)?.label ?? id;
+  const hoveredAt = scene.placements.find((p) => p.artifactId === hovered);
+  return (
+    <div className={c.stage}>
+      <Canvas
+        dpr={[1, SCALE.maxDpr]}
+        camera={{
+          fov: 45,
+          near: 0.05,
+          far: 120,
+          position: scene.views.outside.eye,
+        }}
+        gl={{ antialias: false }}
+      >
+        <Suspense fallback={null}>
+          <Room
+            {...props}
+            hovered={hovered}
+            setHovered={setHovered}
+            overlay={overlay}
+          />
+        </Suspense>
+      </Canvas>
+      <div ref={overlay} className={c.overlay} aria-hidden>
+        {hoveredAt && hoveredAt.artifactId !== focusedArtifactId && (
+          <span
+            className={c.label}
+            data-x={hoveredAt.position[0]}
+            data-y={hoveredAt.position[1] + 1.8}
+            data-z={hoveredAt.position[2]}
+          >
+            {label(hoveredAt.artifactId)}
+          </span>
+        )}
+      </div>
+      <nav className={c.bar} aria-label={`Objects in ${scene.title}`}>
+        {scene.placements.map((p) => (
+          <button
+            key={p.artifactId}
+            type="button"
+            aria-pressed={p.artifactId === focusedArtifactId}
+            onClick={() =>
+              emit(
+                p.artifactId === focusedArtifactId
+                  ? { type: "artifact.blur" }
+                  : { type: "artifact.focus", artifactId: p.artifactId },
+              )
+            }
+          >
+            {p.key ? `${p.key} · ` : ""}
+            {label(p.artifactId)}
+          </button>
+        ))}
+        {scene.activityIds
+          .map((id) => props.content.activities.find((a) => a.id === id))
+          .filter((a) => a && !a.artifactId)
+          .map((a) =>
+            a ? (
+              <button
+                key={a.id}
+                type="button"
+                onClick={() =>
+                  emit({ type: "activity.start", activityId: a.id })
+                }
+              >
+                Reflect: {a.title}
+              </button>
+            ) : null,
+          )}
+        <button
+          type="button"
+          onClick={() => emit({ type: "scene.exit", sceneId: scene.id })}
+        >
+          Back to the island
+        </button>
+      </nav>
+    </div>
+  );
+}
+
+function SceneList({
   scene,
   artifacts,
   content,
@@ -15,15 +116,6 @@ export function DetailScenePart({
   useEffect(() => {
     emit({ type: "scene.ready", sceneId: scene.id });
   }, [scene.id, emit]);
-
-  useEffect(() => {
-    const onKey = (ev: KeyboardEvent) => {
-      const p = scene.placements.find((x) => String(x.key) === ev.key);
-      if (p) emit({ type: "artifact.focus", artifactId: p.artifactId });
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [scene, emit]);
 
   const title = (id: string) => artifacts.find((a) => a.id === id)?.label ?? id;
   return (

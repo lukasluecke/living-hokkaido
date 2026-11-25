@@ -4,6 +4,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   type ContentPack,
+  type Emit,
   EMPTY_JOURNAL,
   type ExperienceEvent,
   type ExperienceState,
@@ -17,6 +18,7 @@ import {
   seasonAt,
   wrapSeason,
 } from "@/contracts";
+import { SoundToggle, useSoundscape } from "@/audio/react";
 import { record } from "./progress";
 import { parts } from "./registry";
 import s from "./Shell.module.css";
@@ -56,6 +58,9 @@ export function Shell({ pack }: { pack: ContentPack }) {
   );
   const journalRef = useRef(journal);
   journalRef.current = journal;
+  // Sound (src/audio): ambient follows view + season; events play cues.
+  const sound = useSoundscape(state);
+  const soundEvent = sound.onEvent;
 
   useEffect(() => {
     setState((st) => ({ ...st, prefs: detectPrefs() }));
@@ -69,6 +74,9 @@ export function Shell({ pack }: { pack: ContentPack }) {
   const emit = useCallback(
     (e: ExperienceEvent) => {
       setState((st) => reduce(pack, st, e));
+      soundEvent(e);
+      // Demo recorder and e2e hook: mirror every event as a DOM event.
+      window.dispatchEvent(new CustomEvent("lh:event", { detail: e }));
       const { journal: next, earned } = record(pack, journalRef.current, e);
       if (next !== journalRef.current) {
         journalRef.current = next;
@@ -88,13 +96,24 @@ export function Shell({ pack }: { pack: ContentPack }) {
       );
       if (line) setGuideLine(line.text);
       for (const id of earned) {
+        soundEvent({ type: "stamp.earned", stampId: id });
         setToast(pack.stamps.find((x) => x.id === id)?.title ?? id);
         const stampLine = pack.guide.find((g) => g.on === "stamp.earned");
         if (stampLine) setGuideLine(stampLine.text);
       }
     },
-    [pack],
+    [pack, soundEvent],
   );
+
+  // Demo recorder and e2e hook (scripts/demo-video): scripts send the same
+  // events the UI sends, through the same reducer. No new power.
+  useEffect(() => {
+    const w = window as Window & { __livingHokkaido?: { emit: Emit } };
+    w.__livingHokkaido = { emit };
+    return () => {
+      delete w.__livingHokkaido;
+    };
+  }, [emit]);
 
   useEffect(() => {
     if (!toast) return;
@@ -140,9 +159,28 @@ export function Shell({ pack }: { pack: ContentPack }) {
     reveal: Reveal,
   } = parts;
 
+  const stage =
+    state.view === "island" || state.view === "travel" ? (
+      <Island {...ctx} view={state.view} locationId={state.locationId} />
+    ) : scene ? (
+      <Scene
+        {...ctx}
+        scene={scene}
+        artifacts={pack.artifacts.filter((a) =>
+          scene.placements.some((p) => p.artifactId === a.id),
+        )}
+        focusedArtifactId={state.artifactId}
+      />
+    ) : null;
+
   return (
-    <main className={s.shell}>
-      <div className={s.hud}>
+    <main
+      className={s.shell}
+      data-view={state.view}
+      data-overlay={state.overlay ?? undefined}
+    >
+      <div className={s.stage}>{stage}</div>
+      <header className={s.hud}>
         <strong>Living Hokkaido</strong>
         <span>Season: {seasonAt(state.season.value)}</span>
         {SEASON_IDS.map((id, i) => (
@@ -165,59 +203,58 @@ export function Shell({ pack }: { pack: ContentPack }) {
         <button type="button" onClick={() => emit({ type: "journal.open" })}>
           Journal ({journal.stamps.length}/{pack.stamps.length})
         </button>
-      </div>
-      {guideLine && <p className={s.guide}>Owl: {guideLine}</p>}
+        <SoundToggle sound={sound} />
+      </header>
+      {guideLine && (
+        <p className={s.guide} aria-live="polite">
+          Owl: {guideLine}
+        </p>
+      )}
       {toast && <output className={s.toast}>New stamp: {toast}</output>}
-
-      {(state.view === "island" || state.view === "travel") && (
-        <Island {...ctx} view={state.view} locationId={state.locationId} />
-      )}
-      {scene && state.view !== "island" && state.view !== "travel" && (
-        <Scene
-          {...ctx}
-          scene={scene}
-          artifacts={pack.artifacts.filter((a) =>
-            scene.placements.some((p) => p.artifactId === a.id),
+      <aside className={s.side}>
+        {artifact && state.view === "focus" && (
+          <Viewer
+            {...ctx}
+            artifact={artifact}
+            claims={claimsFor(pack, artifact.knowledgeId, artifact.claimIds)}
+            read={journal.hotspotsRead
+              .filter((k) => k.startsWith(`${artifact.id}/`))
+              .map((k) => k.slice(artifact.id.length + 1))}
+          />
+        )}
+        {activity && state.view === "activity" && (
+          <Activity
+            {...ctx}
+            activity={activity}
+            claims={claimsFor(pack, activity.knowledgeId, activity.claimIds)}
+          />
+        )}
+      </aside>
+      {state.overlay && (
+        <div className={s.overlay}>
+          {state.overlay === "journal" && (
+            <Journal {...ctx} journal={journal} />
           )}
-          focusedArtifactId={state.artifactId}
-        />
-      )}
-      {artifact && state.view === "focus" && (
-        <Viewer
-          {...ctx}
-          artifact={artifact}
-          claims={claimsFor(pack, artifact.knowledgeId, artifact.claimIds)}
-          read={journal.hotspotsRead
-            .filter((k) => k.startsWith(`${artifact.id}/`))
-            .map((k) => k.slice(artifact.id.length + 1))}
-        />
-      )}
-      {activity && state.view === "activity" && (
-        <Activity
-          {...ctx}
-          activity={activity}
-          claims={claimsFor(pack, activity.knowledgeId, activity.claimIds)}
-        />
-      )}
-      {state.overlay === "journal" && <Journal {...ctx} journal={journal} />}
-      {state.overlay === "reveal" && state.reveal && (
-        <Reveal
-          {...ctx}
-          knowledgeId={state.reveal.knowledgeId}
-          claim={
-            state.reveal.claimId
-              ? resolveClaim(
-                  pack,
-                  state.reveal.knowledgeId,
-                  state.reveal.claimId,
-                )
-              : null
-          }
-          artifact={
-            pack.artifacts.find((a) => a.id === state.reveal?.artifactId) ??
-            null
-          }
-        />
+          {state.overlay === "reveal" && state.reveal && (
+            <Reveal
+              {...ctx}
+              knowledgeId={state.reveal.knowledgeId}
+              claim={
+                state.reveal.claimId
+                  ? resolveClaim(
+                      pack,
+                      state.reveal.knowledgeId,
+                      state.reveal.claimId,
+                    )
+                  : null
+              }
+              artifact={
+                pack.artifacts.find((a) => a.id === state.reveal?.artifactId) ??
+                null
+              }
+            />
+          )}
+        </div>
       )}
     </main>
   );

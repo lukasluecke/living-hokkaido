@@ -1,11 +1,62 @@
 "use client";
-// Island part: HTML fallback stub. Replace the body with the 3D island
-// (port from labs/island). Keep this list as the keyboard / no-WebGL path.
-import { useEffect } from "react";
-import type { IslandPartProps } from "@/contracts";
+// Island part. 3D island from labs/island when WebGL works; the HTML list
+// below is the keyboard / no-WebGL path and the stub "flight".
+import { Canvas } from "@react-three/fiber";
+import { Suspense, useEffect, useRef } from "react";
+import { type IslandPartProps, type Location, SCALE } from "@/contracts";
 import s from "../shared/Fallback.module.css";
+import c from "./Island.module.css";
+import { World } from "./World";
 
-export function IslandPart({
+export function IslandPart(props: IslandPartProps) {
+  const { content, prefs, emit, view } = props;
+  const pins = useRef(new Map<string, HTMLElement>());
+  if (!prefs.webgl) return <IslandList {...props} />;
+  const select = (l: Location) => {
+    if (l.status === "open" && view === "island")
+      emit({ type: "location.select", locationId: l.id });
+  };
+  const o = content.island.overview;
+  return (
+    <div className={c.stage}>
+      <Canvas
+        shadows
+        dpr={[1, SCALE.maxDpr]}
+        camera={{
+          position: o.eye,
+          fov: o.fov ?? SCALE.defaultFov,
+          near: 0.5,
+          far: 500,
+        }}
+        gl={{ antialias: false, powerPreference: "high-performance" }}
+      >
+        <Suspense fallback={null}>
+          <World {...props} onSelect={select} pins={pins} fx />
+        </Suspense>
+      </Canvas>
+      <div className={c.pins}>
+        {content.island.locations.map((l) => (
+          <button
+            key={l.id}
+            type="button"
+            className={`${c.pin} ${l.status === "open" ? "" : c.soon}`}
+            ref={(el) => {
+              if (el) pins.current.set(l.id, el);
+              else pins.current.delete(l.id);
+            }}
+            aria-disabled={l.status !== "open"}
+            onClick={() => select(l)}
+          >
+            {l.title}
+            {l.status === "open" ? "" : " · soon"}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function IslandList({
   content,
   view,
   locationId,

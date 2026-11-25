@@ -1,0 +1,60 @@
+.viewer {
+  position: relative;
+  height: 280px;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 8px 0;
+  touch-action: none;
+  cursor: grab;
+}
+.hotspots {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.hotspot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #fbf4e6;
+  background: #c99a3b;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  box-shadow: 0 2px 8px rgb(43 33 24 / 35%);
+  transition: opacity 0.2s;
+}
+.read {
+  background: #2f4b6e;
+}
+.hotspot:focus-visible {
+  outline: 3px solid #e8c27a;
+}
+.turn {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #5a4a3c;
+}
+.turn button {
+  border: 0;
+  border-radius: 999px;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  color: #2b2118;
+  background: #fbf4e6;
+  cursor: pointer;
+  font-size: 16px;
+}

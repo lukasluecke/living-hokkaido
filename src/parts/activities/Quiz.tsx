@@ -1,0 +1,91 @@
+"use client";
+// Quiz: pick one option. Wrong picks stay marked; the right pick shows the
+// explanation from the definition and the claims it rests on.
+import { useEffect, useRef, useState } from "react";
+import type { ActivityOf, Emit, ResolvedClaim } from "@/contracts";
+import s from "./Activities.module.css";
+import { quizScore } from "./logic";
+import { Sources } from "./Sources";
+
+const LETTERS = "ABCDEFGHIJ";
+
+export function Quiz({
+  a,
+  title,
+  claims,
+  emit,
+}: {
+  a: ActivityOf<"quiz">;
+  title: string;
+  claims: Record<string, ResolvedClaim>;
+  emit: Emit;
+}) {
+  const [tried, setTried] = useState<number[]>([]);
+  const solved = tried.includes(a.answer);
+  const sent = useRef(false);
+  const feedback = useRef<HTMLDivElement>(null);
+  const last = tried.at(-1);
+
+  useEffect(() => {
+    if (!solved || sent.current) return;
+    sent.current = true;
+    emit({
+      type: "activity.complete",
+      result: {
+        activityId: a.id,
+        completed: true,
+        score: quizScore(tried.length - 1, a.options.length),
+        at: new Date().toISOString(),
+      },
+    });
+    feedback.current?.focus();
+  }, [solved, tried.length, a.id, a.options.length, emit]);
+
+  return (
+    <div className={s.quiz}>
+      {a.question !== title && <p className={s.prompt}>{a.question}</p>}
+      <fieldset className={s.options}>
+        <legend className={s.srOnly}>{a.question}</legend>
+        {a.options.map((o, i) => {
+          const wrong = tried.includes(i) && i !== a.answer;
+          const right = solved && i === a.answer;
+          return (
+            <button
+              key={o}
+              type="button"
+              className={`${s.option} ${wrong ? s.wrong : ""} ${right ? s.right : ""}`}
+              aria-pressed={tried.includes(i)}
+              aria-disabled={solved || wrong}
+              onClick={() => {
+                if (solved || tried.includes(i)) return;
+                setTried([...tried, i]);
+              }}
+            >
+              <span className={s.letter} aria-hidden="true">
+                {right ? "✓" : wrong ? "✗" : LETTERS[i]}
+              </span>
+              <span>{o}</span>
+              {wrong && <span className={s.srOnly}> (not this one)</span>}
+              {right && <span className={s.srOnly}> (correct)</span>}
+            </button>
+          );
+        })}
+      </fieldset>
+      <div
+        ref={feedback}
+        tabIndex={-1}
+        aria-live="polite"
+        className={solved ? s.result : s.hint}
+      >
+        {solved ? (
+          <p>{a.explanation}</p>
+        ) : last !== undefined ? (
+          <p>Not quite. Look again and try another one.</p>
+        ) : (
+          <p>Choose one answer.</p>
+        )}
+      </div>
+      {solved && <Sources ids={a.claimIds} claims={claims} />}
+    </div>
+  );
+}

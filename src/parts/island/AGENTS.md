@@ -40,3 +40,6 @@ keyboard path works with WebGL off.
 ## Decisions
 
 - 2026-11-25: purpose-built island, not a geographic map (Lukas).
+
+* 2026-11-25: 3D island ported from labs/island into `World.tsx` + `world/`. Owl flight is the travel step; `owl.arrived` hands off to the detail scene (no roof lift on the island).
+* 2026-11-25: spirit-like snow owl (`world/Owl.tsx`), trail off with reduced motion. See docs/STYLE.md § owl look.

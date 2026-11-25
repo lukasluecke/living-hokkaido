@@ -1,35 +1,85 @@
 .shell {
-  min-height: 100vh;
+  position: relative;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
   background: #1f2d46;
   color: #fbf4e6;
-  padding: 16px;
-  display: grid;
-  gap: 16px;
-  align-content: start;
-  font-family: system-ui, sans-serif;
+  font-family: ui-rounded, "Hiragino Maru Gothic ProN", system-ui, sans-serif;
+}
+.stage {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
 }
 .hud {
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  right: 16px;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
+  pointer-events: none;
+  padding: 0;
+  border: 0;
+  justify-content: flex-start;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 50%);
+}
+.hud > * {
+  pointer-events: auto;
 }
 .hud button {
   font: inherit;
+  font-size: 14px;
   border-radius: 999px;
   border: 1px solid #e8c27a;
-  background: transparent;
+  background: rgb(31 45 70 / 55%);
   color: inherit;
   padding: 4px 12px;
   cursor: pointer;
 }
 .guide {
-  font-style: italic;
+  position: absolute;
+  left: 16px;
+  top: 60px;
+  max-width: min(420px, calc(100% - 32px));
+  margin: 0;
+  background: #fbf4e6;
+  color: #2b2118;
+  border-radius: 14px;
+  padding: 10px 14px;
+  box-shadow: 0 6px 24px rgb(43 33 24 / 25%);
 }
 .toast {
+  position: absolute;
+  top: 120px;
+  left: 50%;
+  transform: translateX(-50%);
   background: #e8c27a;
   color: #2b2118;
   border-radius: 8px;
   padding: 6px 12px;
-  justify-self: start;
+}
+.side {
+  position: absolute;
+  top: 64px;
+  right: 16px;
+  width: min(420px, calc(100% - 32px));
+  max-height: calc(100% - 140px);
+  overflow: auto;
+  display: grid;
+  gap: 12px;
+}
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgb(31 45 70 / 45%);
 }
