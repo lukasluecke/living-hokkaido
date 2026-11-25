@@ -1,0 +1,57 @@
+.panel {
+  background: var(--lh-paper, #fbf4e6);
+  color: var(--lh-ink, #2b2118);
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 6px 24px rgb(43 33 24 / 18%);
+  max-width: 560px;
+}
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0;
+}
+.button {
+  font: inherit;
+  border: 1px solid #8a5a35;
+  background: #fffaf0;
+  color: inherit;
+  border-radius: 999px;
+  padding: 6px 14px;
+  cursor: pointer;
+}
+.button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.button[aria-pressed="true"] {
+  background: #e8c27a;
+}
+.badge {
+  display: inline-block;
+  font-size: 12px;
+  border-radius: 999px;
+  padding: 2px 8px;
+  background: #efe1c2;
+  margin-right: 6px;
+}
+.muted {
+  opacity: 0.75;
+  font-size: 14px;
+}
+.grid {
+  display: grid;
+  gap: 4px;
+}
+.cell {
+  width: 22px;
+  height: 22px;
+  border: 1px solid #8a5a35;
+  background: #fffaf0;
+  padding: 0;
+  cursor: pointer;
+}
+.cellOn {
+  background: #c9a46a;
+}

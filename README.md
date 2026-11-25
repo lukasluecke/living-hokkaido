@@ -27,7 +27,7 @@ The seed story is a **research preview awaiting cultural/editorial approval**, n
 
 Source files are never uploaded to a server. Plain text is read in the browser; audio, images and PDFs are staged by filename and need manually supplied text. Mock extraction retains supplied text; it does not verify facts. Drafts live in component memory. The reviewer name is a demonstration field, not authentication. Do not use this scaffold as a production repository of sensitive contributions.
 
-All sponsor adapters are mock/unavailable and labeled. Convex and Clerk are deliberately deferred until shared storage and authenticated review are required. There is no pretend deployed backend or trained model. See [ARCHITECTURE.md](ARCHITECTURE.md), [PROJECT.md](PROJECT.md), [PLAN.md](PLAN.md), [team workstreams](docs/TEAM.md), [contracts](docs/CONTRACTS.md), [research](docs/RESEARCH.md) and [integration decisions](docs/INTEGRATIONS.md).
+All sponsor adapters are mock/unavailable and labeled. Convex and Clerk are deliberately deferred until shared storage and authenticated review are required. There is no pretend deployed backend or trained model. Working on a part of the visitor experience? Start with [docs/PARTS.md](docs/PARTS.md) and [docs/STYLE.md](docs/STYLE.md); `/shell` shows all parts wired together. See [ARCHITECTURE.md](ARCHITECTURE.md), [PROJECT.md](PROJECT.md), [PLAN.md](PLAN.md), [team workstreams](docs/TEAM.md), [contracts](docs/CONTRACTS.md), [research](docs/RESEARCH.md) and [integration decisions](docs/INTEGRATIONS.md).
 
 ## License
 
