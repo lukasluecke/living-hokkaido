@@ -5,6 +5,7 @@ import { Canvas } from "@react-three/fiber";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { type IslandPartProps, type Location, SCALE } from "@/contracts";
 import s from "../shared/Fallback.module.css";
+import { QualityGovernor, useQuality } from "../shared/Quality";
 import attn from "../shared/Attention.module.css";
 import { Icon, KindIcon, UI_ICON } from "../shared/Icon";
 import {
@@ -19,6 +20,7 @@ import { World } from "./World";
 export function IslandPart(props: IslandPartProps) {
   const { content, prefs, emit, view } = props;
   const pins = useRef(new Map<string, HTMLElement>());
+  const q = useQuality(SCALE.maxDpr);
   if (!prefs.webgl) return <IslandList {...props} />;
   const select = (l: Location) => {
     if (l.status === "open" && view === "island")
@@ -28,8 +30,8 @@ export function IslandPart(props: IslandPartProps) {
   return (
     <div className={c.stage}>
       <Canvas
-        shadows
-        dpr={[1, SCALE.maxDpr]}
+        shadows={q.shadows}
+        dpr={q.dpr}
         camera={{
           position: o.eye,
           fov: o.fov ?? SCALE.defaultFov,
@@ -39,8 +41,15 @@ export function IslandPart(props: IslandPartProps) {
         gl={{ antialias: false, powerPreference: "high-performance" }}
       >
         <Suspense fallback={null}>
-          <World {...props} onSelect={select} pins={pins} fx />
+          <World
+            {...props}
+            onSelect={select}
+            pins={pins}
+            fx
+            extraFx={q.extraFx}
+          />
         </Suspense>
+        <QualityGovernor />
       </Canvas>
       <div className={c.pins}>
         {content.island.locations.map((l) => (

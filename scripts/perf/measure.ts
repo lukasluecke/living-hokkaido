@@ -19,6 +19,8 @@ const { values: opt } = parseArgs({
     seconds: { type: "string", default: "4" },
     size: { type: "string", default: "1440x900" },
     json: { type: "string" },
+    /** Extra query string for the page, for example "quality=low". */
+    query: { type: "string" },
     places: {
       type: "string",
       default: "Lake house,Herring coast,Coal mountain",
@@ -111,7 +113,8 @@ const total = (b: Bytes) => Object.values(b).reduce((a, x) => a + x, 0);
 
 async function main() {
   const server = opt.url ? null : await startServer(opt.port);
-  const base = opt.url ?? `http://localhost:${opt.port}`;
+  const origin = opt.url ?? `http://localhost:${opt.port}`;
+  const base = opt.query ? `${origin}/?${opt.query}` : origin;
   const [w, h] = (opt.size ?? "1440x900").split("x").map(Number);
   const secs = Number(opt.seconds);
   const browser = await chromium.launch({ headless: !opt.headed });
@@ -154,8 +157,13 @@ async function main() {
     );
 
     const island = await fps(page, secs);
-    report.island = island;
-    console.log(`Island: ${island.fps} fps (p95 frame ${island.p95} ms)`);
+    const tier = await page.evaluate(
+      "(() => { try { return sessionStorage.getItem('lh-quality-v1') ?? 'full'; } catch { return '?'; } })()",
+    );
+    report.island = { ...island, tier };
+    console.log(
+      `Island: ${island.fps} fps (p95 frame ${island.p95} ms), quality ${tier}`,
+    );
 
     const places: Record<string, unknown> = {};
     for (const name of (opt.places ?? "").split(",").filter(Boolean)) {
@@ -178,6 +186,9 @@ async function main() {
         const f = await fps(page, secs);
         places[name] = {
           ...f,
+          tier: await page.evaluate(
+            "(() => { try { return sessionStorage.getItem('lh-quality-v1') ?? 'full'; } catch { return '?'; } })()",
+          ),
           addedBytes: total(added.bytes),
           addedFiles: added.files,
         };
