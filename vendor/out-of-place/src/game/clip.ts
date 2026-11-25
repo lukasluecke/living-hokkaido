@@ -56,6 +56,73 @@ function wrap(
   return out;
 }
 
+type Crop = { x: number; y: number; size: number };
+
+/** One 9:16 frame: title band, the game crop and the history card. */
+function drawFrame(
+  ctx: CanvasRenderingContext2D,
+  source: CanvasImageSource,
+  c: Crop,
+  layout: ClipLayout,
+  textAlpha: number,
+) {
+  ctx.fillStyle = css("backdropDeep");
+  ctx.fillRect(0, 0, CLIP_W, CLIP_H);
+
+  // Game crop
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(source, c.x, c.y, c.size, c.size, 0, TOP, CROP, CROP);
+  ctx.strokeStyle = css("outline");
+  ctx.lineWidth = 8;
+  ctx.strokeRect(4, TOP, CLIP_W - 8, CROP);
+
+  // Title band
+  ctx.textAlign = "center";
+  ctx.fillStyle = css("creamSoft");
+  ctx.font = "28px Georgia, serif";
+  ctx.fillText(layout.subtitle, CLIP_W / 2, 64);
+  ctx.globalAlpha = textAlpha;
+  ctx.font = "bold 64px Georgia, serif";
+  ctx.lineWidth = 10;
+  ctx.strokeStyle = css("outline");
+  ctx.strokeText(layout.title, CLIP_W / 2, 160);
+  ctx.fillStyle = css("sunGlow");
+  ctx.fillText(layout.title, CLIP_W / 2, 160);
+
+  // History card. Long facts get a smaller font, so they never reach the
+  // footer.
+  ctx.textAlign = "left";
+  const top = TOP + CROP + 60;
+  const bottom = CLIP_H - 64;
+  const cardEnd = (size: number, draw: boolean) => {
+    let y = top;
+    for (const l of layout.lines) {
+      if (l.label) {
+        ctx.font = `bold ${size - 2}px Georgia, serif`;
+        ctx.fillStyle = css("sunGlow");
+        if (draw) ctx.fillText(l.label, 40, y);
+        y += size + 8;
+      }
+      ctx.font = `${size}px Georgia, serif`;
+      ctx.fillStyle = css("cream");
+      for (const row of wrap(ctx, l.text, CLIP_W - 80)) {
+        if (draw) ctx.fillText(row, 40, y);
+        y += size + 10;
+      }
+      y += 18;
+    }
+    return y - 18 - (size + 10);
+  };
+  let size = 28;
+  while (size > 18 && cardEnd(size, false) > bottom) size -= 2;
+  cardEnd(size, true);
+  ctx.globalAlpha = 1;
+  ctx.font = "20px Georgia, serif";
+  ctx.fillStyle = css("creamSoft");
+  ctx.textAlign = "center";
+  ctx.fillText(layout.footer, CLIP_W / 2, CLIP_H - 28);
+}
+
 export type ClipRecording = {
   stop(): Promise<Blob>;
   mime: string;
@@ -68,7 +135,7 @@ export type ClipRecording = {
  */
 export function startVerticalClip(opts: {
   source: HTMLCanvasElement;
-  crop: () => { x: number; y: number; size: number };
+  crop: () => Crop;
   layout: ClipLayout;
   textAfterMs: number;
   audio: MediaStream | null;
@@ -84,54 +151,7 @@ export function startVerticalClip(opts: {
   const draw = () => {
     const t = performance.now() - t0;
     const textAlpha = Math.min(1, Math.max(0, (t - opts.textAfterMs) / 400));
-    ctx.fillStyle = css("backdropDeep");
-    ctx.fillRect(0, 0, CLIP_W, CLIP_H);
-
-    // Game crop
-    const c = opts.crop();
-    ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(opts.source, c.x, c.y, c.size, c.size, 0, TOP, CROP, CROP);
-    ctx.strokeStyle = css("outline");
-    ctx.lineWidth = 8;
-    ctx.strokeRect(4, TOP, CLIP_W - 8, CROP);
-
-    // Title band
-    ctx.textAlign = "center";
-    ctx.fillStyle = css("creamSoft");
-    ctx.font = "28px Georgia, serif";
-    ctx.fillText(opts.layout.subtitle, CLIP_W / 2, 64);
-    ctx.globalAlpha = textAlpha;
-    ctx.font = "bold 64px Georgia, serif";
-    ctx.lineWidth = 10;
-    ctx.strokeStyle = css("outline");
-    ctx.strokeText(opts.layout.title, CLIP_W / 2, 160);
-    ctx.fillStyle = css("sunGlow");
-    ctx.fillText(opts.layout.title, CLIP_W / 2, 160);
-
-    // History card
-    ctx.textAlign = "left";
-    let y = TOP + CROP + 60;
-    for (const l of opts.layout.lines) {
-      if (l.label) {
-        ctx.font = "bold 26px Georgia, serif";
-        ctx.fillStyle = css("sunGlow");
-        ctx.fillText(l.label, 40, y);
-        y += 36;
-      }
-      ctx.font = "28px Georgia, serif";
-      ctx.fillStyle = css("cream");
-      for (const row of wrap(ctx, l.text, CLIP_W - 80)) {
-        ctx.fillText(row, 40, y);
-        y += 38;
-      }
-      y += 18;
-    }
-    ctx.globalAlpha = 1;
-    ctx.font = "20px Georgia, serif";
-    ctx.fillStyle = css("creamSoft");
-    ctx.textAlign = "center";
-    ctx.fillText(opts.layout.footer, CLIP_W / 2, CLIP_H - 28);
-
+    drawFrame(ctx, opts.source, opts.crop(), opts.layout, textAlpha);
     raf = requestAnimationFrame(draw);
   };
   draw();
@@ -164,11 +184,29 @@ export function startVerticalClip(opts: {
   };
 }
 
+/**
+ * A still 9:16 history card as a PNG: the current game crop with the full
+ * text. Needs a canvas that keeps its drawing buffer (WebGL).
+ */
+export function cardImage(
+  source: HTMLCanvasElement,
+  crop: Crop,
+  layout: ClipLayout,
+): Promise<Blob | null> {
+  const canvas = document.createElement("canvas");
+  canvas.width = CLIP_W;
+  canvas.height = CLIP_H;
+  const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+  drawFrame(ctx, source, crop, layout, 1);
+  return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+}
+
 /** Hand the clip to the share sheet on phones, or download it elsewhere. */
 export async function deliverClip(
   blob: Blob,
   ext: string,
 ): Promise<"shared" | "downloaded"> {
+  // Also used for the PNG card.
   const name = `out-of-place-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.${ext}`;
   const file = new File([blob], name, { type: blob.type });
   const touch =
