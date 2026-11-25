@@ -3,6 +3,7 @@
 // next, the title, "n of m" and a close X. On phone the header is a drag
 // handle: drag down to close, swipe sideways for the previous / next object.
 import { type ReactNode, useRef, useState } from "react";
+import { useT } from "@/i18n";
 import s from "./SidePanel.module.css";
 
 const CLOSE_PX = 90;
@@ -30,6 +31,7 @@ export function SidePanel({
   header?: boolean;
   children: ReactNode;
 }) {
+  const t = useT();
   const start = useRef<{ x: number; y: number; id: number } | null>(null);
   const [dy, setDy] = useState(0);
   const end = (x: number, y: number) => {
@@ -75,8 +77,8 @@ export function SidePanel({
           <button
             type="button"
             className={s.nav}
-            aria-label="Previous object"
-            title="Previous object"
+            aria-label={t("Previous object")}
+            title={t("Previous object")}
             onClick={onPrev}
           >
             ‹
@@ -97,8 +99,8 @@ export function SidePanel({
           <button
             type="button"
             className={s.nav}
-            aria-label="Next object"
-            title="Next object"
+            aria-label={t("Next object")}
+            title={t("Next object")}
             onClick={onNext}
           >
             ›

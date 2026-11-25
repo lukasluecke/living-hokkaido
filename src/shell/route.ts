@@ -7,6 +7,7 @@ import type {
   ExperienceState,
   JournalState,
 } from "@/contracts";
+import { english, type Translate } from "@/i18n/core";
 
 export type StationId = "island" | "place" | "look" | "try" | "journal";
 export type StationStatus = "done" | "now" | "todo";
@@ -31,6 +32,7 @@ export function route(
   pack: ContentPack,
   state: ExperienceState,
   journal: JournalState,
+  t: Translate = english,
 ): Route {
   const location =
     pack.island.locations.find((l) => l.id === state.locationId) ??
@@ -77,11 +79,11 @@ export function route(
     journal: state.overlay === "journal" ? undefined : { type: "journal.open" },
   };
   const label: Record<StationId, string> = {
-    island: "Island",
-    place: location?.title ?? "Place",
-    look: "Look",
-    try: "Try",
-    journal: "Journal",
+    island: t("Island"),
+    place: location?.title ?? t("Place"),
+    look: t("Look"),
+    try: t("Try"),
+    journal: t("Journal"),
   };
   const sub: Partial<Record<StationId, string>> = {
     look: placed.length ? `${looked.length}/${placed.length}` : undefined,
@@ -92,7 +94,10 @@ export function route(
     return { id, label: label[id], status, sub: sub[id], event: events[id] };
   });
 
-  return { stations, next: nextStep(pack, state, journal, location, placed) };
+  return {
+    stations,
+    next: nextStep(pack, state, journal, location, placed, t),
+  };
 }
 
 function nextStep(
@@ -101,6 +106,7 @@ function nextStep(
   journal: JournalState,
   location: ContentPack["island"]["locations"][number] | null,
   placed: string[],
+  t: Translate,
 ): NextStep | null {
   if (state.overlay) return null;
   const art = (id: string) => pack.artifacts.find((a) => a.id === id);
@@ -109,7 +115,9 @@ function nextStep(
   if (state.view === "island") {
     return location
       ? {
-          label: `Go to the ${location.title.toLowerCase()}`,
+          label: t("Go to the {place}", {
+            place: location.title.toLowerCase(),
+          }),
           event: { type: "location.select", locationId: location.id },
         }
       : null;
@@ -121,22 +129,22 @@ function nextStep(
     const a = todo ? act(todo) : undefined;
     if (a)
       return {
-        label: `Try: ${a.title}`,
+        label: t("Try: {title}", { title: a.title }),
         event: { type: "activity.start", activityId: a.id },
       };
     const other = unlooked.find((id) => id !== state.artifactId);
     const o = other ? art(other) : undefined;
     if (o)
       return {
-        label: `Next: ${o.label}`,
+        label: t("Next: {label}", { label: o.label }),
         event: { type: "artifact.focus", artifactId: o.id },
       };
-    return { label: "Open the journal", event: { type: "journal.open" } };
+    return { label: t("Open the journal"), event: { type: "journal.open" } };
   }
   const o = unlooked[0] ? art(unlooked[0]) : undefined;
   if (o)
     return {
-      label: `Look at: ${o.label}`,
+      label: t("Look at: {label}", { label: o.label }),
       event: { type: "artifact.focus", artifactId: o.id },
     };
   const scene = pack.scenes.find((x) => x.id === state.sceneId);
@@ -144,8 +152,8 @@ function nextStep(
   const a = todo ? act(todo) : undefined;
   if (a)
     return {
-      label: `Try: ${a.title}`,
+      label: t("Try: {title}", { title: a.title }),
       event: { type: "activity.start", activityId: a.id },
     };
-  return { label: "Open the journal", event: { type: "journal.open" } };
+  return { label: t("Open the journal"), event: { type: "journal.open" } };
 }
