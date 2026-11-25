@@ -1,5 +1,8 @@
 # Island world lab
 
+> Current state and porting notes: see `HANDBACK.md`. Places, units and
+> events now come from `@/content` and `@/contracts`.
+
 A standalone experiment for the **overworld island only**: terrain, vegetation,
 seasons, owl flight and camera. It is separate from the main Next.js app so we
 can try ideas fast. The code is React Three Fiber, the same stack as the app,
@@ -19,9 +22,9 @@ The panel on the right switches every option live. The line at the bottom of
 the panel shows fps, frame time, draw calls and triangles.
 
 URL parameters (for screenshots or a fixed demo):
-`style=painted|terrace|hex`, `trees=3500`, `treeScale=1.3`,
+`style=painted|terrace|hex`, `trees=9000`, `treeScale=2`,
 `season=0..3.99` (fractions are blends), `play=1` (timelapse), `fx=none|tilt|full`,
-`cam=follow|cut`, `dest=lake|forest|river|coast`, `instant` (no camera easing),
+`cam=follow|cut`, `dest=lake-house` (a location id from `@/content`), `instant` (no camera easing),
 `shot` (hide the UI), `labels`, `dpr=1`, `flyT=0.5` (freeze the owl mid-flight).
 
 ## What each experiment tests

@@ -11,12 +11,12 @@ export type Field = {
   groundY(x: number, z: number): number;
 };
 
-export const EXAG = 3.0; // world units at 2300 m
+export const EXAG = 7.2; // du at 2300 m (ISLAND.maxHeight in @/contracts is 8)
 
 export function heightFromElev(e: number, terrace = 0): number {
-  if (e <= 0) return -0.45 + Math.max(e, -400) / 400 * 0.35;
+  if (e <= 0) return -1.0 + Math.max(e, -400) / 400 * 0.8;
   const q = terrace > 0 ? Math.ceil(e / terrace) * terrace : e;
-  return 0.3 + (Math.min(q, 2300) / 2300) ** 0.85 * EXAG;
+  return 0.6 + (Math.min(q, 2300) / 2300) ** 0.85 * EXAG;
 }
 
 let cached: Field | null = null;

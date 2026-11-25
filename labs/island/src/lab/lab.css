@@ -12,3 +12,8 @@
 .pin { background: rgba(16,26,40,.85); color: #f4efe4; border: 0; border-radius: 999px; padding: 4px 10px; font: 600 12px system-ui; white-space: nowrap; cursor: pointer; }
 .card { position: absolute; left: 14px; bottom: 14px; max-width: 320px; background: rgba(16,26,40,.88); border-radius: 14px; padding: 12px 16px; }
 .card p { margin: 6px 0 0; font-size: 13px; opacity: .85; }
+.panel button.closed { opacity: .55; cursor: not-allowed; }
+.pin.soon { opacity: .75; font-weight: 500; }
+.events { font: 10px/1.4 ui-monospace, monospace; opacity: .75; margin: 6px 0 0; padding-left: 16px; word-break: break-all; }
+.pins { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.pins .pin { position: absolute; left: 0; top: 0; pointer-events: auto; }

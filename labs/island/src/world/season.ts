@@ -1,15 +1,12 @@
 // One shared season clock. Every material reads the same uniform objects, so a
 // single number (0 spring, 1 summer, 2 autumn, 3 winter, wraps at 4) drives the
 // whole island: ground, trees, water, ice, lavender, particles, sky and sun.
+import { seasonWeights } from "@/contracts";
+import { season as tokens, seasonItem } from "@/design/tokens";
 import { Color, Vector4 } from "three";
 
 export const SEASONS = ["Spring", "Summer", "Autumn", "Winter"] as const;
-export const SEASON_NOTES = [
-  "Cherry blossom · snow on the peaks",
-  "Lavender fields · long green days",
-  "Red and gold leaves",
-  "Deep snow · drift ice · warm windows",
-];
+export const SEASON_NOTES = [seasonItem.spring, seasonItem.summer, seasonItem.autumn, seasonItem.winter];
 
 export const U = {
   uW: { value: new Vector4(1, 0, 0, 0) }, // season weights, sum = 1
@@ -18,20 +15,13 @@ export const U = {
   uTerrace: { value: 0 },
 };
 
-/** plateau easing: each season holds, then blends into the next */
+/** Shared plateau-eased weights from @/contracts, as a Vector4. */
 export function weightsFor(s: number, out = new Vector4()) {
-  const t = ((s % 4) + 4) % 4;
-  const i = Math.floor(t), f = t - i;
-  const hold = 0.55;
-  const k = f < hold ? 0 : smooth((f - hold) / (1 - hold));
-  const w = [0, 0, 0, 0];
-  w[i] = 1 - k;
-  w[(i + 1) % 4] += k;
-  return out.set(w[0], w[1], w[2], w[3]);
+  const [a, b, c, d] = seasonWeights(s);
+  return out.set(a, b, c, d);
 }
-const smooth = (x: number) => x * x * (3 - 2 * x);
 
-export function mix4(w: Vector4, cols: [string, string, string, string], out = new Color()) {
+export function mix4(w: Vector4, cols: readonly [string, string, string, string], out = new Color()) {
   const c = cols.map((h) => new Color(h));
   return out.setRGB(
     c[0].r * w.x + c[1].r * w.y + c[2].r * w.z + c[3].r * w.w,
@@ -41,10 +31,10 @@ export function mix4(w: Vector4, cols: [string, string, string, string], out = n
 }
 export const num4 = (w: Vector4, v: [number, number, number, number]) => v[0] * w.x + v[1] * w.y + v[2] * w.z + v[3] * w.w;
 
-export const SKY: [string, string, string, string] = ["#bcd6e2", "#8fc3e0", "#c9cbb8", "#1f2d46"];
-export const SUN: [string, string, string, string] = ["#fff1df", "#fff6e0", "#ffd2a0", "#ffe2c4"];
-export const SEA: [string, string, string, string] = ["#2f7f9c", "#1f78a8", "#2f6f82", "#2a4a68"];
-export const LAVENDER: [string, string, string, string] = ["#7d9a52", "#8a63c8", "#b08a4a", "#eef3f7"];
+export const SKY = tokens.sky;
+export const SUN = tokens.sun;
+export const SEA = tokens.sea;
+export const LAVENDER = tokens.accent;
 
 // GLSL shared by every season-aware material.
 export const GLSL_COMMON = /* glsl */ `

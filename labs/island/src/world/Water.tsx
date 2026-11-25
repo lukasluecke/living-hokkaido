@@ -6,7 +6,7 @@ import { type Field, heightFromElev } from "./field";
 import { LAKE, LAKE_LEVEL, RIVER } from "./island";
 import { mix4, num4, U } from "./season";
 
-const WATER: [string, string, string, string] = ["#5aa7c4", "#3f9bc9", "#4d8ea3", "#e4edf4"];
+const WATER = ["#5aa7c4", "#3f9bc9", "#4d8ea3", "#e4edf4"] as const;
 
 function useWaterMaterial() {
   const m = useMemo(() => new MeshStandardMaterial({ roughness: 0.2, metalness: 0.05, side: DoubleSide, polygonOffset: true, polygonOffsetFactor: -2 }), []);
@@ -37,8 +37,8 @@ export function River({ field }: { field: Field }) {
     for (let i = 0; i <= n; i++) {
       const t = 0.12 + (i / n) * (end - 0.12);
       const p = curve.getPointAt(t), d = curve.getTangentAt(t);
-      const side = new Vector3(-d.z, 0, d.x).normalize().multiplyScalar(0.06 + t * 0.16);
-      const y = Math.max(0.06, field.groundY(p.x, p.z) + 0.04);
+      const side = new Vector3(-d.z, 0, d.x).normalize().multiplyScalar(0.14 + t * 0.36);
+      const y = Math.max(0.1, field.groundY(p.x, p.z) + 0.08);
       pos.push(p.x + side.x, y, p.z + side.z, p.x - side.x, y, p.z - side.z);
       if (i < n) { const a = i * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
     }

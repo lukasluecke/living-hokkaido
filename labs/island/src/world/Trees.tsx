@@ -76,10 +76,10 @@ export function placeTrees(field: Field, count: number, clearings: Clearing[], s
   while (con.length + brd.length < count && tries++ < count * 40) {
     const x = (R() - 0.5) * field.size, z = (R() - 0.5) * field.depth;
     const e = field.elevAt(x, z);
-    if (e < 12 || e > 1450 + fbm(x, z) * 300) continue;
-    const d = 0.12, gx = field.groundY(x + d, z) - field.groundY(x - d, z), gz = field.groundY(x, z + d) - field.groundY(x, z - d);
+    if (e < 12 || e > 1450 + fbm(x * 0.4, z * 0.4) * 300) continue;
+    const d = 0.3, gx = field.groundY(x + d, z) - field.groundY(x - d, z), gz = field.groundY(x, z + d) - field.groundY(x, z - d);
     if (Math.hypot(gx, gz) / (2 * d) > 1.4) continue; // too steep
-    const dens = fbm(x * 0.8 + 3, z * 0.8 - 7);
+    const dens = fbm(x * 0.35 + 3, z * 0.35 - 7);
     if (dens < 0.42 + R() * 0.18) continue; // clearings and meadows
     if (clearings.some((c) => Math.hypot(c.x - x, c.z - z) < c.r)) continue;
     const pConifer = 0.25 + 0.6 * Math.min(1, Math.max(0, (e - 150) / 800));

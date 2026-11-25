@@ -2,6 +2,7 @@
 import { useFrame } from "@react-three/fiber";
 import { forwardRef, useImperativeHandle, useMemo, useRef } from "react";
 import { CatmullRomCurve3, type Group, Vector3 } from "three";
+import { ISLAND } from "@/contracts";
 import type { Field } from "./field";
 
 export type OwlApi = { group: Group | null; flying: boolean; dir: Vector3 };
@@ -9,15 +10,15 @@ export type OwlApi = { group: Group | null; flying: boolean; dir: Vector3 };
 export function flightCurve(field: Field, a: Vector3, b: Vector3) {
   const pts: Vector3[] = [];
   const n = 10, dist = a.distanceTo(b);
-  const arc = Math.min(4, 0.8 + dist * 0.12);
+  const arc = Math.min(9, 1.8 + dist * 0.12);
   for (let i = 0; i <= n; i++) {
     const t = i / n;
     const x = a.x + (b.x - a.x) * t, z = a.z + (b.z - a.z) * t;
     // terrain clearance: max ground height near this sample
     let g = 0;
-    for (let k = -1; k <= 1; k++) g = Math.max(g, field.groundY(x + k * 0.6, z), field.groundY(x, z + k * 0.6));
+    for (let k = -1; k <= 1; k++) g = Math.max(g, field.groundY(x + k * 1.4, z), field.groundY(x, z + k * 1.4));
     const base = a.y + (b.y - a.y) * t;
-    const y = Math.max(base + Math.sin(Math.PI * t) * arc, g + 0.9 * Math.sin(Math.PI * Math.min(1, t * 6, (1 - t) * 6)) + 0.35);
+    const y = Math.max(base + Math.sin(Math.PI * t) * arc, g + 2.0 * Math.sin(Math.PI * Math.min(1, t * 6, (1 - t) * 6)) + 0.8);
     pts.push(new Vector3(x, i === 0 ? a.y : i === n ? b.y : y, z));
   }
   return new CatmullRomCurve3(pts, false, "centripetal");
@@ -25,8 +26,9 @@ export function flightCurve(field: Field, a: Vector3, b: Vector3) {
 
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
 
+/** Owl body is ~2 units wide with wings out; scale it to the contract wingspan. */
 export const Owl = forwardRef<OwlApi, { field: Field; perch: Vector3; target: Vector3 | null; onArrive: () => void; scale?: number }>(
-  function Owl({ field, perch, target, onArrive, scale = 0.3 }, ref) {
+  function Owl({ field, perch, target, onArrive, scale = ISLAND.owlWingspan / 2 }, ref) {
     const g = useRef<Group>(null);
     const wl = useRef<Group>(null), wr = useRef<Group>(null);
     const st = useRef({ t: 1, curve: null as CatmullRomCurve3 | null, dur: 1, key: "" , dir: new Vector3(0, 0, 1)});
@@ -37,9 +39,9 @@ export const Owl = forwardRef<OwlApi, { field: Field; perch: Vector3; target: Ve
       const from = g.current ? g.current.position.clone() : perch.clone();
       st.current.key = key;
       if (target) {
-        const to = target.clone().add(new Vector3(0.75, 0.1, 0.55)); // lands beside the house
+        const to = target.clone(); // caller passes anchor + owlPerch
         st.current.curve = flightCurve(field, from, to);
-        st.current.dur = Math.max(2.2, st.current.curve.getLength() / 5.5);
+        st.current.dur = Math.max(2.2, st.current.curve.getLength() / 11);
         st.current.t = 0;
       }
     }
@@ -52,7 +54,7 @@ export const Owl = forwardRef<OwlApi, { field: Field; perch: Vector3; target: Ve
       if (wl.current) wl.current.rotation.z = 0.2 + flap;
       if (wr.current) wr.current.rotation.z = -0.2 - flap;
       if (!s.curve || s.t >= 1) {
-        if (!s.curve) o.position.copy(perch).add(new Vector3(0, 0.25, 0));
+        if (!s.curve) o.position.copy(perch);
         o.position.y += Math.sin(state.clock.elapsedTime * 2) * 0.0015;
         api.flying = false;
         return;
