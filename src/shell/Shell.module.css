@@ -112,8 +112,9 @@
   height: 48px;
 }
 @media (max-width: 700px) {
+  /* Below the route rail, which is two lines tall on the phone. */
   .owl {
-    top: calc(62px + env(safe-area-inset-top, 0px));
+    top: calc(74px + env(safe-area-inset-top, 0px));
   }
   .owlMark {
     width: 44px;
