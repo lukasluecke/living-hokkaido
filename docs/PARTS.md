@@ -88,6 +88,13 @@ Global events from the shell HUD or any part: `season.set`, `season.play`,
 6. **Contracts change by PR only**, following
    [CONTRACTS.md § Changing contracts](CONTRACTS.md#changing-contracts).
 
+## Optional rendering tasks
+
+[TASKS-SHAW.md](TASKS-SHAW.md) lists optional, more involved tasks per part
+(shaders, GLB geometry, baked light, profiling, video) for Shaw to pick from
+later. They follow the same rules: lab first, HANDBACK, contracts unchanged
+unless proposed.
+
 ## Integrating a teammate's experiment
 
 The goal is to keep the *ideas* and the good code, not to merge a lab
