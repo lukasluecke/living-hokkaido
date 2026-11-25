@@ -169,4 +169,4 @@ read on site, no URL. Locators name the Q number and the photo id.
 | Canoe as a kamuy | `canoe-kamuy` | Ritual context, included in full |
 | Map `map-greetings` (Listening grove) | `greet-*` | Spot positions on the sketch map are our guesses for each named region |
 | Map `map-cise-plan` (Lake house) | `cise-plan`, `cise-size` | The sketch plan and spot positions are our guesses after the Kayano plan (photo 7810); check against the photo. The window of the kamuy seat is shown (ritual context, included in full) |
-
+| Game `game-sticks` (Makers' clearing) | `stick-game` | The rules follow one sentence of Q021; details (who starts, a side with no move passes) are our choices. Check with 更科源蔵『アイヌの童戯』(1983) |

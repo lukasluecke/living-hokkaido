@@ -68,3 +68,63 @@ test("map explore opens each spot once; match needs the held word", () => {
   assert.equal(m.held, null);
   assert.equal(mapScore(m, 2), 2 / 3);
 });
+
+import {
+  movesFor,
+  owlMove,
+  play,
+  startGame,
+  winner,
+} from "@/parts/activities/play/boardLogic";
+
+test("stick game: one step to a free point; a full far edge wins", () => {
+  let g = startGame();
+  assert.equal(g.turn, "you");
+  // Bottom-left stick can only go up (sides are taken).
+  assert.deepEqual(
+    movesFor(g.board, "you").map((m) => `${m.from}>${m.to}`),
+    ["6>3", "7>4", "8>5"],
+  );
+  assert.deepEqual(play(g, { from: 6, to: 0 }), g); // not one step
+  g = play(g, { from: 6, to: 3 });
+  assert.equal(g.turn, "owl");
+  assert.equal(
+    winner(["you", "you", "you", null, null, null, "owl", "owl", "owl"]),
+    "you",
+  );
+});
+
+test("the owl takes a win and every game ends", () => {
+  const b = [
+    null,
+    "you",
+    "you",
+    null,
+    "you",
+    "owl",
+    "owl",
+    "owl",
+    null,
+  ] as const;
+  const m = owlMove([...b], () => 0);
+  assert.deepEqual(m, { from: 5, to: 8 });
+  // Seeded random player against the owl: games end.
+  let seed = 7;
+  const rand = () => {
+    seed = (seed * 16807) % 2147483647;
+    return seed / 2147483647;
+  };
+  for (let t = 0; t < 50; t++) {
+    let g = startGame();
+    while (!g.winner && g.moves < 600) {
+      const ms = movesFor(g.board, g.turn);
+      const next =
+        g.turn === "owl"
+          ? owlMove(g.board, rand)
+          : ms[Math.floor(rand() * ms.length)];
+      if (!next) break;
+      g = play(g, next);
+    }
+    assert.ok(g.winner, "game ended");
+  }
+});

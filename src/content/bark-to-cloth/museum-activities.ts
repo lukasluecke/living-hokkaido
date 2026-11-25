@@ -442,3 +442,18 @@ export const owlStory: ActivityInput = {
   completion:
     "In Shizunai, Suteno Orita told the owl story with the longest known refrain. Each telling changes a little: the story belongs to its teller.",
 };
+
+export const stickGame: ActivityInput = {
+  kind: "board",
+  id: "game-sticks",
+  knowledgeId: "hokkaido-museum",
+  title: "Three sticks on a 田 grid",
+  claimIds: ["stick-game", "ring-game", "games-adults"],
+  game: "stick-grid",
+  rulesClaimId: "stick-game",
+  prompt:
+    "A children's game the museum records: each side stands three sticks on its edge of a 田 grid. In turn, move one stick one step forward, back, left or right onto a free point. Line up all three on the other side first to win.",
+  completion:
+    "Children played this game, and some games were for adults too. The museum also records a game of picking up vine rings with a stick.",
+  opponent: "owl",
+};

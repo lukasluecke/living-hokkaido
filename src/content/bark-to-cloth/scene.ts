@@ -121,7 +121,7 @@ export const makersClearing: DetailSceneInput = {
       key: 2,
     },
   ],
-  activityIds: ["weave-rows", "material", "quiz-full-adult"],
+  activityIds: ["weave-rows", "game-sticks", "material", "quiz-full-adult"],
 };
 
 /** Memory cabin: the curator memory card and the "Over time" slider. */

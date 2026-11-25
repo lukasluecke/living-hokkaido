@@ -120,6 +120,8 @@ function checkActivityKind(
       }
     }
   }
+  if (a.kind === "board" && !cited.has(a.rulesClaimId))
+    errors.push(`${at}: rules claim "${a.rulesClaimId}" not in claimIds`);
   if (a.kind === "map") {
     dupes(
       `${at} spot`,
