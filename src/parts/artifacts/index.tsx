@@ -5,12 +5,14 @@ import { useEffect } from "react";
 import type { ArtifactViewerProps } from "@/contracts";
 import { PresentationBadge, RepresentationBadge } from "../shared/Badges";
 import s from "../shared/Fallback.module.css";
+import { Viewer3D } from "./Viewer3D";
 
 export function ArtifactViewer({
   artifact,
   claims,
   read,
   emit,
+  prefs,
 }: ArtifactViewerProps) {
   useEffect(() => {
     emit({ type: "artifact.inspected", artifactId: artifact.id });
@@ -23,6 +25,7 @@ export function ArtifactViewer({
         <RepresentationBadge value={artifact.model.representation} />
         {summary && <PresentationBadge value={summary.presentation} />}
       </p>
+      {prefs.webgl && <Viewer3D artifact={artifact} read={read} emit={emit} />}
       <p>{summary?.claim.text}</p>
       <ul>
         {artifact.hotspots.map((h) => (

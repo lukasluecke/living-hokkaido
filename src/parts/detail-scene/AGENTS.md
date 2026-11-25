@@ -37,3 +37,4 @@ calls; HTML path works with WebGL off.
 ## Decisions
 
 - 2026-11-25: low-poly room + dollhouse home view (detail-scene research).
+* 2026-11-25: variant A ported into `Room.tsx` + `room/`. Home view is the high dollhouse view with the roof lifted; no real-time shadows (ContactShadows instead); keys 1–3 handled in the part.

@@ -140,9 +140,24 @@ export function Shell({ pack }: { pack: ContentPack }) {
     reveal: Reveal,
   } = parts;
 
+  const stage =
+    state.view === "island" || state.view === "travel" ? (
+      <Island {...ctx} view={state.view} locationId={state.locationId} />
+    ) : scene ? (
+      <Scene
+        {...ctx}
+        scene={scene}
+        artifacts={pack.artifacts.filter((a) =>
+          scene.placements.some((p) => p.artifactId === a.id),
+        )}
+        focusedArtifactId={state.artifactId}
+      />
+    ) : null;
+
   return (
     <main className={s.shell}>
-      <div className={s.hud}>
+      <div className={s.stage}>{stage}</div>
+      <header className={s.hud}>
         <strong>Living Hokkaido</strong>
         <span>Season: {seasonAt(state.season.value)}</span>
         {SEASON_IDS.map((id, i) => (
@@ -165,59 +180,57 @@ export function Shell({ pack }: { pack: ContentPack }) {
         <button type="button" onClick={() => emit({ type: "journal.open" })}>
           Journal ({journal.stamps.length}/{pack.stamps.length})
         </button>
-      </div>
-      {guideLine && <p className={s.guide}>Owl: {guideLine}</p>}
+      </header>
+      {guideLine && (
+        <p className={s.guide} aria-live="polite">
+          Owl: {guideLine}
+        </p>
+      )}
       {toast && <output className={s.toast}>New stamp: {toast}</output>}
-
-      {(state.view === "island" || state.view === "travel") && (
-        <Island {...ctx} view={state.view} locationId={state.locationId} />
-      )}
-      {scene && state.view !== "island" && state.view !== "travel" && (
-        <Scene
-          {...ctx}
-          scene={scene}
-          artifacts={pack.artifacts.filter((a) =>
-            scene.placements.some((p) => p.artifactId === a.id),
+      <aside className={s.side}>
+        {artifact && state.view === "focus" && (
+          <Viewer
+            {...ctx}
+            artifact={artifact}
+            claims={claimsFor(pack, artifact.knowledgeId, artifact.claimIds)}
+            read={journal.hotspotsRead
+              .filter((k) => k.startsWith(`${artifact.id}/`))
+              .map((k) => k.slice(artifact.id.length + 1))}
+          />
+        )}
+        {activity && state.view === "activity" && (
+          <Activity
+            {...ctx}
+            activity={activity}
+            claims={claimsFor(pack, activity.knowledgeId, activity.claimIds)}
+          />
+        )}
+      </aside>
+      {state.overlay && (
+        <div className={s.overlay}>
+          {state.overlay === "journal" && (
+            <Journal {...ctx} journal={journal} />
           )}
-          focusedArtifactId={state.artifactId}
-        />
-      )}
-      {artifact && state.view === "focus" && (
-        <Viewer
-          {...ctx}
-          artifact={artifact}
-          claims={claimsFor(pack, artifact.knowledgeId, artifact.claimIds)}
-          read={journal.hotspotsRead
-            .filter((k) => k.startsWith(`${artifact.id}/`))
-            .map((k) => k.slice(artifact.id.length + 1))}
-        />
-      )}
-      {activity && state.view === "activity" && (
-        <Activity
-          {...ctx}
-          activity={activity}
-          claims={claimsFor(pack, activity.knowledgeId, activity.claimIds)}
-        />
-      )}
-      {state.overlay === "journal" && <Journal {...ctx} journal={journal} />}
-      {state.overlay === "reveal" && state.reveal && (
-        <Reveal
-          {...ctx}
-          knowledgeId={state.reveal.knowledgeId}
-          claim={
-            state.reveal.claimId
-              ? resolveClaim(
-                  pack,
-                  state.reveal.knowledgeId,
-                  state.reveal.claimId,
-                )
-              : null
-          }
-          artifact={
-            pack.artifacts.find((a) => a.id === state.reveal?.artifactId) ??
-            null
-          }
-        />
+          {state.overlay === "reveal" && state.reveal && (
+            <Reveal
+              {...ctx}
+              knowledgeId={state.reveal.knowledgeId}
+              claim={
+                state.reveal.claimId
+                  ? resolveClaim(
+                      pack,
+                      state.reveal.knowledgeId,
+                      state.reveal.claimId,
+                    )
+                  : null
+              }
+              artifact={
+                pack.artifacts.find((a) => a.id === state.reveal?.artifactId) ??
+                null
+              }
+            />
+          )}
+        </div>
       )}
     </main>
   );

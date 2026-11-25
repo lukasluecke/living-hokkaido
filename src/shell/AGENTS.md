@@ -17,3 +17,4 @@ which component renders each part (`registry.ts`). Route: `/shell`.
 ## Decisions
 
 - (none yet)
+* 2026-11-25: one canvas per 3D part (island, detail-scene, artifact viewer). The shell gives a full-screen stage, a HUD, a side slot (viewer, activity) and an overlay slot (journal, reveal).
