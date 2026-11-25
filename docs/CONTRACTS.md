@@ -21,7 +21,8 @@ Two layers:
 | `guide.ts` | `GuideLine` | owl navigates; facts need `claimIds` |
 | `events.ts` | `ExperienceEvent`, `createEventBus` | parts communicate only by events |
 | `experience.ts` | `ExperienceState`, `View`, `Prefs` | written only by `src/shell/state.ts` |
-| `parts.ts` | props per part (`IslandPartProps` …) | a part takes exactly these props |
+| `timeline.ts` | `Timeline`, `TimelineEra`, `eraWeights`, `eraAt` | eras in time order; every era cites ≥ 1 claim of the timeline's knowledge entry; `stage` only picks illustrative shapes |
+| `parts.ts` | props per part (`IslandPartProps` …, `TimelinePartProps`) | a part takes exactly these props |
 | `content.ts` | `ContentPack`, `validateContentPack`, `resolveClaim`, `sanitizeJournal` | every cross-reference checked; `CONTRACT_VERSION` |
 
 ## Changing contracts
@@ -34,6 +35,7 @@ Two layers:
 
 | Version | Change |
 |---|---|
+| 1 (additive) | `timelines` in the content pack (default `[]`), `timeline.ts`, events `timeline.open` / `timeline.era` / `timeline.close`, `TimelinePartProps` (src/parts/over-time). |
 | 1 (additive) | Activity kinds `story`, `words`, `trace` and `MediaRef` (labs/activities-kinds). |
 | 1 | First experience contracts (this file). Artifact id `loom` in the objects lab unified to `cloth`. Places from the island lab replaced by purpose-built `Location`s (no lon/lat). |
 

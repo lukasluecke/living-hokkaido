@@ -13,4 +13,5 @@ export * from "./parts";
 export * from "./scene";
 export * from "./season";
 export * from "./space";
+export * from "./timeline";
 export * from "./world";

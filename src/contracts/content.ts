@@ -17,6 +17,7 @@ import {
   type ResolvedClaim,
 } from "./knowledge";
 import { detailSceneSchema } from "./scene";
+import { timelineSchema } from "./timeline";
 import { islandSchema } from "./world";
 
 export const CONTRACT_VERSION = 1;
@@ -31,6 +32,8 @@ export const contentPackSchema = z.object({
   activities: z.array(activitySchema),
   stamps: z.array(stampSchema),
   guide: z.array(guideLineSchema),
+  /** "Over time" timelines (additive; old packs parse with none). */
+  timelines: z.array(timelineSchema).default([]),
 });
 export type ContentPack = z.infer<typeof contentPackSchema>;
 export type ContentPackInput = z.input<typeof contentPackSchema>;
@@ -251,6 +254,31 @@ export function validateContentPack(input: unknown): string[] {
       for (const id of u.activityIds)
         need(activityIds.has(id), `activity "${id}"`);
     for (const c of s.claimIds) need(allClaims.has(c), `claim "${c}"`);
+  }
+  dupes(
+    "timeline",
+    p.timelines.map((t) => t.id),
+    errors,
+  );
+  for (const t of p.timelines) {
+    visible(t.knowledgeId, `timeline ${t.id}`);
+    if (t.locationId && !locationIds.has(t.locationId))
+      errors.push(`timeline ${t.id}: unknown location "${t.locationId}"`);
+    const claims = claimsOf(t.knowledgeId);
+    for (const c of t.claimIds)
+      if (!claims.has(c))
+        errors.push(`timeline ${t.id}: claim "${c}" not in ${t.knowledgeId}`);
+    dupes(
+      `timeline ${t.id} era`,
+      t.eras.map((e) => e.id),
+      errors,
+    );
+    for (const e of t.eras)
+      for (const c of e.claimIds)
+        if (!claims.has(c))
+          errors.push(
+            `timeline ${t.id} era ${e.id}: claim "${c}" not in ${t.knowledgeId}`,
+          );
   }
   for (const g of p.guide)
     for (const c of g.claimIds)

@@ -39,6 +39,10 @@ export const experienceEventSchema = z.discriminatedUnion("type", [
     artifactId: idSchema.optional(),
   }),
   e("reveal.close", {}),
+  // Over time (timeline part)
+  e("timeline.open", { timelineId: idSchema }),
+  e("timeline.era", { timelineId: idSchema, eraId: idSchema }),
+  e("timeline.close", { timelineId: idSchema }),
   // Global
   e("nav.back", {}),
 ]);
