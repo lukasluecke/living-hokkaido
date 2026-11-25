@@ -41,6 +41,48 @@ device voice never reads Ainu (`validateContentPack` rule).
 | Claims `bark-fiber`, `variation` | `src/data/story.ts` | Check the paraphrases against Hokkaido Digital Museum |
 | Sources `hdm`, `nam`, `obihiro-museum`, `mlit-ainu-crafts` | `knowledge.ts` | Rights scope (`unknown`) and consent (`pending`) |
 
+## Hokkaido Museum panels (restored house)
+
+Added 2026-11-25 from Lukas's photos of the Hokkaido Museum's restored house
+(permanent exhibition, theme 2). Claims are in
+`src/content/bark-to-cloth/over-time.ts` (entry `house-over-time`, all
+`research-preview`). Sources `hm-panel-dwelling`, `hm-panel-house-change`,
+`hm-panel-inside`, `hm-panel-skills`: `rights: "unknown"`,
+`consent: "pending"`, no URL (read on site). The full transcription and
+translation are in the private project files
+(`museum/house-panels.md`), not in Git, because the panel text belongs to
+the museum. The photos are not shipped.
+
+| Claim | Panel (locator) | Needs |
+|---|---|---|
+| `panel-flat-ground` | 住まい, main text 1–2 | Check translation of 擦文文化の後期 / 平地住居. Flat-ground era now reads "Late Satsumon – about 13th century" (was "13th–14th century" from HDM; both claims stay) |
+| `panel-kuril-sakhalin` | 住まい, main text 3 | Check |
+| `panel-regional-materials` | 住まい, second text | Check names of grasses (kaya, yoshi, sasa) and regions |
+| `panel-entry` | 家の中をよく見てみよう, photo 1 | Check. *ohyo* is used here as the Japanese name of the tree (オヒョウ), as on the panel, not as an Ainu word |
+| `panel-hearth` | 家の中をよく見てみよう, photo 2 | Check |
+| `panel-smoked-fish` | 家の中をよく見てみよう, photo 3 | Check |
+| `panel-treasures` | 家の中をよく見てみよう, photo 4 | The panel says the treasures stand in front of the window through which the kamui come and go. We do not draw or name that window. Reviewer: may the upper seat and its treasures be shown at all? |
+| `panel-unhygienic` | 家屋の移り変わり, column 1 | Check |
+| `panel-sunazawa` | 家屋の移り変わり, columns 1–2 | Paraphrase of a quoted memoir (『ク スクップ オルシペ』). Check the paraphrase and her name and dates; we do not quote her |
+| `panel-gradual` | 家屋の移り変わり, column 3 | Check |
+| `panel-moritake` | 家屋の移り変わり, column 4 | Paraphrase of the panel's commentary on his 1937 poem. Check name reading (Moritake Takeichi) and title reading; the poem itself is not shown |
+| `panel-homes-today` | 技術を受け継ぐ, paragraph 1 | Check. Panel says 和人; we wrote "other people in Japan" |
+| `panel-rebuilt` | 技術を受け継ぐ, paragraph 1 | Check |
+| `panel-2015-repair` | 技術を受け継ぐ, paragraph 2 | Check |
+
+Left out on purpose (sacred or ceremonial, needs an Ainu cultural reviewer):
+the window opposite the entrance, the outdoor altar and the cage for a bear
+cub that the panel says stand outside the museum's house.
+
+Lake house interior (`src/parts/detail-scene/room/House.tsx`), restyled
+after the photos (visual reference only):
+
+| Item | Needs |
+|---|---|
+| Layout: entry area with bark, cattail, mortar and pestle, rope, firewood; long hearth with pot on a hook; two-level rack with fish; upper seat with lacquerware on the north wall; hip roof | Confirm that the toy shapes read as illustration, not as a copy of the museum's house or of real objects |
+| Upper-seat mats | Plain dark and red bands only, on purpose (no real motif). Reviewer: keep plain, or use a motif with a source |
+| Lacquerware | Generic tubs, bowl, jar, box. No crests or motifs |
+
 ## Story narration
 
 | Item | File | Needs |

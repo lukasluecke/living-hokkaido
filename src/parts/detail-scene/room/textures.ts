@@ -32,24 +32,26 @@ export function rng(seed: number) {
   };
 }
 
-/** Vertical reed or grass bundles for the walls. */
+/** Vertical reed or grass bundles for the walls. Light straw tones, after
+ * the museum photos of the restored house (visual reference only). The pole
+ * frame is real geometry (House.tsx), so the texture has no painted ties. */
 export function reedTexture(repeat: [number, number]) {
   return canvasTexture(
     256,
     (ctx, s) => {
       const r = rng(7);
-      ctx.fillStyle = "#8f7a4c";
+      ctx.fillStyle = "#b89a5e";
       ctx.fillRect(0, 0, s, s);
       for (let x = 0; x < s; x += 3) {
-        // Reed stems: straw to faded green, a few darker stems.
-        const l = 40 + r() * 24 - (r() < 0.12 ? 14 : 0);
-        ctx.fillStyle = `hsl(${38 + r() * 22}, ${28 + r() * 18}%, ${l}%)`;
+        // Reed stems: pale straw to warm gold, a few darker stems.
+        const l = 52 + r() * 18 - (r() < 0.1 ? 14 : 0);
+        ctx.fillStyle = `hsl(${36 + r() * 12}, ${38 + r() * 16}%, ${l}%)`;
         ctx.fillRect(x, 0, 2 + r() * 2, s);
-      }
-      // Horizontal ties.
-      for (const y of [s * 0.25, s * 0.75]) {
-        ctx.fillStyle = "rgba(60,40,22,0.75)";
-        ctx.fillRect(0, y, s, 6);
+        // Stem nodes.
+        if (r() < 0.5) {
+          ctx.fillStyle = "rgba(90,64,30,0.35)";
+          ctx.fillRect(x, r() * s, 3, 2);
+        }
       }
     },
     repeat,
@@ -80,36 +82,54 @@ export function thatchTexture(repeat: [number, number]) {
   );
 }
 
-/** A plain woven floor mat (simple over-under grid, not a cultural pattern). */
+/** A plain woven floor mat: long straw strands with stitch rows across
+ * (plain weave, not a cultural pattern). */
 export function matTexture(repeat: [number, number]) {
   return canvasTexture(
     256,
     (ctx, s) => {
       const r = rng(3);
-      const cell = 16;
-      for (let y = 0; y < s; y += cell) {
-        for (let x = 0; x < s; x += cell) {
-          const horizontal = (x / cell + y / cell) % 2 === 0;
-          const l = 54 + r() * 10;
-          // Two plain fibre tones in alternating cells (not a cultural pattern).
-          ctx.fillStyle = horizontal
-            ? `hsl(44, 40%, ${l}%)`
-            : `hsl(64, 22%, ${l - 6}%)`;
-          ctx.fillRect(x, y, cell, cell);
-          ctx.strokeStyle = "rgba(90,66,36,0.35)";
-          ctx.lineWidth = 1;
-          for (let k = 3; k < cell; k += 4) {
-            ctx.beginPath();
-            if (horizontal) {
-              ctx.moveTo(x, y + k);
-              ctx.lineTo(x + cell, y + k);
-            } else {
-              ctx.moveTo(x + k, y);
-              ctx.lineTo(x + k, y + cell);
-            }
-            ctx.stroke();
-          }
-        }
+      ctx.fillStyle = "#c2a36a";
+      ctx.fillRect(0, 0, s, s);
+      for (let y = 0; y < s; y += 8) {
+        const l = 58 + r() * 8;
+        ctx.fillStyle = `hsl(${38 + r() * 6}, ${40 + r() * 8}%, ${l}%)`;
+        ctx.fillRect(0, y, s, 7);
+      }
+      // Stitch rows across the strands.
+      for (let x = 16; x < s; x += 64) {
+        ctx.fillStyle = "rgba(96,70,36,0.45)";
+        ctx.fillRect(x, 0, 4, s);
+      }
+    },
+    repeat,
+  );
+}
+
+/** Mat for the upper seat. The panel (claim `panel-treasures`) says that
+ * mats there have patterns, but not which. So this is plain bands only, on
+ * purpose: real mat motifs carry meaning and need a source and a reviewer. */
+export function bandMatTexture(repeat: [number, number] = [1, 1]) {
+  return canvasTexture(
+    256,
+    (ctx, s) => {
+      const r = rng(31);
+      ctx.fillStyle = "#cdb07a";
+      ctx.fillRect(0, 0, s, s);
+      for (let y = 0; y < s; y += 2) {
+        ctx.fillStyle = `rgba(120,90,48,${r() * 0.2})`;
+        ctx.fillRect(0, y, s, 1);
+      }
+      const bands: [number, number, string][] = [
+        [0.12, 0.1, "#2e2620"],
+        [0.27, 0.03, "#7a2c22"],
+        [0.44, 0.12, "#2e2620"],
+        [0.62, 0.03, "#7a2c22"],
+        [0.76, 0.1, "#2e2620"],
+      ];
+      for (const [y, h, c] of bands) {
+        ctx.fillStyle = c;
+        ctx.fillRect(0, y * s, s, h * s);
       }
     },
     repeat,

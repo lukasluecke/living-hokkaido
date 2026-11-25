@@ -77,12 +77,13 @@ export function Hearth({
 
   return (
     <group position={HEARTH_POS} name="hearth">
-      {/* Wooden frame around a sunken ash bed. */}
+      {/* Long wooden frame around a sunken ash bed (as in the museum's
+          restored house; claims cise-hearth, panel-hearth). */}
       {[
-        { p: [0, 0.06, -0.55], s: [1.5, 0.12, 0.12] },
-        { p: [0, 0.06, 0.55], s: [1.5, 0.12, 0.12] },
-        { p: [-0.75, 0.06, 0], s: [0.12, 0.12, 1.22] },
-        { p: [0.75, 0.06, 0], s: [0.12, 0.12, 1.22] },
+        { p: [0, 0.05, -0.47], s: [1.9, 0.1, 0.1] },
+        { p: [0, 0.05, 0.47], s: [1.9, 0.1, 0.1] },
+        { p: [-0.95, 0.05, 0], s: [0.1, 0.1, 1.04] },
+        { p: [0.95, 0.05, 0], s: [0.1, 0.1, 1.04] },
       ].map((b, i) => (
         <mesh
           key={i}
@@ -96,22 +97,26 @@ export function Hearth({
       ))}
       <mesh
         rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, 0.03, 0]}
+        position={[0, 0.02, 0]}
         material={ash}
         receiveShadow
       >
-        <planeGeometry args={[1.4, 1.0]} />
+        <planeGeometry args={[1.8, 0.84]} />
       </mesh>
-      {/* Crossed logs and embers. */}
-      {[0.5, -0.5, 1.6].map((a, i) => (
+      {/* Logs fed in lengthwise; their ends meet in the fire. */}
+      {[
+        [0.48, -0.1, 0.05],
+        [0.5, 0.06, -0.04],
+        [-0.46, 0.0, 0.03],
+      ].map(([x, z, a], i) => (
         <mesh
           key={i}
-          position={[0, 0.1, 0]}
-          rotation={[0, a, Math.PI / 2 - 0.15]}
+          position={[x, 0.07, z]}
+          rotation={[0, a, Math.PI / 2 - Math.sign(x) * 0.06]}
           material={char}
           castShadow
         >
-          <cylinderGeometry args={[0.05, 0.06, 0.7, 6]} />
+          <cylinderGeometry args={[0.05, 0.06, 0.8, 6]} />
         </mesh>
       ))}
       {Array.from({ length: 14 }, (_, i) => {
