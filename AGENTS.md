@@ -10,6 +10,31 @@ Do not invent cultural content, words, quotations, provenance, consent or record
 
 Do not call unavailable sponsor adapters live, and do not claim a trained model or measured improvement without evidence. Add provider-specific timeouts, schema validation, consent checks and fallbacks before connecting any API. Read current official API documentation; never invent endpoints.
 
+## Parallel work on parts (read first)
+
+Teammates experiment on parts of the visitor experience separately, each with
+their own agent, and the results are integrated later (not necessarily
+verbatim). To keep that possible:
+
+1. Find your part in docs/PARTS.md (island, detail-scene, artifacts,
+   activities, journal, reveal) and read the `AGENTS.md` in its folder
+   (`src/parts/<part>/` for app code, `labs/<part>/` for experiments).
+2. Use the shared contracts in `src/contracts` (import `@/contracts`) for all
+   data, ids, units, events and part props. Do not invent parallel types.
+   Use content from `src/content` instead of hard-coded text or positions.
+3. Follow docs/STYLE.md and `src/design/tokens.ts` for look, scale and motion.
+4. A part takes its props and reports through `emit(event)`. It never imports
+   another part, the shell, or content directly. Only `src/shell` holds state.
+5. Experiments go in `labs/<part>` or `labs/<part>-<topic>` and end with a
+   `HANDBACK.md` (docs/HANDBACK.md). Contract changes follow
+   docs/CONTRACTS.md § Changing contracts.
+6. Before you finish: `npm run check` for app changes; for labs, the lab
+   builds and its `HANDBACK.md` is current. Tell the user what to hand back
+   and to whom.
+
+When the user asks for something that crosses a part boundary or changes a
+contract, say so and propose the smallest additive change.
+
 Ownership boundaries are documented in docs/TEAM.md. Coordinate shared contracts before edits. Do not overwrite another teammate’s work or widen scope merely to qualify for prizes. Keep changes reviewable and document tested behavior and limitations.
 
 <!-- BEGIN:nextjs-agent-rules -->
