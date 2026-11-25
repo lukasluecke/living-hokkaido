@@ -17,6 +17,7 @@ import {
 import { barkToClothPack, barkToClothRaw } from "@/content/bark-to-cloth";
 import { record } from "@/shell/progress";
 import { initialState, reduce } from "@/shell/state";
+import { AREAS } from "@/parts/island/world/island";
 
 const pack = barkToClothPack;
 const clone = () => structuredClone(barkToClothRaw);
@@ -315,9 +316,9 @@ test("timeline overlay opens, returns from a reveal and closes", () => {
   assert.equal(s.timelineId, null);
 });
 
-test("every place is open, with its own scene, setting and timelines", () => {
+test("every open place has its own scene, setting and timelines", () => {
   for (const l of barkToClothPack.island.locations) {
-    assert.equal(l.status, "open", l.id);
+    if (l.status !== "open") continue;
     const s = barkToClothPack.scenes.find((x) => x.id === l.sceneId);
     assert.ok(s, l.id);
     assert.equal(s.locationId, l.id);
@@ -369,4 +370,17 @@ test("music kinds cite their claims; tune notes name real strings", () => {
   const t = kindOf(q, "pluck");
   t.tune?.notes.push({ string: 9, hand: "right" });
   assert.ok(validateContentPack(q).length > 0);
+});
+
+test("themed-area places sit on the island's area scenes", () => {
+  const areas = barkToClothPack.island.locations.filter((l) =>
+    l.building.startsWith("area-"),
+  );
+  assert.equal(areas.length, AREAS.length);
+  for (const l of areas) {
+    const a = AREAS.find((x) => `area-${x.id}` === l.building);
+    assert.ok(a, l.id);
+    assert.deepEqual([l.anchor[0], l.anchor[2]], [a.x, a.z], l.id);
+    assert.ok(l.knowledgeIds.includes("land-and-sea"), l.id);
+  }
 });

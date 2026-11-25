@@ -273,6 +273,8 @@ export function PlaceMarker({
   onSelect: () => void;
 }) {
   const live = loc.status === "open";
+  // Themed areas draw their own scene (Areas.tsx); no building here.
+  if (loc.building.startsWith("area-")) return null;
   return (
     <group
       position={anchorPos(field, loc)}
