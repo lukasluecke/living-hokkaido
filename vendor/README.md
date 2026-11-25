@@ -58,6 +58,9 @@ the diff):
 6. Don't Fall on the Slope, one commit: slow motion takes smaller steps
    (no judder); the HUD card is centred without `translate(-50%)` (sharp
    text).
+7. Out of Place, Lukas's feedback, one commit: the pattern paint is pinned
+   to the world (`WorldPattern` in `game/nuri.ts`), a 40 px patch, and
+   Brush / Eyedrop zoom in close on Nuri (`ZOOM` 3.2); Move zooms out.
 
 ## Pull new upstream changes
 
