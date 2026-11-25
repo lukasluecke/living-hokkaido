@@ -2,7 +2,9 @@
 // Lukas 2026-11-26). A guided story, one step at a time. Every `say` and
 // `why` restates its step's claims; clues and hints only guide. Figures are
 // named by their look, never with a personal name, so no name suggests who
-// is Ainu. The cise scene places things only (no posed Ainu figures).
+// is Ainu. The cise and animal hills scenes place things only (no posed
+// Ainu figures); the hills scene shows hunting through animals, the set bow
+// and the use of the pelt, and ends with the cited nuance on kamuy.
 // Steps marked `observed` are backed only by what a diorama shows.
 // Research preview: see docs/REVIEW.md § Build the scene.
 import type { ActivityInput } from "@/contracts";
@@ -378,5 +380,113 @@ export const placeActivities: ActivityInput[] = [
     ],
     completion:
       "Coal mining employed many people from the end of the 19th century. In winter, many people worked in the woods, felling trees with large saws and hauling the wood on horse-drawn sleighs.",
+  },
+  {
+    id: "place-hills",
+    knowledgeId: "land-and-sea",
+    kind: "place",
+    title: "Build the animal hills",
+    stage: "hills",
+    subject: "objects",
+    claimIds: [
+      "diet-ways",
+      "hunt-animals",
+      "river-catch-ainu",
+      "traps-prey",
+      "set-bow",
+      "bear-use",
+      "kamuy-region",
+      "fish-owl-village",
+      "bear-wolf-kamuy",
+      "deer-not-kamuy",
+    ],
+    steps: [
+      {
+        id: "intro",
+        say: "Ainu people got their food by hunting in the hills, fishing in the rivers and the sea, gathering plants and nuts, and farming.",
+        claimIds: ["diet-ways"],
+      },
+      {
+        id: "deer",
+        say: "In the hills, Ainu people hunted large animals for food. One of them was the Hokkaido sika deer.",
+        claimIds: ["hunt-animals", "diet-ways"],
+        ask: "Where do you put the sika deer?",
+        figure: { label: "Sika deer", note: "Large animal", thing: "deer" },
+        options: [r(700, 385), r(320, 215, true), r(160, 440)],
+        hintPlace: "Hunting was done in the hills.",
+        why: "Ainu people hunted in the hills. The Hokkaido sika deer was one of the large animals they hunted for food.",
+      },
+      {
+        id: "bear",
+        say: "The brown bear was another large animal hunted in the hills.",
+        claimIds: ["hunt-animals", "diet-ways"],
+        ask: "Where do you put the brown bear?",
+        figure: { label: "Brown bear", note: "Large animal", thing: "bear" },
+        options: [r(470, 175, true), r(650, 125)],
+        hintPlace: "Like the deer, it was hunted in the hills.",
+        why: "Brown bears, too, were large animals hunted for food in the hills.",
+      },
+      {
+        id: "hare",
+        say: "Smaller animals were hunted too, such as raccoon dogs and hares, and birds such as hazel grouse and jays.",
+        claimIds: ["hunt-animals", "diet-ways"],
+        ask: "Where do you put the hare?",
+        figure: { label: "Hare", note: "Small animal", thing: "hare" },
+        options: [r(720, 410), r(430, 425), r(85, 250, true)],
+        hintPlace: "Small animals were hunted in the hills too.",
+        why: "Smaller animals, such as raccoon dogs and hares, and birds such as hazel grouse and jays, were hunted for food too.",
+      },
+      {
+        id: "salmon",
+        say: "In the rivers, Ainu people caught salmon, trout, itou and shishamo.",
+        claimIds: ["river-catch-ainu"],
+        ask: "Where do the salmon go?",
+        figure: { label: "Salmon", note: "River fish", thing: "salmon" },
+        options: [r(140, 185), r(690, 265, true)],
+        hintPlace: "Fish are caught in the river.",
+        why: "In the rivers, Ainu people caught salmon, trout, itou and shishamo.",
+      },
+      {
+        id: "set-bow",
+        say: "Hunters knew their prey well and made traps for it. A set bow was placed on an animal path.",
+        claimIds: ["traps-prey", "set-bow"],
+        ask: "Where do you put the set bow?",
+        figure: { label: "Set bow", note: "Trap", thing: "set-bow" },
+        options: [r(420, 415), r(200, 262, true), r(650, 150)],
+        hintPlace: "Look for the tracks that animals leave.",
+        why: "A set bow was placed on an animal path. When an animal touched its string, an arrow was released. The tip was often poisoned, for example with aconite root, and capped against rain and dew.",
+      },
+      {
+        id: "pelt",
+        say: "Nothing was wasted. The meat and fat of a brown bear became food, and the pelt became household goods or trade goods.",
+        claimIds: ["bear-use"],
+        ask: "The bear pelt becomes household goods. Where does it go?",
+        figure: { label: "Bear pelt", note: "Household goods", thing: "pelt" },
+        options: [r(420, 165), r(355, 415, true), r(725, 335)],
+        hintPlace: "Household goods are used at home.",
+        why: "Nothing was wasted: the meat and fat of a brown bear became food, and the pelt became household goods or trade goods.",
+      },
+      {
+        id: "fish-owl",
+        say: "Which beings are kamuy, and which matter most, differs by region and by person. Blakiston's fish owl is a kamuy with the role of watching over the village.",
+        claimIds: ["kamuy-region", "fish-owl-village"],
+        ask: "The fish owl watches over the village. Where is it?",
+        figure: {
+          label: "Blakiston's fish owl",
+          note: "Kamuy",
+          thing: "fish-owl",
+        },
+        options: [r(110, 150), r(548, 222, true)],
+        hintPlace: "To watch over the village, it stays close to it.",
+        why: "In many regions, Blakiston's fish owl is a kamuy with the role of watching over the village, and it is highly respected.",
+      },
+      {
+        id: "kamuy",
+        say: "In many regions, the brown bear and the wolf, which is now extinct, were important kamuy. But not every animal is a kamuy: traditions in which the deer is not a kamuy are known in many parts of Hokkaido.",
+        claimIds: ["bear-wolf-kamuy", "deer-not-kamuy"],
+      },
+    ],
+    completion:
+      "Ainu people hunted sika deer, brown bears and smaller animals in the hills and caught salmon in the rivers. A set bow waited on an animal path, and nothing of a bear was wasted. Which beings are kamuy differs by region; in many regions the fish owl watches over the village, and in many parts of Hokkaido there are traditions in which the deer is not a kamuy.",
   },
 ];
