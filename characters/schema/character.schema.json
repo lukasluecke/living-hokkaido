@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/xjets/sapporo-omusha/characters/schema/character.schema.json",
+  "title": "Character sheet",
+  "description": "One figure in the 1808 Kushun Kotan Omusha diorama. Every factual claim carries a source.",
+  "type": "object",
+  "required": ["id", "name", "role", "faction", "perspective", "status", "voice", "knows", "does_not_know", "sources"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9-]+$", "description": "Matches the hotspot's character id." },
+    "name": {
+      "type": "object",
+      "required": ["en"],
+      "properties": { "en": { "type": "string" }, "ja": { "type": "string" } },
+      "description": "A role-based name (e.g. 'Aizu interpreter') unless a historical name is documented."
+    },
+    "role": { "type": "string", "description": "Role in the ceremony." },
+    "faction": { "enum": ["aizu", "shogunate", "wajin-interpreter", "sakhalin-ainu"] },
+    "perspective": {
+      "enum": ["aizu-record", "matsumae-account", "ainu-oral-tradition", "modern-scholarship"],
+      "description": "The source perspective this character mainly speaks from."
+    },
+    "status": { "enum": ["draft", "sourced", "curator-reviewed"], "description": "Only curator-reviewed sheets should be presented as reviewed." },
+    "age": { "$ref": "#/$defs/claim" },
+    "origin": { "$ref": "#/$defs/claim" },
+    "summary": { "type": "string", "description": "One or two sentences shown when the figure is tapped." },
+    "knows": { "type": "array", "items": { "$ref": "#/$defs/claim" }, "description": "What the figure would plausibly know as of 1808." },
+    "does_not_know": { "type": "array", "items": { "type": "string" }, "description": "Things after 1808, or outside the figure's position, that it must not speak to." },
+    "declines": { "type": "array", "items": { "type": "string" }, "description": "Topics the character declines to speculate on (required for Ainu characters: belief, inner opinion of the ceremony)." },
+    "voice": {
+      "type": "object",
+      "required": ["register"],
+      "properties": {
+        "register": { "type": "string", "description": "Speech register, e.g. formal samurai official, plain soldier." },
+        "language_notes": { "type": "string" },
+        "elevenlabs_voice_id": { "type": "string" },
+        "routes_through": { "type": "string", "description": "Character id of the interpreter, for Ainu figures in interpreter mode." }
+      }
+    },
+    "appearance": { "type": "string", "description": "What the figure looks like (clothing, hair); used for 3D reconstruction and alt text." },
+    "model": {
+      "type": "object",
+      "required": ["src", "label"],
+      "properties": {
+        "src": { "type": "string", "description": "GLB for the close-up view, relative to src/index.html." },
+        "label": { "type": "string", "description": "How the model was made and what is invented; always shown with it." }
+      }
+    },
+    "hotspot": {
+      "type": "array", "items": { "type": "number" }, "minItems": 3, "maxItems": 3,
+      "description": "Optional default position in splat-local coordinates; src/hotspots.json takes precedence."
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "citation", "perspective"],
+        "properties": {
+          "id": { "type": "string" },
+          "citation": { "type": "string" },
+          "perspective": { "enum": ["aizu-record", "matsumae-account", "ainu-oral-tradition", "modern-scholarship", "museum-label"] },
+          "url": { "type": "string" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "claim": {
+      "type": "object",
+      "required": ["text", "basis"],
+      "properties": {
+        "text": { "type": "string" },
+        "basis": { "enum": ["documented", "inferred"] },
+        "source": { "type": "string", "description": "A sources[].id" }
+      }
+    }
+  }
+}

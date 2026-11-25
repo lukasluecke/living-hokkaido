@@ -1,0 +1,17 @@
+# Museum capture and other non-redistributable media: never commit.
+assets/
+
+# Raw captures and intermediate files
+*.mp4
+*.mov
+frames/
+*.ply
+
+# Secrets and local tooling
+.env
+.env.*
+!.env.example
+node_modules/
+.DS_Store
+Thumbs.db
+
