@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#1d3644" />
+    <title>Out of Place</title>
+    <style>
+      /* #1d3644 mirrors PALETTE.backdrop so there is no flash before JS loads. */
+      html, body { margin: 0; height: 100%; background: #1d3644; overflow: hidden; touch-action: none; }
+      #game { width: 100vw; height: 100dvh; }
+    </style>
+  </head>
+  <body>
+    <div id="game"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
