@@ -62,14 +62,16 @@ function checkMedia(
     errors.push(`${where}: recording "${s.id}" is a placeholder`);
 }
 
-const allReviewed = (r: Term["review"]) =>
+/** True when a qualified reviewer has done all five checks for a term. */
+export const termReviewed = (r: Term["review"]) =>
   r.spelling && r.region && r.meaning && r.pronunciation && r.consent;
 
 /**
  * Rules for story / words / trace that a schema alone cannot check.
- * Words: a real term (standIn false) needs an approved entry, all five review
- * checks and a consented recording; the device voice never reads it; Ainu is
- * "ain", never a Japanese variety; a stand-in never claims the target lang.
+ * Words: a real term (standIn false) cites a claim; until its five review
+ * checks are done it shows as a draft (see docs/REVIEW.md). The device voice
+ * never reads it; Ainu is "ain", never a Japanese variety; a stand-in never
+ * claims the target lang.
  */
 function checkActivityKind(
   a: ActivityDefinition,
@@ -117,10 +119,6 @@ function checkActivityKind(
           );
         continue;
       }
-      if (k.presentation !== "approved")
-        errors.push(`${where}: real terms need an approved entry`);
-      if (!allReviewed(t.review))
-        errors.push(`${where}: real terms need all five review checks`);
       if (t.audio.kind === "device-voice-placeholder")
         errors.push(`${where}: device voice must not read a real term`);
     }

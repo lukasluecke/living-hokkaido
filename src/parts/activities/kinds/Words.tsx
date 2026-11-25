@@ -1,21 +1,13 @@
 "use client";
-// Words kind: listen, say it aloud, match word to object. In this lab the
-// terms are English stand-ins. No Ainu word is shown until a qualified person
-// has checked spelling, region, meaning and pronunciation and a consenting
-// speaker's recording exists (docs/RESEARCH.md, validateContentPack).
+// Words kind: listen (when a recording exists), say it aloud, match word to
+// object. Terms come from cited claims. A term whose five review checks are
+// not done shows a small "Draft" chip (docs/REVIEW.md). The device voice never
+// reads an Ainu word; without a recording the visitor reads it aloud.
 import { useMemo, useState } from "react";
-import type { Term } from "@/contracts";
+import { termReviewed } from "@/contracts";
 import { ObjectIcon } from "./icons";
 import { Cite, complete, deviceVoice, type KindProps } from "./shared";
 import k from "./kinds.module.css";
-
-const CHECKS: { key: keyof Term["review"]; label: string }[] = [
-  { key: "spelling", label: "Spelling" },
-  { key: "region", label: "Region / variety" },
-  { key: "meaning", label: "Meaning" },
-  { key: "pronunciation", label: "Pronunciation recording" },
-  { key: "consent", label: "Speaker consent" },
-];
 
 /** Stable shuffle so the match columns differ but do not jump on re-render. */
 const shuffled = <T,>(xs: T[]) =>
@@ -30,6 +22,10 @@ export function Words({ activity: a, claims, emit }: KindProps<"words">) {
   const [note, setNote] = useState("");
   const objects = useMemo(() => shuffled(a.terms), [a.terms]);
   const canVoice = deviceVoice.available();
+  /** Recording: always. Device voice: only for non-Ainu text. */
+  const canListen = (kind: string, lang: string) =>
+    kind === "recording" ||
+    (kind === "device-voice-placeholder" && lang !== "ain" && canVoice);
   const reveal = (claimId: string) =>
     emit({ type: "reveal.open", knowledgeId: a.knowledgeId, claimId });
 
@@ -54,9 +50,7 @@ export function Words({ activity: a, claims, emit }: KindProps<"words">) {
       <div className="words">
         {a.standIn && (
           <p className="banner gate" role="note">
-            Mechanic demo · English stand-in words. Ainu words appear here only
-            after a qualified speaker reviews them and a consenting speaker
-            records them.
+            English stand-in words.
           </p>
         )}
         <p>{a.prompt}</p>
@@ -82,16 +76,16 @@ export function Words({ activity: a, claims, emit }: KindProps<"words">) {
                 <ObjectIcon id={t.artifactId} />
                 <p className="term" lang={t.lang}>
                   {t.text}
+                  {!termReviewed(t.review) && (
+                    <span className="draft">Draft</span>
+                  )}
                 </p>
                 <p className="gloss">{t.gloss}</p>
                 <div className="row">
                   <button
                     type="button"
                     className="btn"
-                    disabled={
-                      t.audio.kind === "none" ||
-                      (t.audio.kind !== "recording" && !canVoice)
-                    }
+                    disabled={!canListen(t.audio.kind, t.lang)}
                     onClick={() => deviceVoice.speak(t.text)}
                   >
                     ▶ Listen
@@ -107,23 +101,11 @@ export function Words({ activity: a, claims, emit }: KindProps<"words">) {
                 </div>
                 <p className="voice-label">
                   {t.audio.kind === "recording"
-                    ? "Recorded speaker · consent on file"
-                    : canVoice
-                      ? "Device voice · placeholder"
-                      : "No voice on this device · read it aloud"}
+                    ? "Recorded speaker"
+                    : canListen(t.audio.kind, t.lang)
+                      ? "Device voice"
+                      : "No recording yet · read it aloud"}
                 </p>
-                <div className="locked">
-                  <p>
-                    <strong>Ainu word:</strong> not shown until reviewed
-                  </p>
-                  <ul className="checks">
-                    {CHECKS.map((c) => (
-                      <li key={c.key} className={t.review[c.key] ? "ok" : ""}>
-                        {t.review[c.key] ? "☑" : "☐"} {c.label}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
                 <Cite
                   claim={claims[t.claimId]}
                   onReveal={() => reveal(t.claimId)}

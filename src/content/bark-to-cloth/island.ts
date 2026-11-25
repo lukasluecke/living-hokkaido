@@ -13,7 +13,7 @@ export const locations: LocationInput[] = [
   {
     id: "lake-house",
     title: "Lake house",
-    teaser: "From bark to cloth · research preview",
+    teaser: "From bark to cloth",
     status: "open",
     anchor: [4, 0, 2],
     arrivalView: { eye: [8, 6, 9], target: [4, 0.6, 2] },

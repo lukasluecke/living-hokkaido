@@ -12,7 +12,7 @@ Checked 25 November 2026 JST. This is a candidate research packet, not cultural 
   - Lists a bark-fiber garment under “Attus/Ahrus”. Used to assess the candidate’s museum relevance, not as a license to download its model.
 - `editorial-policy`: Living Hokkaido’s original policy in PROJECT.md supports the third reflection about consent and accuracy. It is not a museum fact.
 
-No images, 3D models, recordings, quotations or museum page dumps are bundled. Scene/objects are original abstract geometry. Source summaries are brief paraphrases. Rights to actual source media, expert review and practitioner participation remain unconfirmed. Vocabulary exercise omitted until spelling, dialect/region, meaning and pronunciation are reviewed by a qualified person; spelling variation in catalogues is not enough to invent a language lesson.
+No images, 3D models, recordings, quotations or museum page dumps are bundled. Scene/objects are original abstract geometry. Source summaries are brief paraphrases. Rights to actual source media, expert review and practitioner participation remain unconfirmed. Vocabulary: per Lukas (2026-11-25) the words activity now shows two Ainu words from cited public sources (attus, isitaykini) as drafts; spelling, region, meaning and pronunciation review comes later (docs/REVIEW.md).
 
 ## Event documents recovered
 

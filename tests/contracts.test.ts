@@ -8,6 +8,7 @@ import {
   sanitizeJournal,
   seasonAt,
   seasonWeights,
+  termReviewed,
   validateContentPack,
 } from "@/contracts";
 import { barkToClothPack, barkToClothRaw } from "@/content/bark-to-cloth";
@@ -178,21 +179,23 @@ test("pack has story, words and trace activities", () => {
     assert.ok(kinds.includes(k), k);
 });
 
-test("real terms need an approved entry, five checks and a recording", () => {
+test("unreviewed real terms are drafts; device voice never reads them", () => {
   let p = clone();
-  realTerms(p, {});
-  let e = validateContentPack(p);
-  assert.ok(e.some((x) => x.includes("approved entry")));
-  assert.ok(e.some((x) => x.includes("five review checks")));
-  p = clone();
-  realTerms(p, { review: allChecks });
-  e = validateContentPack(p);
-  assert.ok(e.some((x) => x.includes("device voice")));
+  realTerms(p, { audio: { kind: "none" } });
+  assert.deepEqual(validateContentPack(p), []);
+  const w = kindOf(barkToClothRaw as Raw, "words");
+  assert.ok(
+    w.terms.every((t) => !termReviewed(t.review)),
+    "seed terms are drafts",
+  );
   p = clone();
   realTerms(p, {
     review: allChecks,
-    audio: { kind: "recording", sourceId: "hdm" },
+    audio: { kind: "device-voice-placeholder" },
   });
+  assert.ok(validateContentPack(p).some((x) => x.includes("device voice")));
+  p = clone();
+  realTerms(p, { audio: { kind: "recording", sourceId: "hdm" } });
   assert.ok(
     validateContentPack(p).some((x) => x.includes("not an audio source")),
   );
@@ -206,7 +209,7 @@ test("Ainu is never tagged as a Japanese variety; stand-ins stay stand-ins", () 
   );
   p = clone();
   const w = kindOf(p, "words");
-  w.terms = w.terms.map((t) => ({ ...t, lang: "ain" }));
+  w.standIn = true;
   assert.ok(validateContentPack(p).some((x) => x.includes("stand-in")));
 });
 

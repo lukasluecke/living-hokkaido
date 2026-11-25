@@ -15,7 +15,7 @@ Two layers:
 | `world.ts` | `Island`, `Location` | open locations need a `sceneId`; positions in island space; `placeholder` flag |
 | `scene.ts` | `DetailScene`, `ArtifactPlacement` | views `outside` + `home`; `roofNode`; placements with `focusView` and key |
 | `artifact.ts` | `Artifact`, `ModelAsset`, `Hotspot` | summary + hotspots cite linked claims; scans need approved rights + consent; withdrawn assets rejected |
-| `activity.ts` | `ActivityDefinition` (quiz / weave / sequence / story / words / trace), `MediaRef`, `ActivityResult` | grounded in ≥ 1 claim; weave is `illustrative` by default; story fact lines cite claims; real `words` terms need an approved entry, five review checks and a consented recording (else `standIn`); recordings are consented `audio` sources |
+| `activity.ts` | `ActivityDefinition` (quiz / weave / sequence / story / words / trace), `MediaRef`, `ActivityResult` | grounded in ≥ 1 claim; weave is `illustrative` by default; story fact lines cite claims; `words` terms cite a claim and show as drafts until their five review checks are done (docs/REVIEW.md); the device voice never reads a real term; recordings are consented `audio` sources |
 | `journal.ts` | `Stamp`, `UnlockRule`, `JournalState` | progress holds only pack ids; storage key `lh-journal-v2` |
 | `season.ts` | `SeasonState`, `seasonWeights`, `seasonAt` | one value 0–4; shell owns the clock |
 | `guide.ts` | `GuideLine` | owl navigates; facts need `claimIds` |

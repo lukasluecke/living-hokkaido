@@ -1,8 +1,8 @@
 // Story, words and trace activities (prototypes: labs/activities-kinds).
 // Every "fact" line restates a bark-to-cloth claim; "frame" lines only guide.
-// The words activity uses English stand-ins: no Ainu word is shown until a
-// qualified reviewer and a consenting speaker's recording exist
-// (docs/RESEARCH.md). Renderers: src/parts/activities/kinds.
+// The words activity shows Ainu words from cited public sources, as drafts
+// for the later language review (docs/REVIEW.md). Renderers:
+// src/parts/activities/kinds.
 import type { ActivityInput } from "@/contracts";
 
 const story = {
@@ -25,7 +25,7 @@ const story = {
         {
           id: "m1",
           role: "frame",
-          text: "This research preview follows a material into a garment.",
+          text: "This story follows a material into a garment.",
         },
         {
           id: "m2",
@@ -112,6 +112,8 @@ const story = {
     "The museum describes cloth woven from inner bark fibers, and clothing that varies by material, region and occasion.",
 } satisfies ActivityInput;
 
+// Draft: no language review yet (docs/REVIEW.md). No recording yet, so
+// Listen stays off for the Ainu words; the device voice never reads them.
 const unreviewed = {
   spelling: false,
   region: false,
@@ -125,40 +127,30 @@ const words = {
   id: "words-objects",
   knowledgeId: "bark-to-cloth",
   title: "Words for things",
-  claimIds: ["bark-fiber", "variation"],
+  claimIds: ["term-attus", "term-isitaykini"],
   lang: "ain",
-  standIn: true,
-  prompt: "Listen, say it aloud, then match each word to its object.",
+  standIn: false,
+  prompt: "Read each Ainu word aloud, then match it to its object.",
   steps: ["listen", "repeat", "match"],
   terms: [
     {
-      id: "fiber",
-      text: "fiber",
-      lang: "en",
-      gloss: "inner bark fibers",
-      artifactId: "fiber",
-      claimId: "bark-fiber",
-      audio: { kind: "device-voice-placeholder" },
-      review: unreviewed,
-    },
-    {
-      id: "cloth",
-      text: "cloth",
-      lang: "en",
-      gloss: "cloth woven from those fibers",
-      artifactId: "cloth",
-      claimId: "bark-fiber",
-      audio: { kind: "device-voice-placeholder" },
-      review: unreviewed,
-    },
-    {
-      id: "garment",
-      text: "garment",
-      lang: "en",
-      gloss: "clothing, which varies by region and occasion",
+      id: "attus",
+      text: "attus",
+      lang: "ain",
+      gloss: "cloth and clothes made from bark fiber",
       artifactId: "garment",
-      claimId: "variation",
-      audio: { kind: "device-voice-placeholder" },
+      claimId: "term-attus",
+      audio: { kind: "none" },
+      review: unreviewed,
+    },
+    {
+      id: "isitaykini",
+      text: "isitaykini",
+      lang: "ain",
+      gloss: "loom",
+      artifactId: "cloth",
+      claimId: "term-isitaykini",
+      audio: { kind: "none" },
       review: unreviewed,
     },
   ],
@@ -172,8 +164,7 @@ const trace = {
   claimIds: ["bark-fiber", "variation", "illustrative", "editorial-policy"],
   prompt:
     "Every sentence in this place comes from somewhere. Pick a sentence, then the source that backs it.",
-  completion:
-    "Each sentence now has its thread. This is still a research preview: no reviewer has approved it yet.",
+  completion: "Each sentence now has its thread back to a source.",
 } satisfies ActivityInput;
 
 export const activityKinds: ActivityInput[] = [story, words, trace];
