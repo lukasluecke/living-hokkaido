@@ -7,6 +7,7 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { MathUtils } from "three";
 import { eraAt, SCALE, type TimelinePartProps } from "@/contracts";
 import { PresentationBadge, RepresentationBadge } from "../shared/Badges";
+import { QualityGovernor, useQuality } from "../shared/Quality";
 import { Diorama } from "./Diorama";
 import c from "./OverTime.module.css";
 
@@ -40,6 +41,7 @@ export function TimelinePart(props: TimelinePartProps) {
   const [sourcesOpen, setSourcesOpen] = useState(false);
   const target = useRef(t);
   const shown = useRef(t);
+  const q = useQuality(SCALE.maxDpr);
   target.current = t;
   const index = eraAt(eras.length, t);
   const era = eras[index];
@@ -110,8 +112,8 @@ export function TimelinePart(props: TimelinePartProps) {
     <div className={c.stage}>
       {prefs.webgl ? (
         <Canvas
-          shadows
-          dpr={[1, SCALE.maxDpr]}
+          shadows={q.shadows}
+          dpr={q.dpr}
           camera={{
             position: [15, 14, 19],
             fov: SCALE.defaultFov,
@@ -129,8 +131,10 @@ export function TimelinePart(props: TimelinePartProps) {
               seasonValue={season.value}
               reducedMotion={prefs.reducedMotion}
               fx
+              extraFx={q.extraFx}
             />
           </Suspense>
+          <QualityGovernor />
         </Canvas>
       ) : (
         <div className={c.noGl} aria-hidden>

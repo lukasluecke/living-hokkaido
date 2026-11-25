@@ -9,6 +9,7 @@ import { Suspense, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { type Artifact, type Emit, factHotspots, SCALE } from "@/contracts";
 import { useGlbClone } from "../shared/Glb";
+import { QualityGovernor, useQuality } from "../shared/Quality";
 import { applyLook } from "./model/looks";
 import { builders, type ObjectId } from "./model/models";
 import { useT } from "@/i18n";
@@ -124,6 +125,7 @@ export function Viewer3D({
   emit: Emit;
 }) {
   const t = useT();
+  const q = useQuality(SCALE.maxDpr);
   const yaw = useRef(0);
   const hotspots = useRef<HTMLDivElement>(null);
   // biome-ignore lint/correctness/useExhaustiveDependencies: reset per artifact
@@ -140,7 +142,7 @@ export function Viewer3D({
       }}
     >
       <Canvas
-        dpr={[1, SCALE.maxDpr]}
+        dpr={q.dpr}
         camera={{ position: [0, 0.35, 2.6], fov: 35 }}
         gl={{ antialias: true }}
       >
@@ -153,6 +155,7 @@ export function Viewer3D({
           color="#9fb8d8"
         />
         <ModelFromSource artifact={artifact} yaw={yaw} hotspots={hotspots} />
+        <QualityGovernor />
         <ContactShadows
           position={[0, -0.95, 0]}
           opacity={0.35}
