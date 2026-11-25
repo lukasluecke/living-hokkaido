@@ -8,3 +8,8 @@ coverage/
 
 # demo video recorder output
 recordings/
+
+# Cloudflare
+.open-next/
+.wrangler/
+.dev.vars
