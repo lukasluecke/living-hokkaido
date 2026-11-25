@@ -31,7 +31,7 @@ import {
 } from "@/i18n";
 import { Hud } from "./Hud";
 import { record } from "./progress";
-import { parts } from "./registry";
+import { parts, preloadParts } from "./registry";
 import { Icon, kindIconPath, UI_ICON } from "@/parts/shared/Icon";
 import { route } from "./route";
 import s from "./Shell.module.css";
@@ -113,6 +113,19 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
       if (j) setJournal(j);
     } catch {}
   }, [pack]);
+
+  // Lazy parts (registry.ts): fetch them once the island had time to draw.
+  useEffect(() => {
+    const w = window as Window & {
+      requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number;
+    };
+    const t = setTimeout(() => {
+      if (w.requestIdleCallback)
+        w.requestIdleCallback(preloadParts, { timeout: 3000 });
+      else preloadParts();
+    }, 1500);
+    return () => clearTimeout(t);
+  }, []);
 
   // Locale: ?lang=ja|en wins, then the stored choice.
   useEffect(() => {
