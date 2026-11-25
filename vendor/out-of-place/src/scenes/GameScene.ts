@@ -21,6 +21,7 @@ import {
   deliverClip,
   startVerticalClip,
 } from "../game/clip";
+import { Crowd } from "../game/crowd";
 import { analyse, giveawayLine } from "../game/giveaway";
 import { Nuri } from "../game/nuri";
 import { Sfx } from "../game/sound";
@@ -38,6 +39,9 @@ const BRUSH_RADIUS = { S: 2, M: 5, L: 10 } as const;
 type BrushSize = keyof typeof BRUSH_RADIUS;
 const ZOOM = 2.5;
 const KEY_STEP = 8;
+/** Finder ring (the seeker's magnifying glass): radius and arrow-key step. */
+const FINDER_R = 16;
+const FINDER_STEP = 6;
 
 const PHASE_TITLE: Record<Phase, string> = {
   sceneReveal: "Look closely",
@@ -82,6 +86,7 @@ export class GameScene extends Phaser.Scene {
   private art!: SceneArt;
   private compositeCtx!: CanvasRenderingContext2D;
   private nuri!: Nuri;
+  private crowd!: Crowd;
   private world!: Phaser.GameObjects.Layer;
   private ui!: Phaser.GameObjects.Layer;
 
@@ -122,6 +127,9 @@ export class GameScene extends Phaser.Scene {
   private cardTitle!: Phaser.GameObjects.Text;
   private cardChips!: Phaser.GameObjects.Text;
   private cardBox!: Phaser.GameObjects.Graphics;
+  private factBox!: Phaser.GameObjects.Graphics;
+  private factLabelText!: Phaser.GameObjects.Text;
+  private factText!: Phaser.GameObjects.Text;
   private spotlight!: Phaser.GameObjects.Graphics;
   private cursorGfx!: Phaser.GameObjects.Graphics;
   private recText!: Phaser.GameObjects.Text;
@@ -249,6 +257,12 @@ export class GameScene extends Phaser.Scene {
           .setDepth(p.depth),
       );
     });
+    this.crowd = new Crowd(
+      this,
+      this.world,
+      this.art.walkers ?? [],
+      this.cfg.prefs.reducedMotion,
+    );
     this.nuri = new Nuri(this);
     this.world.add(this.nuri.container);
     this.spotlight = this.add.graphics().setDepth(20_000);
@@ -438,6 +452,24 @@ export class GameScene extends Phaser.Scene {
         strokeThickness: 3,
       },
     );
+    // The real-history fact gets its own bright panel, so it stands out.
+    this.factBox = this.add.graphics();
+    this.factLabelText = makeText(
+      this,
+      -CARD.w / 2 + 44,
+      0,
+      22,
+      "persimmonDark",
+      {
+        strokeThickness: 0,
+        fontStyle: "bold",
+      },
+    );
+    this.factText = makeText(this, -CARD.w / 2 + 44, 0, 20, "outline", {
+      wordWrap: { width: CARD.w - 88 },
+      lineSpacing: 4,
+      strokeThickness: 0,
+    });
     const how = makeButton(
       this,
       -128,
@@ -463,6 +495,9 @@ export class GameScene extends Phaser.Scene {
       this.cardTitle,
       this.cardChips,
       this.cardBody,
+      this.factBox,
+      this.factLabelText,
+      this.factText,
       how.root,
       clip.root,
     ]);
@@ -543,7 +578,8 @@ export class GameScene extends Phaser.Scene {
     this.input.keyboard?.on("keydown", (ev: KeyboardEvent) => {
       if (this.recording) return;
       const phase = this.state.phase;
-      const step = ev.shiftKey ? KEY_STEP * 3 : KEY_STEP;
+      const base = phase === "seek" ? FINDER_STEP : KEY_STEP;
+      const step = ev.shiftKey ? base * 3 : base;
       const arrow: Record<string, [number, number]> = {
         ArrowLeft: [-step, 0],
         ArrowRight: [step, 0],
@@ -606,6 +642,7 @@ export class GameScene extends Phaser.Scene {
     if (!this.recording)
       this.dispatch({ type: "tick", dtMs: deltaMs * (this.cfg.speed ?? 1) });
     this.nuri.flush();
+    this.crowd.update(deltaMs * (this.cfg.speed ?? 1));
   }
 
   private dispatch(action: RoundAction) {
@@ -627,6 +664,8 @@ export class GameScene extends Phaser.Scene {
     }
     this.seekCursor.shown = false;
     this.drawSeekCursor();
+    // The crowd freezes with the reveal and walks again in the next round.
+    this.crowd.setPaused(phase === "reveal" || phase === "roundOver");
     const a = this.cfg.activity;
     if (phase === "sceneReveal") {
       this.nuri.reset();
@@ -860,8 +899,8 @@ export class GameScene extends Phaser.Scene {
     g.clear();
     if (!this.seekCursor.shown || this.state?.phase !== "seek") return;
     const { x, y } = this.seekCursor;
-    g.lineStyle(7, PALETTE.outline).strokeCircle(x, y, 22);
-    g.lineStyle(4, PALETTE.sunGlow).strokeCircle(x, y, 22);
+    g.lineStyle(7, PALETTE.outline).strokeCircle(x, y, FINDER_R);
+    g.lineStyle(4, PALETTE.sunGlow).strokeCircle(x, y, FINDER_R);
     g.fillStyle(PALETTE.sunGlow).fillCircle(x, y, 3);
   }
 
@@ -958,16 +997,12 @@ export class GameScene extends Phaser.Scene {
       [
         r.stats,
         `Blend score: ${r.blend}%`,
-        "",
-        found ? "What gave you away:" : "Why it worked:",
-        r.giveaway,
-        "",
-        `${r.factLabel}:`,
-        r.fact,
+        ...(found ? ["", "What gave you away:", r.giveaway] : []),
       ].join("\n"),
     );
+    this.layoutFact(r.factLabel, r.fact);
     this.cfg.announce(
-      `${r.title} ${r.stats} ${r.giveaway} ${r.factLabel}: ${r.fact} Press Enter to continue, S for sources, C to save a clip.`,
+      `${r.title} ${r.stats} ${found ? `${r.giveaway} ` : ""}${r.factLabel}: ${r.fact} Press Enter to continue, S for sources, C to save a clip.`,
     );
     this.playRevealSequence(false);
 
@@ -984,6 +1019,24 @@ export class GameScene extends Phaser.Scene {
         },
       });
     }
+  }
+
+  /** The fact panel sits under the body text, above the card's buttons. */
+  private layoutFact(label: string, fact: string) {
+    const top = this.cardBody.y + this.cardBody.height + 18;
+    this.factLabelText.setText(`★ ${label.toUpperCase()}`).setY(top + 14);
+    this.factText.setText(fact).setY(top + 46);
+    const h = 46 + this.factText.height + 26;
+    this.factBox.clear();
+    drawChunkyBox(
+      this.factBox,
+      0,
+      top + h / 2,
+      CARD.w - 40,
+      h,
+      "sunGlow",
+      "persimmonDark",
+    );
   }
 
   // ---------- the reveal moment ----------
@@ -1195,10 +1248,9 @@ export class GameScene extends Phaser.Scene {
       title: info.found ? "FOUND!" : "Master of Disguise!",
       subtitle: a.title,
       lines: [
-        {
-          label: info.found ? "What gave me away" : "How I hid",
-          text: info.giveaway,
-        },
+        ...(info.found
+          ? [{ label: "What gave me away", text: info.giveaway }]
+          : []),
         { label: info.factLabel, text: info.fact },
       ],
       footer: `${this.honestyLabels()} · Sources in the game`,

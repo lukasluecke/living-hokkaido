@@ -1,6 +1,7 @@
 // Shared pieces for every procedural scene: the SceneArt shape the game reads,
 // canvases, depth-sorted props, the floating-island base and the composite.
 import { isoBox, line, makeIso, type Ctx, poly, type Pt } from "./iso";
+import type { WorkerDress } from "./people";
 
 export const WORLD_W = 1280;
 export const WORLD_H = 720;
@@ -18,6 +19,15 @@ export interface Prop {
   depth: number;
 }
 
+/** A background worker who walks back and forth along a path. */
+export interface Walker {
+  dress: WorkerDress;
+  /** Screen points on walkable ground, walked in order, then back. */
+  path: Pt[];
+  /** Screen pixels per second. */
+  speed: number;
+}
+
 export interface SceneArt {
   background: HTMLCanvasElement;
   props: Prop[];
@@ -26,6 +36,8 @@ export interface SceneArt {
   spawn: { x: number; y: number };
   /** Can the hider stand here (world/screen coords of the feet)? */
   walkable(x: number, y: number): boolean;
+  /** Optional crowd of walking workers to hide among (not in `composite`). */
+  walkers?: Walker[];
 }
 
 export function canvas(w: number, h: number): [HTMLCanvasElement, Ctx] {
