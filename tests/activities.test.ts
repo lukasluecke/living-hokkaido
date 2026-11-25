@@ -128,3 +128,34 @@ test("the owl takes a win and every game ends", () => {
     assert.ok(g.winner, "game ended");
   }
 });
+
+import {
+  canonOffBy,
+  pluckPhase,
+  pluckString,
+  startPluck,
+} from "@/parts/activities/play/musicLogic";
+
+test("canon: each voice enters on its own mark, in any loop", () => {
+  assert.equal(canonOffBy(1, 1, 1, 8), 0);
+  assert.equal(canonOffBy(9.2, 1, 1, 8).toFixed(1), "0.2");
+  assert.equal(canonOffBy(1.7, 2, 1, 8).toFixed(1), "-0.3");
+  assert.equal(canonOffBy(5, 2, 1, 8), 3);
+});
+
+test("pluck: explore every string, then play the tab in order", () => {
+  const tune = [3, 1];
+  let s = startPluck();
+  for (const n of [1, 2, 3]) s = pluckString(s, n, 3, tune);
+  assert.equal(pluckPhase(s, 3, tune), "tune");
+  assert.equal(s.next, 0);
+  s = pluckString(s, 2, 3, tune);
+  assert.equal(s.misses, 1);
+  s = pluckString(s, 3, 3, tune);
+  s = pluckString(s, 1, 3, tune);
+  assert.equal(pluckPhase(s, 3, tune), "done");
+  assert.equal(
+    pluckPhase(pluckString(startPluck(), 1, 1, null), 1, null),
+    "done",
+  );
+});

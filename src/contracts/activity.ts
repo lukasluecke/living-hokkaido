@@ -291,6 +291,86 @@ export const boardActivitySchema = z.object({
   opponent: z.enum(["owl", "two-players"]).default("owl"),
 });
 
+// ---------------------------------------------------------------- music
+
+/**
+ * Canon (ukouk structure): voices enter one after another on a shared beat.
+ * The visitor brings in each voice on its mark. Sound is a synthetic
+ * illustration of the structure, never the song or a recording; the words
+ * shown are the source's text with their claim.
+ */
+export const canonActivitySchema = z.object({
+  ...base,
+  kind: z.literal("canon"),
+  prompt: z.string().min(1),
+  completion: z.string().min(1),
+  voices: z
+    .array(z.object({ id: idSchema, label: z.string().min(1) }))
+    .min(2)
+    .max(4),
+  /** Beats between one voice's entry and the next. */
+  offset: z.number().int().min(1).max(8).default(1),
+  /** Length of the looped pattern, in beats. */
+  beats: z.number().int().min(4).max(32).default(8),
+  /** Claim that describes the structure (voices, entries). */
+  structureClaimId: idSchema,
+  /** Song words as the source writes them, each with its claim. */
+  lyrics: z
+    .array(
+      z.object({
+        text: z.string().min(1),
+        lang: z.string().min(2),
+        claimId: idSchema,
+      }),
+    )
+    .default([]),
+});
+
+/**
+ * Pluck a stringed instrument (tonkori mechanics): open strings, each with
+ * a gauge and the hands that play it, and an optional short tab. Tones are
+ * synthetic and illustrative, not the instrument's tuning.
+ */
+export const pluckActivitySchema = z
+  .object({
+    ...base,
+    kind: z.literal("pluck"),
+    prompt: z.string().min(1),
+    completion: z.string().min(1),
+    strings: z
+      .array(
+        z.object({
+          id: idSchema,
+          gauge: z.enum(["thick", "medium", "thin"]),
+          hands: z.array(z.enum(["left", "right"])).min(1),
+        }),
+      )
+      .min(2)
+      .max(8),
+    stringsClaimId: idSchema,
+    tune: z
+      .object({
+        title: z.string().min(1),
+        /** 1-based string numbers, with the hand that plucks each. */
+        notes: z
+          .array(
+            z.object({
+              string: z.number().int().min(1),
+              hand: z.enum(["left", "right"]),
+            }),
+          )
+          .min(1),
+        /** Phrase lengths for display, e.g. [2, 2, 1, 2]. */
+        groups: z.array(z.number().int().min(1)).default([]),
+        claimId: idSchema,
+      })
+      .optional(),
+  })
+  .refine(
+    (a) => !a.tune || a.tune.notes.every((n) => n.string <= a.strings.length),
+    "Tune notes must name existing strings",
+  );
+
 export const activitySchema = z.discriminatedUnion("kind", [
   quizActivitySchema,
   weaveActivitySchema,
@@ -300,6 +380,8 @@ export const activitySchema = z.discriminatedUnion("kind", [
   traceActivitySchema,
   mapActivitySchema,
   boardActivitySchema,
+  canonActivitySchema,
+  pluckActivitySchema,
 ]);
 export type ActivityDefinition = z.infer<typeof activitySchema>;
 export type ActivityInput = z.input<typeof activitySchema>;

@@ -7,6 +7,8 @@ import {
   museumMaps,
   owlStory,
   stickGame,
+  tonkoriPluck,
+  ukoukCanon,
 } from "./museum-activities";
 
 const artifactFor: Record<string, string> = {
@@ -102,4 +104,6 @@ export const activities: ActivityInput[] = [
   ...museumMaps,
   owlStory,
   stickGame,
+  ukoukCanon,
+  tonkoriPluck,
 ];

@@ -304,3 +304,206 @@
 .root :global(.swatch):global(.owl) {
   background: #6e4b32;
 }
+
+/* ------------------------------------------------------------ music */
+.root :global(.toggle) {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 14px;
+  color: var(--lh-ink-soft);
+}
+.root :global(.canon) {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0;
+}
+.root :global(.lane) {
+  display: grid;
+  grid-template-columns: 84px repeat(var(--beats, 8), minmax(0, 1fr));
+  gap: 4px;
+  align-items: end;
+  height: 40px;
+}
+.root :global(.lane):global(.ruler) {
+  height: 16px;
+}
+.root :global(.lane-label) {
+  font-size: 14px;
+  color: var(--lh-ink-soft);
+  align-self: center;
+}
+.root :global(.cell) {
+  display: block;
+  height: 100%;
+  border-radius: 6px;
+  background: #00000010;
+}
+.root :global(.ruler) :global(.cell):global(.now) {
+  background: var(--lh-ink-soft);
+}
+.root :global(.ruler) :global(.cell):global(.mark) {
+  background: var(--lh-gold);
+  box-shadow: 0 0 0 2px var(--lh-gold-deep);
+}
+.root :global(.cell):global(.note) {
+  height: var(--h);
+  background: #2f4b6e22;
+}
+.root :global(.singing) :global(.cell):global(.note) {
+  background: #2f4b6e55;
+}
+.root :global(.singing) :global(.cell):global(.note):global(.now) {
+  background: var(--lh-gold-deep);
+}
+.root :global(.lyrics) {
+  margin-top: 8px;
+  border-top: 2px dotted var(--lh-paper-edge);
+  padding-top: 6px;
+}
+.root :global(.lyric) {
+  font-family: ui-serif, "Hiragino Mincho ProN", Georgia, serif;
+  font-size: 17px;
+  margin: 2px 0;
+}
+.root :global(.tonkori-wrap) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+}
+.root :global(.tonkori) {
+  position: relative;
+  height: 300px;
+  flex: none;
+}
+.root :global(.tonkori) svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.root :global(.tonkori) :global(.body) {
+  fill: #c99a63;
+  stroke: var(--lh-ink);
+  stroke-width: 2;
+}
+.root :global(.bridge) {
+  fill: #6e4b32;
+}
+.root :global(.string) {
+  stroke: #fbf4e6;
+  stroke-linecap: round;
+}
+.root :global(.string):global(.target) {
+  stroke: var(--lh-gold);
+}
+.root :global(.string):global(.ring) {
+  animation: ring 380ms ease-out;
+}
+@keyframes ring {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(1.6px);
+  }
+  40% {
+    transform: translateX(-1.4px);
+  }
+  60% {
+    transform: translateX(1px);
+  }
+  80% {
+    transform: translateX(-0.6px);
+  }
+}
+.root :global(.string-hit) {
+  position: absolute;
+  top: 30px;
+  width: 30px;
+  height: 240px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0;
+  font: inherit;
+}
+.root :global(.string-hit):hover {
+  background: #ffffff22;
+}
+.root :global(.string-hit):global(.target) {
+  background: #e8c27a44;
+}
+.root :global(.string-num) {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--lh-ink);
+  background: #fbf4e6;
+  border-radius: 999px;
+  width: 20px;
+  margin-top: -26px;
+}
+.root :global(.string-hit):global(.tried) :global(.string-num) {
+  background: var(--lh-gold);
+}
+.root :global(.string-hand) {
+  font-size: 11px;
+  color: var(--lh-ink);
+  margin-bottom: -28px;
+}
+.root :global(.tonkori-side) {
+  flex: 1 1 220px;
+}
+.root :global(.steps) {
+  padding-left: 20px;
+  margin: 0 0 6px;
+}
+.root :global(.steps) li {
+  color: var(--lh-ink-soft);
+  margin-bottom: 6px;
+}
+.root :global(.steps) li:global(.on) {
+  color: var(--lh-ink);
+  font-weight: 600;
+}
+.root :global(.tab) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+.root :global(.phrase) {
+  display: inline-flex;
+  gap: 3px;
+}
+.root :global(.tab-note) {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 34px;
+  border-radius: 8px;
+  border: 2px solid var(--lh-paper-edge);
+  font-weight: 700;
+  line-height: 1;
+}
+.root :global(.tab-note) small {
+  font-size: 10px;
+  font-weight: 400;
+}
+.root :global(.tab-note):global(.played) {
+  background: var(--lh-gold);
+}
+.root :global(.tab-note):global(.now) {
+  border-color: var(--lh-gold-deep);
+}
+@media (prefers-reduced-motion: reduce) {
+  .root :global(.string):global(.ring) {
+    animation: none;
+  }
+}
