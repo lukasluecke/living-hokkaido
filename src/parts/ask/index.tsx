@@ -11,6 +11,7 @@ import {
   type AskRequest,
   ASK_MAX_QUESTION,
   askAnswerSchema,
+  askSuggestionsFor,
   type ContentPack,
   resolveClaim,
 } from "@/contracts";
@@ -188,7 +189,16 @@ export function AskPart({
       </button>
     );
 
-  const suggestions = pack.ask.suggestions;
+  // Example questions for where the visitor is now (object, place, island),
+  // minus the ones already asked.
+  const inside = view === "scene" || view === "focus" || view === "activity";
+  const asked = new Set(turns.map((t) => t.question));
+  const suggestions = askSuggestionsFor(pack.ask, {
+    locationId: inside ? locationId : null,
+    artifactId: view === "focus" ? artifactId : null,
+  })
+    .filter((q) => !asked.has(q))
+    .slice(0, turns.length ? 2 : 4);
   return (
     <section
       className={s.panel}
@@ -242,7 +252,7 @@ export function AskPart({
           </article>
         ))}
       </div>
-      {suggestions.length > 0 && turns.length === 0 && (
+      {suggestions.length > 0 && !busy && (
         <ul className={s.chips} aria-label="Example questions">
           {suggestions.map((q) => (
             <li key={q}>
@@ -265,7 +275,7 @@ export function AskPart({
           value={text}
           onChange={(e) => setText(e.target.value)}
           maxLength={ASK_MAX_QUESTION}
-          placeholder="Ask about bark, cloth, the house…"
+          placeholder="Ask a question about what you see…"
           aria-label="Your question"
           enterKeyHint="send"
         />
