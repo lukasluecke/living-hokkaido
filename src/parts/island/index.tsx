@@ -6,7 +6,13 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { type IslandPartProps, type Location, SCALE } from "@/contracts";
 import s from "../shared/Fallback.module.css";
 import attn from "../shared/Attention.module.css";
-import { ActivitySheet, kindSummary, placeActivities } from "./Guide";
+import { Icon, KindIcon, UI_ICON } from "../shared/Icon";
+import {
+  ActivitySheet,
+  kindSummary,
+  placeActivities,
+  placeKinds,
+} from "./Guide";
 import c from "./Island.module.css";
 import { World } from "./World";
 
@@ -102,12 +108,15 @@ function PlaceTray({
             aria-expanded={sheet}
             onClick={() => (sheet ? closeSheet() : setSheet(true))}
           >
+            <Icon d={UI_ICON.try} size={16} />
             All activities
           </button>
         </div>
         <ul className={c.cards}>
           {locations.map((l) => {
             const acts = placeActivities(content, l.id);
+            const kinds = placeKinds(acts);
+            const shown = kinds.slice(0, 4);
             return (
               <li key={l.id}>
                 <button
@@ -115,16 +124,32 @@ function PlaceTray({
                   className={c.card}
                   aria-disabled={l.status !== "open"}
                   data-open={l.status === "open" || undefined}
+                  aria-label={
+                    l.status === "open" && acts.length > 0
+                      ? `${l.title}, ${acts.length} ${acts.length === 1 ? "activity" : "activities"}: ${kindSummary(acts)}`
+                      : undefined
+                  }
                   onClick={() => onSelect(l)}
                 >
                   <span className={c.cardTitle}>{l.title}</span>
                   {l.status === "open" && acts.length > 0 ? (
-                    <span className={c.cardActs}>
-                      <span className={c.state}>
-                        {acts.length}{" "}
-                        {acts.length === 1 ? "activity" : "activities"}
+                    <span className={c.cardActs} aria-hidden="true">
+                      <span className={c.kinds}>
+                        {shown.map((k) => (
+                          <span key={k} className={c.kindChip}>
+                            <KindIcon kind={k} size={16} />
+                          </span>
+                        ))}
+                        {kinds.length > shown.length && (
+                          <span className={c.more}>
+                            +{kinds.length - shown.length}
+                          </span>
+                        )}
                       </span>
-                      <span className={c.kinds}>{kindSummary(acts)}</span>
+                      <span className={c.state}>
+                        <Icon d={UI_ICON.try} size={14} />
+                        {acts.length}
+                      </span>
                     </span>
                   ) : (
                     <span className={c.state}>

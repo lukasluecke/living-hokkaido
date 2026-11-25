@@ -32,6 +32,7 @@ import {
 import { Hud } from "./Hud";
 import { record } from "./progress";
 import { parts } from "./registry";
+import { Icon, kindIconPath, UI_ICON } from "@/parts/shared/Icon";
 import { route } from "./route";
 import s from "./Shell.module.css";
 import { SidePanel } from "./SidePanel";
@@ -250,6 +251,18 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
       : null;
 
   const { stations, next } = route(pack, state, journal, t);
+  const nextEvent = next?.event;
+  const nextIcon =
+    nextEvent?.type === "activity.start"
+      ? kindIconPath(
+          pack.activities.find((a) => a.id === nextEvent.activityId)?.kind ??
+            "",
+        )
+      : nextEvent?.type === "artifact.focus"
+        ? UI_ICON.look
+        : nextEvent?.type === "journal.open"
+          ? UI_ICON.journal
+          : UI_ICON.place;
   const ink = seasonInk[SEASON_IDS.indexOf(seasonAt(state.season.value))];
 
   const stage =
@@ -296,9 +309,6 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
           <section className={s.owl} aria-label={t("Owl guide")}>
             <OwlMark />
             <div className={s.bubble}>
-              <p className={s.cap} aria-hidden="true">
-                {t("Owl guide")}
-              </p>
               <p
                 key={guideLine}
                 className={s.line}
@@ -312,9 +322,13 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
                 <button
                   type="button"
                   className={s.next}
+                  aria-label={next.label}
                   onClick={() => emit(next.event)}
                 >
-                  {next.label}
+                  <Icon d={nextIcon} size={18} />
+                  {/* The icon says "look" or "try", so show only the name. */}
+                  <span>{next.name ?? next.label}</span>
+                  <Icon d={UI_ICON.go} size={16} className={s.nextGo} />
                 </button>
               )}
             </div>

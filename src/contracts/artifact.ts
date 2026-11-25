@@ -53,6 +53,21 @@ export const hotspotSchema = z.object({
 });
 export type Hotspot = z.infer<typeof hotspotSchema>;
 
+/** Hotspots that point at a fact on the object ("Look closer" rows, dots,
+ *  journal counts). A "disclaimer" hotspot is a note about the model. */
+export function factHotspots<H extends Pick<Hotspot, "kind">>(a: {
+  hotspots: readonly H[];
+}): H[] {
+  return a.hotspots.filter((h) => h.kind !== "disclaimer");
+}
+
+/** Notes about the model itself, shown as a small footnote on the card. */
+export function modelNotes<H extends Pick<Hotspot, "kind">>(a: {
+  hotspots: readonly H[];
+}): H[] {
+  return a.hotspots.filter((h) => h.kind === "disclaimer");
+}
+
 export const artifactSchema = z
   .object({
     id: idSchema,

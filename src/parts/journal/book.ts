@@ -1,11 +1,12 @@
 // Pure helpers for the stamp book: sections, progress and hints.
 // No React and no side effects, so a test or a lab can use them directly.
 // Hints only navigate (what to do next); they state no cultural facts.
-import type {
-  ContentPack,
-  JournalState,
-  Presentation,
-  Stamp,
+import {
+  type ContentPack,
+  factHotspots,
+  type JournalState,
+  type Presentation,
+  type Stamp,
 } from "@/contracts";
 
 export type SectionId = "stories" | "objects" | "words" | "skills";
@@ -62,9 +63,9 @@ export function progressOf(
       return count(u.artifactIds, j.inspected);
     case "hotspots-read": {
       const keys = u.artifactIds.flatMap((id) =>
-        (pack.artifacts.find((a) => a.id === id)?.hotspots ?? []).map(
-          (h) => `${id}/${h.id}`,
-        ),
+        factHotspots(
+          pack.artifacts.find((a) => a.id === id) ?? { hotspots: [] },
+        ).map((h) => `${id}/${h.id}`),
       );
       return count(keys, j.hotspotsRead);
     }

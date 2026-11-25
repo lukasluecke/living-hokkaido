@@ -5,6 +5,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import type { ActivityDefinition, DetailScenePartProps } from "@/contracts";
 import { groupActivities, kindCaption } from "../shared/activityGroups";
+import { Icon, KindIcon, UI_ICON } from "../shared/Icon";
 import t from "./Tray.module.css";
 
 /** Scene activities not attached to a placed object (those start from the
@@ -23,45 +24,6 @@ export function roomActivities({
           scene.placements.some((pl) => pl.artifactId === a.artifactId)
         ),
     );
-}
-
-/** Small line icon per activity kind (decorative; the caption names it). */
-export function KindIcon({ kind }: { kind: string }) {
-  const paths: Record<string, string> = {
-    // Woven grid.
-    weave: "M4 7h16M4 12h16M4 17h16M8 4v16M12 4v16M16 4v16",
-    // Folded map.
-    map: "M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14",
-    // Steps in order.
-    sequence: "M4 6h2M4 12h2M4 18h2M9 6h11M9 12h11M9 18h11",
-    // Headphones.
-    story: "M4 15v-3a8 8 0 0 1 16 0v3M4 15h3v5H4zM17 15h3v5h-3z",
-    // Lines of words.
-    words: "M4 7h16M4 12h11M4 17h14",
-    // Question mark.
-    quiz: "M9 9a3 3 0 1 1 4.5 2.6c-.9.5-1.5 1.2-1.5 2.4M12 18h.01",
-    // Document with lines.
-    trace: "M6 3h8l4 4v14H6zM14 3v4h4M9 12h6M9 16h6",
-  };
-  return (
-    <svg
-      className={t.icon}
-      viewBox="0 0 24 24"
-      width="18"
-      height="18"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path
-        d={paths[kind] ?? "M12 4v16M4 12h16"}
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
 }
 
 /** "Try here" sheet: the room's activities by kind. Above the tray on a
@@ -123,14 +85,13 @@ function TryHere({
           </svg>
         </button>
       </div>
-      <p className={t.sheetSub}>
-        {activities.length} {activities.length === 1 ? "thing" : "things"} to
-        try in the room. Activities about one object are on its card.
-      </p>
+      <p className={t.sheetSub}>Activities about one object are on its card.</p>
       <div className={t.groups}>
         {groups.map((g) => (
           <section key={g.id} aria-label={g.label}>
-            <h3 className={t.cap}>{g.label}</h3>
+            <h3 className={t.cap}>
+              {g.label} · {g.items.length}
+            </h3>
             <ul className={t.rows}>
               {g.items.map((a) => (
                 <li key={a.id}>
@@ -140,11 +101,11 @@ function TryHere({
                     data-row=""
                     onClick={() => onStart(a.id)}
                   >
-                    <span className={t.iconWrap}>
-                      <KindIcon kind={a.kind} />
+                    <span className={t.iconWrap} title={kindCaption(a.kind)}>
+                      <KindIcon kind={a.kind} className={t.icon} />
                     </span>
                     <span className={t.rowText}>
-                      <span className={t.kind}>{kindCaption(a.kind)}</span>
+                      <span className={t.srOnly}>{kindCaption(a.kind)}: </span>
                       <span className={t.rowTitle}>{a.title}</span>
                     </span>
                     <span className={t.chev} aria-hidden="true">
@@ -290,10 +251,13 @@ export function Tray({
                 aria-controls={open ? sheetId : undefined}
                 onClick={() => setOpen((v) => !v)}
               >
-                <span className={t.tryCap}>Try here</span>
-                <span className={t.cardLabel}>
-                  {activities.length}{" "}
-                  {activities.length === 1 ? "activity" : "activities"}
+                <Icon d={UI_ICON.try} size={20} className={t.tryIcon} />
+                <span className={t.cardLabel}>Try here</span>
+                <span className={t.tryCount}>
+                  {activities.length}
+                  <span className={t.srOnly}>
+                    {activities.length === 1 ? " activity" : " activities"}
+                  </span>
                 </span>
               </button>
             </li>

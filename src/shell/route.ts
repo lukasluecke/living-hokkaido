@@ -22,7 +22,12 @@ export type Station = {
   event?: ExperienceEvent;
 };
 
-export type NextStep = { label: string; event: ExperienceEvent };
+export type NextStep = {
+  label: string;
+  /** The object or activity name alone, for a button with an icon. */
+  name?: string;
+  event: ExperienceEvent;
+};
 
 export type Route = { stations: Station[]; next: NextStep | null };
 
@@ -130,6 +135,7 @@ function nextStep(
     if (a)
       return {
         label: t("Try: {title}", { title: a.title }),
+        name: a.title,
         event: { type: "activity.start", activityId: a.id },
       };
     const other = unlooked.find((id) => id !== state.artifactId);
@@ -137,6 +143,7 @@ function nextStep(
     if (o)
       return {
         label: t("Next: {label}", { label: o.label }),
+        name: o.label,
         event: { type: "artifact.focus", artifactId: o.id },
       };
     return { label: t("Open the journal"), event: { type: "journal.open" } };
@@ -145,6 +152,7 @@ function nextStep(
   if (o)
     return {
       label: t("Look at: {label}", { label: o.label }),
+      name: o.label,
       event: { type: "artifact.focus", artifactId: o.id },
     };
   const scene = pack.scenes.find((x) => x.id === state.sceneId);
@@ -153,6 +161,7 @@ function nextStep(
   if (a)
     return {
       label: t("Try: {title}", { title: a.title }),
+      name: a.title,
       event: { type: "activity.start", activityId: a.id },
     };
   return { label: t("Open the journal"), event: { type: "journal.open" } };
