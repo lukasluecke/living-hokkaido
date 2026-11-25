@@ -29,7 +29,7 @@ export function SeasonDriver({ season, playing, speed = 0.12, onSeason }: {
     const sky = mix4(w, SKY, tmp.c);
     if (!(scene.background instanceof Color)) scene.background = new Color();
     (scene.background as Color).copy(sky);
-    if (!scene.fog) scene.fog = new Fog(sky, 45, 110);
+    if (!scene.fog) scene.fog = new Fog(sky, 35, 90);
     (scene.fog as Fog).color.copy(sky);
     if (sun.current) {
       mix4(w, SUN, sun.current.color);
@@ -49,8 +49,8 @@ export function SeasonDriver({ season, playing, speed = 0.12, onSeason }: {
       <hemisphereLight ref={hemi} args={["#d5e6f0", "#5a6a52", 1]} />
       <directionalLight
         ref={sun} castShadow position={[-18, 25, 14]} intensity={2.6}
-        shadow-mapSize={[2048, 2048]} shadow-camera-left={-24} shadow-camera-right={24}
-        shadow-camera-top={22} shadow-camera-bottom={-22} shadow-camera-far={90} shadow-bias={-0.0004} shadow-normalBias={0.02}
+        shadow-mapSize={[2048, 2048]} shadow-camera-left={-16} shadow-camera-right={16}
+        shadow-camera-top={14} shadow-camera-bottom={-14} shadow-camera-far={90} shadow-bias={-0.0004} shadow-normalBias={0.02}
       />
     </>
   );
@@ -118,16 +118,13 @@ export function DriftIce({ field }: { field: Field }) {
   const ref = useRef<InstancedMesh>(null);
   const floes = useMemo(() => {
     const R = rng(11), out: number[][] = [];
-    const [x0] = field.toWorld(141.7, 44), [, zN] = field.toWorld(142, 45.5);
-    for (let t = 0; t < 40000 && out.length < 700; t++) {
-      const x = x0 + R() * (field.size / 2 - x0), z = zN + R() * (field.depth / 2 - zN) * 0.55;
+    for (let t = 0; t < 60000 && out.length < 380; t++) {
+      const x = (R() - 0.5) * field.size, z = (R() - 0.5) * field.depth;
+      if (z > -1.5 + x * 0.15) continue; // north / north-east coast only
       const i = Math.round((x / field.size + 0.5) * (field.w - 1)), j = Math.round((z / field.depth + 0.5) * (field.h - 1));
       const d = field.coastDist[j * field.w + i];
-      if (field.elev[j * field.w + i] > 0 || d > 30 || d < 1) continue;
-      // only the north-east (Okhotsk) side
-      const [, zKushiro] = field.toWorld(144, 43.4);
-      if (z > zKushiro - 1) continue;
-      out.push([x, z, 0.12 + R() * 0.35, R() * 6.28, R(), d / 30]);
+      if (field.elev[j * field.w + i] > -20 || d > 26 || d < 2) continue; // sea only (not lake/river)
+      out.push([x, z, 0.1 + R() * 0.28, R() * 6.28, R(), d / 26]);
     }
     return out;
   }, [field]);
@@ -168,10 +165,9 @@ export function DriftIce({ field }: { field: Field }) {
 }
 
 /** Rows of a flower field. Colour changes by season on the CPU (1 uniform). */
-export function FlowerField({ field, lon, lat }: { field: Field; lon: number; lat: number }) {
+export function FlowerField({ field, x: cx, z: cz }: { field: Field; x: number; z: number }) {
   const ref = useRef<InstancedMesh>(null);
   const mat = useMemo(() => new MeshStandardMaterial({ roughness: 0.9 }), []);
-  const [cx, cz] = field.toWorld(lon, lat);
   const rows = useMemo(() => {
     const out: number[][] = [];
     for (let r = 0; r < 9; r++) for (let c = 0; c < 5; c++) out.push([cx + (c - 2) * 0.22, cz + (r - 4) * 0.09]);
@@ -197,10 +193,10 @@ export function FlowerField({ field, lon, lat }: { field: Field; lon: number; la
 }
 
 /** Petals (spring), leaves (autumn), snow (winter): one Points draw call. */
-export function Weather({ count = 4000 }: { count?: number }) {
+export function Weather({ count = 2200 }: { count?: number }) {
   const geo = useMemo(() => {
     const R = rng(3), p = new Float32Array(count * 3), r = new Float32Array(count);
-    for (let i = 0; i < count; i++) { p.set([(R() - 0.5) * 44, R() * 14, (R() - 0.5) * 40], i * 3); r[i] = R(); }
+    for (let i = 0; i < count; i++) { p.set([(R() - 0.5) * 30, R() * 12, (R() - 0.5) * 26], i * 3); r[i] = R(); }
     const g = new BufferGeometry();
     g.setAttribute("position", new Float32BufferAttribute(p, 3));
     g.setAttribute("aRand", new Float32BufferAttribute(r, 1));
@@ -216,12 +212,12 @@ export function Weather({ count = 4000 }: { count?: number }) {
             vR = aRand;
             float fall = mix(0.5, 1.6, uW.w);
             vec3 p = position;
-            p.y = mod(p.y - uTime * fall * (0.6 + aRand), 14.0);
+            p.y = mod(p.y - uTime * fall * (0.6 + aRand), 12.0);
             p.x += sin(uTime * 0.7 + aRand * 30.0) * 0.6 + uTime * 0.15 * (1.0 - uW.w);
-            p.x = mod(p.x + 22.0, 44.0) - 22.0;
-            vA = (uW.x * step(aRand, 0.35) + uW.z * step(aRand, 0.3) + uW.w) * smoothstep(0.0, 1.5, p.y) * smoothstep(14.0, 11.0, p.y);
+            p.x = mod(p.x + 15.0, 30.0) - 15.0;
+            vA = (uW.x * step(aRand, 0.35) + uW.z * step(aRand, 0.3) + uW.w) * smoothstep(0.0, 1.5, p.y) * smoothstep(12.0, 9.0, p.y);
             vec4 mv = modelViewMatrix * vec4(p, 1.0);
-            gl_PointSize = (uW.w > 0.5 ? 5.0 : 6.0) * (30.0 / -mv.z);
+            gl_PointSize = (uW.w > 0.5 ? 3.5 : 5.0) * (30.0 / -mv.z);
             gl_Position = projectionMatrix * mv;
           }`,
         fragmentShader: /* glsl */ `${GLSL_COMMON}

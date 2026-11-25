@@ -1,11 +1,13 @@
 import { CameraControls } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { EffectComposer, N8AO, SMAA, TiltShift2, Vignette } from "@react-three/postprocessing";
-import { Suspense, use, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { MathUtils, Vector3 } from "three";
-import { type Field, flattenPads, loadField } from "../world/field";
+import { buildField, type Field } from "../world/field";
 import { DriftIce, FlowerField, Sea, SeasonDriver, Weather } from "../world/Environment";
 import { HexTerrain } from "../world/HexTerrain";
+import { RIVER } from "../world/island";
+import { Lake, River } from "../world/Water";
 import { Owl, type OwlApi } from "../world/Owl";
 import { placePos, PlaceMarker } from "../world/Places";
 import { FLOWER_FIELD, HOME, PLACES } from "../world/places";
@@ -23,8 +25,7 @@ type Cam = "follow" | "cut";
 
 export default function App() {
   const [style, setStyle] = useState<Style>((q.get("style") as Style) ?? "painted");
-  const [res, setRes] = useState(Number(q.get("res") ?? 512));
-  const [trees, setTrees] = useState(Number(q.get("trees") ?? 15000));
+  const [trees, setTrees] = useState(Number(q.get("trees") ?? 3500));
   const [season, setSeason] = useState(Number(q.get("season") ?? 0));
   const [playing, setPlaying] = useState(q.get("play") === "1");
   const [shown, setShown] = useState(Math.round(season) % 4);
@@ -33,17 +34,17 @@ export default function App() {
   const [dest, setDest] = useState<string | null>(q.get("dest"));
   const [arrived, setArrived] = useState(false);
   const shot = q.has("shot");
-  const fieldP = useMemo(() => loadField(res), [res]);
+  const field = useMemo(() => buildField(), []);
   return (
     <div className="lab">
       <Canvas
         shadows dpr={[1, Math.min(1.5, Number(q.get("dpr") ?? 1.5))]}
-        camera={{ position: [3, 40, 42], fov: 32, near: 0.1, far: 300 }}
+        camera={{ position: [2, 21, 24], fov: 32, near: 0.1, far: 300 }}
         gl={{ antialias: fx === "none", powerPreference: "high-performance", preserveDrawingBuffer: shot }}
       >
         <Suspense fallback={null}>
           <World
-            fieldP={fieldP} style={style} trees={trees} season={season} playing={playing} onSeason={setShown}
+            field={field} style={style} trees={trees} season={season} playing={playing} onSeason={setShown}
             fx={fx} cam={cam} dest={dest} arrived={arrived}
             onArrive={() => setArrived(true)} onSelect={(id) => { setArrived(false); setDest(id); }}
             labels={!shot || q.has("labels")}
@@ -52,7 +53,7 @@ export default function App() {
         <Perf />
       </Canvas>
       <div className="badge">
-        <span>HOKKAIDO · LAB</span>
+        <span>ISLAND · LAB</span>
         <b>{SEASONS[shown]} · {SEASON_NOTES[shown]}</b>
       </div>
       {!shot && (
@@ -60,11 +61,8 @@ export default function App() {
           <Group label="Terrain">
             {(["painted", "terrace", "hex"] as Style[]).map((s) => <Btn key={s} on={style === s} onClick={() => setStyle(s)}>{s}</Btn>)}
           </Group>
-          <Group label="Heightfield">
-            {[256, 512].map((r) => <Btn key={r} on={res === r} onClick={() => setRes(r)}>{r}px</Btn>)}
-          </Group>
           <Group label="Trees">
-            {[0, 5000, 15000, 40000].map((n) => <Btn key={n} on={trees === n} onClick={() => setTrees(n)}>{n / 1000}k</Btn>)}
+            {[0, 1500, 3500, 8000].map((n) => <Btn key={n} on={trees === n} onClick={() => setTrees(n)}>{n / 1000}k</Btn>)}
           </Group>
           <Group label="Season">
             {SEASONS.map((s, i) => <Btn key={s} on={!playing && Math.round(season) % 4 === i} onClick={() => { setPlaying(false); setSeason(i); }}>{s}</Btn>)}
@@ -101,15 +99,18 @@ function Btn({ on, onClick, children }: { on: boolean; onClick: () => void; chil
 }
 
 function World(props: {
-  fieldP: Promise<Field>; style: Style; trees: number; season: number; playing: boolean; onSeason: (s: number) => void;
+  field: Field; style: Style; trees: number; season: number; playing: boolean; onSeason: (s: number) => void;
   fx: Fx; cam: Cam; dest: string | null; arrived: boolean; onArrive: () => void; onSelect: (id: string) => void; labels: boolean;
 }) {
-  const field = use(props.fieldP);
+  const { field } = props;
   const clearings = useMemo<Clearing[]>(() => {
-    const out = [...PLACES, HOME].map((p) => { const [x, z] = field.toWorld(p.lon, p.lat); return { x, z, r: 1.3 }; });
-    flattenPads(field, out);
-    const [fx, fz] = field.toWorld(FLOWER_FIELD.lon, FLOWER_FIELD.lat);
-    out.push({ x: fx, z: fz, r: 0.7 });
+    const out = [...PLACES, HOME].map((p) => ({ x: p.x, z: p.z, r: p.id === "home" ? 0.25 : 0.8 }));
+    out.push({ ...FLOWER_FIELD, r: 0.8 });
+    for (let k = 0; k < RIVER.length - 1; k++)
+      for (let t = 0; t < 1; t += 0.12) {
+        const [ax, az] = RIVER[k], [bx, bz] = RIVER[k + 1];
+        out.push({ x: ax + (bx - ax) * t, z: az + (bz - az) * t, r: 0.28 + k * 0.06 });
+      }
     return out;
   }, [field]);
   const perch = useMemo(() => new Vector3(...placePos(field, HOME)), [field]);
@@ -123,9 +124,10 @@ function World(props: {
       <SeasonDriver season={props.season} playing={props.playing} onSeason={props.onSeason} />
       {props.style === "hex" ? <HexTerrain field={field} /> : <Terrain field={field} terrace={props.style === "terrace" ? 160 : 0} flat={props.style === "terrace"} />}
       <Sea field={field} />
+      {props.style !== "hex" && <><Lake /><River field={field} /></>}
       <DriftIce field={field} />
-      {props.style !== "hex" && props.trees > 0 && <Trees field={field} count={props.trees} clearings={clearings} scale={Number(q.get("treeScale") ?? 1.25)} />}
-      <FlowerField field={field} lon={FLOWER_FIELD.lon} lat={FLOWER_FIELD.lat} />
+      {props.style !== "hex" && props.trees > 0 && <Trees field={field} count={props.trees} clearings={clearings} scale={Number(q.get("treeScale") ?? 1.3)} />}
+      <FlowerField field={field} x={FLOWER_FIELD.x} z={FLOWER_FIELD.z} />
       <Weather />
       {PLACES.map((p) => (
         <PlaceMarker key={p.id} field={field} place={p} labels={props.labels}
@@ -146,7 +148,7 @@ function World(props: {
 }
 
 const T = !q.has("instant");
-const OVERVIEW = { pos: new Vector3(3, 40, 42), look: new Vector3(0.5, 0, 0.5) };
+const OVERVIEW = { pos: new Vector3(1.5, 17, 19.5), look: new Vector3(0, 0.4, 0.8) };
 
 function Rig({ owl, target, cam, arrived }: { owl: React.RefObject<OwlApi | null>; target: Vector3 | null; cam: Cam; arrived: boolean }) {
   const cc = useRef<CameraControls>(null);
@@ -177,7 +179,7 @@ function Rig({ owl, target, cam, arrived }: { owl: React.RefObject<OwlApi | null
   });
   return (
     <CameraControls
-      ref={cc} makeDefault minDistance={1.5} maxDistance={60}
+      ref={cc} makeDefault minDistance={1.5} maxDistance={40}
       minPolarAngle={0.15} maxPolarAngle={MathUtils.degToRad(72)}
       onStart={() => {}} dollyToCursor
     />

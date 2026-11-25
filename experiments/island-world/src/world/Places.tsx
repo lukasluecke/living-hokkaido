@@ -6,7 +6,7 @@ import type { Field } from "./field";
 import type { Place } from "./places";
 
 export function placePos(field: Field, p: Place): [number, number, number] {
-  const [x, z] = field.toWorld(p.lon, p.lat);
+  const { x, z } = p;
   return [x, field.groundY(x, z), z];
 }
 
@@ -20,7 +20,7 @@ function House({ open, active, glow }: { open: boolean; active: boolean; glow: b
   });
   const wall = active ? "#c99a63" : "#a7a090";
   return (
-    <group scale={1.3}>
+    <group scale={1.0}>
       <mesh position={[0, 0.03, 0]} receiveShadow>
         <cylinderGeometry args={[0.75, 0.8, 0.06, 20]} />
         <meshStandardMaterial color="#cdb791" />
@@ -53,7 +53,7 @@ export function PlaceMarker({ field, place, open, active, onSelect, labels }: {
     <group position={p} onClick={(e) => { e.stopPropagation(); onSelect(); }}>
       <House open={open} active={active} glow={!!place.open} />
       {labels && (
-        <Html position={[0, 1.7, 0]} center distanceFactor={18} zIndexRange={[10, 0]}>
+        <Html position={[0, 1.4, 0]} center distanceFactor={18} zIndexRange={[10, 0]}>
           <button type="button" className="pin" onClick={onSelect} aria-label={`Fly to ${place.name}`}>
             {place.name}{place.open ? "" : " · soon"}
           </button>
