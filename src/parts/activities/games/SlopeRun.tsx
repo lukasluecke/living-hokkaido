@@ -7,10 +7,9 @@
 // own HTML card.
 import { useCallback, useRef, useState } from "react";
 import type { Emit } from "@/contracts";
-import { mountSlope } from "@vendor/dont-fall-on-the-slope/src/embed";
 import type { KindProps } from "../kinds/shared";
 import g from "./games.module.css";
-import { GameStage, type MountGame } from "./GameStage";
+import { deferMount, GameStage, type MountGame } from "./GameStage";
 
 export function SlopeRunActivity({
   activity: a,
@@ -29,30 +28,34 @@ export function SlopeRunActivity({
   };
   const mount = useCallback<MountGame>(
     (host, out) =>
-      mountSlope(host, {
-        activityId: a.id,
-        prefs,
-        emit: out,
-        seed: a.seed,
-        finds: a.finds.flatMap((f) => {
-          const c = claims[f.claimId];
-          if (!c) return []; // withdrawn or unknown: no find
-          const cite = c.claim.citations[0];
-          const src = c.sources.find((x) => x.id === cite?.sourceId);
-          return [
-            {
-              id: f.id,
-              label: f.label,
-              look: f.look,
-              text: c.claim.text,
-              source: src
-                ? `${src.title}${cite ? ` · ${cite.locator}` : ""}`
-                : undefined,
-            },
-          ];
-        }),
-        seen: foundRef.current,
-      }),
+      deferMount(
+        import("@vendor/dont-fall-on-the-slope/src/embed").then((m) =>
+          m.mountSlope(host, {
+            activityId: a.id,
+            prefs,
+            emit: out,
+            seed: a.seed,
+            finds: a.finds.flatMap((f) => {
+              const c = claims[f.claimId];
+              if (!c) return []; // withdrawn or unknown: no find
+              const cite = c.claim.citations[0];
+              const src = c.sources.find((x) => x.id === cite?.sourceId);
+              return [
+                {
+                  id: f.id,
+                  label: f.label,
+                  look: f.look,
+                  text: c.claim.text,
+                  source: src
+                    ? `${src.title}${cite ? ` · ${cite.locator}` : ""}`
+                    : undefined,
+                },
+              ];
+            }),
+            seen: foundRef.current,
+          }),
+        ),
+      ),
     [a],
   );
   const seenIds = new Set(found);

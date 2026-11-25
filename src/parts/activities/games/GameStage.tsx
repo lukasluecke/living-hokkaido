@@ -29,6 +29,32 @@ export type GameHandle = { ready: Promise<void>; destroy(): void };
  */
 export type MountGame = (host: HTMLElement, emit: Emit) => GameHandle;
 
+/**
+ * Wraps a game that loads on demand (a dynamic `import()`), so its code
+ * (Phaser, Rapier, three) is not part of the first page load. The handle
+ * is ready when the code has loaded and the game is ready. Destroy before
+ * the load ends destroys the game as soon as it arrives.
+ */
+export function deferMount(load: Promise<GameHandle>): GameHandle {
+  let handle: GameHandle | null = null;
+  let dead = false;
+  const ready = load.then((h) => {
+    if (dead) {
+      h.destroy();
+      return;
+    }
+    handle = h;
+    return h.ready;
+  });
+  return {
+    ready,
+    destroy() {
+      dead = true;
+      handle?.destroy();
+    },
+  };
+}
+
 export function GameStage({
   activityId,
   knowledgeId,
@@ -67,6 +93,7 @@ export function GameStage({
 }) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const host = useRef<HTMLDivElement>(null);
   const play = useRef<HTMLButtonElement>(null);
   // The shell rebuilds `claims` and may rebuild `emit` on every render
@@ -79,16 +106,26 @@ export function GameStage({
   useEffect(() => {
     if (!open || !host.current) return;
     setError(null);
+    setLoading(true);
     let handle: GameHandle | null = null;
+    let live = true;
     try {
       handle = mountRef.current(host.current, (e) => emitRef.current(e));
-      handle.ready.catch((err: unknown) =>
-        setError(err instanceof Error ? err.message : String(err)),
-      );
+      handle.ready
+        .catch((err: unknown) => {
+          if (live) setError(err instanceof Error ? err.message : String(err));
+        })
+        .finally(() => {
+          if (live) setLoading(false);
+        });
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
+      setLoading(false);
     }
-    return () => handle?.destroy();
+    return () => {
+      live = false;
+      handle?.destroy();
+    };
   }, [open]);
 
   // Esc closes the stage, not the whole activity: catch it on the way
@@ -178,6 +215,11 @@ export function GameStage({
                 className={`${g.host} ${fit === "wide" ? g.wide : ""}`}
                 data-activity={activityId}
               />
+              {loading && !error && (
+                <p className={g.loading} role="status">
+                  Loading the game…
+                </p>
+              )}
               {error && (
                 <p className={g.error} role="alert">
                   The game could not start: {error}
