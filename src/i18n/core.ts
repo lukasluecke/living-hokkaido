@@ -133,3 +133,26 @@ export function localizePack(pack: ContentPack, locale: Locale): ContentPack {
   if (locale === DEFAULT_LOCALE) return pack;
   return walk(pack, CONTENT[locale], "", false) as ContentPack;
 }
+
+/**
+ * Content strings that `localizePack()` would translate but that have no
+ * entry yet (ids and enum values are skipped). For tests and translators.
+ */
+export function untranslated(pack: ContentPack, locale: Locale): string[] {
+  const dict = CONTENT[locale];
+  const out = new Set<string>();
+  const visit = (v: unknown, key: string, ainu: boolean): void => {
+    if (typeof v === "string") {
+      if (KEEP_KEYS.has(key) || (ainu && key === "text")) return;
+      if (!/[A-Za-z]/.test(v) || !/\s|[A-Z]/.test(v)) return;
+      if (!Object.hasOwn(dict, v)) out.add(v);
+    } else if (Array.isArray(v)) for (const x of v) visit(x, key, false);
+    else if (v && typeof v === "object") {
+      const o = v as Record<string, unknown>;
+      for (const [k, x] of Object.entries(o))
+        if (!KEEP_TREES.has(k)) visit(x, k, o.lang === "ain");
+    }
+  };
+  visit(pack, "", false);
+  return [...out];
+}
