@@ -179,8 +179,12 @@ function Furniture() {
       }),
     [],
   );
-  const basket = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: "#9a7a48", roughness: 1 }),
+  // Baskets in a few fibre tones, so the room is not one brown.
+  const baskets3 = useMemo(
+    () =>
+      ["#9a7a48", "#b89a62", "#7d6a4a"].map(
+        (color) => new THREE.MeshStandardMaterial({ color, roughness: 1 }),
+      ),
     [],
   );
   const r = useMemo(() => rng(5), []);
@@ -215,7 +219,13 @@ function Furniture() {
       <Boxes items={items} material={wood} />
       <Boxes items={ropes} material={rope} />
       {baskets.map((b, i) => (
-        <mesh key={i} position={b.p} material={basket} castShadow receiveShadow>
+        <mesh
+          key={i}
+          position={b.p}
+          material={baskets3[i % 3]}
+          castShadow
+          receiveShadow
+        >
           <cylinderGeometry args={[b.rad, b.rad * 0.8, 0.24, 10]} />
         </mesh>
       ))}
