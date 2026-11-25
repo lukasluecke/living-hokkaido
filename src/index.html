@@ -59,6 +59,10 @@
   .marker[data-active="true"] .dot { outline: 2px solid #fff; outline-offset: 3px; }
   .marker.hidden { display: none; }
   @keyframes pulse { 50% { transform: scale(1.12); } }
+  /* Hidden dots: invisible but still tappable; a faint ring on hover, and the selected one shows. */
+  body.ghost .marker .dot { opacity: 0; animation: none; transition: opacity .15s; }
+  body.ghost .marker:hover .dot, body.ghost .marker:focus-visible .dot { opacity: .45; }
+  body.ghost .marker[data-active="true"] .dot { opacity: 1; }
   /* Figures sit close together, so names show only on hover, focus or selection. */
   .marker .name { display: none; }
   .marker:hover, .marker:focus-visible, .marker[data-active="true"] { z-index: 1; }
@@ -172,6 +176,9 @@
     <button id="about" title="About this scene: what is known, and what is not">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>
       <span class="label">About</span>
+    </button>
+    <button id="dots" aria-pressed="true" title="Show or hide the figure dots (figures stay tappable)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
     </button>
     <button id="flip" aria-pressed="true" title="Flip upside-down scenes">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M7 8l5-5 5 5M7 16l5 5 5-5"/></svg>
@@ -528,7 +535,20 @@ $("file").addEventListener("change", async (e) => {
   loadSplat({ fileBytes: new Uint8Array(await f.arrayBuffer()), fileName: f.name }, f.name);
 });
 $("flip").addEventListener("click", () => { flipped = !flipped; applyFlip(); frameScene(); });
-$("reset").addEventListener("click", () => { if (!home) return; camera.position.copy(home.position); controls.target.copy(home.target); controls.update(); });
+// ?dots=0 or the eye button: hide the dots, keep the figures tappable. Remembered per browser.
+let dotsOn = params.get("dots") !== "0";
+try { if (!params.has("dots") && localStorage.getItem("omusha.dots") === "0") dotsOn = false; } catch { /* storage blocked */ }
+function applyDots() {
+  document.body.classList.toggle("ghost", !dotsOn);
+  $("dots").setAttribute("aria-pressed", String(dotsOn));
+}
+$("dots").addEventListener("click", () => {
+  dotsOn = !dotsOn; applyDots();
+  try { localStorage.setItem("omusha.dots", dotsOn ? "1" : "0"); } catch { /* ignore */ }
+  toast(dotsOn ? "Figure dots shown" : "Dots hidden · figures still tappable");
+});
+applyDots();
+$("reset").addEventListener("click",() => { if (!home) return; camera.position.copy(home.position); controls.target.copy(home.target); controls.update(); });
 $("fs").addEventListener("click", () => {
   const el = document.documentElement;
   if (document.fullscreenElement) document.exitFullscreen?.(); else (el.requestFullscreen || el.webkitRequestFullscreen)?.call(el);
