@@ -14,7 +14,7 @@
   /* Cover edge, page stack and soft shadow. */
   border: 1px solid var(--paper-edge);
   border-top: 6px solid var(--cover);
-  box-shadow: 0 18px 40px rgb(15 25 40 / 35%);
+  box-shadow: 0 18px 40px rgb(43 33 24 / 35%);
   animation: open 220ms ease-out;
 }
 .still {

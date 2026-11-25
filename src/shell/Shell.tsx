@@ -58,8 +58,8 @@ function OwlMark() {
       <ellipse cx="44" cy="52" rx="15" ry="14" fill="#f2f7fc" />
       <circle cx="35" cy="38" r="8.5" fill="#eaf3fb" />
       <circle cx="53" cy="38" r="8.5" fill="#eaf3fb" />
-      <circle cx="35" cy="39" r="4" fill="#1d2a36" />
-      <circle cx="53" cy="39" r="4" fill="#1d2a36" />
+      <circle cx="35" cy="39" r="4" fill="#2b2118" />
+      <circle cx="53" cy="39" r="4" fill="#2b2118" />
       <path d="M41 45 L44 50 L47 45 Z" fill="#e8c27a" />
     </svg>
   );

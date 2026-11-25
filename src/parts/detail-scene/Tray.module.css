@@ -16,7 +16,7 @@
 .tray {
   display: block;
   background: var(--fl-paper);
-  border: 1px solid var(--fl-line);
+  border: 2px solid var(--fl-edge);
   border-bottom: 0;
   border-radius: 12px 12px 0 0;
   box-shadow: var(--fl-shadow);
@@ -185,7 +185,7 @@
   overflow: auto;
   overscroll-behavior: contain;
   background: var(--fl-paper);
-  border: 1px solid var(--fl-line);
+  border: 2px solid var(--fl-edge);
   border-radius: 12px;
   box-shadow: var(--fl-shadow);
   padding: 14px 16px 16px;

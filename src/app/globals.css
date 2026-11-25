@@ -1,4 +1,4 @@
-/* Field label fonts: self-hosted (public/fonts, SIL OFL 1.1), Latin subset. */
+/* Storybook field-kit fonts: self-hosted (public/fonts, SIL OFL 1.1), Latin subset. */
 @font-face {
   font-family: "Shippori Mincho B1";
   font-weight: 700;
@@ -6,34 +6,40 @@
   src: url("/fonts/shippori-mincho-b1-700.woff2") format("woff2");
 }
 @font-face {
-  font-family: "Zen Kaku Gothic New";
-  font-weight: 400;
+  font-family: "Zen Maru Gothic";
+  font-weight: 400 500;
   font-display: swap;
-  src: url("/fonts/zen-kaku-gothic-new-400.woff2") format("woff2");
+  src: url("/fonts/zen-maru-gothic-500.woff2") format("woff2");
 }
 @font-face {
-  font-family: "Zen Kaku Gothic New";
+  font-family: "Zen Maru Gothic";
   font-weight: 700;
   font-display: swap;
-  src: url("/fonts/zen-kaku-gothic-new-700.woff2") format("woff2");
+  src: url("/fonts/zen-maru-gothic-700.woff2") format("woff2");
 }
-/* Field label tokens (mirror src/design/tokens.ts ui + seasonInk). Parts may
-   read these; the shell sets --fl-season from the season clock. */
+/* Storybook field-kit tokens (mirror src/design/tokens.ts ui + seasonInk).
+   Warm paper, brown ink outlines with a hard drop (storybook), rounded chips
+   (field kit), small caps captions and numbered rows (museum label). Parts
+   may read these; the shell sets --fl-season from the season clock. */
 :root {
-  --fl-paper: #fbfaf6;
-  --fl-stock2: #eef1f2;
-  --fl-line: #d3d9de;
-  --fl-ink: #1d2a36;
-  --fl-ink-soft: #53606c;
+  --fl-paper: #fbf4e6;
+  --fl-card: #fffaf0;
+  --fl-stock2: #f3e6c9;
+  --fl-line: #e2cfa6;
+  --fl-edge: #2b2118;
+  --fl-ink: #2b2118;
+  --fl-ink-soft: #5a4a3c;
   --fl-gold: #e8c27a;
   --fl-draft: #7a5a12;
-  --fl-draft-bg: #fbf1d8;
-  --fl-season: #c9577a;
-  --fl-season-soft: color-mix(in srgb, var(--fl-season) 16%, white);
-  --fl-radius: 6px;
-  --fl-shadow: 0 10px 26px rgb(15 25 40 / 22%);
+  --fl-draft-bg: #f6e3b4;
+  --fl-season: #c45a78;
+  --fl-season-soft: color-mix(in srgb, var(--fl-season) 18%, #fbf4e6);
+  --fl-radius: 14px;
+  --fl-shadow: 4px 5px 0 rgb(43 33 24 / 85%);
+  --fl-lift: 0 3px 0 var(--fl-edge);
   --fl-body:
-    "Zen Kaku Gothic New", "Hiragino Kaku Gothic ProN", system-ui, sans-serif;
+    "Zen Maru Gothic", "Hiragino Maru Gothic ProN", ui-rounded, system-ui,
+    sans-serif;
   --fl-heading: "Shippori Mincho B1", "Hiragino Mincho ProN", Georgia, serif;
 }
 :root {

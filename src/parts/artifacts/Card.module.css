@@ -135,7 +135,7 @@
   height: 26px;
   border-radius: 50%;
   border: 2px solid var(--fl-season);
-  background: #fff;
+  background: var(--fl-card);
   color: var(--fl-ink);
   font-size: 12px;
   font-weight: 700;
@@ -191,7 +191,7 @@
   padding: 8px 12px 8px 10px;
   border: 1px solid var(--fl-line);
   border-radius: var(--fl-radius);
-  background: #fff;
+  background: var(--fl-card);
   text-align: left;
   transition:
     border-color 120ms,
@@ -199,7 +199,7 @@
 }
 .act:hover {
   border-color: var(--fl-ink-soft);
-  box-shadow: 0 2px 8px rgb(15 25 40 / 10%);
+  box-shadow: 0 2px 8px rgb(43 33 24 / 10%);
 }
 .actIcon {
   flex: none;
@@ -262,7 +262,7 @@
   bottom: 0;
   margin: 0 calc(-1 * var(--pad));
   padding: 12px var(--pad) 16px;
-  background: linear-gradient(rgb(251 250 246 / 0%), var(--fl-paper) 12px);
+  background: linear-gradient(rgb(251 244 230 / 0%), var(--fl-paper) 12px);
 }
 .primary {
   display: flex;
@@ -270,13 +270,13 @@
   gap: 10px;
   width: 100%;
   padding: 11px 14px 11px 16px;
-  border: 0;
+  border: 2px solid var(--fl-edge);
   border-radius: var(--fl-radius);
-  background: var(--fl-ink);
-  color: #fff;
+  background: var(--fl-gold);
+  color: var(--fl-ink);
   font-weight: 700;
   text-align: left;
-  box-shadow: 0 2px 0 #0b141d;
+  box-shadow: var(--fl-lift);
 }
 /* A long title (a quiz question) wraps to two lines at most, never a pill. */
 .primaryText {
@@ -318,4 +318,7 @@
   .act {
     transition: none;
   }
+}
+.card .primary:focus-visible {
+  outline-color: var(--fl-ink);
 }

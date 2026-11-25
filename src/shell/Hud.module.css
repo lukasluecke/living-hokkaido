@@ -40,7 +40,7 @@
 .rail {
   justify-self: center;
   background: var(--fl-paper);
-  border: 1px solid var(--fl-line);
+  border: 2px solid var(--fl-edge);
   border-radius: 999px;
   padding: 5px 14px 4px;
   box-shadow: var(--fl-shadow);
@@ -98,7 +98,7 @@ li[data-status="todo"] .seg {
   margin-top: 2px;
   border-radius: 50%;
   border: 3px solid var(--fl-ink);
-  background: #fff;
+  background: var(--fl-card);
   transition: transform 160ms ease-out;
 }
 li[data-status="done"] .station i {
@@ -142,13 +142,13 @@ li[data-status="now"] .station i {
   gap: 8px;
   height: 40px;
   margin: 0;
-  border: 1px solid var(--fl-line);
+  border: 2px solid var(--fl-edge);
   background: var(--fl-paper);
   color: var(--fl-ink);
   font: inherit;
   font-weight: 700;
   font-size: 14px;
-  box-shadow: var(--fl-shadow);
+  box-shadow: var(--fl-lift);
   cursor: pointer;
 }
 .counter {
@@ -186,7 +186,7 @@ li[data-status="now"] .station i {
   padding: 12px;
   background: var(--fl-paper);
   color: var(--fl-ink);
-  border: 1px solid var(--fl-line);
+  border: 2px solid var(--fl-edge);
   border-radius: var(--fl-radius);
   box-shadow: var(--fl-shadow);
   animation: drop 160ms ease-out;
@@ -227,7 +227,7 @@ li[data-status="now"] .station i {
   padding: 0;
   border: 1px solid var(--fl-line);
   border-radius: 50%;
-  background: #fff;
+  background: var(--fl-card);
   color: var(--fl-ink);
   cursor: pointer;
 }

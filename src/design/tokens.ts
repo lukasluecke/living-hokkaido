@@ -4,29 +4,31 @@
 import type { SeasonId } from "@/contracts";
 
 /**
- * UI (DOM overlay) colours. "Field label" look (Lukas, 2026-11-26): museum
- * labels on snow-white card stock, deep sea-blue ink, one seasonal ink
- * (`seasonInk`) for progress, rings and stamps, gold only for focus.
- * The same values are CSS variables `--fl-*` in src/app/globals.css.
+ * UI (DOM overlay) colours. "Storybook field kit" look (Lukas, 2026-11-26):
+ * warm paper and brown ink outlines with a hard drop, rounded chips, museum
+ * label captions, one seasonal ink (`seasonInk`) for progress, rings and
+ * stamps, gold only for focus. Same values as `--fl-*` in src/app/globals.css.
  */
 export const ui = {
-  paper: "#fbfaf6",
-  paperEdge: "#d3d9de",
+  paper: "#fbf4e6",
+  paperEdge: "#e2cfa6",
+  /** Inner cards and rows on paper. */
+  card: "#fffaf0",
   /** Second surface: inset rows, owl note, tray footers. */
-  stock2: "#eef1f2",
-  ink: "#1d2a36",
-  inkSoft: "#53606c",
+  stock2: "#f3e6c9",
+  ink: "#2b2118",
+  inkSoft: "#5a4a3c",
   gold: "#e8c27a",
   goldDeep: "#c99a3b",
   night: "#1f2d46",
   danger: "#9c4f2e",
   /** Draft / research-preview chip. */
   draft: "#7a5a12",
-  draftBg: "#fbf1d8",
+  draftBg: "#f6e3b4",
 } as const;
 
 /** Seasonal ink: [spring, summer, autumn, winter]. Rail, rings, stamps. */
-export const seasonInk = ["#c9577a", "#7a5fc0", "#c8562e", "#2f6f9c"] as const;
+export const seasonInk = ["#c45a78", "#7b5ea8", "#b8542b", "#3d6b91"] as const;
 
 /** Material palette for 3D objects and buildings (per part name). */
 export const material = {
@@ -85,7 +87,7 @@ export const motion = {
 
 export const type = {
   /** Body text in overlays. Self-hosted files in public/fonts (OFL), no network fonts. */
-  body: '"Zen Kaku Gothic New", "Hiragino Kaku Gothic ProN", system-ui, sans-serif',
+  body: '"Zen Maru Gothic", "Hiragino Maru Gothic ProN", ui-rounded, system-ui, sans-serif',
   heading: '"Shippori Mincho B1", "Hiragino Mincho ProN", Georgia, serif',
   /** Minimum overlay text size (px). */
   minSize: 14,

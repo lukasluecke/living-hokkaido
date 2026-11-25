@@ -3,7 +3,7 @@
   flex: none;
   height: 250px;
   border-radius: var(--fl-radius, 6px);
-  border: 1px solid var(--fl-line, #d3d9de);
+  border: 1px solid var(--fl-line, #e2cfa6);
   overflow: hidden;
   touch-action: none;
   cursor: grab;
@@ -22,8 +22,8 @@
   height: 32px;
   border-radius: 50%;
   border: 3px solid var(--fl-season, #c9577a);
-  background: var(--fl-paper, #fbfaf6);
-  color: var(--fl-ink, #1d2a36);
+  background: var(--fl-paper, #fbf4e6);
+  color: var(--fl-ink, #2b2118);
   font: inherit;
   font-size: 13px;
   font-weight: 700;
@@ -31,7 +31,7 @@
   padding: 0;
   box-shadow:
     0 0 0 4px rgb(255 255 255 / 55%),
-    0 3px 10px rgb(15 25 40 / 35%);
+    0 3px 10px rgb(43 33 24 / 35%);
   transition: opacity 0.2s;
 }
 .read {
@@ -59,9 +59,9 @@
   width: 30px;
   height: 30px;
   padding: 0;
-  color: var(--fl-ink, #1d2a36);
-  background: var(--fl-paper, #fbfaf6);
-  box-shadow: 0 0 0 1px var(--fl-line, #d3d9de);
+  color: var(--fl-ink, #2b2118);
+  background: var(--fl-paper, #fbf4e6);
+  box-shadow: 0 0 0 1px var(--fl-line, #e2cfa6);
   cursor: pointer;
   font-size: 16px;
 }

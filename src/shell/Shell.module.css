@@ -39,7 +39,7 @@
   pointer-events: auto;
   background: var(--fl-paper);
   color: var(--fl-ink);
-  border: 1px solid var(--fl-line);
+  border: 2px solid var(--fl-edge);
   border-radius: 4px 14px 14px 14px;
   padding: 10px 14px 12px;
   box-shadow: var(--fl-shadow);
@@ -69,12 +69,12 @@
   font: inherit;
   font-size: 14px;
   font-weight: 700;
-  border: 0;
-  border-radius: var(--fl-radius);
-  padding: 9px 14px;
-  background: var(--fl-ink);
-  color: #fff;
-  box-shadow: 0 2px 0 #0b141d;
+  border: 2px solid var(--fl-edge);
+  border-radius: 999px;
+  padding: 8px 16px;
+  background: var(--fl-gold);
+  color: var(--fl-ink);
+  box-shadow: var(--fl-lift);
   cursor: pointer;
   text-align: left;
 }
@@ -86,7 +86,7 @@
   box-shadow: none;
 }
 .next:focus-visible {
-  outline: 3px solid var(--fl-gold);
+  outline: 3px solid var(--fl-ink);
   outline-offset: 2px;
 }
 @media (prefers-reduced-motion: reduce) {

@@ -5,7 +5,7 @@
   min-height: 0;
   background: var(--fl-paper);
   color: var(--fl-ink);
-  border: 1px solid var(--fl-line);
+  border: 2px solid var(--fl-edge);
   border-radius: 10px;
   box-shadow: var(--fl-shadow);
   overflow: hidden;
