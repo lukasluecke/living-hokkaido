@@ -1,0 +1,261 @@
+/* E1 Heritage Journal: a cloth-bound stamp book on warm paper.
+   Colours come from src/design/tokens.ts through CSS variables (index.tsx). */
+.book {
+  position: relative;
+  max-width: 920px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 22px 22px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  border-radius: 14px;
+  /* Cover edge, page stack and soft shadow. */
+  border: 6px solid var(--cover);
+  box-shadow:
+    0 0 0 2px var(--ink),
+    4px 6px 0 -1px var(--paper-edge),
+    4px 6px 0 1px var(--ink),
+    0 18px 40px rgb(43 33 24 / 35%);
+  animation: open 220ms ease-out;
+}
+.still {
+  animation: none;
+}
+@keyframes open {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  border-bottom: 2px dashed var(--paper-edge);
+  padding: 0 0 10px;
+  margin: 0 0 14px;
+  max-width: none;
+}
+.title {
+  font-family: var(--font-heading);
+  font-size: 28px;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+.count {
+  margin: 2px 0 0;
+  color: var(--ink-soft);
+}
+.close,
+.link {
+  font: inherit;
+  color: var(--ink);
+  cursor: pointer;
+}
+.close {
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  border-radius: 999px;
+  padding: 6px 16px;
+  box-shadow: 0 2px 0 var(--ink);
+}
+.close:hover {
+  background: var(--gold);
+}
+.close:active {
+  background: var(--gold-deep);
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+/* Two-page spread: Stories + Objects left, Words + Skills right. */
+.spread {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-flow: column;
+  grid-template-rows: auto auto;
+  column-gap: 44px;
+  row-gap: 18px;
+  position: relative;
+}
+.spread::before {
+  /* Book spine. */
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  background: linear-gradient(
+    var(--paper-edge),
+    var(--ink-soft),
+    var(--paper-edge)
+  );
+  opacity: 0.5;
+}
+@media (max-width: 680px) {
+  .book {
+    padding: 16px;
+  }
+  .spread {
+    grid-template-columns: 1fr;
+    grid-auto-flow: row;
+    grid-template-rows: none;
+  }
+  .spread::before {
+    display: none;
+  }
+}
+
+.section {
+  min-width: 0;
+}
+.sectionTitle {
+  font-family: var(--font-heading);
+  font-size: 20px;
+  margin: 0;
+}
+.blurb,
+.empty {
+  margin: 0 0 8px;
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+.empty {
+  font-style: italic;
+  padding: 12px 0;
+}
+.stamps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  gap: 10px;
+}
+
+.stamp {
+  font: inherit;
+  color: var(--ink);
+  width: 100%;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 10px 6px 8px;
+  background: transparent;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: center;
+  transition:
+    transform 160ms ease,
+    background 160ms ease;
+}
+.stamp:hover {
+  background: rgb(232 194 122 / 22%);
+}
+.stamp:focus-visible,
+.close:focus-visible,
+.link:focus-visible {
+  outline: 3px solid var(--gold-deep);
+  outline-offset: 2px;
+}
+.stamp[aria-pressed="true"] {
+  border-color: var(--gold-deep);
+  background: rgb(232 194 122 / 30%);
+}
+.earned svg {
+  /* A stamp is never pressed perfectly straight. */
+  transform: rotate(-6deg);
+  filter: drop-shadow(0 1px 0 var(--ink));
+}
+li:nth-child(even) > .earned svg {
+  transform: rotate(5deg);
+}
+.stamp:hover svg {
+  transform: rotate(0deg) scale(1.04);
+}
+.still .stamp,
+.still .stamp svg {
+  transition: none;
+}
+.locked .stampTitle {
+  color: var(--ink-soft);
+}
+.stampTitle {
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.2;
+}
+.stampState {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+.earned .stampState {
+  color: var(--seal);
+  font-weight: 600;
+}
+
+.detail {
+  margin-top: 16px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border: 2px solid var(--ink);
+  border-radius: 14px;
+  background: #fffaf0;
+  box-shadow: 0 3px 0 var(--ink);
+}
+.detail svg {
+  flex: none;
+}
+.detailBody {
+  min-width: 0;
+}
+.detailBody p {
+  margin: 4px 0;
+  color: var(--ink);
+}
+.detailTitle {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  margin: 0 0 2px;
+}
+.date {
+  color: var(--ink-soft);
+}
+.progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-soft);
+}
+.progress progress {
+  accent-color: var(--seal);
+  width: 140px;
+}
+.reminder {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--paper-edge);
+}
+.reminder span {
+  /* Shared honesty badge. */
+  font-size: 12px;
+}
+.link {
+  background: none;
+  border: none;
+  padding: 0;
+  text-decoration: underline;
+  text-decoration-color: var(--gold-deep);
+  text-underline-offset: 3px;
+}
+.link:hover {
+  color: var(--seal);
+}
