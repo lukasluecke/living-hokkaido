@@ -87,7 +87,8 @@ export function QualityGovernor() {
   useFrame((_, delta) => {
     if (pinned || tier === 0) return;
     if (document.hidden) return monitor.reset();
-    if (monitor.frame(delta * 1000)) setTier((tier - 1) as Tier);
+    const steps = monitor.frame(delta * 1000);
+    if (steps > 0) setTier(Math.max(0, tier - steps) as Tier);
   });
   return null;
 }

@@ -133,7 +133,8 @@ first island frame and fps per place (`scripts/perf/measure.ts`;
 Every canvas puts a `<QualityGovernor />` inside and takes `dpr` (and
 `shadows`) from `useQuality()` (`src/parts/shared/Quality.tsx`). When a
 canvas stays under 40 fps for two 1.5 s windows (after a 2.5 s warm-up),
-the shared tier goes down one step. Fast machines stay on `full`, so their
+the shared tier goes down one step (two steps when a window is under
+20 fps; the next check waits 1 s). Fast machines stay on `full`, so their
 look does not change. The tier lasts for the browser session and never goes
 up by itself. `?quality=full|high|mid|low` fixes the tier (no automatic
 steps).

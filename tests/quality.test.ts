@@ -13,7 +13,7 @@ const run = (
   ms: number,
 ) => {
   let steps = 0;
-  for (let t = 0; t < ms; t += gapMs) if (m.frame(gapMs)) steps++;
+  for (let t = 0; t < ms; t += gapMs) steps += m.frame(gapMs);
   return steps;
 };
 
@@ -31,11 +31,28 @@ test("a 60 fps canvas never steps down", () => {
   assert.equal(run(createMonitor(), 1000 / 60, 60_000), 0);
 });
 
-test("a 20 fps canvas steps down after warm-up and two slow windows", () => {
+test("a 30 fps canvas steps down one tier after warm-up and two slow windows", () => {
   const m = createMonitor();
   const until = MONITOR.warmupMs + MONITOR.windowMs * MONITOR.slowWindows + 100;
-  assert.equal(run(m, 50, MONITOR.warmupMs + MONITOR.windowMs), 0);
-  assert.equal(run(m, 50, until - MONITOR.warmupMs - MONITOR.windowMs), 1);
+  assert.equal(run(m, 1000 / 30, MONITOR.warmupMs + MONITOR.windowMs), 0);
+  assert.equal(
+    run(m, 1000 / 30, until - MONITOR.warmupMs - MONITOR.windowMs),
+    1,
+  );
+});
+
+test("a 10 fps canvas steps two tiers at once", () => {
+  const m = createMonitor();
+  const until = MONITOR.warmupMs + MONITOR.windowMs * MONITOR.slowWindows;
+  assert.equal(run(m, 100, until + 200), 2);
+});
+
+test("after a step, the next check comes after a short warm-up", () => {
+  const m = createMonitor();
+  const first = MONITOR.warmupMs + MONITOR.windowMs * MONITOR.slowWindows;
+  run(m, 1000 / 30, first + 50);
+  const next = MONITOR.rewarmMs + MONITOR.windowMs * MONITOR.slowWindows;
+  assert.equal(run(m, 1000 / 30, next + 100), 1);
 });
 
 test("a 1 fps software GPU still counts", () => {
@@ -45,7 +62,7 @@ test("a 1 fps software GPU still counts", () => {
 test("one slow window alone (a load hitch) does not step down", () => {
   const m = createMonitor();
   run(m, 1000 / 60, MONITOR.warmupMs + 100);
-  run(m, 50, MONITOR.windowMs);
+  run(m, 1000 / 30, MONITOR.windowMs);
   assert.equal(run(m, 1000 / 60, 10_000), 0);
 });
 
