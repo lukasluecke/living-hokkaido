@@ -19,7 +19,9 @@ export type ObstacleKind =
   | "lamp-post"
   | "crate"
   | "bicycle"
-  | "tourist";
+  | "tourist"
+  /** A street exhibit (core/exhibits.ts): drawn by render/exhibits.ts. */
+  | "exhibit";
 
 export type Obstacle = {
   id: string;
@@ -85,6 +87,7 @@ const SIZES: Record<ObstacleKind, { w: number; d: number; h: number }> = {
   crate: { w: 1.0, d: 1.0, h: 1.0 },
   bicycle: { w: 0.6, d: 1.7, h: 1.0 },
   tourist: { w: 0.55, d: 0.45, h: 1.7 },
+  exhibit: { w: 0.9, d: 1.6, h: 0.9 },
 };
 /** Weighted kinds for obstacles out in the street. */
 const ROW_KINDS: ObstacleKind[] = [

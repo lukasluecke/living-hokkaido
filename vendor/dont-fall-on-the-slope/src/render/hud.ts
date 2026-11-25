@@ -9,10 +9,12 @@ export type CardContent = {
   body: string;
   stats?: string;
   action: string;
-  /** Finds collected this run, each explained by its claim. */
-  finds?: { label: string; text: string; source?: string }[];
-  /** How many finds were missed. */
-  missed?: number;
+  /** Exhibits noticed this run, each explained by its claim. */
+  noticed?: { label: string; text: string; source?: string; fresh: boolean }[];
+  /** One passed but missed exhibit, explained too. */
+  past?: { label: string; text: string; source?: string };
+  /** Street notebook: exhibits seen in all runs, of the pool. */
+  notebook?: [number, number];
 };
 
 const font =
@@ -89,7 +91,7 @@ export function createHud(host: HTMLElement, touch: boolean) {
     fontWeight: "700",
     fontVariantNumeric: "tabular-nums",
   });
-  // "Your finds": each collected label with its cited claim.
+  // What was noticed (and one missed exhibit), each with its cited claim.
   const finds = el("div", {
     textAlign: "left",
     margin: "0 0 12px",
@@ -191,7 +193,7 @@ export function createHud(host: HTMLElement, touch: boolean) {
     setMeter(metres: number, best: number, found?: [number, number]) {
       const parts = [`${metres} m`];
       if (best > 0) parts.push(`best ${best} m`);
-      if (found && found[1] > 0) parts.push(`finds ${found[0]}/${found[1]}`);
+      if (found && found[1] > 0) parts.push(`noticed ${found[0]}/${found[1]}`);
       meter.textContent = parts.join(" · ");
     },
     toast(text: string) {
@@ -210,49 +212,81 @@ export function createHud(host: HTMLElement, touch: boolean) {
       stats.style.display = c.stats ? "block" : "none";
       button.textContent = c.action;
       finds.replaceChildren();
-      const list = c.finds ?? [];
-      if (list.length || c.missed) {
-        finds.append(
+      const small = (t: string) =>
+        el(
+          "div",
+          {
+            fontSize: "11px",
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            opacity: "0.65",
+            margin: "4px 0 6px",
+          },
+          t,
+        );
+      const item = (
+        f: { label: string; text: string; source?: string },
+        tag?: string,
+      ) => {
+        const box = el("div", {
+          borderLeft: `4px solid ${css("accent")}`,
+          padding: "4px 0 4px 10px",
+          margin: "0 0 8px",
+        });
+        const head = el(
+          "strong",
+          { display: "block", fontSize: "15px" },
+          f.label,
+        );
+        if (tag)
+          head.append(
+            el(
+              "span",
+              {
+                marginLeft: "8px",
+                padding: "1px 6px",
+                borderRadius: "6px",
+                background: css("accent"),
+                fontSize: "11px",
+              },
+              tag,
+            ),
+          );
+        box.append(
+          head,
           el(
-            "div",
-            {
-              fontSize: "11px",
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              opacity: "0.65",
-              margin: "4px 0 6px",
-            },
-            "Your finds",
+            "p",
+            { margin: "2px 0", fontSize: "14px", lineHeight: "1.4" },
+            f.text,
           ),
         );
-        for (const f of list) {
-          const item = el("div", {
-            borderLeft: `4px solid ${css("accent")}`,
-            padding: "4px 0 4px 10px",
-            margin: "0 0 8px",
-          });
-          item.append(
-            el("strong", { display: "block", fontSize: "15px" }, f.label),
-            el(
-              "p",
-              { margin: "2px 0", fontSize: "14px", lineHeight: "1.4" },
-              f.text,
-            ),
+        if (f.source)
+          box.append(
+            el("small", { opacity: "0.7", fontSize: "12px" }, f.source),
           );
-          if (f.source)
-            item.append(
-              el("small", { opacity: "0.7", fontSize: "12px" }, f.source),
-            );
-          finds.append(item);
-        }
-        if (c.missed)
-          finds.append(
-            el(
-              "p",
-              { margin: "0", fontSize: "13px", opacity: "0.75" },
-              `${c.missed} more ${c.missed === 1 ? "label" : "labels"} still on the street.`,
-            ),
-          );
+        return box;
+      };
+      const list = c.noticed ?? [];
+      if (list.length) {
+        finds.append(small("What you noticed"));
+        for (const f of list)
+          finds.append(item(f, f.fresh ? "New" : undefined));
+      }
+      if (c.past) {
+        finds.append(small("You slid past"));
+        finds.append(item(c.past));
+      }
+      if (c.notebook && c.notebook[1] > 0) {
+        const [n, total] = c.notebook;
+        finds.append(
+          el(
+            "p",
+            { margin: "6px 0 0", fontSize: "13px", fontWeight: "700" },
+            n >= total
+              ? `Street notebook complete: all ${total} seen.`
+              : `Street notebook: ${n} of ${total} seen.`,
+          ),
+        );
       }
       card.style.display = "block";
     },
