@@ -180,7 +180,7 @@ export const jaUi: Record<string, string> = {
   "Where this comes from": "どこから来たか",
   "Where:": "場所:",
   Words: "言葉",
-  "of {n} looked at": "/ {n} 見た",
+  "of {n} looked at": "/{n}",
   "the activity": "アクティビティ",
   "{have} of {need}": "{have}/{need}",
   "{have} of {total} stamps": "スタンプ {have}/{total}",
