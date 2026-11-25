@@ -1,10 +1,9 @@
 // Props for one proposed activity kind. Same shape as ActivityPartProps
-// (src/contracts/parts.ts), with the proposed union instead of the current one.
-import type { Emit, Prefs, ResolvedClaim } from "@/contracts";
-import type { ProposedActivity, ProposedOf } from "../contract-proposal";
+// (src/contracts/parts.ts), narrowed to one kind.
+import type { ActivityKind, ActivityOf, Emit, Prefs, ResolvedClaim } from "@/contracts";
 
-export type KindProps<K extends ProposedActivity["kind"]> = {
-  activity: ProposedOf<K>;
+export type KindProps<K extends ActivityKind> = {
+  activity: ActivityOf<K>;
   claims: Record<string, ResolvedClaim>;
   prefs: Prefs;
   emit: Emit;

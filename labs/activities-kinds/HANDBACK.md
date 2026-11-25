@@ -2,7 +2,7 @@
 
 Part: activities
 Author: Lukas (+ agent)   Date: 2026-11-25
-Status: exploring (story and trace are ready to integrate; words is a gated mechanic demo)
+Status: ready to integrate (contracts + content merged in this PR; renderers wait in the lab)
 
 ## Recommendation (3–5 lines)
 Add three additive activity kinds: `story` (owl-read chapters with synced
@@ -15,7 +15,8 @@ exist. See DESIGN.md for the rules and the other kinds we considered.
 ## Keep
 | What | Files | Notes for porting |
 |---|---|---|
-| Proposed schemas + cross-checks | contract-proposal.ts | Copy into src/contracts/activity.ts, add to `activitySchema`; call `checkActivityKinds` from `validateContentPack` |
+| Schemas (done) | src/contracts/activity.ts, src/contracts/content.ts | Already in the union and in `validateContentPack` |
+| Content (done) | src/content/bark-to-cloth/activity-kinds.ts | Ids `story-bark-to-cloth`, `words-objects`, `trace-sources`; not yet in `scene.activityIds` |
 | Story player | src/Story.tsx | Timer captions; device-voice word boundaries when enabled; Space = play/pause; chapters nav; transcript toggle |
 | Words (listen / repeat / match) | src/Words.tsx | Two-step tabs; click word then object; review checklist per term |
 | Trace board | src/Trace.tsx | SVG threads drawn from DOM rects; redraw on resize |
@@ -34,7 +35,8 @@ exist. See DESIGN.md for the rules and the other kinds we considered.
 - Uses as-is: `ResolvedClaim`, `resolveClaim`, `ActivityResult`,
   `ExperienceEvent` (`activity.complete`, `activity.close`, `reveal.open`),
   `Prefs`, `createEventBus`, design tokens, the bark-to-cloth pack.
-- Proposed (additive, in `contract-proposal.ts`):
+- Added in this PR (additive, CONTRACT_VERSION stays 1; tests in
+  `tests/contracts.test.ts`):
   - `mediaRefSchema`: `none | device-voice-placeholder | recording(sourceId)`.
     A recording must be an `audio` source with approved rights, granted
     consent and not a placeholder.
@@ -45,14 +47,26 @@ exist. See DESIGN.md for the rules and the other kinds we considered.
     terms (text, lang, gloss, artifactId, claimId, audio, five review flags).
   - `traceActivitySchema` (`kind: "trace"`): prompt, completion; pairs come
     from the knowledge entry.
-  - `checkActivityKinds(activity, entry)`: real terms need an approved entry,
-    all five checks and a recording; device voice never reads a real term;
-    Ainu tagged `ja-*` is rejected; stand-ins must not claim the target
-    language; fact-line and choice claims must be in `claimIds`; withdrawn
-    entries block everything.
-- Tests to add on adoption: the nine rules in `scripts/schema-check.ts`
-  (`npm run check:schema`, passing).
-- No new events needed.
+  - `validateContentPack` rules: real terms need an approved entry, all five
+    checks and a recording; device voice never reads a real term; Ainu tagged
+    `ja-*` is rejected; stand-ins must not claim the target language;
+    fact-line and choice claims must be in `claimIds`; term artifacts exist.
+- No new events.
+
+## How to make them playable in /shell
+1. Copy `src/Story.tsx`, `src/Words.tsx`, `src/Trace.tsx`, `src/Owl.tsx`,
+   `src/icons.tsx`, `src/shared.tsx` into `src/parts/activities/kinds/`. Add
+   `"use client"` at the top of the three renderers.
+2. Turn `src/ui.css` into `kinds.module.css` (Next allows global CSS only
+   in the layout) and swap `className="x"` for `className={s.x}`; or import
+   `ui.css` once in `src/app/layout.tsx`.
+3. In `ActivityPart`, add
+   `{activity.kind === "story" && <Story activity={activity} claims={claims} prefs={prefs} emit={emit} />}`
+   and the same for `words` and `trace`.
+4. Add `"story-bark-to-cloth"`, `"words-objects"`, `"trace-sources"` to
+   `scene.activityIds` in `src/content/bark-to-cloth/scene.ts` (optionally to
+   an artifact's `activityIds`, e.g. story on `garment`).
+5. `npm run check`, then walk /shell: scene → activity → complete → Esc.
 
 ## Assets
 | File | Source | Licence / rights | Size | Triangles |
@@ -84,8 +98,10 @@ and zod; the content pack is included. No fps numbers (container only).
 `shots/story-mobile.jpg` (made by `scripts/shots.mjs`).
 
 ## Open questions
-1. Language reviewer (name / role / variety) for `words`.
-2. Recorded, consented English narration for the demo, or captions only?
+1. Language reviewer (name / role / variety) for `words`. Assumed for the
+   demo: review pending, stand-ins with the label.
+2. Voice: assumed for the demo: captions + device voice as a labelled English
+   placeholder. Later a consented human recording (`voice.kind: "recording"`).
 3. Stamp for `trace`?
 4. Should story choices also let the visitor pick the next object in the
    room (emit `artifact.focus`)? That needs the shell to allow it from the

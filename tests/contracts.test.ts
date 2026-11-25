@@ -150,3 +150,74 @@ test("events are validated at the boundary", () => {
     false,
   );
 });
+
+// Story, words and trace kinds (labs/activities-kinds).
+type Raw = ReturnType<typeof clone>;
+type RawActivity = Raw["activities"][number];
+const kindOf = <K extends RawActivity["kind"]>(p: Raw, kind: K) => {
+  const a = p.activities.find((x) => x.kind === kind);
+  if (!a) throw Error(`no ${kind} activity in pack`);
+  return a as Extract<RawActivity, { kind: K }>;
+};
+const realTerms = (p: Raw, patch: object) => {
+  const w = kindOf(p, "words");
+  w.standIn = false;
+  w.terms = w.terms.map((t) => ({ ...t, lang: "ain", ...patch }));
+};
+const allChecks = {
+  spelling: true,
+  region: true,
+  meaning: true,
+  pronunciation: true,
+  consent: true,
+};
+
+test("pack has story, words and trace activities", () => {
+  const kinds = pack.activities.map((a) => a.kind);
+  for (const k of ["story", "words", "trace"] as const)
+    assert.ok(kinds.includes(k), k);
+});
+
+test("real terms need an approved entry, five checks and a recording", () => {
+  let p = clone();
+  realTerms(p, {});
+  let e = validateContentPack(p);
+  assert.ok(e.some((x) => x.includes("approved entry")));
+  assert.ok(e.some((x) => x.includes("five review checks")));
+  p = clone();
+  realTerms(p, { review: allChecks });
+  e = validateContentPack(p);
+  assert.ok(e.some((x) => x.includes("device voice")));
+  p = clone();
+  realTerms(p, {
+    review: allChecks,
+    audio: { kind: "recording", sourceId: "hdm" },
+  });
+  assert.ok(
+    validateContentPack(p).some((x) => x.includes("not an audio source")),
+  );
+});
+
+test("Ainu is never tagged as a Japanese variety; stand-ins stay stand-ins", () => {
+  let p = clone();
+  realTerms(p, { lang: "ja-x-ainu" });
+  assert.ok(
+    validateContentPack(p).some((x) => x.includes("not a Japanese dialect")),
+  );
+  p = clone();
+  const w = kindOf(p, "words");
+  w.terms = w.terms.map((t) => ({ ...t, lang: "ain" }));
+  assert.ok(validateContentPack(p).some((x) => x.includes("stand-in")));
+});
+
+test("story fact lines and choices cite the activity's claims", () => {
+  const p = clone();
+  const s = kindOf(p, "story");
+  s.claimIds = ["bark-fiber"];
+  const e = validateContentPack(p);
+  assert.ok(e.some((x) => x.includes("not in claimIds")));
+  const q = clone();
+  const line = kindOf(q, "story").chapters[0].lines[1];
+  if (line.role === "fact") line.claimIds = [];
+  assert.notDeepEqual(validateContentPack(q), []);
+});
