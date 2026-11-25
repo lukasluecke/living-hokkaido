@@ -1,12 +1,13 @@
-/* Compact HUD. Glass chips on the scene; nothing wider than it needs. */
+/* Field-label HUD: brand at the left, the line rail in the centre, the stamp
+   counter and one menu at the right. Card stock chips, sea-blue ink, the
+   seasonal ink (--fl-season) for the current station. */
 .hud {
   position: absolute;
   top: calc(10px + env(safe-area-inset-top, 0px));
   left: 12px;
   right: 12px;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 8px;
   margin: 0;
@@ -15,112 +16,281 @@
   background: none;
   pointer-events: none;
   z-index: 3;
+  font-family: var(--fl-body);
 }
 .hud > * {
   pointer-events: auto;
 }
 .title {
-  font-size: 15px;
-  letter-spacing: 0.01em;
-  text-shadow: 0 1px 3px rgb(0 0 0 / 55%);
+  justify-self: start;
+  font-family: var(--fl-heading);
+  font-size: 19px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 6px rgb(0 0 0 / 55%);
   white-space: nowrap;
-  margin-right: auto;
-}
-.seasons,
-.tools {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  padding: 3px;
-  border-radius: 999px;
-  background: rgb(31 45 70 / 55%);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0 2px 10px rgb(0 0 0 / 18%);
-}
-.tools {
-  gap: 4px;
-  background: none;
-  box-shadow: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  padding: 0;
-}
-.seasons button,
-.round {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  margin: 0;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  color: #fbf4e6;
-  cursor: pointer;
-  text-decoration: none;
-}
-.seasons button[aria-pressed="true"] {
-  background: #e8c27a;
-  color: #2b2118;
-}
-.round {
-  width: 36px;
-  height: 36px;
-  background: rgb(31 45 70 / 55%);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0 2px 10px rgb(0 0 0 / 18%);
-}
-.round[aria-pressed="false"] {
-  opacity: 0.7;
-}
-.seasons button:hover,
-.round:hover {
-  background: rgb(251 244 230 / 22%);
-}
-.seasons button[aria-pressed="true"]:hover {
-  background: #f0d08f;
-}
-.seasons button:focus-visible,
-.round:focus-visible {
-  outline: 2px solid #e8c27a;
-  outline-offset: 2px;
+  pointer-events: none;
 }
 .icon {
   width: 18px;
   height: 18px;
 }
-.badge {
-  position: absolute;
-  top: -3px;
-  right: -3px;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
+
+/* Line rail */
+.rail {
+  justify-self: center;
+  background: var(--fl-paper);
+  border: 2px solid var(--fl-edge);
   border-radius: 999px;
-  background: #e8c27a;
-  color: #2b2118;
+  padding: 5px 14px 4px;
+  box-shadow: var(--fl-shadow);
+}
+.rail ol {
+  display: flex;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rail li {
+  display: flex;
+  align-items: flex-start;
+}
+.seg {
+  width: 40px;
+  height: 3px;
+  margin: 8px 2px 0;
+  background: var(--fl-ink);
+  border-radius: 2px;
+}
+li[data-status="now"] .seg,
+li[data-status="todo"] .seg {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--fl-ink) 0 4px,
+    transparent 4px 8px
+  );
+}
+.station {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 44px;
+  margin: 0;
+  padding: 0 2px;
+  border: 0;
+  background: none;
+  color: var(--fl-ink-soft);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.station:disabled {
+  cursor: default;
+}
+.station i {
+  width: 14px;
+  height: 14px;
+  margin-top: 2px;
+  border-radius: 50%;
+  border: 3px solid var(--fl-ink);
+  background: var(--fl-card);
+  transition: transform 160ms ease-out;
+}
+li[data-status="done"] .station i {
+  background: var(--fl-ink);
+}
+li[data-status="now"] .station {
+  color: var(--fl-ink);
+}
+li[data-status="now"] .station i {
+  width: 18px;
+  height: 18px;
+  margin-top: 0;
+  border-color: var(--fl-season);
+  background: var(--fl-season);
+  box-shadow: 0 0 0 4px var(--fl-season-soft);
+}
+.station:not(:disabled):hover i {
+  transform: scale(1.15);
+}
+.station:focus-visible {
+  outline: 3px solid var(--fl-gold);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+.sub {
+  color: var(--fl-season);
+}
+
+/* Right tools */
+.tools {
+  position: relative;
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.counter,
+.round {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  margin: 0;
+  border: 2px solid var(--fl-edge);
+  background: var(--fl-paper);
+  color: var(--fl-ink);
+  font: inherit;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: var(--fl-lift);
+  cursor: pointer;
+}
+.counter {
+  padding: 0 14px 0 6px;
+  border-radius: 999px;
+}
+.counter b {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--fl-season);
+  color: var(--fl-season);
+  font-size: 13px;
+}
+.round {
+  justify-content: center;
+  width: 40px;
+  padding: 0;
+  border-radius: 50%;
+}
+.counter:focus-visible,
+.round:focus-visible,
+.menu button:focus-visible,
+.menu a:focus-visible {
+  outline: 3px solid var(--fl-gold);
+  outline-offset: 2px;
+}
+.menu {
+  position: absolute;
+  top: 48px;
+  right: 0;
+  width: 248px;
+  padding: 12px;
+  background: var(--fl-paper);
+  color: var(--fl-ink);
+  border: 2px solid var(--fl-edge);
+  border-radius: var(--fl-radius);
+  box-shadow: var(--fl-shadow);
+  animation: drop 160ms ease-out;
+}
+@keyframes drop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .menu {
+    animation: none;
+  }
+  .station i {
+    transition: none;
+  }
+}
+.cap {
+  margin: 0 0 6px;
   font-size: 11px;
   font-weight: 700;
-  line-height: 16px;
-  text-align: center;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fl-ink-soft);
 }
-@media (max-width: 520px) {
+.seasons {
+  display: flex;
+  gap: 4px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--fl-line);
+}
+.seasons button {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--fl-line);
+  border-radius: 50%;
+  background: var(--fl-card);
+  color: var(--fl-ink);
+  cursor: pointer;
+}
+.seasons button[aria-pressed="true"] {
+  background: var(--fl-season);
+  border-color: var(--fl-season);
+  color: #fff;
+}
+.items {
+  display: grid;
+  padding-top: 6px;
+}
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: var(--fl-ink);
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+.item:hover {
+  background: var(--fl-stock2);
+}
+
+/* Phone: no brand; the rail shows only the current station's label. */
+@media (max-width: 700px) {
+  .hud {
+    grid-template-columns: auto 1fr auto;
+  }
   .title {
-    font-size: 13px;
-    white-space: normal;
-    line-height: 1.1;
-    max-width: 5.5em;
+    display: none;
   }
-  .seasons button {
-    width: 30px;
-    height: 30px;
+  .rail {
+    grid-column: 1 / 3;
+    justify-self: start;
+    padding: 5px 10px 4px;
   }
-  .round {
-    width: 32px;
-    height: 32px;
+  .seg {
+    width: 14px;
+  }
+  .station {
+    min-width: 28px;
+  }
+  li:not([data-status="now"]) .stationLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .counterText {
+    display: none;
+  }
+  .counter {
+    padding: 0 6px;
   }
 }

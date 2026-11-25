@@ -35,6 +35,9 @@ export type DetailScenePartProps = PartContext & {
   artifacts: Artifact[];
   /** Focused artifact. The scene moves its camera; the viewer shows the card. */
   focusedArtifactId: string | null;
+  /** Placed artifacts the visitor has already inspected (journal progress),
+   *  for the tray's "N of M looked at". Optional: left out, no progress shows. */
+  inspectedArtifactIds?: string[];
 };
 
 /** C2 pick-up-and-turn viewer, card and hotspots for one artifact. */
@@ -44,6 +47,12 @@ export type ArtifactViewerProps = PartContext & {
   claims: Record<string, ResolvedClaim>;
   /** Hotspots already read, as hotspot ids. */
   read: string[];
+  /**
+   * Activities the visitor has completed (e.g. `journal.completed`). The card
+   * marks them "Done" and offers the first one not done. Optional: without
+   * it no activity shows as done.
+   */
+  doneActivityIds?: string[];
 };
 
 /** One activity of any kind. Emit activity.complete or activity.close. */
