@@ -61,3 +61,9 @@ journal stamp appears after completion.
 - 2026-11-25: A tilted 2.5D case with pointer look-around (PR #55) felt
   weird to Lukas and was reverted to the flat 2D stage. Later idea (Lukas):
   an isometric scene (needs new stage drawings and new ring positions).
+- 2026-11-25: Lukas chose real exhibits for the slope (v1 with the 7 cited
+  Otaru claims): each Play's street shows up to 2 new and up to 2 seen
+  exhibits plus the canal (`core/exhibits.ts` in the vendored game). Pass
+  close to notice one; the end card explains what you noticed and one you
+  slid past. The journal keeps `found`; the panel shows the street
+  notebook. More exhibits need new cited claims first.

@@ -2,7 +2,12 @@
 // HUD and input. Fixed 60 Hz simulation, rendering every animation frame.
 import type RAPIER from "@dimforge/rapier3d-compat";
 import { WOBBLE } from "./core/balance";
-import { collectAt, placeFinds } from "./core/finds";
+import {
+  noticeAt,
+  pickExhibits,
+  placeExhibits,
+  slidPast,
+} from "./core/exhibits";
 import { crashLine, FINISH_LINE, READY_LINE, TITLE } from "./core/lines";
 import { rng } from "./core/random";
 import {
@@ -19,7 +24,7 @@ import { easeLean } from "./input/controls";
 import { attachInput } from "./input/input";
 import type { SlopeProps } from "./integration/contracts";
 import { createPhysics, mul, PLAYER, SOFT } from "./physics/world";
-import { createFindMarkers } from "./render/finds";
+import { createExhibits } from "./render/exhibits";
 import { createHud } from "./render/hud";
 import { createView } from "./render/view";
 
@@ -35,6 +40,7 @@ const HIT_NAME: Record<string, string> = {
   crate: "Crate",
   bicycle: "Bicycle",
   tourist: "Fellow visitor",
+  exhibit: "Exhibit",
 };
 
 /** Upright and facing down the street, swaying with the lean and the
@@ -59,37 +65,57 @@ export function startGame(
   host: HTMLElement,
   props: SlopeProps,
 ) {
-  const track = generateTrack(props.seed ?? 1);
+  const random = rng(Date.now());
+  // Exhibits: this street shows a few from the pool, new ones first.
+  const pool = props.finds ?? [];
+  const seenBefore = props.seen ?? [];
+  const picks = pickExhibits(pool, seenBefore, random);
+  const { track, spots } = placeExhibits(generateTrack(props.seed ?? 1), picks);
+  if (import.meta.env?.DEV) console.info("[exhibits]", JSON.stringify(spots));
   const finishAt = track.length - PLAYER.startS;
   const physics = createPhysics(R, track, props.seed ?? 1, props.startAt ?? 0);
   const view = createView(host, track, props.prefs.reducedMotion);
   const touch = window.matchMedia("(pointer: coarse)").matches;
   const hud = createHud(host, touch);
-  const random = rng(Date.now());
   let state: RunState = initialRun;
   let slowmo = 0;
-  // Finds: museum labels in the lane; collected ones are explained at the end.
-  const findInfo = props.finds ?? [];
-  const spots = placeFinds(
-    track,
-    findInfo.map((f) => f.id),
-  );
-  const markers = createFindMarkers(
+  const exhibits = createExhibits(
     view.scene,
     track,
     spots,
     props.prefs.reducedMotion,
   );
-  let collected: string[] = [];
+  /** Noticed this run, and in any run of this street or before. */
+  let noticed: string[] = [];
+  const seen = new Set(seenBefore);
   let lean = 0;
   let clock = 0;
-  const findCard = () => ({
-    finds: collected.flatMap((id) => {
-      const f = findInfo.find((x) => x.id === id);
-      return f ? [{ label: f.label, text: f.text, source: f.source }] : [];
-    }),
-    missed: spots.length - collected.length,
-  });
+  const info = (id: string) => pool.find((x) => x.id === id);
+  const explain = (id: string) => {
+    const f = info(id);
+    return f ? { label: f.label, text: f.text, source: f.source } : undefined;
+  };
+  /** The end card's exhibits part: noticed ones (new tagged), one missed
+   *  one passed on the way, and the notebook. Marks this run's as seen. */
+  const exhibitCard = (reached: number) => {
+    const list = noticed.flatMap((id) => {
+      const e = explain(id);
+      return e ? [{ ...e, fresh: !seen.has(id) }] : [];
+    });
+    const missed = slidPast(picks, [...seen], noticed, (id) => {
+      const sp = spots.find((x) => x.id === id);
+      return !!sp && sp.s1 < reached;
+    });
+    for (const id of noticed) seen.add(id);
+    return {
+      noticed: list,
+      past: missed ? explain(missed.id) : undefined,
+      notebook: [pool.filter((f) => seen.has(f.id)).length, pool.length] as [
+        number,
+        number,
+      ],
+    };
+  };
 
   const input = attachInput(host, view.canvas, hud.buttons, () => onAction());
   hud.buttons.action.addEventListener("click", () => onAction());
@@ -100,7 +126,7 @@ export function startGame(
       physics.reset();
       view.snap();
       slowmo = 0;
-      collected = [];
+      noticed = [];
       lean = 0;
       dispatch({ type: "restart" });
     }
@@ -109,8 +135,15 @@ export function startGame(
   function dispatch(action: RunAction) {
     const prev = state;
     state = reduceRun(state, action);
+    // Reaching the canal notices it: it is the last exhibit.
+    if (state.phase === "finished" && prev.phase !== "finished")
+      for (const sp of spots)
+        if (sp.look === "canal" && !noticed.includes(sp.id))
+          noticed = [...noticed, sp.id];
     if (state.phase !== prev.phase) enter(state);
-    if (prev.runsEnded === 0 && state.runsEnded === 1) {
+    // Every run ends with a result: the host's journal keeps what was
+    // noticed, so the next street brings new exhibits.
+    if (state.runsEnded > prev.runsEnded) {
       props.emit({
         type: "activity.complete",
         result: {
@@ -118,6 +151,7 @@ export function startGame(
           completed: true,
           score: resultScore(state.distance, finishAt),
           at: new Date().toISOString(),
+          found: noticed,
         },
       });
     }
@@ -147,7 +181,7 @@ export function startGame(
               body: line,
               stats,
               action: "Slide again",
-              ...findCard(),
+              ...exhibitCard(physics.local().s),
             });
           },
           props.prefs.reducedMotion ? 300 : 1200,
@@ -162,7 +196,7 @@ export function startGame(
           body: FINISH_LINE,
           stats,
           action: "Slide again",
-          ...findCard(),
+          ...exhibitCard(track.length + 10),
         });
         hud.announce(`Reached the canal: ${score(s)} metres. ${FINISH_LINE}`);
         break;
@@ -204,14 +238,12 @@ export function startGame(
         if (state.phase === "sliding") {
           dispatch({ type: "progress", distance: physics.distance() });
           const here = physics.local();
-          for (const id of collectAt(spots, collected, here.s, here.x)) {
-            collected = [...collected, id];
-            const f = findInfo.find((x) => x.id === id);
+          for (const id of noticeAt(spots, noticed, here.s, here.x)) {
+            noticed = [...noticed, id];
+            const f = info(id);
             if (f) {
-              hud.toast(`Found: ${f.label}`);
-              hud.announce(
-                `Found a label: ${f.label}. ${collected.length} of ${spots.length}.`,
-              );
+              hud.toast(`Noticed: ${f.label}${seen.has(id) ? "" : " · new"}`);
+              hud.announce(`You noticed ${f.label}. The end card explains it.`);
             }
           }
           if (hit && SOFT[hit]) {
@@ -222,9 +254,9 @@ export function startGame(
         }
       }
     }
-    hud.setMeter(score(state), state.best, [collected.length, spots.length]);
+    hud.setMeter(score(state), state.best, [noticed.length, spots.length]);
     clock += real;
-    markers.update(clock, real, collected);
+    exhibits.update(clock, real, noticed);
     const at = physics.local();
     // Visual lean eases toward the input so the sway reads as weight.
     const target = state.phase === "sliding" ? lean : 0;
@@ -252,6 +284,7 @@ export function startGame(
       cancelAnimationFrame(raf);
       input.destroy();
       hud.destroy();
+      exhibits.destroy();
       view.destroy();
       physics.free();
     },

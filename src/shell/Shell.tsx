@@ -330,6 +330,11 @@ export function Shell({ pack }: { pack: ContentPack }) {
               {...ctx}
               activity={activity}
               claims={claimsFor(pack, activity.knowledgeId, activity.claimIds)}
+              found={journal.found.flatMap((key) =>
+                key.startsWith(`${activity.id}/`)
+                  ? [key.slice(activity.id.length + 1)]
+                  : [],
+              )}
             />
           </SidePanel>
         )}

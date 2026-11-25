@@ -6,6 +6,7 @@ import {
   eraAt,
   eraWeights,
   type ExperienceEvent,
+  activitySchema,
   experienceEventSchema,
   resolveClaim,
   sanitizeJournal,
@@ -383,4 +384,42 @@ test("themed-area places sit on the island's area scenes", () => {
     assert.deepEqual([l.anchor[0], l.anchor[2]], [a.x, a.z], l.id);
     assert.ok(l.knowledgeIds.includes("land-and-sea"), l.id);
   }
+});
+
+test("journal keeps things found in activities, and old journals parse", () => {
+  const slope = pack.activities.find((a) => a.kind === "slope-run");
+  assert.ok(slope);
+  let j = EMPTY_JOURNAL;
+  for (const found of [["find-tuff"], ["find-tuff", "find-peak"], undefined])
+    j = record(pack, j, {
+      type: "activity.complete",
+      result: {
+        activityId: slope.id,
+        completed: true,
+        at: "2026-11-25T00:00:00Z",
+        found,
+      },
+    }).journal;
+  assert.deepEqual(j.found, [`${slope.id}/find-tuff`, `${slope.id}/find-peak`]);
+  // A journal saved before `found` existed gets [] (additive default).
+  const { found: _, ...old } = EMPTY_JOURNAL;
+  assert.deepEqual(sanitizeJournal(pack, old)?.found, []);
+  // Unknown activities drop out.
+  const k = sanitizeJournal(pack, { ...j, found: [...j.found, "gone/x"] });
+  assert.deepEqual(k?.found, j.found);
+});
+
+test("slope-run finds default their look (older definitions parse)", () => {
+  const a = activitySchema.parse({
+    kind: "slope-run",
+    id: "s",
+    knowledgeId: "k",
+    title: "t",
+    claimIds: ["c"],
+    prompt: "p",
+    completion: "c",
+    finds: [{ id: "f", label: "F", claimId: "c" }],
+  });
+  assert.ok(a.kind === "slope-run");
+  assert.equal(a.finds[0]?.look, "straw-sacks");
 });

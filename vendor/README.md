@@ -61,6 +61,14 @@ the diff):
 7. Out of Place, Lukas's feedback, one commit: the pattern paint is pinned
    to the world (`WorldPattern` in `game/nuri.ts`), a 40 px patch, and
    Brush / Eyedrop zoom in close on Nuri (`ZOOM` 3.2); Move zooms out.
+8. Don't Fall on the Slope, exhibits (Lukas's choice), one commit: the
+   floating labels are gone (`core/finds.ts`, `render/finds.ts`); real
+   street things instead (`core/exhibits.ts`, `render/exhibits.ts`, an
+   `exhibit` obstacle kind). `SlopeProps.finds[].look`, `SlopeProps.seen`
+   and `ActivityResult.found` are new (mirrored in
+   `integration/contracts.ts`). The game now emits `activity.complete` at
+   the end of every run (with `found`), not only once. The standalone page
+   has placeholder exhibits (`?seen=all`).
 
 ## Pull new upstream changes
 

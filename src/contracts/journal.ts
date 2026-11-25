@@ -55,6 +55,9 @@ export const journalStateSchema = z.object({
   seasonsSeen: z.array(seasonIdSchema),
   revealOpened: z.boolean(),
   stamps: z.array(z.object({ stampId: idSchema, earnedAt: z.string() })),
+  /** "<activityId>/<foundId>": things found in activities (slope-run
+   *  exhibits). Additive: older saved journals parse with []. */
+  found: z.array(z.string()).default([]),
 });
 export type JournalState = z.infer<typeof journalStateSchema>;
 
@@ -67,4 +70,5 @@ export const EMPTY_JOURNAL: JournalState = {
   seasonsSeen: [],
   revealOpened: false,
   stamps: [],
+  found: [],
 };

@@ -38,6 +38,11 @@ export const PALETTE = {
   trousers: 0x343846,
   // Canal
   water: 0x22364f,
+  // Exhibits
+  straw: 0xc9a86a,
+  strawShade: 0x9c7f4c,
+  herring: 0xa9b8c6,
+  ceramic: 0x3b4352,
   // UI
   ink: 0x1a2236,
   cream: 0xf6ecd9,

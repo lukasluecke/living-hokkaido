@@ -33,38 +33,51 @@ const slopeRun: ActivityInput = {
     "otaru-canal-1914-1923",
   ],
   prompt:
-    "January, an icy shopping street. Slide down to the canal without touching the shops, lamp posts or people. Snow piles only slow you down. Slide through the floating museum labels to collect them: the end card explains each one.",
+    "January, an icy shopping street. Slide down to the canal without touching the shops, lamp posts or people. Snow piles only slow you down. A glow on the ice marks an exhibit: pass close to notice it, and the end card explains what you saw. Each Play brings new exhibits.",
+  // Exhibits: real things of the street (look), each explained by a claim.
   // Labels are short game names; the end card shows each claim's text.
   finds: [
     {
       id: "find-warehouse",
-      label: "A stone warehouse",
+      label: "A merchant's warehouse",
+      look: "warehouse-wall",
       claimId: "otaru-warehouse-1890",
     },
     {
       id: "find-tuff",
-      label: "Tuff stone",
+      label: "A stone warehouse wall",
+      look: "warehouse-wall",
       claimId: "kitahama-tuff-on-timber",
     },
     {
       id: "find-shachihoko",
-      label: "Shachihoko",
+      label: "Shachihoko on the ridge",
+      look: "shachihoko",
       claimId: "otaru-warehouse-shachihoko",
     },
     {
       id: "find-fertilizer",
-      label: "Herring fertilizer",
+      label: "Straw sacks",
+      look: "straw-sacks",
       claimId: "herring-fertilizer",
     },
     {
       id: "find-kimura",
-      label: "The Kimura warehouse",
+      label: "A cart of sacks",
+      look: "sack-cart",
       claimId: "kimura-warehouse-1894",
     },
     {
       id: "find-peak",
-      label: "The herring peak",
+      label: "Boxes of herring",
+      look: "herring-boxes",
       claimId: "herring-peak-1897",
+    },
+    {
+      id: "find-canal",
+      label: "The canal",
+      look: "canal",
+      claimId: "otaru-canal-1914-1923",
     },
   ],
   completion:

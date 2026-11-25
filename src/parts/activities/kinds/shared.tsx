@@ -13,6 +13,8 @@ export type KindProps<K extends ActivityKind> = {
   claims: Record<string, ResolvedClaim>;
   prefs: Prefs;
   emit: Emit;
+  /** Ids found in this activity before (from the journal). */
+  found?: string[];
 };
 
 export const complete = (emit: Emit, activityId: string, score?: number) =>
