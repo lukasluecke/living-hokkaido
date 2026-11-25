@@ -37,4 +37,5 @@ Turn with mouse, touch and arrow keys; every hotspot reachable by keyboard;
 
 - Open: final models by code (Claude) or Blender (Yuling, Shaw)?
 - Open: toon for objects only, or also the island?
+
 * 2026-11-25: viewer ported as `Viewer3D.tsx` (toon + ink hull, PresentationControls turn, projected hotspots with back-face fade) inside the card. Objects are shown alone on a neutral backdrop, not in the room.
