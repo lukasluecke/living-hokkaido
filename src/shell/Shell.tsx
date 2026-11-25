@@ -13,13 +13,17 @@ import {
   type PartContext,
   type ResolvedClaim,
   resolveClaim,
+  SEASON_IDS,
   sanitizeJournal,
+  seasonAt,
   wrapSeason,
 } from "@/contracts";
+import { seasonInk } from "@/design/tokens";
 import { useSoundscape } from "@/audio/react";
 import { Hud } from "./Hud";
 import { record } from "./progress";
 import { parts } from "./registry";
+import { route } from "./route";
 import s from "./Shell.module.css";
 import { SidePanel } from "./SidePanel";
 import { initialState, reduce } from "./state";
@@ -36,6 +40,29 @@ function detectPrefs() {
       .matches,
     webgl,
   };
+}
+
+/** Our own fictional guide: a snow-white round owl with a pale blue trail. */
+function OwlMark() {
+  return (
+    <svg className={s.owlMark} viewBox="0 0 80 80" aria-hidden="true">
+      <path
+        d="M6 70 Q30 58 44 62"
+        stroke="#cfe7ff"
+        strokeWidth="4"
+        fill="none"
+        strokeLinecap="round"
+        opacity="0.8"
+      />
+      <ellipse cx="44" cy="44" rx="26" ry="27" fill="#fff" />
+      <ellipse cx="44" cy="52" rx="15" ry="14" fill="#f2f7fc" />
+      <circle cx="35" cy="38" r="8.5" fill="#eaf3fb" />
+      <circle cx="53" cy="38" r="8.5" fill="#eaf3fb" />
+      <circle cx="35" cy="39" r="4" fill="#1d2a36" />
+      <circle cx="53" cy="39" r="4" fill="#1d2a36" />
+      <path d="M41 45 L44 50 L47 45 Z" fill="#e8c27a" />
+    </svg>
+  );
 }
 
 function claimsFor(pack: ContentPack, knowledgeId: string, ids: string[]) {
@@ -189,6 +216,9 @@ export function Shell({ pack }: { pack: ContentPack }) {
       ? (pack.timelines.find((t) => t.id === state.timelineId) ?? null)
       : null;
 
+  const { stations, next } = route(pack, state, journal);
+  const ink = seasonInk[SEASON_IDS.indexOf(seasonAt(state.season.value))];
+
   const stage =
     state.view === "island" || state.view === "travel" ? (
       <Island {...ctx} view={state.view} locationId={state.locationId} />
@@ -208,6 +238,7 @@ export function Shell({ pack }: { pack: ContentPack }) {
       className={s.shell}
       data-view={state.view}
       data-overlay={state.overlay ?? undefined}
+      style={{ "--fl-season": ink } as React.CSSProperties}
     >
       <div className={s.stage}>{stage}</div>
       <Hud
@@ -216,6 +247,7 @@ export function Shell({ pack }: { pack: ContentPack }) {
         stamps={journal.stamps.length}
         total={pack.stamps.length}
         sound={sound}
+        stations={stations}
         onOverTime={
           localTimeline
             ? () =>
@@ -223,17 +255,33 @@ export function Shell({ pack }: { pack: ContentPack }) {
             : undefined
         }
       />
-      {guideLine && (
-        <p
-          key={guideLine}
-          className={s.guide}
-          aria-live="polite"
-          data-still={state.prefs.reducedMotion || undefined}
-        >
-          <span className={s.owlDot} aria-hidden="true" />
-          <span className={s.visuallyHidden}>Owl: </span>
-          {guideLine}
-        </p>
+      {guideLine && state.view !== "activity" && !state.overlay && (
+        <section className={s.owl} aria-label="Owl guide">
+          <OwlMark />
+          <div className={s.bubble}>
+            <p className={s.cap} aria-hidden="true">
+              Owl guide
+            </p>
+            <p
+              key={guideLine}
+              className={s.line}
+              aria-live="polite"
+              data-still={state.prefs.reducedMotion || undefined}
+            >
+              <span className={s.visuallyHidden}>Owl: </span>
+              {guideLine}
+            </p>
+            {next && (
+              <button
+                type="button"
+                className={s.next}
+                onClick={() => emit(next.event)}
+              >
+                {next.label}
+              </button>
+            )}
+          </div>
+        </section>
       )}
       <Ask
         {...ctx}
