@@ -25,7 +25,7 @@ import {
 } from "../game/clip";
 import { Crowd } from "../game/crowd";
 import { analyse, giveawayLine } from "../game/giveaway";
-import { Nuri } from "../game/nuri";
+import { Nuri, type NuriPaint, type WorldPattern } from "../game/nuri";
 import { Sfx } from "../game/sound";
 import type { OutOfPlaceProps } from "../integration/contracts";
 import { PALETTE } from "../style/palette";
@@ -43,17 +43,18 @@ const BRUSH_RADIUS = { S: 2, M: 5, L: 10 } as const;
 type BrushSize = keyof typeof BRUSH_RADIUS;
 const SIZES: BrushSize[] = ["S", "M", "L"];
 /** Side of the texture swatch the eyedropper takes from the scene (px). */
-const PATCH = 24;
+const PATCH = 40;
 /** Recent paints kept in the panel's bottom row. */
 const RECENT_MAX = 4;
 /** Eyedropper loupe: the patch at 4×, a frame, and a chip of the colour. */
-const LOUPE_K = 4;
+const LOUPE_K = 3;
 const LOUPE_B = 6;
 const LOUPE_W = PATCH * LOUPE_K + LOUPE_B * 2;
 const LOUPE_H = LOUPE_W + 22;
 /** The loupe texture is drawn at 2× so it stays sharp at RES 2. */
 const LOUPE_TEX = 2;
-const ZOOM = 2.5;
+/** Painting zoom: close on Nuri and the scene right around them. */
+const ZOOM = 3.2;
 const KEY_STEP = 8;
 /** Finder ring (the seeker's magnifying glass): radius and arrow-key step. */
 const FINDER_R = 16;
@@ -88,7 +89,12 @@ const CLIP_MS = 10_000;
 const CARD = { x: 950, y: 318, w: 560, h: 500 };
 
 /** What the brush paints with: a colour, and the scene patch it came from. */
-type Paint = { color: number; patch: HTMLCanvasElement | null };
+type Paint = {
+  color: number;
+  patch: HTMLCanvasElement | null;
+  /** World position of the patch's top-left pixel. */
+  at: { x: number; y: number } | null;
+};
 
 type RevealInfo = {
   found: boolean;
@@ -113,7 +119,7 @@ export class GameScene extends Phaser.Scene {
   private tool: Tool = "move";
   private brushSize: BrushSize = "M";
   private color: number = PALETTE.tuff;
-  private fillPattern: CanvasPattern | null = null;
+  private fillPattern: WorldPattern | null = null;
   private recent: Paint[] = [];
   private recentBtns: Phaser.GameObjects.Container[] = [];
   private recentKeys: string[] = [];
@@ -715,7 +721,7 @@ export class GameScene extends Phaser.Scene {
       this.nuri.reset();
       this.brushSize = "M";
       this.setTool("move");
-      this.setPaint({ color: PALETTE.tuff, patch: null }, false);
+      this.setPaint({ color: PALETTE.tuff, patch: null, at: null }, false);
       this.recent = [];
       this.drawRecent();
       this.lastHider = null;
@@ -764,6 +770,7 @@ export class GameScene extends Phaser.Scene {
       this.lastHider = s.hider;
       this.nuri.setFeet(s.hider.x, s.hider.y);
       this.nuri.setPose(s.hider.pose);
+      if (this.zoomed && phase === "disguise") this.centerZoom();
       for (const [pose, b] of Object.entries(this.poseBtns))
         b.setSelected(pose === s.hider.pose);
     }
@@ -787,8 +794,10 @@ export class GameScene extends Phaser.Scene {
       ]
         .filter(Boolean)
         .join("\n"),
-      disguise:
-        "Hider: move Nuri to a spot, paint to blend in, pick a pose. The eyedropper picks up colour and pattern.\nKeys: arrows move · E pick paint · [ ] brush size · F fill · 1–4 pose · Enter done",
+      // Zoomed in to paint: a short line, so the banner covers less.
+      disguise: this.zoomed
+        ? "Paint near where you picked: the pattern lines up with the scene. Move zooms out."
+        : "Hider: move Nuri to a spot, then paint to blend in and pick a pose. The eyedropper picks up colour and pattern.\nKeys: arrows move · E pick paint · [ ] brush size · F fill · 1–4 pose · Enter done",
       handoff: "",
       seek: `Seeker: tap whoever looks out of place. Wrong taps cost ${this.penaltySeconds} seconds.\nKeys: arrows move the ring · Space taps · G gives up`,
       reveal: "",
@@ -840,6 +849,10 @@ export class GameScene extends Phaser.Scene {
 
   private setTool(tool: Tool) {
     this.tool = tool;
+    // Once Nuri stands where they hide, painting zooms in close; Move zooms
+    // back out to choose a spot.
+    if (this.state.phase === "disguise" && (tool === "move") === this.zoomed)
+      this.setZoom(tool !== "move");
     this.syncPanel();
   }
 
@@ -945,8 +958,8 @@ export class GameScene extends Phaser.Scene {
 
   private setBrushSize(size: BrushSize) {
     this.brushSize = size;
-    if (this.tool === "move") this.tool = "brush";
-    this.syncPanel();
+    if (this.tool === "move") this.setTool("brush");
+    else this.syncPanel();
   }
 
   private setPose(pose: Pose) {
@@ -970,16 +983,21 @@ export class GameScene extends Phaser.Scene {
     const cam = this.cameras.main;
     if (on) {
       cam.setZoom(ZOOM * RES);
-      // Shift right a little so Nuri sits in the middle of the area the panel doesn't cover.
-      cam.centerOn(
-        this.state.hider.x + (WORLD_W - PANEL_X0) / (2 * ZOOM),
-        this.hiderMidY,
-      );
+      this.centerZoom();
     } else {
       cam.setZoom(RES);
       cam.centerOn(WORLD_W / 2, WORLD_H / 2);
     }
     this.zoomBtn?.setLabel(on ? "Zoom −" : "Zoom +");
+    if (this.state.phase === "disguise") this.render();
+  }
+
+  /** Keeps Nuri in the middle of the area the panel doesn't cover. */
+  private centerZoom() {
+    this.cameras.main.centerOn(
+      this.state.hider.x + (WORLD_W - PANEL_X0) / (2 * ZOOM),
+      this.hiderMidY,
+    );
   }
 
   private tryMove(x: number, y: number) {
@@ -1011,18 +1029,23 @@ export class GameScene extends Phaser.Scene {
       PATCH,
       PATCH,
     );
-    this.setPaint({ color, patch }, true);
+    this.setPaint(
+      { color, patch, at: { x: px - PATCH / 2, y: py - PATCH / 2 } },
+      true,
+    );
     this.setTool("brush");
   }
 
   /** Brush paint: the scene patch when there is one, else the colour. */
-  private get paint(): number | CanvasPattern {
+  private get paint(): NuriPaint {
     return this.fillPattern ?? this.color;
   }
 
   private setPaint(p: Paint, remember: boolean) {
     this.color = p.color;
-    this.fillPattern = p.patch ? this.nuri.pattern(p.patch) : null;
+    const pattern = p.patch ? this.nuri.pattern(p.patch) : null;
+    this.fillPattern =
+      pattern && p.at ? { pattern, x0: p.at.x, y0: p.at.y } : null;
     if (this.textures.exists("swatch-patch"))
       this.textures.remove("swatch-patch");
     if (p.patch) {
