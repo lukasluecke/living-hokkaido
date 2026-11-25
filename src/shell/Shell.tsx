@@ -199,13 +199,45 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
       if (ev.key === "Escape") emit({ type: "nav.back" });
       // Arrows step objects only when nothing else has focus (the 3D
       // viewer and sliders use arrows themselves).
-      const free = ev.target === document.body;
+      // The side panel takes focus when it opens; it counts as "nothing".
+      const t = ev.target as HTMLElement | null;
+      const free = t === document.body || t?.dataset.arrowSteps !== undefined;
       if (free && (ev.key === "ArrowLeft" || ev.key === "ArrowRight"))
         stepRef.current?.(ev.key === "ArrowLeft" ? -1 : 1);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [emit]);
+
+  // Overlays (journal, reveal, timeline) are modal: the page behind is
+  // inert, focus moves in on open and goes back to the opener on close.
+  const overlayBox = useRef<HTMLDivElement>(null);
+  const lastFocus = useRef<HTMLElement | null>(null);
+  const opener = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    const onFocus = (e: FocusEvent) => {
+      const el = e.target as HTMLElement;
+      if (!overlayBox.current?.contains(el)) lastFocus.current = el;
+    };
+    document.addEventListener("focusin", onFocus);
+    return () => document.removeEventListener("focusin", onFocus);
+  }, []);
+  const covered = state.overlay !== null;
+  useEffect(() => {
+    if (!covered) {
+      const el = opener.current;
+      opener.current = null;
+      if (el?.isConnected) el.focus({ preventScroll: true });
+      return;
+    }
+    if (!opener.current) opener.current = lastFocus.current;
+    const box = overlayBox.current;
+    if (!box || box.contains(document.activeElement)) return;
+    const first = box.querySelector<HTMLElement>(
+      'button:not([disabled]), a[href], input:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    );
+    first?.focus({ preventScroll: true });
+  }, [covered, state.overlay]);
 
   const ctx: PartContext = useMemo(
     () => ({ content: pack, season: state.season, prefs: state.prefs, emit }),
@@ -288,8 +320,11 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
         data-overlay={state.overlay ?? undefined}
         style={{ "--fl-season": ink } as React.CSSProperties}
       >
-        <div className={s.stage}>{stage}</div>
+        <div className={s.stage} inert={covered}>
+          {stage}
+        </div>
         <Hud
+          inert={covered}
           season={state.season}
           emit={emit}
           stamps={journal.stamps.length}
@@ -350,7 +385,7 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
             {t("New stamp: {title}", { title: t(toast) })}
           </output>
         )}
-        <aside className={s.side}>
+        <aside className={s.side} inert={covered}>
           {artifact && state.view === "focus" && (
             <SidePanel
               key="card"
@@ -405,7 +440,7 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
           )}
         </aside>
         {openTimeline && (
-          <div className={s.timeline}>
+          <div ref={overlayBox} className={s.timeline}>
             <OverTime
               {...ctx}
               timeline={openTimeline}
@@ -425,6 +460,7 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
         )}
         {state.overlay && state.overlay !== "timeline" && (
           <div
+            ref={overlayBox}
             className={s.overlay}
             onClick={(e) => {
               if (e.target === e.currentTarget) emit({ type: "nav.back" });

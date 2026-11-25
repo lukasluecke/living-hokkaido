@@ -45,7 +45,10 @@ export function Hud({
   locale,
   onLocale,
   onOverTime,
+  inert,
 }: {
+  /** An overlay covers the page: take the HUD out of focus order. */
+  inert?: boolean;
   season: SeasonState;
   emit: Emit;
   stamps: number;
@@ -87,7 +90,7 @@ export function Hud({
   }, [menu]);
 
   return (
-    <header className={s.hud}>
+    <header className={s.hud} inert={inert}>
       <strong className={s.title}>
         {t("Living Hokkaido")}
         {draft && (
