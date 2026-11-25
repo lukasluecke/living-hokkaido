@@ -12,13 +12,12 @@ import {
   type JournalState,
   type PartContext,
   type ResolvedClaim,
-  SEASON_IDS,
   resolveClaim,
   sanitizeJournal,
-  seasonAt,
   wrapSeason,
 } from "@/contracts";
-import { SoundToggle, useSoundscape } from "@/audio/react";
+import { useSoundscape } from "@/audio/react";
+import { Hud } from "./Hud";
 import { record } from "./progress";
 import { parts } from "./registry";
 import s from "./Shell.module.css";
@@ -180,35 +179,23 @@ export function Shell({ pack }: { pack: ContentPack }) {
       data-overlay={state.overlay ?? undefined}
     >
       <div className={s.stage}>{stage}</div>
-      <header className={s.hud}>
-        <strong>Living Hokkaido</strong>
-        <span>Season: {seasonAt(state.season.value)}</span>
-        {SEASON_IDS.map((id, i) => (
-          <button
-            key={id}
-            type="button"
-            onClick={() => emit({ type: "season.set", value: i })}
-          >
-            {id}
-          </button>
-        ))}
-        <button
-          type="button"
-          onClick={() =>
-            emit({ type: "season.play", playing: !state.season.playing })
-          }
-        >
-          {state.season.playing ? "Pause" : "Timelapse"}
-        </button>
-        <button type="button" onClick={() => emit({ type: "journal.open" })}>
-          Journal ({journal.stamps.length}/{pack.stamps.length})
-        </button>
-        <SoundToggle sound={sound} />
-        <a href="/contribute">Contribute a story</a>
-      </header>
+      <Hud
+        season={state.season}
+        emit={emit}
+        stamps={journal.stamps.length}
+        total={pack.stamps.length}
+        sound={sound}
+      />
       {guideLine && (
-        <p className={s.guide} aria-live="polite">
-          Owl: {guideLine}
+        <p
+          key={guideLine}
+          className={s.guide}
+          aria-live="polite"
+          data-still={state.prefs.reducedMotion || undefined}
+        >
+          <span className={s.owlDot} aria-hidden="true" />
+          <span className={s.visuallyHidden}>Owl: </span>
+          {guideLine}
         </p>
       )}
       {toast && <output className={s.toast}>New stamp: {toast}</output>}

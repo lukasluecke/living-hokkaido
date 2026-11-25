@@ -61,19 +61,25 @@ export function useSoundscape(
 export function SoundToggle({
   sound,
   className,
+  children,
 }: {
   sound: Soundscape;
   className?: string;
+  /** Custom content (for example an icon); the label stays accessible. */
+  children?: (muted: boolean) => React.ReactNode;
 }) {
+  const label = sound.muted ? "Sound off" : "Sound on";
   return (
     <button
       type="button"
       className={className}
       aria-pressed={!sound.muted}
+      aria-label={children ? label : undefined}
+      title={children ? label : undefined}
       data-sound="off"
       onClick={() => sound.setMuted(!sound.muted)}
     >
-      {sound.muted ? "Sound off" : "Sound on"}
+      {children ? children(sound.muted) : label}
     </button>
   );
 }

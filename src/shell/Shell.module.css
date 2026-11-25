@@ -15,61 +15,77 @@
   inset: 0;
   overflow: auto;
 }
-.hud {
-  position: absolute;
-  top: 12px;
-  left: 16px;
-  right: 16px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-  pointer-events: none;
-  padding: 0;
-  border: 0;
-  justify-content: flex-start;
-  text-shadow: 0 1px 3px rgb(0 0 0 / 50%);
-}
-.hud > * {
-  pointer-events: auto;
-}
-.hud button,
-.hud a {
-  font: inherit;
-  font-size: 14px;
-  border-radius: 999px;
-  border: 1px solid #e8c27a;
-  background: rgb(31 45 70 / 55%);
-  color: inherit;
-  padding: 4px 12px;
-  cursor: pointer;
-  text-decoration: none;
-}
 .guide {
   position: absolute;
-  left: 16px;
-  top: 60px;
-  max-width: min(420px, calc(100% - 32px));
+  left: 12px;
+  top: calc(56px + env(safe-area-inset-top, 0px));
+  max-width: min(340px, calc(100% - 24px));
   margin: 0;
-  background: #fbf4e6;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  background: rgb(251 244 230 / 94%);
   color: #2b2118;
-  border-radius: 14px;
-  padding: 10px 14px;
-  box-shadow: 0 6px 24px rgb(43 33 24 / 25%);
+  border-radius: 12px;
+  padding: 7px 12px;
+  font-size: 14px;
+  line-height: 1.35;
+  box-shadow: 0 4px 16px rgb(43 33 24 / 22%);
+  pointer-events: none;
+  z-index: 2;
+  animation: guide 9s ease forwards;
+}
+.guide[data-still] {
+  animation: none;
+}
+@keyframes guide {
+  0% {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  4%,
+  85% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.owlDot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  margin-top: 5px;
+  border-radius: 999px;
+  background: radial-gradient(circle, #ffffff 30%, #bfe0ff 100%);
+  box-shadow: 0 0 8px #bfe0ff;
+}
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 .toast {
   position: absolute;
-  top: 120px;
+  top: calc(104px + env(safe-area-inset-top, 0px));
   left: 50%;
   transform: translateX(-50%);
   background: #e8c27a;
   color: #2b2118;
-  border-radius: 8px;
-  padding: 6px 12px;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 14px;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgb(43 33 24 / 22%);
+  z-index: 2;
 }
 .side {
   position: absolute;
-  top: 64px;
+  top: calc(56px + env(safe-area-inset-top, 0px));
   right: 16px;
   width: min(420px, calc(100% - 32px));
   max-height: calc(100% - 140px);
@@ -84,4 +100,21 @@
   place-items: center;
   padding: 16px;
   background: rgb(31 45 70 / 45%);
+  z-index: 4;
+}
+/* Phone: the side slot (object card, activity) is a bottom sheet. */
+@media (max-width: 700px) {
+  .side {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: auto;
+    max-height: 62%;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .side > * {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
 }
