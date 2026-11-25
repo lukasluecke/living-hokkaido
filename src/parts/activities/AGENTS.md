@@ -45,3 +45,9 @@ journal stamp appears after completion.
   `canon` (ukouk structure: bring in each voice on its mark) and `pluck`
   (tonkori: pluck each open string, then the short tab) use `play/synth.ts`:
   synthetic tones only, never a voice or a recording; the UI says so.
+- 2026-11-26: Lukas chose "Build the scene" v2 (labs/activities-scene):
+  kind `place` in `play/Place.tsx`, pure state in `play/placeLogic.ts`,
+  drawings in `play/PlaceArt.tsx`. A guided story, one step at a time; each
+  step hands over ONE figure (named by hat and colour, never a personal
+  name) or thing, with a clue, 2–3 rings and a pose sheet of 4. Ainu home
+  scenes use `subject: "objects"`. Later idea (Lukas): a 2.5D stage.

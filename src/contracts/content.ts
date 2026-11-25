@@ -129,6 +129,11 @@ function checkActivityKind(
         errors.push(`${at}: claim "${c}" not in claimIds`);
   if (a.kind === "board" && !cited.has(a.rulesClaimId))
     errors.push(`${at}: rules claim "${a.rulesClaimId}" not in claimIds`);
+  if (a.kind === "place")
+    for (const st of a.steps)
+      for (const c of st.claimIds)
+        if (!cited.has(c))
+          errors.push(`${at}: step ${st.id} cites "${c}", not in claimIds`);
   if (a.kind === "map") {
     dupes(
       `${at} spot`,

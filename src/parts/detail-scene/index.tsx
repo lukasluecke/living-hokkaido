@@ -33,6 +33,7 @@ const VERB: Record<string, string> = {
   canon: "Sing along",
   pluck: "Pluck",
   map: "Explore",
+  place: "Scene",
 };
 
 /** Up to two activities show in the bar; more go in one "Activities" menu. */

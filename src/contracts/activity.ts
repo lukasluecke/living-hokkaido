@@ -371,6 +371,98 @@ export const pluckActivitySchema = z
     "Tune notes must name existing strings",
   );
 
+// ---------------------------------------------------------------- place
+
+/**
+ * Build the scene (labs/activities-scene): a guided story, one step at a
+ * time. A step says one cited fact (captions + device voice), then hands
+ * over ONE figure or thing with a clue. The visitor puts it on one of 2–3
+ * rings and, for people, picks a pose from the pose sheet; then the step
+ * restates its claim. Figures are named by their look ("Straw hat"), never
+ * with a personal name. Ainu scenes use `subject: "objects"` (no posed Ainu
+ * figures). `observed: true` marks a step backed only by what a museum
+ * diorama shows, not by panel text (weaker source; the UI says so).
+ */
+export const placePoseSchema = z.enum([
+  "stand",
+  "watch",
+  "survey",
+  "carry",
+  "saw",
+  "tent",
+  "lead",
+  "net",
+  "rake",
+  "shovel",
+  "drill",
+  "sleigh",
+]);
+export type PlacePose = z.infer<typeof placePoseSchema>;
+
+export const placeStepSchema = z
+  .object({
+    id: idSchema,
+    /** One fact, restating the claims below. Read aloud by the device voice. */
+    say: z.string().min(1),
+    claimIds: z.array(idSchema).min(1),
+    observed: z.boolean().default(false),
+    /** Switches the stage to this season from this step on. */
+    season: z.enum(["summer", "winter"]).optional(),
+    /** The clue question. Required with a figure. */
+    ask: z.string().min(1).optional(),
+    figure: z
+      .object({
+        label: z.string().min(1),
+        note: z.string().optional(),
+        /** People: hat and colour, so every figure looks different. */
+        hat: z.enum(["cap", "straw", "band", "hood", "helmet"]).optional(),
+        colour: z.string().optional(),
+        /** Things: which drawing (objects scenes only). */
+        thing: z
+          .enum(["cattail", "bark", "mortar", "pot", "weave", "fish"])
+          .optional(),
+      })
+      .optional(),
+    /** Rings, 0..1 from the left and from the top of the stage. One is right. */
+    options: z
+      .array(
+        z.object({
+          x: z.number().min(0).max(1),
+          y: z.number().min(0).max(1),
+          right: z.boolean().default(false),
+        }),
+      )
+      .default([]),
+    pose: placePoseSchema.optional(),
+    poses: z.array(placePoseSchema).default([]),
+    hintPlace: z.string().optional(),
+    hintPose: z.string().optional(),
+    /** Shown after the step is done. Must only restate the claims. */
+    why: z.string().optional(),
+  })
+  .refine(
+    (s) =>
+      !s.figure ||
+      (Boolean(s.ask) &&
+        s.options.filter((o) => o.right).length === 1 &&
+        (!s.pose || s.poses.includes(s.pose))),
+    "A step with a figure needs a clue, exactly one right ring, and its pose on the sheet",
+  );
+
+export const placeActivitySchema = z.object({
+  ...base,
+  kind: z.literal("place"),
+  /** Which drawn stage the renderer shows. Illustrative sketches. */
+  stage: z.enum(["survey-camp", "herring-yard", "cise", "mine-forest"]),
+  subject: z.enum(["people", "objects"]),
+  /** Season at the start (mine-forest switches at a step). */
+  season: z.enum(["summer", "winter"]).default("summer"),
+  steps: z.array(placeStepSchema).min(2),
+  /** Shown at the end. Must only restate claims. */
+  completion: z.string().min(1),
+  illustrative: z.literal(true).default(true),
+});
+
 export const activitySchema = z.discriminatedUnion("kind", [
   quizActivitySchema,
   weaveActivitySchema,
@@ -382,6 +474,7 @@ export const activitySchema = z.discriminatedUnion("kind", [
   boardActivitySchema,
   canonActivitySchema,
   pluckActivitySchema,
+  placeActivitySchema,
 ]);
 export type ActivityDefinition = z.infer<typeof activitySchema>;
 export type ActivityInput = z.input<typeof activitySchema>;
