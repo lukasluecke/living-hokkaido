@@ -12,6 +12,7 @@ import path from 'node:path';
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { Readable } from 'node:stream';
 import { talkPrompt } from './talk-prompt.mjs';
+import { translateJa } from './translate.mjs';
 
 try { process.loadEnvFile(); } catch { /* no .env */ }
 
@@ -332,6 +333,34 @@ async function voiceList(res) {
   return sendJson(res, 200, { model: TTS_MODEL, using: VOICES, voices: (out.voices || []).map((v) => ({ id: v.voice_id, name: v.name, category: v.category, labels: v.labels })) });
 }
 
+// ---- Japanese view of the record. The seed has a machine translation in envelopes/ja.json
+// (to be reviewed); observations added through the app are translated on first view and cached.
+const JA_SEED = (() => { try { return JSON.parse(fs.readFileSync(path.join(ROOT, 'envelopes', 'ja.json'), 'utf8')).observations; } catch { return {}; } })();
+const jaCache = new Map();
+async function withJapanese(list) {
+  const missing = list.filter((o) => !JA_SEED[o.id] && !jaCache.has(o.id)).slice(0, 40);
+  if (missing.length) {
+    const items = {};
+    for (const o of missing) {
+      items[`${o.id}|claim`] = o.claim;
+      if (o.note) items[`${o.id}|note`] = o.note;
+      if (o.absence?.note) items[`${o.id}|absenceNote`] = o.absence.note;
+      if (o.source?.ref) items[`${o.id}|sourceRef`] = o.source.ref;
+    }
+    try {
+      const ja = await translateJa(items);
+      for (const o of missing) {
+        const pick = (f) => ja[`${o.id}|${f}`];
+        if (pick('claim')) jaCache.set(o.id, { claim: pick('claim'), note: pick('note'), absenceNote: pick('absenceNote'), sourceRef: pick('sourceRef') });
+      }
+    } catch (err) { console.error('translate', err.message); }
+  }
+  return list.map((o) => {
+    const ja = JA_SEED[o.id] || jaCache.get(o.id);
+    return ja ? { ...o, ja: { ...ja, machine: true } } : o;
+  });
+}
+
 let appendQueue = Promise.resolve();
 async function readJson(req, limit = 20000) {
   let size = 0; const chunks = [];
@@ -345,7 +374,9 @@ async function handleApi(req, res, pathname) {
     return sendJson(res, 200, JSON.parse(fs.readFileSync(path.join(ROOT, 'envelopes', 'index.json'), 'utf8')));
   }
   if (pathname === '/api/observations' && req.method === 'GET') {
-    return sendJson(res, 200, (await allObservations()).filter(visible));
+    const list = (await allObservations()).filter(visible);
+    if (new URL(req.url, 'http://x').searchParams.get('lang') === 'ja') return sendJson(res, 200, await withJapanese(list));
+    return sendJson(res, 200, list);
   }
   if (pathname === '/api/observations' && req.method === 'POST') {
     let body;

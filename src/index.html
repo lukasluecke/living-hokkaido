@@ -42,8 +42,11 @@
   button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
   button:disabled { opacity: .5; cursor: default; }
   button svg { width: 16px; height: 16px; flex: none; }
-  .label { display: inline; }
+  .label { display: inline; white-space: nowrap; }
+  .tools > * { flex-shrink: 0; }
   @media (max-width: 560px) { .label { display: none; } button, .btn { padding: 0 10px; } }
+  /* Phones: the toolbar goes under the title so the title keeps its width. */
+  @media (max-width: 480px) { .bar { flex-wrap: wrap; } .title { flex-basis: 100%; } .tools { margin-left: auto; } }
   input[type=file] { display: none; }
 
   /* Hotspot markers */
@@ -137,7 +140,10 @@
   .figure3d model-viewer { width: 100%; height: 300px; border-radius: 12px;
     background: radial-gradient(circle at 50% 40%, #2a2f37, #14171c 70%); --poster-color: transparent; }
   @media (max-width: 720px) { .figure3d model-viewer { height: 34dvh; } }
-  button.lang { gap: 6px; font-size: 13px; } justify-self: start; height: 32px; font-size: 12px; }
+  .figure3d .print { justify-self: start; height: 32px; font-size: 12px; }
+  button.lang { padding: 0 10px; }
+  button.lang .flag { width: 30px; height: 20px; border-radius: 3px; box-shadow: 0 0 0 1px rgba(255,255,255,.35); display: none; }
+  button.lang .flag.on { display: block; }
   .figure3d .note { font-size: 11px; color: var(--muted); }
 
   /* Edit mode */
@@ -181,28 +187,28 @@
 <div id="markers"></div>
 
 <div class="bar">
-  <div class="title"><b>Omusha, Kushun Kotan, 1808</b><span>オムシャ・久春古丹 · tap a figure</span></div>
+  <div class="title"><b data-i18n="title">Omusha, Kushun Kotan, 1808</b><span data-i18n="subtitle">オムシャ・久春古丹 · tap a figure</span></div>
   <div class="tools">
-    <label class="btn" title="Open a splat file">
+    <label class="btn" title="Open a splat file" data-i18n-title="openTitle">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h6l2 2h10v10H3z"/></svg>
-      <span class="label">Open</span>
+      <span class="label" data-i18n="open">Open</span>
       <input id="file" type="file" accept=".ply,.spz,.splat,.ksplat,.sog,.zip">
     </label>
-    <button id="about" title="About this scene: what is known, and what is not">
+    <button id="about" title="About this scene: what is known, and what is not" data-i18n-title="aboutTitle">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>
-      <span class="label">About</span>
+      <span class="label" data-i18n="about">About</span>
     </button>
-    <button id="lang" class="lang" title="Language for Talk and voice / 会話と音声の言語"><span data-l="en">EN</span><span data-l="ja">日本語</span></button>
-    <button id="dots" aria-pressed="true" title="Show or hide the figure dots (figures stay tappable)">
+    <button id="lang" class="lang" aria-label="Language / 言語"><svg class="flag" data-l="en" viewBox="0 0 60 30" aria-hidden="true"><clipPath id="ukS"><path d="M0,0v30h60V0z"/></clipPath><clipPath id="ukT"><path d="M30,15h30v15zv15H0zH0V0zV0h30z"/></clipPath><g clip-path="url(#ukS)"><path d="M0,0v30h60V0z" fill="#012169"/><path d="M0,0L60,30M60,0L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0L60,30M60,0L0,30" clip-path="url(#ukT)" stroke="#C8102E" stroke-width="4"/><path d="M30,0v30M0,15h60" stroke="#fff" stroke-width="10"/><path d="M30,0v30M0,15h60" stroke="#C8102E" stroke-width="6"/></g></svg><svg class="flag" data-l="ja" viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#fff"/><circle cx="15" cy="10" r="6" fill="#BC002D"/></svg></button>
+    <button id="dots" aria-pressed="true" title="Show or hide the figure dots (figures stay tappable)" data-i18n-title="dotsTitle">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
     </button>
-    <button id="flip" aria-pressed="true" title="Flip upside-down scenes">
+    <button id="flip" aria-pressed="true" title="Flip upside-down scenes" data-i18n-title="flipTitle">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M7 8l5-5 5 5M7 16l5 5 5-5"/></svg>
     </button>
-    <button id="reset" title="Reset view">
+    <button id="reset" title="Reset view" data-i18n-title="resetTitle">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
     </button>
-    <button id="fs" title="Fullscreen">
+    <button id="fs" title="Fullscreen" data-i18n-title="fsTitle">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
     </button>
   </div>
@@ -211,7 +217,7 @@
 <aside class="sheet" id="sheet" aria-live="polite">
   <header>
     <div class="who"><h2 id="sName"></h2><div class="ja" id="sJa"></div></div>
-    <button id="sClose" title="Close">✕</button>
+    <button id="sClose" title="Close" data-i18n-title="close">✕</button>
   </header>
   <div class="body">
     <div class="figure3d fig-only" id="sModelWrap" hidden>
@@ -219,28 +225,28 @@
         touch-action="pan-y" interaction-prompt="none" shadow-intensity="0.7" exposure="1.05" alt="">
       </model-viewer>
       <div class="note" id="sModelLabel"></div>
-      <button class="print" id="sStl" title="Shape only (STL has no colour). Team use only: not for sharing.">Download for 3D printing (STL)</button>
+      <button class="print" id="sStl" title="Shape only (STL has no colour). Team use only: not for sharing." data-i18n="stl" data-i18n-title="stlTitle">Download for 3D printing (STL)</button>
     </div>
     <div class="crumb" id="sCrumb"></div>
     <div class="chips fig-only" id="sChips"></div>
-    <div class="fig-only"><div class="k">Role</div><div id="sRole"></div></div>
-    <div id="sDeclinesWrap" class="fig-only" hidden><div class="k">Will not speculate on</div><div id="sDeclines"></div></div>
+    <div class="fig-only"><div class="k" data-i18n="role">Role</div><div id="sRole"></div></div>
+    <div id="sDeclinesWrap" class="fig-only" hidden><div class="k" data-i18n="declines">Will not speculate on</div><div id="sDeclines"></div></div>
     <section class="chat fig-only" id="sChat">
       <div class="known-h" id="sTalkH">Talk <span>· answers only from the record below</span></div>
-      <div class="row2 voicebar"><span class="chip" id="sVoiceCredit" hidden title="Synthetic voices: not recordings of any person">Voices by ElevenLabs · synthetic</span>
+      <div class="row2 voicebar"><span class="chip" id="sVoiceCredit" hidden title="Synthetic voices: not recordings of any person" data-i18n-title="creditTitle">Voices by ElevenLabs · synthetic</span>
         <button type="button" class="link" id="sAuto" hidden aria-pressed="true">🔊 Voice on</button></div>
       <div class="sugg" id="sSugg"></div>
       <div class="log" id="sLog" aria-live="polite"></div>
       <form class="ask" id="sAsk">
-        <button type="button" class="mic" id="sMic" title="Ask by voice" hidden>🎙</button>
+        <button type="button" class="mic" id="sMic" title="Ask by voice" data-i18n-title="micTitle" hidden>🎙</button>
         <input id="sQ" maxlength="500" placeholder="Ask this figure something…" autocomplete="off">
         <button class="primary" id="sSend">Ask</button>
       </form>
     </section>
     <div class="notice fig-only" id="sNotice">This voice is a synthetic interpretation built from historical sources. It is not a historical record and does not speak for any person or community.</div>
     <div class="known">
-      <div class="known-h">What is known <span>· and what is not</span></div>
-      <div class="legend">Every entry shows two separate scores: <b>evidence</b> (how well it is supported) and <b>standing</b> (whose knowledge it is). Nothing is overwritten; corrections keep the history.</div>
+      <div class="known-h" data-i18n-html="knownH">What is known <span>· and what is not</span></div>
+      <div class="legend" data-i18n-html="legend">Every entry shows two separate scores: <b>evidence</b> (how well it is supported) and <b>standing</b> (whose knowledge it is). Nothing is overwritten; corrections keep the history.</div>
       <div id="sKnown"></div>
     </div>
     <div id="sForm"></div>
@@ -302,7 +308,10 @@ async function loadData() {
     const h = await (await fetch("hotspots.json", { cache: "no-store" })).json();
     hotspots = h.hotspots || []; startView = h.view || null;
   } catch { hotspots = []; }
+  // Japanese versions of the sheets (machine translation, characters/1808/ja.json)
+  try { CHAR_JA = (await (await fetch("../characters/1808/ja.json")).json()).characters || {}; } catch { CHAR_JA = {}; }
 }
+let CHAR_JA = {};
 
 // ---------- Three / Spark
 const canvas = $("c");
@@ -365,11 +374,11 @@ function frameScene() {
 }
 
 async function loadSplat(opts, label) {
-  loading(`Loading ${label}…`);
+  loading(t("loading")(label));
   if (mesh) { scene.remove(mesh); mesh.dispose?.(); mesh = null; }
   try {
     const next = new SplatMesh({ ...opts, raycastable: true, onProgress: (e) => {
-      if (e.lengthComputable && e.total) loading(`Loading ${label}… ${(e.loaded / 1048576).toFixed(1)} / ${(e.total / 1048576).toFixed(1)} MB`, e.loaded / e.total);
+      if (e.lengthComputable && e.total) loading(`${t("loading")(label)} ${(e.loaded / 1048576).toFixed(1)} / ${(e.total / 1048576).toFixed(1)} MB`, e.loaded / e.total);
     } });
     mesh = next; applyFlip(); scene.add(next);
     await next.initialized;
@@ -379,8 +388,8 @@ async function loadSplat(opts, label) {
     console.error(err);
     const missing = !opts.fileBytes && SRC.includes("assets/");
     failed(missing
-      ? "The scene scan (splat) isn't uploaded yet. Meanwhile, open a figure or the record:"
-      : `Couldn't load ${label}. ${err?.message || ""}`);
+      ? t("noSplat")
+      : t("cantLoad")(label, err?.message || ""));
     if (missing) showFigureList();
   }
 }
@@ -399,11 +408,11 @@ function showFigureList() {
     b.addEventListener("click", onClick);
     list.appendChild(b);
   };
-  add("About this scene", openScene, "what is known, and what is not");
+  add(t("aboutScene"), openScene, t("aboutSceneSub"));
   for (const id of CHARACTER_IDS) {
     const c = characters[id]; if (!c) continue;
     if (!c.model?.src && !Env.about(id).length) continue;
-    add(c.name.en, () => openSheet(id), c.model?.src ? "3D model" : "");
+    add(nameOf(c), () => openSheet(id), c.model?.src ? t("model3d") : "");
   }
   card.appendChild(list);
   ui.loader.classList.add("interactive");
@@ -417,11 +426,11 @@ function buildMarkers() {
   for (const h of hotspots) {
     const c = characters[h.character]; if (!c) continue;
     const el = document.createElement("button");
-    el.className = "marker"; el.title = c.name.en;
+    el.className = "marker"; el.title = nameOf(c);
     el.style.setProperty("--c", FACTION_COLOR[c.faction] || "var(--accent)");
     el.innerHTML = `<span class="dot"></span><span class="name"></span>`;
-    el.querySelector(".name").textContent = c.name.en;
-    el.addEventListener("click", (e) => { e.stopPropagation(); openSheet(h.character); });
+    el.querySelector(".name").textContent = nameOf(c);
+    el.dataset.active = String(active === h.character);
     root.appendChild(el); markerEls.set(h.character, { el, local: new THREE.Vector3(...h.position) });
   }
 }
@@ -447,8 +456,8 @@ function openScene() {
   for (const [, m] of markerEls) m.el.dataset.active = "false";
   const env = Env.envelopeById(SCENE_ENVELOPE);
   $("sheet").dataset.mode = "scene";
-  $("sName").textContent = env?.name.en || "About this scene";
-  $("sJa").textContent = env?.name.ja || "";
+  $("sName").textContent = (env && (env.name[LANG] || env.name.en)) || t("aboutScene");
+  $("sJa").textContent = (env && (LANG === "ja" ? env.name.en : env.name.ja)) || "";
   $("sCrumb").textContent = Env.breadcrumb(SCENE_ENVELOPE);
   $("sModel").removeAttribute("src");
   // Scene-level record: everything in the diorama, the place it depicts and the museum,
@@ -459,36 +468,36 @@ function openScene() {
 }
 $("about").addEventListener("click", openScene);
 
-function openSheet(id) {
+function openSheet(id, { keepChat = false } = {}) {
   const c = characters[id]; if (!c) return;
   active = id;
   for (const [cid, m] of markerEls) m.el.dataset.active = String(cid === id);
   $("sheet").dataset.mode = "figure";
   $("sCrumb").textContent = Env.breadcrumb(SCENE_ENVELOPE);
-  $("sName").textContent = c.name.en; $("sJa").textContent = c.name.ja || "";
-  $("sRole").textContent = c.role || "—";
+  $("sName").textContent = nameOf(c); $("sJa").textContent = otherNameOf(c);
+  $("sRole").textContent = sheetText(c, "role") || "—";
   showRecord(Env.about(id), { envelopes: [SCENE_ENVELOPE], about: [id] });
   const chips = $("sChips"); chips.innerHTML = "";
   const chip = (text, cls = "") => { const s = document.createElement("span"); s.className = `chip ${cls}`; s.textContent = text; chips.appendChild(s); };
-  chip(c.faction?.replace(/-/g, " ") || "unknown");
-  chip(c.perspective?.replace(/-/g, " ") || "no perspective");
-  chip(c.status === "curator-reviewed" ? "curator reviewed" : c.status === "sourced" ? "sourced, not yet reviewed" : "draft, not yet sourced", c.status === "curator-reviewed" ? "" : "draft");
-  if (c.voice?.routes_through) chip(`speaks through the ${characters[c.voice.routes_through]?.name.en.toLowerCase() || "interpreter"}`);
-  const dec = c.declines || [];
+  chip(t("faction")[c.faction] || c.faction?.replace(/-/g, " ") || "—");
+  chip(c.perspective ? Env.label(c.perspective) : "—");
+  chip(t("status")[c.status] || t("status").draft, c.status === "curator-reviewed" ? "" : "draft");
+  if (c.voice?.routes_through) chip(t("speaksThrough")(characters[c.voice.routes_through] ? nameOf(characters[c.voice.routes_through]) : "interpreter"));
+  const dec = (LANG === "ja" && CHAR_JA[id]?.declines?.length ? CHAR_JA[id].declines : c.declines) || [];
   $("sDeclinesWrap").hidden = !dec.length; $("sDeclines").textContent = dec.join(" · ");
   // Close-up 3D model, when the figure has one
   const mv = $("sModel");
   $("sModelWrap").hidden = !c.model?.src;
   if (c.model?.src) {
     if (mv.getAttribute("src") !== c.model.src) mv.setAttribute("src", c.model.src);
-    mv.setAttribute("alt", `3D model of the ${c.name.en}${c.appearance ? ": " + c.appearance : ""}`);
+    mv.setAttribute("alt", `${t("modelAlt")(nameOf(c))}${sheetText(c, "appearance") ? "：" + sheetText(c, "appearance") : ""}`);
     mv.cameraOrbit = "0deg 80deg auto";
-    $("sModelLabel").textContent = c.model.label || "";
+    $("sModelLabel").textContent = sheetText(c, "modelLabel") || "";
     $("sStl").dataset.src = c.model.src; $("sStl").dataset.name = id;
   } else {
     mv.removeAttribute("src");
   }
-  resetChat(id);
+  if (!keepChat || chat.id !== id) resetChat(id);
   $("sheet").classList.add("open");
 }
 
@@ -503,7 +512,25 @@ const I18N = {
     listening: "Listening… tap 🎙 again to send", transcribing: "Transcribing…", fromRecord: "From the record:", unknown: "Unknown: ",
     voiceOn: "🔊 Voice on", voiceOff: "🔇 Voice off", replay: "🔊 Replay", making: "… voice", credit: "Voices by ElevenLabs · synthetic",
     notice: "This voice is a synthetic interpretation built from historical sources. It is not a historical record and does not speak for any person or community.",
-    switched: "Talk and voice: English",
+    switched: "English",
+    title: "Omusha, Kushun Kotan, 1808", subtitle: "オムシャ・久春古丹 · tap a figure", open: "Open", about: "About",
+    openTitle: "Open a splat file", aboutTitle: "About this scene: what is known, and what is not",
+    dotsTitle: "Show or hide the figure dots (figures stay tappable)", flipTitle: "Flip upside-down scenes", resetTitle: "Reset view",
+    fsTitle: "Fullscreen", close: "Close", langTitle: "English · tap for 日本語",
+    stl: "Download for 3D printing (STL)", stlTitle: "Shape only (STL has no colour). Team use only: not for sharing.",
+    stlMaking: "Preparing STL…", stlSaved: (mm) => `STL saved: ${mm} mm tall. Scale it in your slicer.`, stlFailed: (m) => `Couldn't make the STL: ${m}`,
+    role: "Role", declines: "Will not speculate on", creditTitle: "Synthetic voices: not recordings of any person", micTitle: "Ask by voice",
+    knownH: "What is known <span>· and what is not</span>",
+    legend: "Every entry shows two separate scores: <b>evidence</b> (how well it is supported) and <b>standing</b> (whose knowledge it is). Nothing is overwritten; corrections keep the history.",
+    aboutScene: "About this scene", aboutSceneSub: "what is known, and what is not", model3d: "3D model",
+    noSplat: "The scene scan (splat) isn't uploaded yet. Meanwhile, open a figure or the record:",
+    loading: (l) => `Loading ${l}…`, cantLoad: (l, m) => `Couldn't load ${l}. ${m}`,
+    hintTouch: "Tap a marker to meet a figure · drag to orbit · pinch to zoom", hintMouse: "Click a marker to meet a figure · drag to orbit · scroll to zoom",
+    dotsOn: "Figure dots shown", dotsOff: "Dots hidden · figures still tappable",
+    micBlocked: "Microphone blocked. Allow it in the browser, or type the question.", notCaught: "Didn't catch that. Try again.",
+    faction: { aizu: "Aizu clan", shogunate: "shogunate", "wajin-interpreter": "Wajin interpreter", "sakhalin-ainu": "Sakhalin Ainu" },
+    status: { "curator-reviewed": "curator reviewed", sourced: "sourced, not yet reviewed", draft: "draft, not yet sourced" },
+    speaksThrough: (n) => `speaks through the ${n.toLowerCase()}`, modelAlt: (n) => `3D model of the ${n}`,
   },
   ja: {
     suggAinu: ["ここでは何が行われていますか？", "この儀式はあなたにとって何を意味しましたか？", "何を着ていますか？", "なぜ顔が見えないのですか？"],
@@ -513,26 +540,60 @@ const I18N = {
     listening: "聞いています… もう一度 🎙 で送信", transcribing: "文字にしています…", fromRecord: "記録より：", unknown: "不明：",
     voiceOn: "🔊 音声オン", voiceOff: "🔇 音声オフ", replay: "🔊 もう一度", making: "… 音声", credit: "音声：ElevenLabs（合成音声）",
     notice: "この声は歴史資料をもとにした合成の解釈です。歴史記録ではなく、特定の個人や共同体を代弁するものではありません。",
-    switched: "会話と音声：日本語",
+    switched: "日本語",
+    title: "オムシャ　久春古丹　1808年", subtitle: "Omusha, Kushun Kotan · 人物をタップ", open: "開く", about: "この場面について",
+    openTitle: "スプラットファイルを開く", aboutTitle: "この場面について：分かっていること、分からないこと",
+    dotsTitle: "人物の印を表示／非表示（非表示でもタップできます）", flipTitle: "上下を反転", resetTitle: "視点をリセット",
+    fsTitle: "全画面表示", close: "閉じる", langTitle: "日本語 · タップで English",
+    stl: "3Dプリント用にダウンロード（STL）", stlTitle: "形状のみ（STLには色がありません）。チーム内の利用に限ります。共有しないでください。",
+    stlMaking: "STLを作成しています…", stlSaved: (mm) => `STLを保存しました：高さ${mm}mm。スライサーで拡大縮小してください。`, stlFailed: (m) => `STLを作成できませんでした：${m}`,
+    role: "役割", declines: "推測しないこと", creditTitle: "合成音声です。実在の人物の録音ではありません。", micTitle: "声で質問する",
+    knownH: "分かっていること <span>・分からないこと</span>",
+    legend: "各項目には二つの別々の評価があります：<b>根拠</b>（どの程度裏付けられているか）と<b>立場</b>（誰の知識か）。上書きはされず、訂正しても履歴が残ります。",
+    aboutScene: "この場面について", aboutSceneSub: "分かっていること、分からないこと", model3d: "3Dモデル",
+    noSplat: "場面のスキャン（スプラット）はまだアップロードされていません。その間、人物または記録を開けます：",
+    loading: (l) => `${l} を読み込んでいます…`, cantLoad: (l, m) => `${l} を読み込めませんでした。${m}`,
+    hintTouch: "印をタップして人物に会う · ドラッグで回転 · ピンチで拡大", hintMouse: "印をクリックして人物に会う · ドラッグで回転 · スクロールで拡大",
+    dotsOn: "人物の印を表示", dotsOff: "印を非表示 · 人物はタップできます",
+    micBlocked: "マイクがブロックされています。ブラウザで許可するか、質問を入力してください。", notCaught: "聞き取れませんでした。もう一度どうぞ。",
+    faction: { aizu: "会津藩", shogunate: "幕府", "wajin-interpreter": "和人の通辞", "sakhalin-ainu": "樺太アイヌ" },
+    status: { "curator-reviewed": "学芸員確認済み", sourced: "出典あり・未確認", draft: "下書き・出典未確認" },
+    speaksThrough: (n) => `${n}を介して話す`, modelAlt: (n) => `${n}の3Dモデル`,
+    machine: "機械翻訳",
   },
 };
+// Name and sheet text in the current language. Japanese sheet text is a machine translation.
+const nameOf = (c) => (LANG === "ja" ? c.name.ja || c.name.en : c.name.en);
+const otherNameOf = (c) => (LANG === "ja" ? c.name.en : c.name.ja || "");
+const sheetText = (c, f) => (LANG === "ja" && CHAR_JA[c.id]?.[f]) || (f === "modelLabel" ? c.model?.label : c[f]);
 let LANG = params.get("lang") === "ja" || params.get("lang") === "en" ? params.get("lang") : null;
 try { LANG = LANG || localStorage.getItem("omusha.lang"); } catch { /* storage blocked */ }
 if (LANG !== "ja" && LANG !== "en") LANG = navigator.language?.startsWith("ja") ? "ja" : "en";
 const t = (k) => I18N[LANG][k];
 function applyLang() {
   document.documentElement.lang = LANG;
-  for (const s of $("lang").querySelectorAll("span")) s.classList.toggle("on", s.dataset.l === LANG);
+  Env.setLang(LANG);
+  for (const f of $("lang").querySelectorAll(".flag")) f.classList.toggle("on", f.dataset.l === LANG);
+  $("lang").title = t("langTitle");
+  for (const n of document.querySelectorAll("[data-i18n]")) n.textContent = t(n.dataset.i18n);
+  for (const n of document.querySelectorAll("[data-i18n-html]")) n.innerHTML = t(n.dataset.i18nHtml);
+  for (const n of document.querySelectorAll("[data-i18n-title]")) n.title = t(n.dataset.i18nTitle);
   $("sTalkH").replaceChildren(t("talkH"), Object.assign(document.createElement("span"), { textContent: t("talkSub") }));
   $("sSend").textContent = t("ask"); $("sQ").placeholder = t("placeholder");
   $("sVoiceCredit").textContent = t("credit"); $("sNotice").textContent = t("notice");
   if (chat.id) renderSuggestions(chat.id);
   syncVoiceUi();
 }
-$("lang").addEventListener("click", () => {
+$("lang").addEventListener("click", async () => {
   LANG = LANG === "ja" ? "en" : "ja";
   try { localStorage.setItem("omusha.lang", LANG); } catch { /* ignore */ }
   stopSpeaking(); applyLang(); toast(t("switched"));
+  // Re-draw everything that shows names or the record, keeping any conversation in place.
+  await Env.loadEnvelope();
+  buildMarkers();
+  if (!ui.loader.classList.contains("hide") && ui.loader.classList.contains("interactive")) { failed(t("noSplat")); showFigureList(); }
+  if ($("sheet").classList.contains("open")) { if (active) openSheet(active, { keepChat: true }); else openScene(); }
+  if (EDIT) renderEditor();
 });
 
 let chat = { id: null, history: [] };
@@ -604,7 +665,7 @@ async function ask(question) {
     const cited = (data.cites || []).map((c) => Env.state.all.find((o) => o.id === c)).filter(Boolean);
     if (cited.length) {
       const box = elm("div", "cited"); box.append(elm("div", "", t("fromRecord")));
-      for (const o of cited) box.append(elm("div", "", `• ${o.kind === "absence" ? t("unknown") : ""}${o.claim} (${o.source?.ref || o.source?.type || "no source"})`));
+      for (const o of cited) box.append(elm("div", "", `• ${o.kind === "absence" ? t("unknown") : ""}${Env.claimOf(o)} (${Env.sourceOf(o) || "—"})`));
       pending.append(box);
     }
     chat.history.push({ role: "user", text: question }, { role: "model", text: data.answer });
@@ -631,7 +692,7 @@ $("sMic").addEventListener("click", async () => {
   if (voice.server && window.MediaRecorder) {
     let stream;
     try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
-    catch { toast("Microphone blocked. Allow it in the browser, or type the question."); return; }
+    catch { toast(t("micBlocked")); return; }
     const type = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg"].find((t) => MediaRecorder.isTypeSupported(t)) || "";
     const rec = new MediaRecorder(stream, type ? { mimeType: type } : undefined);
     const chunks = [];
@@ -645,7 +706,7 @@ $("sMic").addEventListener("click", async () => {
         const res = await fetch(`/api/listen?lang=${LANG}`, { method: "POST", headers: { "content-type": blob.type }, body: blob });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Could not hear that.");
-        if (data.text) { $("sQ").value = data.text; ask(data.text); } else toast("Didn't catch that. Try again.");
+        if (data.text) { $("sQ").value = data.text; ask(data.text); } else toast(t("notCaught"));
       } catch (err) { toast(err.message); }
       finally { $("sQ").placeholder = t("placeholder"); }
     };
@@ -746,7 +807,7 @@ $("flip").addEventListener("click", () => { flipped = !flipped; applyFlip(); fra
 const PRINT_HEIGHT_MM = 100;
 $("sStl").addEventListener("click", async (event) => {
   const btn = event.currentTarget, label = btn.textContent;
-  btn.disabled = true; btn.textContent = "Preparing STL…";
+  btn.disabled = true; btn.textContent = t("stlMaking");
   try {
     const [{ GLTFLoader }, { STLExporter }, { MeshoptDecoder }] = await Promise.all([
       import("three/addons/loaders/GLTFLoader.js"),
@@ -762,9 +823,9 @@ $("sStl").addEventListener("click", async (event) => {
     const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(new Blob([stl], { type: "model/stl" })), download: `${btn.dataset.name}.stl` });
     document.body.append(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 10000);
-    toast(`STL saved: ${PRINT_HEIGHT_MM} mm tall. Scale it in your slicer.`);
+    toast(t("stlSaved")(PRINT_HEIGHT_MM));
   } catch (err) {
-    console.error(err); toast(`Couldn't make the STL: ${err.message}`);
+    console.error(err); toast(t("stlFailed")(err.message));
   } finally {
     btn.disabled = false; btn.textContent = label;
   }
@@ -780,7 +841,7 @@ function applyDots() {
 $("dots").addEventListener("click", () => {
   dotsOn = !dotsOn; applyDots();
   try { localStorage.setItem("omusha.dots", dotsOn ? "1" : "0"); } catch { /* ignore */ }
-  toast(dotsOn ? "Figure dots shown" : "Dots hidden · figures still tappable");
+  toast(dotsOn ? t("dotsOn") : t("dotsOff"));
 });
 applyDots();
 $("reset").addEventListener("click",() => { if (!home) return; camera.position.copy(home.position); controls.target.copy(home.target); controls.update(); });
@@ -791,11 +852,12 @@ $("fs").addEventListener("click", () => {
 function hint() {
   const h = $("hint");
   h.textContent = EDIT ? "Edit mode: pick a figure, then tap where it stands"
-    : isTouch ? "Tap a marker to meet a figure · drag to orbit · pinch to zoom" : "Click a marker to meet a figure · drag to orbit · scroll to zoom";
+    : isTouch ? t("hintTouch") : t("hintMouse");
   h.classList.remove("hide"); clearTimeout(hint.t); hint.t = setTimeout(() => h.classList.add("hide"), 5000);
 }
 
 // ---------- Go
+Env.setLang(LANG);
 await Promise.all([loadData(), Env.loadEnvelope()]);
 buildMarkers();
 if (EDIT) { $("editor").classList.add("on"); renderEditor(); }
