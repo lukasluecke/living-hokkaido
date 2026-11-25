@@ -51,6 +51,7 @@ export const lakeHouse: DetailSceneInput = {
     "story-bark-to-cloth",
     "words-objects",
     "trace-sources",
+    "map-cise-plan",
     "quiz-canoe",
     "quiz-garden",
   ],
@@ -82,7 +83,12 @@ export const listeningGrove: DetailSceneInput = {
       key: 1,
     },
   ],
-  activityIds: ["story-bark-to-cloth", "words-objects", "quiz-small-kana"],
+  activityIds: [
+    "story-bark-to-cloth",
+    "words-objects",
+    "map-greetings",
+    "quiz-small-kana",
+  ],
 };
 
 /** Makers' clearing: the loom and the weaving activity at a workbench. */

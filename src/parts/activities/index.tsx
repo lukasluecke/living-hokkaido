@@ -9,6 +9,7 @@ import { Quiz } from "./Quiz";
 import { Story } from "./kinds/Story";
 import { Trace } from "./kinds/Trace";
 import { Words } from "./kinds/Words";
+import { MapActivity } from "./play/Map";
 import { Sequence } from "./Sequence";
 import { themeVars } from "./theme";
 import { Weave } from "./Weave";
@@ -20,6 +21,7 @@ const KIND_LABEL: Record<ActivityPartProps["activity"]["kind"], string> = {
   story: "Story",
   words: "Words",
   trace: "Follow the thread",
+  map: "Map",
 };
 
 export function ActivityPart({
@@ -89,6 +91,14 @@ export function ActivityPart({
       )}
       {activity.kind === "trace" && (
         <Trace activity={activity} claims={claims} prefs={prefs} emit={emit} />
+      )}
+      {activity.kind === "map" && (
+        <MapActivity
+          activity={activity}
+          claims={claims}
+          prefs={prefs}
+          emit={emit}
+        />
       )}
       <div className={s.foot}>
         <button type="button" className={s.secondary} onClick={close}>

@@ -334,3 +334,16 @@ test("every place is open, with its own scene, setting and timelines", () => {
     validateContentPack(bad).some((e) => e.includes('unknown timeline "nope"')),
   );
 });
+
+test("map activities: spots cite the activity's claims; placeholder defaults on", () => {
+  const m = pack.activities.find((a) => a.kind === "map");
+  assert.ok(m && m.kind === "map" && m.placeholder);
+  const p = clone();
+  const raw = kindOf(p, "map");
+  raw.spots[0].claimId = "bark-fiber";
+  assert.ok(validateContentPack(p).some((e) => e.includes("not in claimIds")));
+  const q = clone();
+  const dup = kindOf(q, "map");
+  dup.spots[1].id = dup.spots[0].id;
+  assert.ok(validateContentPack(q).some((e) => e.includes("Duplicate")));
+});

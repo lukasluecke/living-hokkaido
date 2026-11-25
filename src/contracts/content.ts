@@ -108,6 +108,18 @@ function checkActivityKind(
       }
     }
   }
+  if (a.kind === "map") {
+    dupes(
+      `${at} spot`,
+      a.spots.map((x) => x.id),
+      errors,
+    );
+    for (const spot of a.spots)
+      if (!cited.has(spot.claimId))
+        errors.push(
+          `${at} spot ${spot.id}: claim "${spot.claimId}" not in claimIds`,
+        );
+  }
   if (a.kind === "words") {
     for (const t of a.terms) {
       const where = `${at} term ${t.id}`;
