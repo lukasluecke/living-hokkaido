@@ -1,3 +1,41 @@
+/* Field label fonts: self-hosted (public/fonts, SIL OFL 1.1), Latin subset. */
+@font-face {
+  font-family: "Shippori Mincho B1";
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/shippori-mincho-b1-700.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Zen Kaku Gothic New";
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/zen-kaku-gothic-new-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Zen Kaku Gothic New";
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/zen-kaku-gothic-new-700.woff2") format("woff2");
+}
+/* Field label tokens (mirror src/design/tokens.ts ui + seasonInk). Parts may
+   read these; the shell sets --fl-season from the season clock. */
+:root {
+  --fl-paper: #fbfaf6;
+  --fl-stock2: #eef1f2;
+  --fl-line: #d3d9de;
+  --fl-ink: #1d2a36;
+  --fl-ink-soft: #53606c;
+  --fl-gold: #e8c27a;
+  --fl-draft: #7a5a12;
+  --fl-draft-bg: #fbf1d8;
+  --fl-season: #c9577a;
+  --fl-season-soft: color-mix(in srgb, var(--fl-season) 16%, white);
+  --fl-radius: 6px;
+  --fl-shadow: 0 10px 26px rgb(15 25 40 / 22%);
+  --fl-body: "Zen Kaku Gothic New", "Hiragino Kaku Gothic ProN", system-ui,
+    sans-serif;
+  --fl-heading: "Shippori Mincho B1", "Hiragino Mincho ProN", Georgia, serif;
+}
 :root {
   --ink: #254b42;
   --muted: #64756d;

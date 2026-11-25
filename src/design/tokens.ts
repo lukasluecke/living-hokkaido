@@ -3,17 +3,30 @@
 // Change a token here, not in a part, so all parts stay in one style.
 import type { SeasonId } from "@/contracts";
 
-/** UI (DOM overlay) colours. Warm paper and ink, gold for focus. */
+/**
+ * UI (DOM overlay) colours. "Field label" look (Lukas, 2026-11-26): museum
+ * labels on snow-white card stock, deep sea-blue ink, one seasonal ink
+ * (`seasonInk`) for progress, rings and stamps, gold only for focus.
+ * The same values are CSS variables `--fl-*` in src/app/globals.css.
+ */
 export const ui = {
-  paper: "#fbf4e6",
-  paperEdge: "#efe1c2",
-  ink: "#2b2118",
-  inkSoft: "#5a4a3c",
+  paper: "#fbfaf6",
+  paperEdge: "#d3d9de",
+  /** Second surface: inset rows, owl note, tray footers. */
+  stock2: "#eef1f2",
+  ink: "#1d2a36",
+  inkSoft: "#53606c",
   gold: "#e8c27a",
   goldDeep: "#c99a3b",
   night: "#1f2d46",
   danger: "#9c4f2e",
+  /** Draft / research-preview chip. */
+  draft: "#7a5a12",
+  draftBg: "#fbf1d8",
 } as const;
+
+/** Seasonal ink: [spring, summer, autumn, winter]. Rail, rings, stamps. */
+export const seasonInk = ["#c9577a", "#7a5fc0", "#c8562e", "#2f6f9c"] as const;
 
 /** Material palette for 3D objects and buildings (per part name). */
 export const material = {
@@ -71,9 +84,9 @@ export const motion = {
 } as const;
 
 export const type = {
-  /** Body text in overlays. Local system fonts only (no network fonts). */
-  body: 'ui-rounded, "Hiragino Maru Gothic ProN", system-ui, sans-serif',
-  heading: 'ui-serif, "Hiragino Mincho ProN", Georgia, serif',
+  /** Body text in overlays. Self-hosted files in public/fonts (OFL), no network fonts. */
+  body: '"Zen Kaku Gothic New", "Hiragino Kaku Gothic ProN", system-ui, sans-serif',
+  heading: '"Shippori Mincho B1", "Hiragino Mincho ProN", Georgia, serif',
   /** Minimum overlay text size (px). */
   minSize: 14,
 } as const;
