@@ -3,6 +3,7 @@
 // When the game is ported, import these from `@/contracts` and delete this
 // file. Keep it in sync by hand; never add fields living-hokkaido lacks.
 // The activity definition (kind "slope-run") is a later contract proposal.
+import type { FindInfo } from "../core/finds";
 
 export type ActivityResult = {
   activityId: string;
@@ -34,6 +35,12 @@ export type SlopeProps = {
   emit: Emit;
   /** Street layout seed. Same seed, same street. */
   seed?: number;
+  /**
+   * Museum labels to collect on the way down, in street order. Each one's
+   * `text` is a cited claim (the host resolves it); the end card shows the
+   * collected ones. Optional: without it there are no finds.
+   */
+  finds?: FindInfo[];
   /** Dev only: start this many metres down the street (the page reads
    *  ?at=N). Hosts leave it out. */
   startAt?: number;
