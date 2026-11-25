@@ -95,6 +95,9 @@
   overscroll-behavior: contain;
 }
 .body > * {
+  /* The side panel draws the frame; a part's own card border would show
+     as a second frame inside it (most visible on the phone sheet). */
+  border: 0;
   box-shadow: none;
   max-width: none;
   border-radius: 0;

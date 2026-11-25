@@ -15,7 +15,11 @@ export function SoundLab() {
   const [buses, setBuses] = useState(() => ({
     ...(getSoundEngine()?.manifest.buses ?? { master: 1, ambient: 1, ui: 1 }),
   }));
-  const engine = getSoundEngine();
+  // The engine exists only in the browser: render after mount so the server
+  // HTML (empty) matches the first client render (no hydration error).
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const engine = mounted ? getSoundEngine() : null;
 
   useEffect(() => getSoundEngine()?.attach(), []);
   useEffect(() => {
