@@ -49,3 +49,32 @@
   outline: 3px solid #e8c27a;
   outline-offset: 2px;
 }
+/* Phone: one scrolling row; hidden while the object sheet is open. */
+@media (max-width: 700px) {
+  .bar {
+    left: 0;
+    right: 0;
+    transform: none;
+    max-width: none;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding: 0 12px calc(4px + env(safe-area-inset-bottom, 0px));
+    bottom: 10px;
+    scrollbar-width: none;
+  }
+  .bar button {
+    flex: none;
+    white-space: nowrap;
+  }
+  .bar[data-focused] {
+    display: none;
+  }
+}
+/* Laptop: leave room for the object card on the right while focused. */
+@media (min-width: 701px) {
+  .bar[data-focused] {
+    left: calc((100% - 452px) / 2);
+    max-width: calc(100% - 484px);
+  }
+}

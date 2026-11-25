@@ -164,7 +164,17 @@ export function PinTracker({
       const [x, y, z] = anchorPos(field, l);
       v.current.set(x, y + 2.4, z).project(camera);
       const hidden = v.current.z > 1;
-      el.style.transform = `translate(-50%, -100%) translate(${((v.current.x + 1) / 2) * size.width}px, ${((1 - v.current.y) / 2) * size.height}px)`;
+      // Keep the whole label on screen (8px margin), so edge pins stay readable.
+      const half = el.offsetWidth / 2 + 8;
+      const px = Math.min(
+        Math.max(((v.current.x + 1) / 2) * size.width, half),
+        size.width - half,
+      );
+      const py = Math.min(
+        Math.max(((1 - v.current.y) / 2) * size.height, el.offsetHeight + 8),
+        size.height - 8,
+      );
+      el.style.transform = `translate(-50%, -100%) translate(${px}px, ${py}px)`;
       el.style.visibility = hidden ? "hidden" : "visible";
     }
   });

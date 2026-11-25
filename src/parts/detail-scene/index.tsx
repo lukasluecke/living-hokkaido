@@ -61,7 +61,11 @@ export function DetailScenePart(props: DetailScenePartProps) {
           </span>
         )}
       </div>
-      <nav className={c.bar} aria-label={`Objects in ${scene.title}`}>
+      <nav
+        className={c.bar}
+        aria-label={`Objects in ${scene.title}`}
+        data-focused={focusedArtifactId ? "" : undefined}
+      >
         {scene.placements.map((p) => (
           <button
             key={p.artifactId}
