@@ -25,9 +25,30 @@ export function makeUniso(ox: number, oy: number) {
   };
 }
 
+/**
+ * Hand-drawn look: every outlined shape's corners move by up to this many
+ * pixels, the same way every time (a hash of the point), so edges are a
+ * little uneven instead of a perfect pixel grid. 0 turns it off.
+ */
+export const WOBBLE_PX = 2.2;
+
+function jitter(x: number, y: number, k: number): number {
+  const h = Math.sin(x * 12.9898 + y * 78.233 + k * 37.719) * 43758.5453;
+  return (h - Math.floor(h) - 0.5) * 2 * WOBBLE_PX;
+}
+
+/** A point nudged by the hand-drawn wobble. */
+export function wob([x, y]: Pt): Pt {
+  return [x + jitter(x, y, 1), y + jitter(x, y, 2)];
+}
+
 export function poly(ctx: Ctx, pts: Pt[], fill: PaletteKey, lineW = 3) {
   ctx.beginPath();
-  pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+  // The nudge depends only on the point, so shapes that share a corner
+  // (a face and its shading patch) still meet.
+  pts
+    .map(wob)
+    .forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
   ctx.closePath();
   ctx.fillStyle = hex(fill);
   ctx.fill();
@@ -40,9 +61,14 @@ export function poly(ctx: Ctx, pts: Pt[], fill: PaletteKey, lineW = 3) {
 }
 
 export function line(ctx: Ctx, a: Pt, b: Pt, color: PaletteKey, w = 2) {
+  const [ax, ay] = wob(a);
+  const [bx, by] = wob(b);
   ctx.beginPath();
-  ctx.moveTo(a[0], a[1]);
-  ctx.lineTo(b[0], b[1]);
+  ctx.moveTo(ax, ay);
+  // A slight bow in the middle, so long lines are not ruler-straight.
+  const mx = (ax + bx) / 2 + jitter(bx, ay, 3) * 0.8;
+  const my = (ay + by) / 2 + jitter(ax, by, 4) * 0.8;
+  ctx.quadraticCurveTo(mx, my, bx, by);
   ctx.strokeStyle = hex(color);
   ctx.lineWidth = w;
   ctx.lineCap = "round";

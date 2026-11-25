@@ -23,6 +23,9 @@ interface PartDef {
   path(ctx: CanvasRenderingContext2D): void;
 }
 
+const paintStyle = (p: number | CanvasPattern) =>
+  typeof p === "number" ? "#" + p.toString(16).padStart(6, "0") : p;
+
 const ATLAS_W = 200;
 const ATLAS_H = 60;
 
@@ -231,10 +234,18 @@ export class Nuri {
     this.tex.refresh();
   }
 
+  /**
+   * A texture swatch from the scene as paint: a small patch, tiled. Paint
+   * with it to copy a pattern (stone blocks, planks), not only a colour.
+   */
+  pattern(patch: HTMLCanvasElement): CanvasPattern | null {
+    return this.ctx.createPattern(patch, "repeat");
+  }
+
   /** Paint a round dab at a world point. Paint is clipped to each part's silhouette. */
-  dab(wx: number, wy: number, radius: number, color: number) {
+  dab(wx: number, wy: number, radius: number, paint: number | CanvasPattern) {
     const ctx = this.ctx;
-    ctx.fillStyle = "#" + color.toString(16).padStart(6, "0");
+    ctx.fillStyle = paintStyle(paint);
     for (const name of DRAW_ORDER) {
       const img = this.parts.get(name)!;
       const { frame: f, path } = PARTS[name];
@@ -262,10 +273,10 @@ export class Nuri {
    * Paint every part in one colour (undoable): the keyboard and quick-paint
    * path. The outline and face stay, so a perfect hide still takes brushwork.
    */
-  fill(color: number) {
+  fill(paint: number | CanvasPattern) {
     this.beginStroke();
     const ctx = this.ctx;
-    ctx.fillStyle = "#" + color.toString(16).padStart(6, "0");
+    ctx.fillStyle = paintStyle(paint);
     for (const name of DRAW_ORDER) {
       const { frame: f, path } = PARTS[name];
       ctx.save();

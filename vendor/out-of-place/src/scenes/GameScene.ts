@@ -37,6 +37,11 @@ export type GameSceneData = OutOfPlaceProps & {
 type Tool = "move" | "brush" | "eyedrop";
 const BRUSH_RADIUS = { S: 2, M: 5, L: 10 } as const;
 type BrushSize = keyof typeof BRUSH_RADIUS;
+const SIZES: BrushSize[] = ["S", "M", "L"];
+/** Side of the texture swatch the eyedropper takes from the scene (px). */
+const PATCH = 24;
+/** Recent paints kept in the panel's bottom row. */
+const RECENT_MAX = 4;
 const ZOOM = 2.5;
 const KEY_STEP = 8;
 /** Finder ring (the seeker's magnifying glass): radius and arrow-key step. */
@@ -61,6 +66,7 @@ const BTN_W = 140;
 const BTN_H = 76;
 const ROWS = [110, 196, 300, 390, 494];
 const MAIN_BTN = { x: 1115, y: 650, w: 296, h: 84 };
+const RECENT_Y = 568;
 
 // Reveal: freeze, slow zoom on the hider, then the sting.
 const REVEAL_ZOOM = 2.3;
@@ -69,6 +75,9 @@ const REVEAL_ZOOM_MS = 2400;
 const REVEAL_SCREEN_X = 360;
 const CLIP_MS = 10_000;
 const CARD = { x: 950, y: 318, w: 560, h: 500 };
+
+/** What the brush paints with: a colour, and the scene patch it came from. */
+type Paint = { color: number; patch: HTMLCanvasElement | null };
 
 type RevealInfo = {
   found: boolean;
@@ -93,6 +102,12 @@ export class GameScene extends Phaser.Scene {
   private tool: Tool = "move";
   private brushSize: BrushSize = "M";
   private color: number = PALETTE.tuff;
+  private fillPattern: CanvasPattern | null = null;
+  private recent: Paint[] = [];
+  private recentBtns: Phaser.GameObjects.Container[] = [];
+  private recentKeys: string[] = [];
+  private swatchImg!: Phaser.GameObjects.Image;
+  private brushGfx!: Phaser.GameObjects.Graphics;
   private zoomed = false;
   private stroking = false;
   private dragging = false;
@@ -146,6 +161,8 @@ export class GameScene extends Phaser.Scene {
     this.tool = "move";
     this.brushSize = "M";
     this.color = PALETTE.tuff;
+    this.fillPattern = null;
+    this.recent = [];
     this.zoomed = false;
     this.stroking = false;
     this.dragging = false;
@@ -267,7 +284,8 @@ export class GameScene extends Phaser.Scene {
     this.world.add(this.nuri.container);
     this.spotlight = this.add.graphics().setDepth(20_000);
     this.cursorGfx = this.add.graphics().setDepth(25_000);
-    this.world.add([this.spotlight, this.cursorGfx]);
+    this.brushGfx = this.add.graphics().setDepth(25_000);
+    this.world.add([this.spotlight, this.cursorGfx, this.brushGfx]);
     this.seekCursor = { ...this.art.spawn, shown: false };
   }
 
@@ -324,6 +342,10 @@ export class GameScene extends Phaser.Scene {
     };
     this.swatch = this.add.graphics();
     this.panel.add(this.swatch);
+    this.swatchImg = this.add
+      .image(THIRDS[0], ROWS[3] - 3, "__DEFAULT")
+      .setVisible(false);
+    this.panel.add(this.swatchImg);
     btn(THIRDS[1], ROWS[3], "Fill", () => this.fillAll(), 88, 24);
     this.undoBtn = btn(THIRDS[2], ROWS[3], "Undo", () => this.undo(), 88, 24);
     this.poseBtns = {
@@ -525,7 +547,7 @@ export class GameScene extends Phaser.Scene {
             this.nuri.beginStroke();
             this.stroking = true;
             this.lastDab = { x: w.x, y: w.y };
-            this.nuri.dab(w.x, w.y, BRUSH_RADIUS[this.brushSize], this.color);
+            this.nuri.dab(w.x, w.y, BRUSH_RADIUS[this.brushSize], this.paint);
             this.syncPanel();
           } else {
             this.pickColor(w.x, w.y);
@@ -536,8 +558,10 @@ export class GameScene extends Phaser.Scene {
       },
     );
     this.input.on("pointermove", (p: Phaser.Input.Pointer) => {
-      if (!p.isDown || this.state.phase !== "disguise") return;
+      if (this.state.phase !== "disguise") return;
       const w = cam.getWorldPoint(p.x, p.y);
+      this.drawBrushPreview(w.x, w.y);
+      if (!p.isDown) return;
       if (this.dragging) this.tryMove(w.x, w.y);
       if (this.stroking && this.lastDab) {
         // Fill the gap between pointer events so fast strokes stay continuous.
@@ -555,7 +579,7 @@ export class GameScene extends Phaser.Scene {
             this.lastDab.x + (w.x - this.lastDab.x) * t,
             this.lastDab.y + (w.y - this.lastDab.y) * t,
             r,
-            this.color,
+            this.paint,
           );
         }
         this.lastDab = { x: w.x, y: w.y };
@@ -627,6 +651,8 @@ export class GameScene extends Phaser.Scene {
           this.pickColor(this.state.hider.x, this.state.hider.y - 70); // colour behind Nuri
         else if (k === "f" || k === " ") this.fillAll();
         else if (k === "z") this.undo();
+        else if (k === "[") this.stepBrushSize(-1);
+        else if (k === "]") this.stepBrushSize(1);
         else if (k === "+" || k === "=") this.setZoom(true);
         else if (k === "-") this.setZoom(false);
         else handled = false;
@@ -657,6 +683,7 @@ export class GameScene extends Phaser.Scene {
   private onEnter(phase: Phase) {
     this.dragging = this.stroking = false;
     this.lastShownSeconds = -1;
+    this.brushGfx?.clear();
     if (phase !== "roundOver") {
       this.clearRevealFx();
       this.resetCamera();
@@ -671,7 +698,9 @@ export class GameScene extends Phaser.Scene {
       this.nuri.reset();
       this.brushSize = "M";
       this.setTool("move");
-      this.color = PALETTE.tuff;
+      this.setPaint({ color: PALETTE.tuff, patch: null }, false);
+      this.recent = [];
+      this.drawRecent();
       this.lastHider = null;
       this.roundNo++;
       this.revealInfo = null;
@@ -742,7 +771,7 @@ export class GameScene extends Phaser.Scene {
         .filter(Boolean)
         .join("\n"),
       disguise:
-        "Hider: move Nuri to a spot, paint to blend in, pick a pose.\nKeys: arrows move · E pick colour · F fill · 1–3 pose · Enter done",
+        "Hider: move Nuri to a spot, paint to blend in, pick a pose. The eyedropper picks up colour and pattern.\nKeys: arrows move · E pick paint · [ ] brush size · F fill · 1–3 pose · Enter done",
       handoff: "",
       seek: `Seeker: tap whoever looks out of place. Wrong taps cost ${this.penaltySeconds} seconds.\nKeys: arrows move the ring · Space taps · G gives up`,
       reveal: "",
@@ -797,6 +826,36 @@ export class GameScene extends Phaser.Scene {
     this.syncPanel();
   }
 
+  /** Outline of the brush (or the eyedropper's square) under the pointer. */
+  private drawBrushPreview(x: number, y: number) {
+    const g = this.brushGfx;
+    g.clear();
+    if (this.state.phase !== "disguise") return;
+    if (this.tool === "brush") {
+      const r = BRUSH_RADIUS[this.brushSize];
+      g.lineStyle(3, PALETTE.outline, 0.9).strokeCircle(x, y, r + 1);
+      g.lineStyle(1.5, PALETTE.cream, 0.95).strokeCircle(x, y, r + 1);
+    } else if (this.tool === "eyedrop") {
+      g.lineStyle(3, PALETTE.outline, 0.9).strokeRect(
+        x - PATCH / 2,
+        y - PATCH / 2,
+        PATCH,
+        PATCH,
+      );
+      g.lineStyle(1.5, PALETTE.sunGlow).strokeRect(
+        x - PATCH / 2,
+        y - PATCH / 2,
+        PATCH,
+        PATCH,
+      );
+    }
+  }
+
+  private stepBrushSize(d: number) {
+    const i = SIZES.indexOf(this.brushSize);
+    this.setBrushSize(SIZES[Math.max(0, Math.min(SIZES.length - 1, i + d))]);
+  }
+
   private setBrushSize(size: BrushSize) {
     this.brushSize = size;
     if (this.tool === "move") this.tool = "brush";
@@ -809,7 +868,7 @@ export class GameScene extends Phaser.Scene {
 
   private fillAll() {
     if (this.state.phase !== "disguise") return;
-    this.nuri.fill(this.color);
+    this.nuri.fill(this.paint);
     this.syncPanel();
     this.cfg.announce("Nuri painted.");
   }
@@ -846,8 +905,86 @@ export class GameScene extends Phaser.Scene {
     const py = Math.round(y);
     if (px < 0 || py < 0 || px >= WORLD_W || py >= WORLD_H) return;
     const [r, g, b, alpha] = this.compositeCtx.getImageData(px, py, 1, 1).data;
-    this.color = alpha > 0 ? (r << 16) | (g << 8) | b : PALETTE.backdrop;
+    const color = alpha > 0 ? (r << 16) | (g << 8) | b : PALETTE.backdrop;
+    // Take a small square of the scene too, so the brush can copy its
+    // pattern (stone joints, planks), not only one flat colour.
+    const patch = document.createElement("canvas");
+    patch.width = patch.height = PATCH;
+    const pc = patch.getContext("2d")!;
+    pc.fillStyle = `#${PALETTE.backdrop.toString(16).padStart(6, "0")}`;
+    pc.fillRect(0, 0, PATCH, PATCH);
+    pc.drawImage(
+      this.art.composite,
+      px - PATCH / 2,
+      py - PATCH / 2,
+      PATCH,
+      PATCH,
+      0,
+      0,
+      PATCH,
+      PATCH,
+    );
+    this.setPaint({ color, patch }, true);
     this.setTool("brush");
+  }
+
+  /** Brush paint: the scene patch when there is one, else the colour. */
+  private get paint(): number | CanvasPattern {
+    return this.fillPattern ?? this.color;
+  }
+
+  private setPaint(p: Paint, remember: boolean) {
+    this.color = p.color;
+    this.fillPattern = p.patch ? this.nuri.pattern(p.patch) : null;
+    if (this.textures.exists("swatch-patch"))
+      this.textures.remove("swatch-patch");
+    if (p.patch) {
+      this.textures
+        .addCanvas("swatch-patch", p.patch)
+        ?.setFilter(Phaser.Textures.FilterMode.NEAREST);
+      this.swatchImg?.setTexture("swatch-patch").setDisplaySize(80, 60);
+    }
+    this.swatchImg?.setVisible(!!p.patch);
+    if (remember) {
+      this.recent = [
+        p,
+        ...this.recent.filter((q) => q.patch !== p.patch),
+      ].slice(0, RECENT_MAX);
+      this.drawRecent();
+    }
+    this.syncPanel();
+  }
+
+  /** The row of recent paints under the poses: tap one to paint with it again. */
+  private drawRecent() {
+    for (const b of this.recentBtns) b.destroy();
+    for (const k of this.recentKeys)
+      if (this.textures.exists(k)) this.textures.remove(k);
+    this.recentBtns = [];
+    this.recentKeys = [];
+    if (!this.panel) return;
+    this.recent.forEach((p, i) => {
+      const x = PANEL_X0 + 46 + i * 72;
+      const root = this.add.container(x, RECENT_Y);
+      const g = this.add.graphics();
+      drawChunkyBox(g, 0, 0, 58, 40, p.color, p.color);
+      root.add(g);
+      if (p.patch) {
+        const key = `recent-${i}`;
+        this.recentKeys.push(key);
+        this.textures
+          .addCanvas(key, p.patch)
+          ?.setFilter(Phaser.Textures.FilterMode.NEAREST);
+        root.add(this.add.image(0, -2, key).setDisplaySize(50, 30));
+      }
+      const hit = this.add
+        .zone(0, 0, 66, 48)
+        .setInteractive({ useHandCursor: true });
+      hit.on("pointerup", () => this.setPaint(p, false));
+      root.add(hit);
+      this.panel.add(root);
+      this.recentBtns.push(root);
+    });
   }
 
   private syncPanel() {
@@ -869,6 +1006,7 @@ export class GameScene extends Phaser.Scene {
       this.color,
     );
     this.undoBtn.root.setAlpha(this.nuri.canUndo ? 1 : 0.5);
+    if (this.swatchImg) this.panel.bringToTop(this.swatchImg);
   }
 
   // ---------- seek and reveal ----------
