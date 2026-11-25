@@ -9,6 +9,7 @@ import { Quiz } from "./Quiz";
 import { Story } from "./kinds/Story";
 import { Trace } from "./kinds/Trace";
 import { Words } from "./kinds/Words";
+import { BoardActivity } from "./play/Board";
 import { MapActivity } from "./play/Map";
 import { Sequence } from "./Sequence";
 import { themeVars } from "./theme";
@@ -22,6 +23,7 @@ const KIND_LABEL: Record<ActivityPartProps["activity"]["kind"], string> = {
   words: "Words",
   trace: "Follow the thread",
   map: "Map",
+  board: "Game",
 };
 
 export function ActivityPart({
@@ -94,6 +96,14 @@ export function ActivityPart({
       )}
       {activity.kind === "map" && (
         <MapActivity
+          activity={activity}
+          claims={claims}
+          prefs={prefs}
+          emit={emit}
+        />
+      )}
+      {activity.kind === "board" && (
+        <BoardActivity
           activity={activity}
           claims={claims}
           prefs={prefs}

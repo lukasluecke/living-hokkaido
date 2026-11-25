@@ -272,6 +272,25 @@ export const mapActivitySchema = z.object({
   placeholder: z.boolean().default(true),
 });
 
+// ---------------------------------------------------------------- board
+
+/**
+ * A documented, non-sacred game played against the owl guide or by two
+ * people on one device. The rules live in the renderer, one per `game`,
+ * and `rulesClaimId` is the claim that records them.
+ */
+export const boardActivitySchema = z.object({
+  ...base,
+  kind: z.literal("board"),
+  /** stick-grid: three sticks each on a 田 grid (Hokkaido Museum, Q021). */
+  game: z.literal("stick-grid"),
+  prompt: z.string().min(1),
+  rulesClaimId: idSchema,
+  /** Shown when a game ends. Must only restate claims. */
+  completion: z.string().min(1),
+  opponent: z.enum(["owl", "two-players"]).default("owl"),
+});
+
 export const activitySchema = z.discriminatedUnion("kind", [
   quizActivitySchema,
   weaveActivitySchema,
@@ -280,6 +299,7 @@ export const activitySchema = z.discriminatedUnion("kind", [
   wordsActivitySchema,
   traceActivitySchema,
   mapActivitySchema,
+  boardActivitySchema,
 ]);
 export type ActivityDefinition = z.infer<typeof activitySchema>;
 export type ActivityInput = z.input<typeof activitySchema>;

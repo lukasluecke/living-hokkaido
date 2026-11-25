@@ -28,6 +28,7 @@ const VERB: Record<string, string> = {
   trace: "Trace",
   weave: "Weave",
   sequence: "Put in order",
+  board: "Play",
   map: "Explore",
 };
 

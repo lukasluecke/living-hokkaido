@@ -39,3 +39,6 @@ journal stamp appears after completion.
   module, `.root` scope, pure state in `play/*Logic.ts`). `map`: stylised
   figure (sketch Hokkaido map or cise plan) with spot buttons; explore opens
   every spot, match puts each word on its spot.
+  `board`: the stick game on a 田 grid (Q021) against a gentle owl
+  (`play/boardLogic.ts`: takes a win, avoids handing one over, else steps
+  closer, with a little chance) or two players on one device.
