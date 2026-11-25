@@ -19,3 +19,7 @@ which component renders each part (`registry.ts`). Route: `/shell`.
 - 2026-11-25: one canvas per 3D part (island, detail-scene, artifact viewer). The shell gives a full-screen stage, a HUD, a side slot (viewer, activity) and an overlay slot (journal, reveal).
 - 2026-11-25: demo/e2e hook in `Shell.tsx`: every event is mirrored as a `lh:event` DOM event, `window.__livingHokkaido.emit` sends events, `<main>` has `data-view` and `data-overlay` (for `scripts/demo-video`, PR #8). Sound hook-up from PR #7 (`src/audio/AGENTS.md`) is kept when that PR merges.
 - 2026-11-25: "Ask the owl" (`src/parts/ask`, docs/ASK.md) is mounted in `Shell.tsx` next to the guide line, with `view`, `locationId`, `sceneId`, `artifactId` and `covered` (an overlay is open). It sends only existing events.
+- 2026-11-25: lazy parts (performance). `registry.ts` loads the island and
+  ask with the page and every other part with `next/dynamic`;
+  `preloadParts()` fetches them about 1.5 s after the shell mounts (idle).
+  First-load JS 727 → 603 KB gzip.
