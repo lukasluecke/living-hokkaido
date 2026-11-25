@@ -1,5 +1,5 @@
 // Drawings for the "place" kind: figures in poses (the pose sheet), things
-// from the house, and four sketch stages after museum dioramas. All
+// from the house and the animal hills, and five sketch stages. All
 // illustrative, our own geometry (labs/activities-scene). Stage box is
 // 800 × 450; figure box 76 × 100 with the feet at the bottom.
 import type { ReactNode } from "react";
@@ -10,7 +10,20 @@ export const STAGE_W = 800;
 export const STAGE_H = 450;
 
 type Hat = "cap" | "straw" | "band" | "hood" | "helmet";
-export type Thing = "cattail" | "bark" | "mortar" | "pot" | "weave" | "fish";
+export type Thing =
+  | "cattail"
+  | "bark"
+  | "mortar"
+  | "pot"
+  | "weave"
+  | "fish"
+  | "deer"
+  | "bear"
+  | "hare"
+  | "salmon"
+  | "set-bow"
+  | "pelt"
+  | "fish-owl";
 
 const HIP: [number, number] = [35, 60];
 const rot = (p: [number, number], d: number): [number, number] => {
@@ -388,10 +401,168 @@ export function Person({
   );
 }
 
+const INK = "#1d2a36";
+
+/** Animal hills things: animals in side view, the set bow, the pelt. */
+const HILL_THINGS: Partial<Record<Thing, ReactNode>> = {
+  deer: (
+    <svg viewBox="0 0 60 60" aria-hidden="true">
+      <g stroke="#5a3f2b" strokeWidth="3" strokeLinecap="round">
+        <path d="M18 38v17M24 39v16M38 39v16M44 38v17" />
+        <path d="M45 16l-3-8M45 16l4-7M42 9l-4-3M49 9l3-4" strokeWidth="2" />
+      </g>
+      <path
+        d="M14 30c0-6 6-9 14-9h12c4 0 6-4 5-10l5 2c2 4 1 10-3 14l-1 13H16c-2-2-2-6-2-10z"
+        fill="#9a6a3e"
+        stroke="#5a3f2b"
+        strokeWidth="1.3"
+      />
+      <path d="M45 13c3 0 7 1 9 3l-3 4c-2 0-5-1-7-3z" fill="#9a6a3e" />
+      <ellipse cx="15.5" cy="31" rx="3.5" ry="5" fill="#f4efe4" />
+      <g fill="#f4efe4">
+        <circle cx="24" cy="27" r="1.3" />
+        <circle cx="30" cy="25" r="1.3" />
+        <circle cx="36" cy="27" r="1.3" />
+        <circle cx="27" cy="31" r="1.3" />
+        <circle cx="33" cy="31" r="1.3" />
+      </g>
+      <circle cx="49" cy="15" r="1.2" fill={INK} />
+    </svg>
+  ),
+  bear: (
+    <svg viewBox="0 0 60 60" aria-hidden="true">
+      <path
+        d="M6 40c0-12 8-20 22-20 8 0 14 2 18 6l6 2c3 1 4 4 3 6l-6 2-3 4v15h-7l-1-9H18v9h-7l-1-8c-3-2-4-4-4-7z"
+        fill="#5b3b26"
+        stroke="#3a2618"
+        strokeWidth="1.3"
+      />
+      <circle cx="44" cy="23" r="3" fill="#5b3b26" stroke="#3a2618" />
+      <path d="M52 33l3 1" stroke="#2a1b12" strokeWidth="2" />
+      <circle cx="48" cy="29" r="1.2" fill="#140d09" />
+    </svg>
+  ),
+  hare: (
+    <svg viewBox="0 0 60 60" aria-hidden="true">
+      <path
+        d="M34 26c-2-8-1-18 2-20s4 8 2 18M38 26c1-8 4-16 7-16s1 9-4 17"
+        fill="#b8a58a"
+        stroke="#6f5f48"
+        strokeWidth="1.2"
+      />
+      <path
+        d="M14 48c0-10 8-16 18-16 2-4 6-7 10-6 4 1 6 5 4 9l-4 3c2 4 1 8-2 10z"
+        fill="#b8a58a"
+        stroke="#6f5f48"
+        strokeWidth="1.2"
+      />
+      <circle cx="13" cy="44" r="3.5" fill="#efe9dc" />
+      <path d="M20 55h22" stroke="#6f5f48" strokeWidth="2" />
+      <circle cx="43" cy="31" r="1.2" fill={INK} />
+    </svg>
+  ),
+  salmon: (
+    <svg viewBox="0 0 60 60" aria-hidden="true">
+      <path
+        d="M8 50c6-4 12-4 18 0s12 4 18 0 8-3 10-2"
+        stroke="#6fb3c8"
+        strokeWidth="3"
+        fill="none"
+        strokeLinecap="round"
+      />
+      <path
+        d="M8 32c10-10 28-12 38-2l8-7v18l-8-7C36 44 18 42 8 32z"
+        fill="#b0796e"
+        stroke="#6b4a44"
+        strokeWidth="1.3"
+      />
+      <path
+        d="M14 30c10-6 24-6 30 0"
+        stroke="#d9c9b8"
+        strokeWidth="2"
+        fill="none"
+      />
+      <circle cx="14" cy="30" r="1.4" fill={INK} />
+    </svg>
+  ),
+  "set-bow": (
+    <svg viewBox="0 0 60 60" aria-hidden="true">
+      <path d="M8 56V34M52 56V40" stroke={woodDark} strokeWidth="3" />
+      <path
+        d="M4 40c10 6 10 6 2 12"
+        stroke="#c8562e"
+        strokeWidth="1.5"
+        strokeDasharray="3 2"
+        fill="none"
+      />
+      <path
+        d="M8 36 52 42"
+        stroke="#c8562e"
+        strokeWidth="1.2"
+        strokeDasharray="3 2"
+      />
+      <path
+        d="M30 18c8 6 8 26 0 32"
+        stroke={wood}
+        strokeWidth="3.5"
+        fill="none"
+        strokeLinecap="round"
+      />
+      <path d="M30 18v32" stroke="#efe9dc" strokeWidth="1" />
+      <path d="M50 34H14" stroke={woodDark} strokeWidth="2" />
+      <path d="M14 34l5-3v6z" fill="#53606c" />
+      <path d="M48 31l4 3-4 3" stroke="#c9a46a" strokeWidth="1.5" fill="none" />
+    </svg>
+  ),
+  pelt: (
+    <svg viewBox="0 0 60 60" aria-hidden="true">
+      <path
+        d="M30 6c4 0 6 3 6 6 6 0 10 3 10 8l8-2-4 10 2 14 6 4-8 2c-2 6-8 10-20 10S12 54 10 48l-8-2 6-4 2-14-4-10 8 2c0-5 4-8 10-8 0-3 2-6 6-6z"
+        fill="#6b4a33"
+        stroke="#3a2618"
+        strokeWidth="1.3"
+      />
+      <path d="M30 18v30" stroke="#57392a" strokeWidth="1.5" />
+    </svg>
+  ),
+  "fish-owl": (
+    <svg viewBox="0 0 60 60" aria-hidden="true">
+      <path
+        d="M4 52h52"
+        stroke={woodDark}
+        strokeWidth="4"
+        strokeLinecap="round"
+      />
+      <path
+        d="M30 12c-8 0-14 4-14 14 0 10 4 18 14 22 10-4 14-12 14-22 0-10-6-14-14-14z"
+        fill="#8a6a48"
+        stroke="#4f3a26"
+        strokeWidth="1.3"
+      />
+      <path
+        d="M17 16l-3-9 9 6zM43 16l3-9-9 6z"
+        fill="#8a6a48"
+        stroke="#4f3a26"
+      />
+      <path d="M22 32c4 10 12 10 16 0" fill="#b49470" />
+      <g stroke="#4f3a26" strokeWidth="1">
+        <path d="M26 36v6M30 38v6M34 36v6" />
+      </g>
+      <circle cx="24" cy="23" r="4" fill="#e8b830" />
+      <circle cx="36" cy="23" r="4" fill="#e8b830" />
+      <circle cx="24" cy="23" r="1.8" fill={INK} />
+      <circle cx="36" cy="23" r="1.8" fill={INK} />
+      <path d="M28 27h4l-2 4z" fill="#3b4a5e" />
+      <path d="M24 48v4M36 48v4" stroke="#53606c" strokeWidth="2" />
+    </svg>
+  ),
+};
+
 const STALKS = [14, 22, 30, 38, 46];
 
-/** Things from the house (cise scene), 60 × 60. */
+/** Things from the house and the hills (objects scenes), 60 × 60. */
 export function ThingArt({ thing }: { thing: Thing }) {
+  if (HILL_THINGS[thing]) return HILL_THINGS[thing];
   return (
     <svg viewBox="0 0 60 60" aria-hidden="true">
       {thing === "cattail" && (
@@ -760,11 +931,101 @@ function MineForest({ winter }: { winter: boolean }) {
   );
 }
 
+function Hills() {
+  return (
+    <>
+      <defs>
+        <linearGradient id="place-hill-sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#b9cfdc" />
+          <stop offset="1" stopColor="#e3e7dc" />
+        </linearGradient>
+      </defs>
+      <rect width="800" height="450" fill="url(#place-hill-sky)" />
+      <path
+        d="M0 130C90 80 180 90 260 115 340 70 440 75 560 120L560 330H0z"
+        fill="#8fa06a"
+      />
+      {crowns(18, 21, [380, 90, 560, 150], ["#5f7a45", "#6d8a4f"], 12, 22)}
+      <path
+        d="M0 210C120 170 260 180 420 220 500 240 560 260 600 300V340H0z"
+        fill="#a3b178"
+      />
+      <rect y="330" width="800" height="120" fill="#b9bf8a" />
+      <path
+        d="M640 0C600 90 700 160 660 260 630 330 700 390 690 450H760C770 390 700 330 730 260 770 160 670 90 700 0z"
+        fill="#6fa9c2"
+      />
+      <path
+        d="M670 40C650 110 720 170 690 250"
+        stroke="#e9f2f6"
+        strokeWidth="3"
+        fill="none"
+        opacity=".7"
+      />
+      <path
+        d="M30 305C110 290 160 270 205 262 260 250 320 215 400 165"
+        stroke="#7d6a3a"
+        strokeWidth="14"
+        fill="none"
+        strokeLinecap="round"
+        opacity=".35"
+      />
+      {[
+        [60, 300],
+        [110, 290],
+        [160, 276],
+        [250, 252],
+        [300, 226],
+        [350, 196],
+      ].map(([x, y]) => (
+        <g key={`track${x}`} fill="#5a3f2b">
+          <ellipse cx={x - 3} cy={y} rx="2" ry="3" />
+          <ellipse cx={x + 3} cy={y} rx="2" ry="3" />
+        </g>
+      ))}
+      <path d="M548 410V215" stroke={woodDark} strokeWidth="9" />
+      <path
+        d="M548 260 510 236M548 230l30-16"
+        stroke={woodDark}
+        strokeWidth="5"
+      />
+      {crowns(9, 31, [505, 150, 595, 205], ["#4f7044", "#5f7a45"], 16, 26)}
+      {[
+        [210, 345],
+        [410, 350],
+      ].map(([x, y]) => (
+        <g key={`house${x}`}>
+          <rect x={x} y={y} width="90" height="45" fill={material.wall} />
+          <path
+            d={`M${x - 10} ${y + 4} ${x + 45} ${y - 32} ${x + 100} ${y + 4}z`}
+            fill={material.roof}
+          />
+          <rect x={x + 52} y={y + 18} width="18" height="27" fill={woodDark} />
+        </g>
+      ))}
+      <g fontSize="15" fontWeight="700" fill={INK}>
+        <text x="150" y="160" textAnchor="middle">
+          Hills
+        </text>
+        <text x="780" y="30" textAnchor="end">
+          River
+        </text>
+        <text x="150" y="420" textAnchor="middle">
+          Village
+        </text>
+        <text x="40" y="335">
+          Animal path
+        </text>
+      </g>
+    </>
+  );
+}
+
 export function StageArt({
   stage,
   winter,
 }: {
-  stage: "survey-camp" | "herring-yard" | "cise" | "mine-forest";
+  stage: "survey-camp" | "herring-yard" | "cise" | "mine-forest" | "hills";
   winter: boolean;
 }) {
   return (
@@ -777,6 +1038,7 @@ export function StageArt({
       {stage === "herring-yard" && <HerringYard />}
       {stage === "cise" && <Cise />}
       {stage === "mine-forest" && <MineForest winter={winter} />}
+      {stage === "hills" && <Hills />}
     </svg>
   );
 }
