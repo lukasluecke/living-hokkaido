@@ -241,6 +241,10 @@ async function talk(body) {
 // Elders and the Ainu woman speak through the interpreter, so the interpreter's voice reads their answers.
 const ELEVEN_KEY = process.env.ELEVENLABS_API_KEY || '';
 const TTS_MODEL = process.env.ELEVENLABS_TTS_MODEL || 'eleven_multilingual_v2';
+const TTS_MODEL_JA = process.env.ELEVENLABS_TTS_MODEL_JA || TTS_MODEL;
+const TTS_MODELS = ['eleven_multilingual_v2', 'eleven_flash_v2_5', 'eleven_turbo_v2_5', 'eleven_v3'];
+// language_code is honoured by these models and ignored or refused by the others.
+const LANG_CODE_MODELS = new Set(['eleven_flash_v2_5', 'eleven_turbo_v2_5', 'eleven_v3']);
 const STT_MODEL = process.env.ELEVENLABS_STT_MODEL || 'scribe_v1';
 // Premade ElevenLabs voices; override with ELEVENLABS_VOICES='{"interpreter":"<voice id>",...}'.
 const VOICES = {
@@ -273,14 +277,16 @@ async function speak(req, res) {
   const text = forSpeech(typeof body.text === 'string' ? body.text : '').slice(0, 1200);
   if (!text) return sendJson(res, 400, { error: 'Nothing to say.' });
   const voice = voiceFor(typeof body.figure === 'string' && /^[a-z0-9-]+$/.test(body.figure) ? body.figure : '');
-  const key = createHash('sha256').update(`${voice}|${TTS_MODEL}|${text}`).digest('hex');
+  const lang = body.lang === 'ja' || body.lang === 'en' ? body.lang : '';
+  const model = TTS_MODELS.includes(body.model) ? body.model : (lang === 'ja' ? TTS_MODEL_JA : TTS_MODEL);
+  const key = createHash('sha256').update(`${voice}|${model}|${lang}|${text}`).digest('hex');
   let audio = ttsCache.get(key);
   if (!audio) {
     if (voiceLimited()) return sendJson(res, 429, { error: 'Too many voice requests this minute.' });
     const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice}?output_format=mp3_44100_128`, {
       method: 'POST',
       headers: { 'xi-api-key': ELEVEN_KEY, 'content-type': 'application/json', accept: 'audio/mpeg' },
-      body: JSON.stringify({ text, model_id: TTS_MODEL, voice_settings: { stability: 0.55, similarity_boost: 0.75 } }),
+      body: JSON.stringify({ text, model_id: model, ...(lang && LANG_CODE_MODELS.has(model) && { language_code: lang }), voice_settings: { stability: 0.55, similarity_boost: 0.75 } }),
       signal: AbortSignal.timeout(45000),
     });
     if (!r.ok) {

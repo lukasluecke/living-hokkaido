@@ -566,7 +566,7 @@ async function speak(text, figure, btn) {
   if (voice.server) {
     if (btn) btn.textContent = t("making");
     try {
-      const res = await fetch("/api/speak", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text, figure }) });
+      const res = await fetch("/api/speak", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text, figure, lang: LANG }) });
       if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || `Voice failed (${res.status})`);
       if (voice.audio.src) URL.revokeObjectURL(voice.audio.src);
       voice.audio.src = URL.createObjectURL(await res.blob());
