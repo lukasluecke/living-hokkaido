@@ -41,6 +41,15 @@ the diff):
    finder ring (`FINDER_R` 16, `FINDER_STEP` 6); the reveal card drops
    "Why it worked" and shows the fact in its own bright "★ Real history"
    panel (the clip drops "How I hid" too).
+3. Out of Place polish, one commit: the eyedropper picks a small patch of
+   the scene and paints with it as a pattern (`nuri.ts`, `GameScene.ts`),
+   a row of recent paints, a brush preview with `[` / `]` sizes, and
+   slightly uneven hand-drawn edges in `art/iso.ts` (`WOBBLE_PX`).
+4. Don't Fall on the Slope polish, one commit: finds (floating labels on
+   the clear lane, `core/finds.ts`, `render/finds.ts`, optional
+   `SlopeProps.finds`) listed with their claims on the end card; snow
+   piles slow you down instead of a crash (`SOFT` in `physics/world.ts`);
+   lean eases in (`easeLean`).
 
 ## Pull new upstream changes
 

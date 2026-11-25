@@ -426,8 +426,8 @@ export const hideSeekActivitySchema = z
 /**
  * Slide down an icy street without touching anything ("Don't Fall on the
  * Slope", vendored from erinalin/dont-fall-on-the-slope). A 3D physics game;
- * the street is generic and illustrative, never a reconstruction. The game
- * shows no history text yet; claims are shown beside it by the renderer.
+ * the street is generic and illustrative, never a reconstruction. History
+ * text comes only from the claims of its `finds`.
  */
 export const slopeRunActivitySchema = z.object({
   ...base,
@@ -438,6 +438,21 @@ export const slopeRunActivitySchema = z.object({
   completion: z.string().min(1),
   /** Street layout seed. Same seed, same street. */
   seed: z.number().int().nonnegative().optional(),
+  /**
+   * Museum labels floating in the street, in street order. Slide through
+   * one to collect it; the end card explains it with its claim. `label` is
+   * a short game name and states no fact.
+   */
+  finds: z
+    .array(
+      z.object({
+        id: idSchema,
+        label: z.string().min(1),
+        claimId: idSchema,
+      }),
+    )
+    .max(12)
+    .default([]),
   /** True while the street is not backed by an approved reconstruction. */
   illustrative: z.boolean().default(true),
 });
