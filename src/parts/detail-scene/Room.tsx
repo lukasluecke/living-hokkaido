@@ -14,6 +14,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import type { CameraView, DetailScenePartProps } from "@/contracts";
 import { createToonUniforms, toonifyTree } from "../shared/toon";
+import { AreaStatic, isAreaSetting } from "./room/AreaSets";
 import { ArtifactShell, RoomObject } from "./room/Artifacts";
 import { Dust, Hearth, WindowLight } from "./room/Hearth";
 import { HouseStatic, Roof } from "./room/House";
@@ -215,7 +216,7 @@ function Setting({
   season,
   prefs,
 }: RoomProps & { kind: string; lift: { current: number } }) {
-  if (kind === "grove" || kind === "clearing")
+  if (kind === "grove" || kind === "clearing" || isAreaSetting(kind))
     return (
       <>
         <OutdoorSky season={season.value} />
@@ -226,7 +227,9 @@ function Setting({
           color="#fff1df"
         />
         <MergeStatic>
-          {kind === "grove" ? (
+          {isAreaSetting(kind) ? (
+            <AreaStatic kind={kind} season={season} />
+          ) : kind === "grove" ? (
             <GroveStatic season={season} />
           ) : (
             <ClearingStatic season={season} />
@@ -238,7 +241,8 @@ function Setting({
     <>
       <color attach="background" args={["#1a1d24"]} />
       <fog attach="fog" args={["#1a1d24", 14, 40]} />
-      <hemisphereLight args={["#9fb4e8", "#4a3424", 0.6]} />
+      <hemisphereLight args={["#b4c4ea", "#6a4c34", 0.95]} />
+      <CameraFill />
       <directionalLight
         position={[8, 12, 6]}
         intensity={0.45}
@@ -268,6 +272,25 @@ function Setting({
       {!prefs.reducedMotion && <Dust />}
     </>
   );
+}
+
+/**
+ * Soft light from the camera, so the side of an object that the visitor
+ * looks at is never in deep shade (the loom was near black in its focus
+ * view: the hearth and the window light it from behind).
+ */
+function CameraFill() {
+  const light = useRef<THREE.DirectionalLight>(null);
+  const ahead = useMemo(() => new THREE.Vector3(), []);
+  useFrame(({ camera }) => {
+    const l = light.current;
+    if (!l) return;
+    l.position.copy(camera.position);
+    camera.getWorldDirection(ahead);
+    l.target.position.copy(camera.position).add(ahead);
+    l.target.updateMatrixWorld();
+  });
+  return <directionalLight ref={light} intensity={0.85} color="#fff0dc" />;
 }
 
 /** Season sky as background and far fog for the outdoor sets. */

@@ -4,12 +4,14 @@ import {
   loadContentPack,
 } from "@/contracts";
 import { activities } from "./activities";
+import { areaActivities, areaArtifacts, areaScenes } from "./area-scenes";
 import { artifacts } from "./artifacts";
 import { guide } from "./guide";
 import { locations, overview, owlHome } from "./island";
 import { stamps } from "./journal";
 import { barkToCloth } from "./knowledge";
 import { memories } from "./memories";
+import { landAndSea } from "./land-and-sea";
 import { hokkaidoMuseum } from "./museum";
 import { houseOverTime, houseTimeline } from "./over-time";
 import {
@@ -22,11 +24,17 @@ import {
 export const barkToClothRaw = {
   contractVersion: CONTRACT_VERSION,
   id: "bark-to-cloth",
-  knowledge: [barkToCloth, houseOverTime, hokkaidoMuseum],
+  knowledge: [barkToCloth, houseOverTime, hokkaidoMuseum, landAndSea],
   island: { owlHome, overview, locations },
-  scenes: [lakeHouse, listeningGrove, makersClearing, memoryCabin],
-  artifacts,
-  activities,
+  scenes: [
+    lakeHouse,
+    listeningGrove,
+    makersClearing,
+    memoryCabin,
+    ...areaScenes,
+  ],
+  artifacts: [...artifacts, ...areaArtifacts],
+  activities: [...activities, ...areaActivities],
   stamps,
   guide,
   memories,

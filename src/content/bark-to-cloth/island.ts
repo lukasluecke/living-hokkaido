@@ -58,4 +58,52 @@ export const locations: LocationInput[] = [
     building: "cabin",
     placeholder: true,
   },
+  // Themed areas after Hokkaido Museum dioramas (theme 2 and theme 4). The
+  // island draws each scene itself (src/parts/island/world/Areas.tsx); the
+  // anchor must match AREAS there. Closed for now; each has a small outdoor scene (area-scenes.ts) ready to open. Claims:
+  // knowledge "land-and-sea".
+  {
+    id: "herring-coast",
+    sceneId: "herring-coast",
+    title: "Herring coast",
+    teaser: "Living off the sea",
+    status: "soon",
+    anchor: [12, 0, 11.2],
+    knowledgeIds: ["land-and-sea"],
+    building: "area-coast",
+    placeholder: true,
+  },
+  {
+    id: "survey-forest",
+    sceneId: "survey-forest",
+    title: "Survey forest",
+    teaser: "Forest plants and the 1890 land survey",
+    status: "soon",
+    anchor: [-16, 0, -1],
+    knowledgeIds: ["land-and-sea"],
+    building: "area-forest",
+    placeholder: true,
+  },
+  {
+    id: "animal-hills",
+    sceneId: "animal-hills",
+    title: "Animal hills",
+    teaser: "Deer and bears in the hills",
+    status: "soon",
+    anchor: [19, 0, 0],
+    knowledgeIds: ["land-and-sea"],
+    building: "area-hills",
+    placeholder: true,
+  },
+  {
+    id: "coal-mountain",
+    sceneId: "coal-mountain",
+    title: "Coal mountain",
+    teaser: "Coal mining and winter logging",
+    status: "soon",
+    anchor: [-5, 0, -12.6],
+    knowledgeIds: ["land-and-sea"],
+    building: "area-mountains",
+    placeholder: true,
+  },
 ];
