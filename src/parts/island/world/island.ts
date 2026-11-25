@@ -63,6 +63,27 @@ export const RIVER: [number, number][] = [
 ];
 export const FLOWER_FIELD = { x: -14, z: 6 };
 
+/**
+ * Themed areas (world/Areas.tsx): toy scenes after Hokkaido Museum dioramas.
+ * Island-authored scenery like the flower field, not content-pack places.
+ * ry turns the scene (0 = its front faces the overview camera, +z); s scales
+ * it; r is the tree-free clearing and level pad around it (du).
+ */
+export type Area = {
+  id: "coast" | "forest" | "hills" | "mountains";
+  x: number;
+  z: number;
+  ry: number;
+  s: number;
+  r: number;
+};
+export const AREAS: Area[] = [
+  { id: "coast", x: 12, z: 11.2, ry: 0.1, s: 1.25, r: 2.4 },
+  { id: "forest", x: -16, z: -1, ry: 0.35, s: 1.35, r: 2.1 },
+  { id: "hills", x: 19, z: 0, ry: -0.3, s: 1.4, r: 1.9 },
+  { id: "mountains", x: -5, z: -12.6, ry: 0.15, s: 1.35, r: 2.4 },
+];
+
 export const ISLAND = {
   size: 64,
   depth: 56,
@@ -72,6 +93,7 @@ export const ISLAND = {
       ...island.locations.map((l) => ({ ...at(l.anchor), r: SPACE.padRadius })),
       { ...at(island.owlHome), r: SPACE.padRadius * 0.6 },
       { ...FLOWER_FIELD, r: 2.2 },
+      ...AREAS.map((a) => ({ x: a.x, z: a.z, r: a.r * 0.75 })),
     ];
   },
   elevation(x: number, z: number): number {

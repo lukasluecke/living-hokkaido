@@ -123,6 +123,8 @@ const SIDE_GEO: Record<Side, { n: V3; c: V3 }> = {
 };
 /** Opacity of a wall that faces the camera in the explore views. */
 const FADED = 0.14;
+/** Post centre inside the wall centre line: half wall + post radius + gap. */
+const P_IN = 0.09 + 0.1 + 0.01;
 
 type WallMats = {
   reed: THREE.Material;
@@ -132,7 +134,7 @@ type WallMats = {
 };
 function wallMats(): WallMats {
   const t = (m: THREE.MeshStandardMaterial) => {
-    m.transparent = true;
+    m.transparent = false;
     return m;
   };
   return {
@@ -192,17 +194,22 @@ function wallParts() {
     r: 0.1,
   });
   // Corner posts.
-  at("ne").poles.push(post(HW, -HD));
-  at("nw").poles.push(post(-HW, -HD));
-  at("se").poles.push(post(HW, HD));
-  at("sw").poles.push(post(-HW, HD));
+  // Posts stand just inside the reed walls. On the wall centre line their
+  // round faces grazed the flat wall faces and flickered when the camera
+  // turned (z-fighting).
+  const px = HW - P_IN;
+  const pz = HD - P_IN;
+  at("ne").poles.push(post(px, -pz));
+  at("nw").poles.push(post(-px, -pz));
+  at("se").poles.push(post(px, pz));
+  at("sw").poles.push(post(-px, pz));
   for (const x of [-HW / 2, 0, HW / 2]) {
-    at("n").poles.push(post(x, -HD));
-    at("s").poles.push(post(x, HD));
+    at("n").poles.push(post(x, -pz));
+    at("s").poles.push(post(x, pz));
   }
   for (const z of [-HD / 2, HD / 2]) {
-    at("w").poles.push(post(-HW, z));
-    at("e").poles.push(post(HW, z));
+    at("w").poles.push(post(-px, z));
+    at("e").poles.push(post(px, z));
   }
   for (const x of [DOOR.x0, DOOR.x1])
     at("s").poles.push({ a: [x, 0, HD - i], b: [x, DOOR.h, HD - i], r: 0.06 });
@@ -230,12 +237,14 @@ function wallParts() {
         { a: [HW - i, y, win.z1], b: [HW - i, y, HD], r: 0.035 },
       );
     for (const x of postsX) {
-      at("n").ties.push({ p: [x, y, -HD + i], s: [0.24, 0.07, 0.09] });
-      at("s").ties.push({ p: [x, y, HD - i], s: [0.24, 0.07, 0.09] });
+      // Rope bands round the posts.
+      const tx = Math.max(-px, Math.min(px, x));
+      at("n").ties.push({ p: [tx, y, -pz], s: [0.23, 0.07, 0.23] });
+      at("s").ties.push({ p: [tx, y, pz], s: [0.23, 0.07, 0.23] });
     }
     for (const z of [-HD / 2, HD / 2]) {
-      at("w").ties.push({ p: [-HW + i, y, z], s: [0.09, 0.07, 0.24] });
-      at("e").ties.push({ p: [HW - i, y, z], s: [0.09, 0.07, 0.24] });
+      at("w").ties.push({ p: [-px, y, z], s: [0.23, 0.07, 0.23] });
+      at("e").ties.push({ p: [px, y, z], s: [0.23, 0.07, 0.23] });
     }
   }
   // Wall plates on top of the walls; window frame.
@@ -309,6 +318,14 @@ export function Walls({ lift }: { lift?: { current: number } }) {
       for (const mat of Object.values(m)) {
         mat.opacity = op;
         mat.depthWrite = op > 0.95;
+        // Transparent only while fading: solid walls in the transparent
+        // pass are depth-sorted per mesh, and the order flips as the
+        // camera turns (pillars and walls flickered in front of each other).
+        const clear = op < 0.995;
+        if (mat.transparent !== clear) {
+          mat.transparent = clear;
+          mat.needsUpdate = true;
+        }
       }
     }
   });
