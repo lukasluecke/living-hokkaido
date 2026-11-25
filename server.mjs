@@ -197,6 +197,7 @@ async function talk(body) {
 
   const id = typeof body.figure === 'string' && /^[a-z0-9-]+$/.test(body.figure) ? body.figure : '';
   const question = typeof body.question === 'string' ? body.question.trim().slice(0, 500) : '';
+  const lang = body.lang === 'ja' || body.lang === 'en' ? body.lang : undefined;
   if (!id || !question) return { status: 400, data: { error: 'Send a figure and a question.' } };
   const index = JSON.parse(fs.readFileSync(path.join(CHAR_DIR, 'index.json'), 'utf8')).characters;
   if (!index.includes(id)) return { status: 404, data: { error: 'Unknown figure.' } };
@@ -210,7 +211,7 @@ async function talk(body) {
     method: 'POST',
     headers: { 'content-type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
     body: JSON.stringify({
-      systemInstruction: { parts: [{ text: talkPrompt(characters[id], observations, characters) }] },
+      systemInstruction: { parts: [{ text: talkPrompt(characters[id], observations, characters, lang) }] },
       contents: [...history, { role: 'user', parts: [{ text: question }] }],
       generationConfig: { temperature: 0.3, responseMimeType: 'application/json', responseSchema: TALK_SCHEMA, thinkingConfig: { thinkingLevel: GEMINI_THINKING } },
     }),
@@ -257,7 +258,7 @@ function voiceFor(id) {
   return c?.voice?.routes_through === 'interpreter' ? VOICES.interpreter : VOICES.narrator;
 }
 const ttsCache = new Map(); // text+voice -> mp3 Buffer, so replays cost no credits
-const forSpeech = (t) => t.replace(/\s*\[[^\]]*\]/g, '').replace(/^\(Through the interpreter\)\s*/i, 'Through the interpreter. ').trim();
+const forSpeech = (t) => t.replace(/\s*\[[^\]]*\]/g, '').replace(/\s*【[^】]*】/g, '').replace(/^\(Through the interpreter\)\s*/i, 'Through the interpreter. ').replace(/^（通辞を介して）\s*/, '通辞を介して。').trim();
 let voiceWindow = { start: 0, count: 0 };
 const voiceLimited = () => {
   const now = Date.now();
@@ -303,6 +304,8 @@ async function listen(req, res) {
   for await (const c of req) { size += c.length; if (size > 5e6) return sendJson(res, 413, { error: 'Recording too long.' }); chunks.push(c); }
   const form = new FormData();
   form.append('model_id', STT_MODEL);
+  const lang = new URL(req.url, 'http://x').searchParams.get('lang');
+  if (lang === 'ja' || lang === 'en') form.append('language_code', lang);
   form.append('file', new Blob([Buffer.concat(chunks)], { type }), `question.${type.includes('mp4') ? 'mp4' : type.includes('ogg') ? 'ogg' : 'webm'}`);
   const r = await fetch('https://api.elevenlabs.io/v1/speech-to-text', { method: 'POST', headers: { 'xi-api-key': ELEVEN_KEY }, body: form, signal: AbortSignal.timeout(45000) });
   if (!r.ok) {

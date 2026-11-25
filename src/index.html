@@ -137,7 +137,7 @@
   .figure3d model-viewer { width: 100%; height: 300px; border-radius: 12px;
     background: radial-gradient(circle at 50% 40%, #2a2f37, #14171c 70%); --poster-color: transparent; }
   @media (max-width: 720px) { .figure3d model-viewer { height: 34dvh; } }
-  .figure3d .print { justify-self: start; height: 32px; font-size: 12px; }
+  button.lang { gap: 6px; font-size: 13px; } justify-self: start; height: 32px; font-size: 12px; }
   .figure3d .note { font-size: 11px; color: var(--muted); }
 
   /* Edit mode */
@@ -192,6 +192,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>
       <span class="label">About</span>
     </button>
+    <button id="lang" class="lang" title="Language for Talk and voice / 会話と音声の言語"><span data-l="en">EN</span><span data-l="ja">日本語</span></button>
     <button id="dots" aria-pressed="true" title="Show or hide the figure dots (figures stay tappable)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
     </button>
@@ -225,7 +226,7 @@
     <div class="fig-only"><div class="k">Role</div><div id="sRole"></div></div>
     <div id="sDeclinesWrap" class="fig-only" hidden><div class="k">Will not speculate on</div><div id="sDeclines"></div></div>
     <section class="chat fig-only" id="sChat">
-      <div class="known-h">Talk <span>· answers only from the record below</span></div>
+      <div class="known-h" id="sTalkH">Talk <span>· answers only from the record below</span></div>
       <div class="row2 voicebar"><span class="chip" id="sVoiceCredit" hidden title="Synthetic voices: not recordings of any person">Voices by ElevenLabs · synthetic</span>
         <button type="button" class="link" id="sAuto" hidden aria-pressed="true">🔊 Voice on</button></div>
       <div class="sugg" id="sSugg"></div>
@@ -236,7 +237,7 @@
         <button class="primary" id="sSend">Ask</button>
       </form>
     </section>
-    <div class="notice fig-only">This voice is a synthetic interpretation built from historical sources. It is not a historical record and does not speak for any person or community.</div>
+    <div class="notice fig-only" id="sNotice">This voice is a synthetic interpretation built from historical sources. It is not a historical record and does not speak for any person or community.</div>
     <div class="known">
       <div class="known-h">What is known <span>· and what is not</span></div>
       <div class="legend">Every entry shows two separate scores: <b>evidence</b> (how well it is supported) and <b>standing</b> (whose knowledge it is). Nothing is overwritten; corrections keep the history.</div>
@@ -492,17 +493,57 @@ function openSheet(id) {
 }
 
 // ---------- Talk: answers come from /api/talk, grounded in the observations that pass the protocol.
-const SUGGESTIONS = {
-  "sakhalin-ainu": ["What is happening here?", "What did the ceremony mean to you?", "What are you wearing?", "Why can't we see your face?"],
-  default: ["What is happening here?", "Who are you?", "What happens after the ceremony?"],
+// Language for Talk: answers, voice, voice input and the Talk labels. The record itself stays as written.
+const I18N = {
+  en: {
+    suggAinu: ["What is happening here?", "What did the ceremony mean to you?", "What are you wearing?", "Why can't we see your face?"],
+    sugg: ["What is happening here?", "Who are you?", "What happens after the ceremony?"],
+    grounding: { documented: "from the record", inferred: "partly inferred", unknown: "not in the record", declined: "declined" },
+    talkH: "Talk", talkSub: " · answers only from the record below", ask: "Ask", placeholder: "Ask this figure something…",
+    listening: "Listening… tap 🎙 again to send", transcribing: "Transcribing…", fromRecord: "From the record:", unknown: "Unknown: ",
+    voiceOn: "🔊 Voice on", voiceOff: "🔇 Voice off", replay: "🔊 Replay", making: "… voice", credit: "Voices by ElevenLabs · synthetic",
+    notice: "This voice is a synthetic interpretation built from historical sources. It is not a historical record and does not speak for any person or community.",
+    switched: "Talk and voice: English",
+  },
+  ja: {
+    suggAinu: ["ここでは何が行われていますか？", "この儀式はあなたにとって何を意味しましたか？", "何を着ていますか？", "なぜ顔が見えないのですか？"],
+    sugg: ["ここでは何が行われていますか？", "あなたは誰ですか？", "儀式のあとには何がありますか？"],
+    grounding: { documented: "記録にあり", inferred: "一部推定", unknown: "記録にない", declined: "回答を控える" },
+    talkH: "話す", talkSub: "・下の記録だけをもとに答えます", ask: "質問", placeholder: "この人物に質問する…",
+    listening: "聞いています… もう一度 🎙 で送信", transcribing: "文字にしています…", fromRecord: "記録より：", unknown: "不明：",
+    voiceOn: "🔊 音声オン", voiceOff: "🔇 音声オフ", replay: "🔊 もう一度", making: "… 音声", credit: "音声：ElevenLabs（合成音声）",
+    notice: "この声は歴史資料をもとにした合成の解釈です。歴史記録ではなく、特定の個人や共同体を代弁するものではありません。",
+    switched: "会話と音声：日本語",
+  },
 };
-const GROUNDING = { documented: "from the record", inferred: "partly inferred", unknown: "not in the record", declined: "declined" };
+let LANG = params.get("lang") === "ja" || params.get("lang") === "en" ? params.get("lang") : null;
+try { LANG = LANG || localStorage.getItem("omusha.lang"); } catch { /* storage blocked */ }
+if (LANG !== "ja" && LANG !== "en") LANG = navigator.language?.startsWith("ja") ? "ja" : "en";
+const t = (k) => I18N[LANG][k];
+function applyLang() {
+  document.documentElement.lang = LANG;
+  for (const s of $("lang").querySelectorAll("span")) s.classList.toggle("on", s.dataset.l === LANG);
+  $("sTalkH").replaceChildren(t("talkH"), Object.assign(document.createElement("span"), { textContent: t("talkSub") }));
+  $("sSend").textContent = t("ask"); $("sQ").placeholder = t("placeholder");
+  $("sVoiceCredit").textContent = t("credit"); $("sNotice").textContent = t("notice");
+  if (chat.id) renderSuggestions(chat.id);
+  syncVoiceUi();
+}
+$("lang").addEventListener("click", () => {
+  LANG = LANG === "ja" ? "en" : "ja";
+  try { localStorage.setItem("omusha.lang", LANG); } catch { /* ignore */ }
+  stopSpeaking(); applyLang(); toast(t("switched"));
+});
+
 let chat = { id: null, history: [] };
 function resetChat(id) {
   chat = { id, history: [] };
   $("sLog").innerHTML = ""; $("sQ").value = "";
+  renderSuggestions(id);
+}
+function renderSuggestions(id) {
   const sugg = $("sSugg"); sugg.innerHTML = "";
-  for (const q of SUGGESTIONS[characters[id]?.faction] || SUGGESTIONS.default) {
+  for (const q of characters[id]?.faction === "sakhalin-ainu" ? t("suggAinu") : t("sugg")) {
     const b = document.createElement("button"); b.type = "button"; b.textContent = q;
     b.addEventListener("click", () => ask(q)); sugg.append(b);
   }
@@ -516,14 +557,14 @@ function syncVoiceUi() {
   $("sVoiceCredit").hidden = !voice.server;
   $("sAuto").hidden = !voice.server;
   $("sAuto").setAttribute("aria-pressed", String(voice.auto));
-  $("sAuto").textContent = voice.auto ? "🔊 Voice on" : "🔇 Voice off";
+  $("sAuto").textContent = voice.auto ? t("voiceOn") : t("voiceOff");
   $("sMic").hidden = !(voice.server && window.MediaRecorder) && !Recognition;
 }
 function stopSpeaking() { voice.audio.pause(); if ("speechSynthesis" in window) speechSynthesis.cancel(); }
 async function speak(text, figure, btn) {
   stopSpeaking();
   if (voice.server) {
-    if (btn) btn.textContent = "… voice";
+    if (btn) btn.textContent = t("making");
     try {
       const res = await fetch("/api/speak", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text, figure }) });
       if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || `Voice failed (${res.status})`);
@@ -531,12 +572,12 @@ async function speak(text, figure, btn) {
       voice.audio.src = URL.createObjectURL(await res.blob());
       await voice.audio.play();
     } catch (err) { toast(err.message); }
-    finally { if (btn) btn.textContent = "🔊 Replay"; }
+    finally { if (btn) btn.textContent = t("replay"); }
     return;
   }
   if (!("speechSynthesis" in window)) return;
   const u = new SpeechSynthesisUtterance(text.replace(/\s*\[[^\]]*\]/g, ""));
-  u.lang = /[぀-ヿ一-龯]/.test(text) ? "ja-JP" : "en-GB"; u.rate = 0.95;
+  u.lang = LANG === "ja" ? "ja-JP" : "en-GB"; u.rate = 0.95;
   speechSynthesis.speak(u);
 }
 async function ask(question) {
@@ -548,7 +589,7 @@ async function ask(question) {
   $("sSend").disabled = true; $("sQ").value = "";
   try {
     const res = await fetch("/api/talk", { method: "POST", headers: { "content-type": "application/json" },
-      body: JSON.stringify({ figure: id, question, history: chat.history }) });
+      body: JSON.stringify({ figure: id, question, history: chat.history, lang: LANG }) });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || (res.status === 404 ? "Talk needs the Node server (npm start)." : `Failed (${res.status})`));
     if (chat.id !== id) return;
@@ -556,14 +597,14 @@ async function ask(question) {
     pending.classList.toggle("unknown", data.grounding === "unknown");
     pending.append(elm("div", "", data.answer));
     const row = elm("div", "row2");
-    row.append(elm("span", `chip${data.grounding === "documented" ? "" : " draft"}`, GROUNDING[data.grounding] || data.grounding));
-    const say = elm("button", "link", "🔊 Replay"); say.type = "button"; say.addEventListener("click", () => speak(data.answer, id, say));
+    row.append(elm("span", `chip${data.grounding === "documented" ? "" : " draft"}`, t("grounding")[data.grounding] || data.grounding));
+    const say = elm("button", "link", t("replay")); say.type = "button"; say.addEventListener("click", () => speak(data.answer, id, say));
     row.append(say); pending.append(row);
     if (voice.server && voice.auto) speak(data.answer, id, say);
     const cited = (data.cites || []).map((c) => Env.state.all.find((o) => o.id === c)).filter(Boolean);
     if (cited.length) {
-      const box = elm("div", "cited"); box.append(elm("div", "", "From the record:"));
-      for (const o of cited) box.append(elm("div", "", `• ${o.kind === "absence" ? "Unknown: " : ""}${o.claim} (${o.source?.ref || o.source?.type || "no source"})`));
+      const box = elm("div", "cited"); box.append(elm("div", "", t("fromRecord")));
+      for (const o of cited) box.append(elm("div", "", `• ${o.kind === "absence" ? t("unknown") : ""}${o.claim} (${o.source?.ref || o.source?.type || "no source"})`));
       pending.append(box);
     }
     chat.history.push({ role: "user", text: question }, { role: "model", text: data.answer });
@@ -598,23 +639,23 @@ $("sMic").addEventListener("click", async () => {
     const timer = setTimeout(() => rec.state === "recording" && rec.stop(), 15000);
     rec.onstop = async () => {
       clearTimeout(timer); stream.getTracks().forEach((t) => t.stop());
-      recording = null; mic.setAttribute("aria-pressed", "false"); $("sQ").placeholder = "Listening done · transcribing…";
+      recording = null; mic.setAttribute("aria-pressed", "false"); $("sQ").placeholder = t("transcribing");
       try {
         const blob = new Blob(chunks, { type: rec.mimeType || "audio/webm" });
-        const res = await fetch("/api/listen", { method: "POST", headers: { "content-type": blob.type }, body: blob });
+        const res = await fetch(`/api/listen?lang=${LANG}`, { method: "POST", headers: { "content-type": blob.type }, body: blob });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Could not hear that.");
         if (data.text) { $("sQ").value = data.text; ask(data.text); } else toast("Didn't catch that. Try again.");
       } catch (err) { toast(err.message); }
-      finally { $("sQ").placeholder = "Ask this figure something…"; }
+      finally { $("sQ").placeholder = t("placeholder"); }
     };
     recording = rec; rec.start(); mic.setAttribute("aria-pressed", "true");
-    $("sQ").placeholder = "Listening… tap 🎙 again to send";
+    $("sQ").placeholder = t("listening");
     return;
   }
   if (!Recognition) return;
   const r = new Recognition();
-  r.lang = navigator.language?.startsWith("ja") ? "ja-JP" : "en-US"; r.interimResults = true;
+  r.lang = LANG === "ja" ? "ja-JP" : "en-US"; r.interimResults = true;
   mic.setAttribute("aria-pressed", "true"); recording = r;
   r.onresult = (e) => {
     const x = e.results[e.results.length - 1]; $("sQ").value = x[0].transcript;
@@ -623,7 +664,7 @@ $("sMic").addEventListener("click", async () => {
   r.onend = r.onerror = () => { recording = null; mic.setAttribute("aria-pressed", "false"); };
   r.start();
 });
-syncVoiceUi();
+applyLang();
 function closeSheet() {
   active = null; $("sheet").classList.remove("open");
   for (const [, m] of markerEls) m.el.dataset.active = "false";
