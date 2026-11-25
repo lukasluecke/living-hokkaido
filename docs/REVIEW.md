@@ -116,6 +116,24 @@ after the photos (visual reference only):
 - [ ] Kept on purpose (not part of the open gates): voice-clone consent,
       translation consent for real speakers, withdrawal hides the memory.
 
+## Hokkaido Museum: clothing claims and the robe activity
+
+Added 2026-11-25 in `src/content/bark-to-cloth/knowledge.ts` (entry
+`bark-to-cloth`, `research-preview`). Sources `hm-panel-bark-robe` (樹皮衣をつくる,
+IMG_7717), `hm-panel-clothing` (2 衣服, PC 239, IMG_7720), `hm-qa-binder`
+(アイヌ文化Q&A): `rights: "unknown"`, `consent: "pending"`, no URL.
+
+| Claim | Locator | Needs |
+|---|---|---|
+| `robe-maker` | 樹皮衣をつくる, lead | Check the names (Fujitani Rumiko, Noriyuki) and if the family wants them shown |
+| `robe-step-peel` … `robe-step-sew` | 樹皮衣をつくる, steps 1–6 | Check the paraphrase. The panel cites 『アイヌ生活文化再現マニュアル 織る 樹皮衣』 and, for step 6, Kodama Mari (1991) |
+| `clothing-materials`, `clothing-today` | 2 衣服, museum English | Check |
+| `pattern-techniques`, `pattern-asymmetry` | Q&A no. 008 | Check the translation |
+
+The sequence activity `make-bark-robe` ("From tree to robe", on the `fiber`
+artifact) and the hotspot `patterns` on the `garment` artifact use these
+claims.
+
 ## Hokkaido Museum catalog (whole visit)
 
 Added 2026-11-25: [`docs/research/hokkaido-museum/`](research/hokkaido-museum/)

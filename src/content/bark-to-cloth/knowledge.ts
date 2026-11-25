@@ -53,6 +53,34 @@ const mlit: Source = {
   placeholder: false,
 };
 
+/** A Hokkaido Museum exhibit panel or Q&A card, read on site (no public
+ *  URL). Full text: docs/research/hokkaido-museum/transcriptions/panels.md
+ *  (museum text, not MIT). Claims below are short paraphrases. */
+const hmPanel = (id: string, title: string, section: string): Source => ({
+  id,
+  title: `Hokkaido Museum exhibit panel: ${title}`,
+  kind: "museum",
+  rights: "unknown",
+  consent: "pending",
+  attribution: `Hokkaido Museum, permanent exhibition, ${section}. Photographed 2026-11-25.`,
+  placeholder: false,
+});
+const hmBarkRobe = hmPanel(
+  "hm-panel-bark-robe",
+  "樹皮衣をつくる (Making a bark-fiber robe)",
+  "theme 2, 2 衣服 Clothing",
+);
+const hmClothing = hmPanel(
+  "hm-panel-clothing",
+  "2 衣服 Clothing (Pocket Curator 239)",
+  "theme 2, 2 衣服 Clothing",
+);
+const hmQa = hmPanel(
+  "hm-qa-binder",
+  "アイヌ文化Q&A (Ainu culture Q&A cards)",
+  "theme 2, Q&A binder answered by museum staff",
+);
+
 /** Placeholder audio source for the sample curator memory (memories.ts).
  *  No recording exists. Replace with a real, consented recording. */
 const sampleMemoryAudio: Source = {
@@ -78,6 +106,9 @@ export const barkToCloth: KnowledgeEntry = {
     obihiro,
     mlit,
     sampleMemoryAudio,
+    hmBarkRobe,
+    hmClothing,
+    hmQa,
   ],
   claims: [
     ...researchClaims,
@@ -111,6 +142,92 @@ export const barkToCloth: KnowledgeEntry = {
           sourceId: "obihiro-museum",
           locator: "Attus page: isitaykini [Loom]",
         },
+      ],
+    },
+    {
+      id: "robe-maker",
+      text: "The museum records how Fujitani Rumiko of Nibutani (Biratori, Hidaka) made an ohyo bark robe for her husband, with the method she learned from her mother.",
+      citations: [
+        {
+          sourceId: "hm-panel-bark-robe",
+          locator: "Lead text, Photo IMG_7717",
+        },
+      ],
+    },
+    {
+      id: "robe-step-peel",
+      text: "Cut the bark at the base of the trunk and peel it, best from spring to summer when the tree holds more water. Separate the inner bark from the outer bark.",
+      citations: [
+        { sourceId: "hm-panel-bark-robe", locator: "Step 1, Photo IMG_7717" },
+      ],
+    },
+    {
+      id: "robe-step-soften",
+      text: "Boil the inner bark in hot water until it is soft. Some makers soak it in a marsh for about ten days, or in a hot spring.",
+      citations: [
+        { sourceId: "hm-panel-bark-robe", locator: "Step 2, Photo IMG_7717" },
+      ],
+    },
+    {
+      id: "robe-step-layers",
+      text: "Wash it well in water to remove the slime, and peel the fiber layers apart.",
+      citations: [
+        { sourceId: "hm-panel-bark-robe", locator: "Step 3, Photo IMG_7717" },
+      ],
+    },
+    {
+      id: "robe-step-thread",
+      text: "Split the layers into thin strips and make them into thread.",
+      citations: [
+        { sourceId: "hm-panel-bark-robe", locator: "Step 4, Photo IMG_7717" },
+      ],
+    },
+    {
+      id: "robe-step-weave",
+      text: "Weave the thread into cloth.",
+      citations: [
+        { sourceId: "hm-panel-bark-robe", locator: "Step 5, Photo IMG_7717" },
+      ],
+    },
+    {
+      id: "robe-step-sew",
+      text: "Cut and sew the robe from the finished cloth, then add embroidery.",
+      citations: [
+        { sourceId: "hm-panel-bark-robe", locator: "Step 6, Photo IMG_7717" },
+      ],
+    },
+    {
+      id: "clothing-materials",
+      text: "Older garments were made from animal hides, fish skins, or cloth woven from tree-bark or grass fibers. When cotton came through trade, people decorated clothes with cotton strips and thread, and made robes of cotton.",
+      citations: [
+        {
+          sourceId: "hm-panel-clothing",
+          locator: "Panel text (museum English), sentences 1–2, photo IMG_7720",
+        },
+      ],
+    },
+    {
+      id: "clothing-today",
+      text: "These clothes are not worn in daily life today, but people wear them more and more at ceremonies and at song and dance performances.",
+      citations: [
+        {
+          sourceId: "hm-panel-clothing",
+          locator: "Panel text (museum English), sentences 3–4, photo IMG_7720",
+        },
+      ],
+    },
+    {
+      id: "pattern-techniques",
+      text: "Patterns are embroidered directly on the cloth, made by sewing other cloth on top, or both. The placement differs on each garment, and regions have their own features.",
+      citations: [
+        { sourceId: "hm-qa-binder", locator: "Q&A no. 008, photo IMG_7794" },
+      ],
+    },
+    {
+      id: "pattern-asymmetry",
+      text: "A pattern that looks mirrored along the back is often not perfectly symmetric. Each robe shows its maker's careful handwork.",
+      citations: [
+        { sourceId: "hm-qa-binder", locator: "Q&A no. 008, photo IMG_7794" },
       ],
     },
     {
