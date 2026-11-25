@@ -3,10 +3,12 @@
 import { ISLAND, type Location } from "@/contracts";
 import { material } from "@/design/tokens";
 import { useFrame } from "@react-three/fiber";
-import { useRef } from "react";
-import { type Group, Vector3 } from "three";
+import { useLayoutEffect, useRef } from "react";
+import { type Group, type Material, type Mesh, Vector3 } from "three";
+import { snowCap } from "../../shared/snowCap";
 import type { Field } from "./field";
 import { AREAS } from "./island";
+import { SNOW } from "./season";
 
 export function anchorPos(
   field: Field,
@@ -288,6 +290,20 @@ function HitArea({ r }: { r: number }) {
   );
 }
 
+/** Snow on the top faces of a building in winter (idempotent patch). */
+function Snowy({ children }: { children: React.ReactNode }) {
+  const ref = useRef<Group>(null);
+  useLayoutEffect(() => {
+    ref.current?.traverse((o) => {
+      const mat = (o as Mesh).material as Material | Material[] | undefined;
+      if (!mat) return;
+      // Windows are vertical, so they stay clear.
+      for (const m of Array.isArray(mat) ? mat : [mat]) snowCap(m, SNOW);
+    });
+  });
+  return <group ref={ref}>{children}</group>;
+}
+
 export function PlaceMarker({
   field,
   loc,
@@ -321,7 +337,9 @@ export function PlaceMarker({
       onPointerOut={() => onHover(false)}
     >
       {!area && (
-        <Building kind={loc.building} open={roofOpen} live={live || active} />
+        <Snowy>
+          <Building kind={loc.building} open={roofOpen} live={live || active} />
+        </Snowy>
       )}
       <HitArea r={hitRadius(loc)} />
     </group>

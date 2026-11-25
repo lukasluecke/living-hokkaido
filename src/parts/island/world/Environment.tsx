@@ -33,6 +33,7 @@ import {
   SKY,
   SUN,
   U,
+  SNOW,
   weightsFor,
 } from "./season";
 
@@ -59,6 +60,7 @@ export function SeasonDriver({
     if (playing) s.current = (s.current + dt * speed) % 4;
     const w = weightsFor(s.current, tmp.w);
     U.uW.value.copy(w);
+    SNOW.value = w.w;
     U.uSnowLine.value = num4(w, [1350, 2600, 1800, -200]);
     const sky = mix4(w, SKY, tmp.c);
     if (!(scene.background instanceof Color)) scene.background = new Color();

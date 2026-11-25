@@ -26,6 +26,7 @@ import {
   ClearingStatic,
   GroveStatic,
   Lantern,
+  Surroundings,
 } from "./room/Outdoor";
 import { season as tone } from "@/design/tokens";
 
@@ -251,7 +252,7 @@ function Setting({
       {kind === "cabin" ? (
         <>
           <MergeStatic>
-            <CabinStatic lift={lift} />
+            <CabinStatic lift={lift} season={season} />
           </MergeStatic>
           <group scale={CABIN_SCALE}>
             <Roof lift={lift} />
@@ -262,7 +263,8 @@ function Setting({
       ) : (
         <>
           <MergeStatic>
-            <HouseStatic lift={lift} />
+            <HouseStatic lift={lift} outside={false} />
+            <Surroundings season={season} />
           </MergeStatic>
           <Roof lift={lift} />
           <Hearth shadows={false} />
