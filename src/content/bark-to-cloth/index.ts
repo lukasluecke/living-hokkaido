@@ -9,6 +9,7 @@ import { guide } from "./guide";
 import { locations, overview, owlHome } from "./island";
 import { stamps } from "./journal";
 import { barkToCloth } from "./knowledge";
+import { memories } from "./memories";
 import { lakeHouse } from "./scene";
 
 export const barkToClothRaw = {
@@ -21,6 +22,7 @@ export const barkToClothRaw = {
   activities,
   stamps,
   guide,
+  memories,
 };
 
 /** Parsed with defaults applied. Throws if any reference is broken. */

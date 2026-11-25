@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   isAinu,
   type MemoryAudio,
+  needsReview,
   type MemoryTranslation,
   pickTranslation,
   type VoiceMemory,
@@ -22,9 +23,44 @@ function langName(tag: string, uiLang: string) {
   }
 }
 
-function Audio({ audio, label }: { audio: MemoryAudio; label: string }) {
+/** Browser speech for text-only entries. Labelled placeholder; never Ainu. */
+function DeviceVoice({ text, lang }: { text: string; lang: string }) {
+  const [ok, setOk] = useState(false);
+  useEffect(() => setOk(typeof speechSynthesis !== "undefined"), []);
+  if (!ok || isAinu(lang)) return null;
+  return (
+    <button
+      type="button"
+      className={s.button}
+      onClick={() => {
+        speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = lang;
+        speechSynthesis.speak(u);
+      }}
+    >
+      Read aloud · device voice, placeholder
+    </button>
+  );
+}
+
+function Audio({
+  audio,
+  label,
+  text,
+  lang,
+}: {
+  audio: MemoryAudio;
+  label: string;
+  text: string;
+  lang: string;
+}) {
   if (audio.kind !== "file")
-    return <p className={s.muted}>No audio file. Text only.</p>;
+    return (
+      <p className={s.muted}>
+        No audio file. Text only. <DeviceVoice text={text} lang={lang} />
+      </p>
+    );
   return (
     // biome-ignore lint/a11y/useMediaCaption: the transcript is shown next to it
     <audio controls preload="none" src={audio.url} aria-label={label} />
@@ -40,6 +76,7 @@ function voiceLabel(t: MemoryTranslation, speaker: string) {
 
 function modeLabel(t: MemoryTranslation) {
   if (t.provider === "mock") return "Mock · not a real translation";
+  if (t.provider === "sample") return "Sample text by the team";
   if (t.mode === "human-checked")
     return `Machine translation, checked by ${t.checkedBy}`;
   return `Machine translated (${t.provider}) · not checked`;
@@ -56,7 +93,6 @@ export function MemoryCard({
   uiLang: string;
 }) {
   const t = choice === ORIGINAL ? null : pickTranslation(m, [choice]);
-  const ainu = isAinu(m.lang) || m.containsAinu;
   const original = langName(m.lang, uiLang);
   return (
     <article aria-label={m.title}>
@@ -65,7 +101,9 @@ export function MemoryCard({
         {m.curator.name} · {m.curator.role}
       </p>
       <p>
-        <span className={s.badge}>Curator memory</span>
+        <span className={s.badge}>
+          {m.placeholder ? "Sample · no real curator yet" : "Curator memory"}
+        </span>
         <span className={s.badge}>
           {m.review.status === "approved"
             ? `Reviewed by ${m.review.reviewer}`
@@ -75,7 +113,12 @@ export function MemoryCard({
       <p>
         <strong>Original · {original}</strong>
       </p>
-      <Audio audio={m.audio} label={`${m.title}, original in ${original}`} />
+      <Audio
+        audio={m.audio}
+        label={`${m.title}, original in ${original}`}
+        text={m.transcript}
+        lang={m.lang}
+      />
       <details open={!t}>
         <summary>Transcript ({original})</summary>
         <p lang={m.lang}>{m.transcript}</p>
@@ -86,19 +129,20 @@ export function MemoryCard({
             <strong>{langName(t.lang, uiLang)}</strong>{" "}
             <span className={s.badge}>{modeLabel(t)}</span>
             <span className={s.badge}>{voiceLabel(t, m.curator.name)}</span>
+            {needsReview(m, t) && <span className={s.badge}>Draft</span>}
           </p>
           <Audio
             audio={t.audio}
             label={`${m.title}, translation in ${langName(t.lang, uiLang)}`}
+            text={t.text}
+            lang={t.lang}
           />
           <p lang={t.lang}>{t.text}</p>
         </section>
       )}
       {!t && choice !== ORIGINAL && (
         <p className={s.muted}>
-          {ainu
-            ? "Not translated. Ainu-language memories are translated only after a qualified review."
-            : `No ${langName(choice, uiLang)} version yet. The original is shown.`}
+          No {langName(choice, uiLang)} version yet. The original is shown.
         </p>
       )}
     </article>

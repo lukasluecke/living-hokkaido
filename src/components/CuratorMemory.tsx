@@ -424,8 +424,7 @@ export default function CuratorMemory() {
           </label>
           {ainu && (
             <p className="small">
-              Ainu-language content is not machine-translated. A qualified
-              reviewer must check it first.
+              Draft: Ainu content is marked for the later review pass.
             </p>
           )}
         </fieldset>
@@ -560,28 +559,24 @@ export default function CuratorMemory() {
       </div>
       <div className="review">
         <p className="eyebrow">5 · TRANSLATE AND PREVIEW</p>
-        <fieldset
-          disabled={withdrawn || ainu || consent.translation !== "granted"}
-        >
+        <fieldset disabled={withdrawn || consent.translation !== "granted"}>
           <legend>Visitor languages</legend>
-          {LANGS.filter(([tag]) => tag !== lang && !isAinu(tag)).map(
-            ([tag, name]) => (
-              <label className="check" key={tag}>
-                <input
-                  type="checkbox"
-                  checked={targets.includes(tag)}
-                  onChange={(e) =>
-                    setTargets(
-                      e.target.checked
-                        ? [...targets, tag]
-                        : targets.filter((t) => t !== tag),
-                    )
-                  }
-                />
-                {name}
-              </label>
-            ),
-          )}
+          {LANGS.filter(([tag]) => tag !== lang).map(([tag, name]) => (
+            <label className="check" key={tag}>
+              <input
+                type="checkbox"
+                checked={targets.includes(tag)}
+                onChange={(e) =>
+                  setTargets(
+                    e.target.checked
+                      ? [...targets, tag]
+                      : targets.filter((t) => t !== tag),
+                  )
+                }
+              />
+              {name}
+            </label>
+          ))}
           <div className="actions">
             <button
               type="button"

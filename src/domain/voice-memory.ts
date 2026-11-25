@@ -56,13 +56,13 @@ const base = (lang: string) => lang.toLowerCase().split("-")[0];
 export const isAinuLang = (lang: string) => base(lang) === "ain";
 
 export type GateResult =
-  | { ok: true; allowClone: boolean }
+  | { ok: true; allowClone: boolean; reviewNeeded: boolean }
   | { ok: false; reason: string };
 
 /**
  * Consent and language gate. Runs in the browser and again on the server
- * before any provider call. Ainu content is never sent for automatic
- * translation: a named reviewer and a human translation come first.
+ * before any provider call. Prototype: Ainu content is allowed and only
+ * flagged (reviewNeeded) for the later review pass in docs/REVIEW.md.
  */
 export function translationGate(
   r: Pick<
@@ -75,18 +75,17 @@ export function translationGate(
       ok: false,
       reason: "The speaker has not granted translation consent.",
     };
-  if (isAinuLang(r.sourceLang) || isAinuLang(r.targetLang) || r.containsAinu)
-    return {
-      ok: false,
-      reason:
-        "Ainu-language content is not machine-translated. A qualified reviewer must check it first.",
-    };
   if (base(r.sourceLang) === base(r.targetLang))
     return {
       ok: false,
       reason: "Choose a language that differs from the original.",
     };
-  return { ok: true, allowClone: r.consent.voiceClone === "granted" };
+  return {
+    ok: true,
+    allowClone: r.consent.voiceClone === "granted",
+    reviewNeeded:
+      isAinuLang(r.sourceLang) || isAinuLang(r.targetLang) || r.containsAinu,
+  };
 }
 
 /** Upper limit for one recording sent to a provider (bytes). */

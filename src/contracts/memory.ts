@@ -7,9 +7,11 @@
 // - The original recording stays playable. A translation never replaces it.
 // - Every translation is labelled: "machine" until a named person checks it.
 // - A cloned voice needs the speaker's explicit voice-clone consent.
-// - Any translation needs the speaker's translation consent.
-// - Ainu-language memories (or memories with Ainu words) get no translation
-//   until a named reviewer approves the memory and checks each translation.
+// - Any translation needs the speaker's translation consent (a placeholder
+//   sample has no speaker and is exempt; it can never use a cloned voice).
+// - Prototype (Lukas, 2026-11-25): review gates are open. Ainu content may be
+//   machine-translated now; `needsReview` flags it quietly as a draft and
+//   docs/REVIEW.md lists the review pass. Voice-clone consent stays enforced.
 // - Withdrawn consent or a withdrawn review hides the memory everywhere.
 import { z } from "zod";
 import { idSchema } from "./ids";
@@ -96,6 +98,8 @@ export const voiceMemorySchema = z
       /** Record that authorizes this person as a curator. */
       authorizationId: z.string().min(1),
     }),
+    /** Sample made by the team, no real curator or recording. UI says so. */
+    placeholder: z.boolean().default(false),
     /** Language of the original recording. */
     lang: langTagSchema,
     /** True if an otherwise non-Ainu memory contains Ainu words. */
@@ -125,7 +129,6 @@ export const voiceMemorySchema = z
       (!m.review.reviewer || !m.review.reviewedAt)
     )
       issue(["review"], "Approved memories need a reviewer and a review date");
-    const ainu = isAinu(m.lang) || m.containsAinu;
     const seen = new Set<string>();
     m.translations.forEach((t, i) => {
       if (seen.has(t.lang))
@@ -133,7 +136,7 @@ export const voiceMemorySchema = z
       seen.add(t.lang);
       if (t.lang === m.lang)
         issue(["translations", i], "A translation needs a different language");
-      if (m.consent.translation !== "granted")
+      if (m.consent.translation !== "granted" && !m.placeholder)
         issue(
           ["translations", i],
           "Translations need granted translation consent",
@@ -145,14 +148,6 @@ export const voiceMemorySchema = z
         );
       if (t.mode === "human-checked" && !t.checkedBy)
         issue(["translations", i], "A checked translation needs checkedBy");
-      if (
-        (ainu || isAinu(t.lang)) &&
-        (m.review.status !== "approved" || t.mode !== "human-checked")
-      )
-        issue(
-          ["translations", i],
-          "Ainu content needs an approved review and a checked translation",
-        );
     });
   });
 export type VoiceMemory = z.infer<typeof voiceMemorySchema>;
@@ -160,7 +155,15 @@ export type VoiceMemoryInput = z.input<typeof voiceMemorySchema>;
 
 /** True when a visitor may see and hear the memory. */
 export const isMemoryVisible = (m: VoiceMemory) =>
-  m.consent.recording === "granted" && m.review.status !== "withdrawn";
+  m.review.status !== "withdrawn" &&
+  m.consent.recording !== "withdrawn" &&
+  (m.placeholder || m.consent.recording === "granted");
+
+/** Ainu content, or a translation into Ainu, that no reviewer checked yet.
+ *  Shown as a quiet draft label; listed in docs/REVIEW.md. */
+export const needsReview = (m: VoiceMemory, t?: MemoryTranslation | null) =>
+  (isAinu(m.lang) || m.containsAinu || (!!t && isAinu(t.lang))) &&
+  (m.review.status !== "approved" || (!!t && t.mode !== "human-checked"));
 
 /** Visible memories for one artifact, in pack order. */
 export const memoriesForArtifact = (
@@ -177,7 +180,7 @@ export function pickTranslation(
   m: VoiceMemory,
   preferred: readonly string[],
 ): MemoryTranslation | null {
-  if (m.consent.translation !== "granted") return null;
+  if (m.consent.translation !== "granted" && !m.placeholder) return null;
   const usable = m.translations.filter(
     (t) => t.voice !== "cloned" || m.consent.voiceClone === "granted",
   );

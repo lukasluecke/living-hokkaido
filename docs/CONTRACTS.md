@@ -18,7 +18,7 @@ Two layers:
 | `activity.ts` | `ActivityDefinition` (quiz / weave / sequence / story / words / trace), `MediaRef`, `ActivityResult` | grounded in ≥ 1 claim; weave is `illustrative` by default; story fact lines cite claims; real `words` terms need an approved entry, five review checks and a consented recording (else `standIn`); recordings are consented `audio` sources |
 | `journal.ts` | `Stamp`, `UnlockRule`, `JournalState` | progress holds only pack ids; storage key `lh-journal-v2` |
 | `season.ts` | `SeasonState`, `seasonWeights`, `seasonAt` | one value 0–4; shell owns the clock |
-| `memory.ts` | `VoiceMemory`, `MemoryTranslation`, `memoriesForArtifact`, `pickTranslation` | original audio stays playable; translations need translation consent; `cloned` voice needs voice-clone consent; translations are `machine` until `checkedBy`; Ainu content needs an approved review and checked translations; withdrawn consent hides it; source must be an `audio` source |
+| `memory.ts` | `VoiceMemory`, `MemoryTranslation`, `memoriesForArtifact`, `pickTranslation` | original audio stays playable; translations need translation consent; `cloned` voice needs voice-clone consent; translations are `machine` until `checkedBy`; Ainu content is flagged by `needsReview` (draft, prototype gate open); `placeholder` samples skip speaker consent but never use a cloned voice; withdrawn consent hides it; source must be an `audio` source |
 | `guide.ts` | `GuideLine` | owl navigates; facts need `claimIds` |
 | `events.ts` | `ExperienceEvent`, `createEventBus` | parts communicate only by events |
 | `experience.ts` | `ExperienceState`, `View`, `Prefs` | written only by `src/shell/state.ts` |

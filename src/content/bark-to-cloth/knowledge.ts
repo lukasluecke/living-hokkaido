@@ -30,13 +30,25 @@ const policy: Source = {
   placeholder: false,
 };
 
+/** Placeholder audio source for the sample curator memory (memories.ts).
+ *  No recording exists. Replace with a real, consented recording. */
+const sampleMemoryAudio: Source = {
+  id: "sample-memory-audio",
+  title: "Sample curator memory · placeholder, no recording",
+  kind: "audio",
+  rights: "unknown",
+  consent: "pending",
+  attribution: "Living Hokkaido team (sample text, not a curator)",
+  placeholder: true,
+};
+
 export const barkToCloth: KnowledgeEntry = {
   id: "bark-to-cloth",
   title: story.title,
   subtitle: story.subtitle,
   presentation: "research-preview",
   narration: story.narration,
-  sources: [museum("hdm"), museum("nam"), policy],
+  sources: [museum("hdm"), museum("nam"), policy, sampleMemoryAudio],
   claims: [
     ...researchClaims,
     {

@@ -15,8 +15,8 @@ no key exists yet. Nothing in this feature has been verified with real audio.
 1. `/contribute` → "Curator memories" (`src/components/CuratorMemory.tsx`).
 2. Curator: name, role, authorization record, "I am an authorized curator".
    No sign-in in the demo. Production needs a curator role (for example Clerk).
-3. Object and language. "Contains Ainu words" or language `ain` turns
-   machine translation off.
+3. Object and language. "Contains Ainu words" or language `ain` marks the
+   memory as a draft for the later review pass (prototype: not blocked).
 4. Consent, three separate choices: keep and play the recording; translate by
    machine; make a synthetic copy of the voice. The curator reads a consent
    statement aloud and records it. A voice copy stays off until that spoken
@@ -26,7 +26,7 @@ no key exists yet. Nothing in this feature has been verified with real audio.
 6. Transcribe (live: ElevenLabs Scribe; mock: type it). The curator checks
    every word.
 7. Translate into visitor languages. The browser and the server both run
-   `translationGate` (consent, Ainu rule, different language) before any
+   `translationGate` (consent, different language; flags Ainu as `reviewNeeded`) before any
    provider call.
 8. Preview, exactly as on the object card (`MemoryCard`).
 9. "Export for review" downloads pack JSON (a `source` of kind `audio` plus the
@@ -51,8 +51,13 @@ X, with X's consent" / "Stock synthetic voice, not X". Mock text says
 - Any translation needs `translation: granted`. `voice: "cloned"` needs
   `voiceClone: granted`.
 - `mode` is `machine` until a named person checks it (`checkedBy`).
-- Ainu (`ain`, or `containsAinu`): translations only with an approved review
-  and checked translations. Ainu is never tagged as a Japanese variety.
+- Ainu (`ain`, or `containsAinu`): prototype gate is open (Lukas,
+  2026-11-25). `needsReview` shows a quiet "Draft" label until a reviewer
+  approves the memory and checks the translation. See docs/REVIEW.md. Ainu is
+  never tagged as a Japanese variety.
+- `placeholder: true` = team sample with no real curator or recording. The
+  card says "Sample · no real curator yet". It needs no speaker consent but
+  can never use a cloned voice.
 - `sourceId` must be an `audio` source in the knowledge entry; a real audio
   file needs approved rights and a non-placeholder source.
 - Withdrawn recording consent or a withdrawn review hides the memory

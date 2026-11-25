@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  loadContentPack,
   memoriesForArtifact,
+  needsReview,
   pickTranslation,
   type VoiceMemoryInput,
   validateContentPack,
@@ -68,7 +70,23 @@ const packWith = (m: VoiceMemoryInput) => {
 };
 
 test("packs without memories still parse (additive default)", () => {
-  assert.deepEqual(validateContentPack(barkToClothRaw), []);
+  const { memories: _omit, ...rest } = structuredClone(barkToClothRaw);
+  assert.deepEqual(validateContentPack(rest), []);
+});
+
+test("the sample memory is a labelled placeholder and shows on the cloth", () => {
+  const pack = loadContentPack(barkToClothRaw);
+  const [m] = memoriesForArtifact(pack.memories, "cloth");
+  assert.equal(m?.placeholder, true);
+  assert.equal(m?.audio.kind, "none");
+  assert.ok(m?.translations.every((t) => t.voice !== "cloned"));
+  assert.equal(pickTranslation(m, ["de-DE"])?.lang, "de");
+});
+
+test("a placeholder can never use a cloned voice", () => {
+  const m = memory({ placeholder: true });
+  m.consent.voiceClone = "pending";
+  assert.equal(voiceMemorySchema.safeParse(m).success, false);
 });
 
 test("a consented memory with a machine translation is valid", () => {
@@ -99,15 +117,11 @@ test("translations need translation consent", () => {
   assert.equal(voiceMemorySchema.safeParse(m).success, false);
 });
 
-test("Ainu memories get no unreviewed machine translation", () => {
-  assert.equal(
-    voiceMemorySchema.safeParse(memory({ lang: "ain" })).success,
-    false,
-  );
-  assert.equal(
-    voiceMemorySchema.safeParse(memory({ containsAinu: true })).success,
-    false,
-  );
+test("prototype: Ainu translations are allowed but flagged as draft", () => {
+  const m = voiceMemorySchema.parse(memory({ lang: "ain" }));
+  assert.equal(needsReview(m, m.translations[0]), true);
+  const mixed = voiceMemorySchema.parse(memory({ containsAinu: true }));
+  assert.equal(needsReview(mixed, mixed.translations[0]), true);
   const reviewed = memory({
     lang: "ain",
     review: {
@@ -121,12 +135,9 @@ test("Ainu memories get no unreviewed machine translation", () => {
       mode: "human-checked",
       checkedBy: "Named Reviewer",
     });
-  assert.equal(voiceMemorySchema.safeParse(reviewed).success, true);
-  assert.equal(
-    voiceMemorySchema.safeParse(memory({ translations: [], lang: "ain" }))
-      .success,
-    true,
-  );
+  const r = voiceMemorySchema.parse(reviewed);
+  assert.equal(needsReview(r, r.translations[0]), false);
+  assert.equal(needsReview(voiceMemorySchema.parse(memory())), false);
 });
 
 test("withdrawn memories are hidden; translation picks visitor language", () => {
@@ -141,7 +152,7 @@ test("withdrawn memories are hidden; translation picks visitor language", () => 
   assert.equal(pickTranslation(m, ["de"]), null);
 });
 
-test("gate blocks Ainu, missing consent and same language", () => {
+test("gate flags Ainu, blocks missing consent and same language", () => {
   const consent = { translation: "granted", voiceClone: "declined" } as const;
   const base = {
     sourceLang: "ja",
@@ -149,9 +160,15 @@ test("gate blocks Ainu, missing consent and same language", () => {
     containsAinu: false,
     consent,
   };
-  assert.deepEqual(translationGate(base), { ok: true, allowClone: false });
-  assert.equal(translationGate({ ...base, targetLang: "ain" }).ok, false);
-  assert.equal(translationGate({ ...base, containsAinu: true }).ok, false);
+  assert.deepEqual(translationGate(base), {
+    ok: true,
+    allowClone: false,
+    reviewNeeded: false,
+  });
+  const ainu = translationGate({ ...base, targetLang: "ain" });
+  assert.ok(ainu.ok && ainu.reviewNeeded);
+  const mixed = translationGate({ ...base, containsAinu: true });
+  assert.ok(mixed.ok && mixed.reviewNeeded);
   assert.equal(translationGate({ ...base, targetLang: "ja-JP" }).ok, false);
   assert.equal(
     translationGate({
@@ -188,7 +205,7 @@ test("no key selects the offline mock; mock never claims a translation", async (
   assert.equal(r.value?.result?.voice, "none");
 });
 
-test("ElevenLabs adapter turns cloning off without consent", async () => {
+test("ElevenLabs adapter turns cloning off without consent; no call without translation consent", async () => {
   const calls: { url: string; body?: FormData }[] = [];
   const fake = (async (url: string, init?: RequestInit) => {
     calls.push({ url, body: init?.body as FormData });
@@ -209,11 +226,11 @@ test("ElevenLabs adapter turns cloning off without consent", async () => {
   assert.equal(calls[0].body?.get("target_lang"), "en");
   const blocked = await p.startTranslation({
     audio: new Blob(["x"]),
-    sourceLang: "ain",
+    sourceLang: "ja",
     targetLang: "en",
     transcript: "t",
     containsAinu: false,
-    consent: { translation: "granted", voiceClone: "granted" },
+    consent: { translation: "pending", voiceClone: "granted" },
   });
   assert.equal(blocked.value, null);
   assert.equal(calls.length, 1);
