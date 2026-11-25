@@ -311,6 +311,7 @@ export function Shell({ pack }: { pack: ContentPack }) {
               read={journal.hotspotsRead
                 .filter((k) => k.startsWith(`${artifact.id}/`))
                 .map((k) => k.slice(artifact.id.length + 1))}
+              doneActivityIds={journal.completed}
             />
           </SidePanel>
         )}
