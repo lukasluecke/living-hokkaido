@@ -36,6 +36,7 @@ Two layers:
 
 | Version | Change |
 |---|---|
+| 1 (additive) | `place`: stage `hills` (Animal hills) and things `deer`, `bear`, `hare`, `salmon`, `set-bow`, `pelt`, `fish-owl`. New enum values only, so old content still parses. |
 | 1 (additive) | Exhibits for `slope-run` (Lukas, 2026-11-25): each find gets `look` (`warehouse-wall`, `shachihoko`, `straw-sacks`, `sack-cart`, `herring-boxes`, `canal`; default `straw-sacks`). `ActivityResult.found` (optional ids found in the run). `JournalState.found` (`"<activityId>/<id>"`, default `[]`, so saved journals still parse). `ActivityPartProps.found` (optional, from the journal). |
 | 1 (additive) | `slope-run` gets `finds` (default `[]`, max 12): `{ id, label, claimId }` labels on the street; each `claimId` must be in `claimIds` (`checkActivityKind`). |
 | 1 (default) | `hide-seek` default `durations.disguise` 60 → 80 s (Erina's playtest; seek stays 90 s). Same in `vendor/out-of-place/contract-proposal.ts`. |

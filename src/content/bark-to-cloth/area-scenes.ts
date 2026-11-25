@@ -685,6 +685,7 @@ export const areaScenes: DetailSceneInput[] = [
       },
     ],
     activityIds: [
+      "place-hills",
       "quiz-bear-use",
       "quiz-deer-kamuy",
       "sequence-set-bow",

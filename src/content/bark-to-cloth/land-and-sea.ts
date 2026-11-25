@@ -198,6 +198,32 @@ export const landAndSea: KnowledgeEntry = {
       "Not every animal is a kamuy: traditions in which the deer is not a kamuy are known in many parts of Hokkaido.",
       ["hm-qa-kamuy", "Q019 (photo 7806), answer, sentence 3"],
     ),
+    c(
+      "traps-prey",
+      "Hunters and fishers knew their prey well and made traps for it: for salmon and trout in the rivers, and for brown bears and Hokkaido sika deer in the hills.",
+      ["hm-panel-diet", "Panel text, sentence 2 (photo 7750)"],
+    ),
+    c(
+      "diet-grown-traded",
+      "Ainu people also ate foxtail millet and Japanese millet that they grew themselves, and rice, salt and miso that they got from the Wajin (ethnic Japanese).",
+      ["hm-panel-diet", "Panel text, sentence 3 (photo 7750)"],
+    ),
+    c(
+      "kamuy-region",
+      "Which beings are kamuy, and which kamuy matter most, differs by region and by person.",
+      [
+        "hm-panel-beliefs-2",
+        "いろいろなカムイ, bear photo caption, sentence 1 (photo 7727)",
+      ],
+    ),
+    c(
+      "fish-owl-village",
+      "Blakiston's fish owl is a kamuy with the role of watching over the village, and it is highly respected in many regions.",
+      [
+        "hm-panel-beliefs-2",
+        "いろいろなカムイ, owl photo caption (photo 7727)",
+      ],
+    ),
     // ------------------------------------------------ mountains
     c(
       "coal-deposits",
