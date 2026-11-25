@@ -1,0 +1,262 @@
+/* "Ask the owl". Warm paper card (tokens.ui), bottom-left of the stage. */
+.icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+.trigger {
+  position: absolute;
+  left: 12px;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: inherit;
+  font-size: 14px;
+  border: 0;
+  border-radius: 999px;
+  padding: 7px 14px 7px 10px;
+  background: #1f2d46;
+  color: #fbf4e6;
+  box-shadow: 0 4px 14px rgb(43 33 24 / 25%);
+  cursor: pointer;
+}
+.trigger:hover {
+  background: #2b3d5e;
+}
+.trigger:focus-visible,
+.panel button:focus-visible,
+.panel input:focus-visible {
+  outline: 3px solid #e8c27a;
+  outline-offset: 2px;
+}
+.panel {
+  position: absolute;
+  left: 12px;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  z-index: 3;
+  width: min(380px, calc(100% - 24px));
+  max-height: min(70%, 560px);
+  display: flex;
+  flex-direction: column;
+  background: #fbf4e6;
+  color: #2b2118;
+  border-radius: 14px;
+  box-shadow: 0 6px 24px rgb(43 33 24 / 26%);
+  overflow: hidden;
+  animation: rise 200ms ease-out;
+}
+.panel[data-still] {
+  animation: none;
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+.head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 8px 8px 14px;
+  border-bottom: 1px solid #efe1c2;
+}
+.title {
+  flex: 1;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+.x {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.x:hover {
+  background: #efe1c2;
+}
+.log {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.intro {
+  margin: 0;
+  color: #5a4a3c;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.turn {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.q {
+  align-self: flex-end;
+  margin: 0;
+  max-width: 85%;
+  background: #1f2d46;
+  color: #fbf4e6;
+  border-radius: 12px 12px 2px 12px;
+  padding: 6px 10px;
+  font-size: 14px;
+}
+.thinking {
+  margin: 0;
+  color: #5a4a3c;
+  font-size: 14px;
+  font-style: italic;
+}
+.a {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.a > p {
+  margin: 0;
+}
+.claims {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.claims li {
+  border-left: 3px solid #e8c27a;
+  background: #fff9ee;
+  border-radius: 0 8px 8px 0;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.claimText {
+  color: #2b2118;
+}
+.claimMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+.how {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: #1f2d46;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.go {
+  align-self: flex-start;
+  font: inherit;
+  border: 0;
+  border-radius: 999px;
+  padding: 6px 14px;
+  background: #e8c27a;
+  color: #2b2118;
+  cursor: pointer;
+}
+.go:hover {
+  background: #c99a3b;
+}
+.notice {
+  color: #5a4a3c;
+  font-size: 11px;
+  opacity: 0.85;
+}
+.chips {
+  list-style: none;
+  margin: 0;
+  padding: 0 14px 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chips button {
+  font: inherit;
+  font-size: 13px;
+  border: 1px solid #efe1c2;
+  border-radius: 999px;
+  padding: 4px 10px;
+  background: #fff9ee;
+  color: #2b2118;
+  cursor: pointer;
+  text-align: left;
+}
+.chips button:hover {
+  border-color: #c99a3b;
+}
+.form {
+  display: flex;
+  gap: 6px;
+  padding: 8px 10px 10px;
+  border-top: 1px solid #efe1c2;
+}
+.form input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-size: 16px;
+  border: 1px solid #efe1c2;
+  border-radius: 999px;
+  padding: 7px 12px;
+  background: #fff;
+  color: #2b2118;
+}
+.form button {
+  font: inherit;
+  border: 0;
+  border-radius: 999px;
+  padding: 7px 16px;
+  background: #1f2d46;
+  color: #fbf4e6;
+  cursor: pointer;
+}
+.form button:disabled,
+.chips button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+/* Phone: above the scene's object row; hidden behind an open object sheet;
+   the open box is a bottom sheet above everything else. */
+@media (max-width: 700px) {
+  .trigger {
+    bottom: calc(58px + env(safe-area-inset-bottom, 0px));
+  }
+  .trigger[data-sheet] {
+    display: none;
+  }
+  .panel {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    max-height: 75%;
+    z-index: 5;
+    border-radius: 14px 14px 0 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .panel {
+    animation: none;
+  }
+}

@@ -36,6 +36,7 @@ Two layers:
 
 | Version | Change |
 |---|---|
+| 1 (additive) | `ask.ts`: `AskRequest`, `AskAnswer`, `AskAction`; `ContentPack.ask.suggestions` (default `[]`); `AskPartProps` (src/parts/ask, docs/ASK.md). |
 | 1 (additive) | `DetailScene.setting` (default `"house"`), `DetailScene.timelineIds` (default `[]`), entry `"fly-in"`. Sound zones can be limited to `scenes`. The three other places open with their own scenes. |
 | 1 (additive) | `ContentPack.memories` (default `[]`) and `memory.ts`: curator voice memories with consent and labelled translations. |
 | 1 (additive) | `timelines` in the content pack (default `[]`), `timeline.ts`, events `timeline.open` / `timeline.era` / `timeline.close`, `TimelinePartProps` (src/parts/over-time). |
