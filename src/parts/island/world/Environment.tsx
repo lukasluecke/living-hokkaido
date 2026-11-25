@@ -63,7 +63,7 @@ export function SeasonDriver({
     const sky = mix4(w, SKY, tmp.c);
     if (!(scene.background instanceof Color)) scene.background = new Color();
     (scene.background as Color).copy(sky);
-    if (!scene.fog) scene.fog = new Fog(sky, 80, 200);
+    if (!scene.fog) scene.fog = new Fog(sky, 55, 175);
     (scene.fog as Fog).color.copy(sky);
     if (sun.current) {
       mix4(w, SUN, sun.current.color);

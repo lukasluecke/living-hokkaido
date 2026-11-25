@@ -83,7 +83,8 @@ function matcap() {
 
 export function materialFor(look: LookId, part: Part): THREE.Material {
   const color = new THREE.Color(PALETTE[part]);
-  const side = part === "bark" ? THREE.DoubleSide : THREE.FrontSide;
+  const side =
+    part === "bark" || part === "fiber" ? THREE.DoubleSide : THREE.FrontSide;
   switch (look) {
     case "pbr":
       return new THREE.MeshStandardMaterial({

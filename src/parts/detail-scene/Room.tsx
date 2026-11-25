@@ -2,7 +2,7 @@
 // The 3D detail scene. Ported from labs/detail-scene (variant A, low-poly):
 // roof-lift entry, dollhouse home view, hover glow, focus camera move-in.
 import { CameraControls, ContactShadows } from "@react-three/drei";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import {
   Bloom,
   EffectComposer,
@@ -13,7 +13,8 @@ import { ToneMappingMode } from "postprocessing";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import type { CameraView, DetailScenePartProps } from "@/contracts";
-import { ArtifactShell, RoomModel } from "./room/Artifacts";
+import { createToonUniforms, toonifyTree } from "../shared/toon";
+import { ArtifactShell, RoomObject } from "./room/Artifacts";
 import { Dust, Hearth, WindowLight } from "./room/Hearth";
 import { HouseStatic, Roof } from "./room/House";
 import { MergeStatic } from "./room/MergeStatic";
@@ -131,7 +132,8 @@ export function Room(props: RoomProps) {
     <>
       <color attach="background" args={["#1a1d24"]} />
       <fog attach="fog" args={["#1a1d24", 14, 40]} />
-      <hemisphereLight args={["#9fb4e8", "#3a2418", 0.35]} />
+      <hemisphereLight args={["#9fb4e8", "#4a3424", 0.6]} />
+      <RoomToon />
       <directionalLight
         position={[8, 12, 6]}
         intensity={0.45}
@@ -157,7 +159,12 @@ export function Room(props: RoomProps) {
             else emit({ type: "artifact.focus", artifactId: id });
           }}
         >
-          <RoomModel artifactId={p.artifactId} />
+          <RoomObject
+            artifactId={p.artifactId}
+            source={
+              props.artifacts.find((a) => a.id === p.artifactId)?.model.source
+            }
+          />
         </ArtifactShell>
       ))}
       <ContactShadows
@@ -191,4 +198,20 @@ export function Room(props: RoomProps) {
       </EffectComposer>
     </>
   );
+}
+
+/** Same two-tone look as the island, with a cool blue shade (no fog). */
+function RoomToon() {
+  const { scene } = useThree();
+  const T = useMemo(() => {
+    const t = createToonUniforms();
+    t.uShade.value.set("#6f7fa6");
+    t.uBand.value = 0.18;
+    return t;
+  }, []);
+  const n = useRef(0);
+  useFrame(() => {
+    if (n.current++ % 20 === 0) toonifyTree(scene, T);
+  });
+  return null;
 }

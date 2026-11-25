@@ -38,11 +38,12 @@ export function reedTexture(repeat: [number, number]) {
     256,
     (ctx, s) => {
       const r = rng(7);
-      ctx.fillStyle = "#8a6a43";
+      ctx.fillStyle = "#8f7a4c";
       ctx.fillRect(0, 0, s, s);
       for (let x = 0; x < s; x += 3) {
-        const l = 38 + r() * 22;
-        ctx.fillStyle = `hsl(${32 + r() * 10}, ${35 + r() * 15}%, ${l}%)`;
+        // Reed stems: straw to faded green, a few darker stems.
+        const l = 40 + r() * 24 - (r() < 0.12 ? 14 : 0);
+        ctx.fillStyle = `hsl(${38 + r() * 22}, ${28 + r() * 18}%, ${l}%)`;
         ctx.fillRect(x, 0, 2 + r() * 2, s);
       }
       // Horizontal ties.
@@ -89,8 +90,11 @@ export function matTexture(repeat: [number, number]) {
       for (let y = 0; y < s; y += cell) {
         for (let x = 0; x < s; x += cell) {
           const horizontal = (x / cell + y / cell) % 2 === 0;
-          const l = 52 + r() * 10;
-          ctx.fillStyle = `hsl(42, 38%, ${l}%)`;
+          const l = 54 + r() * 10;
+          // Two plain fibre tones in alternating cells (not a cultural pattern).
+          ctx.fillStyle = horizontal
+            ? `hsl(44, 40%, ${l}%)`
+            : `hsl(64, 22%, ${l - 6}%)`;
           ctx.fillRect(x, y, cell, cell);
           ctx.strokeStyle = "rgba(90,66,36,0.35)";
           ctx.lineWidth = 1;
@@ -118,7 +122,7 @@ export function woodTexture(repeat: [number, number] = [1, 1]) {
     128,
     (ctx, s) => {
       const r = rng(19);
-      ctx.fillStyle = "#6b4a2e";
+      ctx.fillStyle = "#5e4630";
       ctx.fillRect(0, 0, s, s);
       for (let x = 0; x < s; x += 2) {
         ctx.fillStyle = `rgba(${40 + r() * 40},${24 + r() * 20},${12},${0.15 + r() * 0.25})`;

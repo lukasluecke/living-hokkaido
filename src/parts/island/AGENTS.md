@@ -43,3 +43,4 @@ keyboard path works with WebGL off.
 
 * 2026-11-25: 3D island ported from labs/island into `World.tsx` + `world/`. Owl flight is the travel step; `owl.arrived` hands off to the detail scene (no roof lift on the island).
 * 2026-11-25: spirit-like snow owl (`world/Owl.tsx`), trail off with reduced motion. See docs/STYLE.md § owl look.
+* 2026-11-25: toon pass via `src/parts/shared/toon.ts` (two-tone light, cool shade, two-colour fog) with season tokens `shade`, `fogNear`, `ink`.

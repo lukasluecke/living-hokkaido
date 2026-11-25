@@ -39,6 +39,19 @@ function jitter(geo: THREE.BufferGeometry, amount: number, seed = 1) {
   return geo;
 }
 
+/** Soft vertical folds: push vertices in z by a sine across x. */
+function drape(geo: THREE.BufferGeometry, depth: number, freq: number) {
+  const pos = geo.getAttribute("position") as THREE.BufferAttribute;
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i);
+    const y = pos.getY(i);
+    const k = Math.max(0, 0.6 - y) / 1.3; // more folds towards the hem
+    pos.setZ(i, pos.getZ(i) + Math.sin(x * freq) * depth * k);
+  }
+  geo.computeVertexNormals();
+  return geo;
+}
+
 /** Garment: T-shaped robe silhouette with hem and cuff bands. */
 function garment() {
   const g = new THREE.Group();
@@ -60,15 +73,24 @@ function garment() {
     bevelThickness: 0.025,
     bevelSegments: 1,
     curveSegments: 2,
+    steps: 1,
   });
   body.translate(0, 0, -0.06);
-  g.add(mesh(jitter(body, 0.012, 2), "cloth", "body"));
+  drape(body, 0.012, 16);
+  g.add(mesh(jitter(body, 0.008, 2), "cloth", "body"));
+  // Front edge band where the panels overlap (plain band, no motif).
+  const front = new THREE.BoxGeometry(0.05, 1.12, 0.02);
+  front.rotateZ(0.06);
+  front.translate(0.05, -0.12, 0.085);
+  g.add(mesh(front, "band", "front"));
   // Sleeves
   for (const side of [-1, 1]) {
-    const sl = new THREE.BoxGeometry(0.46, 0.26, 0.13, 3, 1, 1);
+    const sl = new THREE.CylinderGeometry(0.1, 0.14, 0.46, 8, 3);
+    sl.scale(1, 1, 0.55);
+    sl.rotateZ((side * Math.PI) / 2);
     sl.translate(side * 0.55, 0.47, 0);
     g.add(mesh(jitter(sl, 0.012, side + 4), "cloth", `sleeve${side}`));
-    const cuff = new THREE.BoxGeometry(0.06, 0.28, 0.15);
+    const cuff = new THREE.BoxGeometry(0.06, 0.22, 0.13);
     cuff.translate(side * 0.79, 0.47, 0);
     g.add(mesh(cuff, "band", `cuff${side}`));
   }
@@ -100,7 +122,17 @@ function loom() {
     r.translate(x, 0.05, 0);
     beams.push(r);
   }
-  g.add(mesh(jitter(mergeGeometries(beams), 0.008, 3), "wood", "frame"));
+  // Short legs so the frame stands, and pegs at the corners.
+  for (const x of [-0.42, 0.42])
+    for (const z of [-0.45, 0.45]) {
+      const leg = new THREE.CylinderGeometry(0.03, 0.035, 0.16, 6);
+      leg.translate(x, -0.04, z);
+      beams.push(leg);
+      const peg = new THREE.CylinderGeometry(0.018, 0.018, 0.08, 6);
+      peg.translate(x, 0.11, z);
+      beams.push(peg);
+    }
+  g.add(mesh(jitter(mergeGeometries(beams), 0.006, 3), "wood", "frame"));
   const warp: THREE.BufferGeometry[] = [];
   for (let i = 0; i < 14; i++) {
     const t = new THREE.CylinderGeometry(0.006, 0.006, 0.9, 4);
@@ -113,6 +145,14 @@ function loom() {
   const woven = new THREE.BoxGeometry(0.7, 0.02, 0.3, 6, 1, 3);
   woven.translate(0, 0.09, 0.27);
   g.add(mesh(jitter(woven, 0.006, 5), "cloth", "woven"));
+  // Plain weft stripes in the woven part (colour only, no motif).
+  const stripes: THREE.BufferGeometry[] = [];
+  for (const z of [0.16, 0.31, 0.38]) {
+    const st = new THREE.BoxGeometry(0.7, 0.024, 0.025);
+    st.translate(0, 0.092, z);
+    stripes.push(st);
+  }
+  g.add(mesh(mergeGeometries(stripes), "band", "stripes"));
   const shuttle = new THREE.CylinderGeometry(0.025, 0.025, 1.0, 6);
   shuttle.rotateZ(Math.PI / 2);
   shuttle.translate(0, 0.13, 0.06);
@@ -126,24 +166,34 @@ function loom() {
 function fiber() {
   const g = new THREE.Group();
   g.name = "fiber";
+  // Inner bark strips are flat ribbons, not round threads.
   const strands: THREE.BufferGeometry[] = [];
-  for (let i = 0; i < 16; i++) {
-    const a = (i / 16) * Math.PI * 2;
-    const r = 0.05 + (i % 3) * 0.025;
-    const pts = [0, 0.25, 0.5, 0.75, 1].map(
-      (t) =>
-        new THREE.Vector3(
-          Math.cos(a) * r * (1 + 0.8 * Math.abs(t - 0.45)) +
-            Math.sin(t * 5 + i) * 0.02,
-          (t - 0.5) * 1.0,
-          Math.sin(a) * r * (1 + 0.8 * Math.abs(t - 0.45)),
-        ),
-    );
-    strands.push(
-      new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 8, 0.011, 4),
-    );
+  for (let i = 0; i < 18; i++) {
+    const a = (i / 18) * Math.PI * 2;
+    const r = 0.045 + (i % 3) * 0.022;
+    const w = 0.022 + (i % 4) * 0.006;
+    const rib = new THREE.PlaneGeometry(1.0, w, 14, 1);
+    const pos = rib.getAttribute("position") as THREE.BufferAttribute;
+    for (let k = 0; k < pos.count; k++) {
+      const x = pos.getX(k);
+      const t = x + 0.5;
+      const spread = 1 + 0.9 * Math.abs(t - 0.45);
+      const twist = Math.sin(t * 4 + i) * 0.5;
+      const y = pos.getY(k);
+      pos.setXYZ(
+        k,
+        Math.cos(a) * r * spread +
+          Math.sin(t * 5 + i) * 0.02 +
+          y * Math.cos(a + twist),
+        x,
+        Math.sin(a) * r * spread + y * Math.sin(a + twist),
+      );
+    }
+    rib.computeVertexNormals();
+    strands.push(rib);
   }
   const bundle = mesh(mergeGeometries(strands), "fiber", "strands");
+  (bundle.material as THREE.MeshStandardMaterial).side = THREE.DoubleSide;
   bundle.rotation.z = Math.PI / 2.4;
   bundle.position.set(0.05, 0.16, 0.05);
   g.add(bundle);
@@ -155,6 +205,11 @@ function fiber() {
   );
   tieM.position.copy(bundle.position);
   g.add(tieM);
+  const tie2 = tieM.clone();
+  tie2.name = "tie2";
+  tie2.position.add(new THREE.Vector3(0, 0.3, 0).applyEuler(bundle.rotation));
+  tie2.scale.setScalar(0.9);
+  g.add(tie2);
   // Curved bark strip
   const bark = new THREE.CylinderGeometry(
     0.28,
@@ -169,8 +224,24 @@ function fiber() {
   bark.rotateZ(Math.PI / 2);
   bark.translate(0, -0.2, -0.32);
   const barkM = mesh(jitter(bark, 0.02, 7), "bark", "bark");
-  (barkM.material as THREE.MeshStandardMaterial).side = THREE.DoubleSide;
+  (barkM.material as THREE.MeshStandardMaterial).side = THREE.FrontSide;
   g.add(barkM);
+  // Pale inner face of the strip (where the fibre layer comes from).
+  const inner = new THREE.CylinderGeometry(
+    0.27,
+    0.27,
+    0.88,
+    10,
+    3,
+    true,
+    0.03,
+    Math.PI * 0.5,
+  );
+  inner.rotateZ(Math.PI / 2);
+  inner.translate(0, -0.2, -0.32);
+  const innerM = mesh(jitter(inner, 0.012, 8), "fiber", "bark-inner");
+  (innerM.material as THREE.MeshStandardMaterial).side = THREE.BackSide;
+  g.add(innerM);
   g.position.y = 0.12;
   return g;
 }

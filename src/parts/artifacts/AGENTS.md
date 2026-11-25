@@ -39,3 +39,4 @@ Turn with mouse, touch and arrow keys; every hotspot reachable by keyboard;
 - Open: toon for objects only, or also the island?
 
 * 2026-11-25: viewer ported as `Viewer3D.tsx` (toon + ink hull, PresentationControls turn, projected hotspots with back-face fade) inside the card. Objects are shown alone on a neutral backdrop, not in the room.
+* 2026-11-25: code models stay until real models exist (Lukas). A GLB replaces one by setting `model.source` to `{ kind: "glb", url }` in the pack; the viewer and the room both load it (`src/parts/shared/Glb.tsx`). Toon is used on the island and in the room too.

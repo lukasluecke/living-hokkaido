@@ -5,42 +5,65 @@
 // they face away from the camera.
 import { ContactShadows, PresentationControls } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { useEffect, useMemo, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { type Artifact, type Emit, SCALE } from "@/contracts";
+import { useGlbClone } from "../shared/Glb";
 import { applyLook } from "./model/looks";
 import { builders, type ObjectId } from "./model/models";
 import c from "./Viewer.module.css";
 
-function useModel(artifact: Artifact) {
-  return useMemo(() => {
-    const src = artifact.model.source;
-    const build =
-      src.kind === "procedural" ? builders[src.builder as ObjectId] : undefined;
+/** Centre a model on its base so every object frames the same way. */
+function frame(g: THREE.Object3D) {
+  const box = new THREE.Box3().setFromObject(g);
+  const size = box.getSize(new THREE.Vector3());
+  const centre = box.getCenter(new THREE.Vector3());
+  const wrap = new THREE.Group();
+  g.position.sub(centre);
+  wrap.add(g);
+  wrap.userData.radius = Math.max(size.x, size.y, size.z) / 2;
+  return wrap;
+}
+
+type ModelProps = {
+  artifact: Artifact;
+  yaw: React.RefObject<number>;
+  hotspots: React.RefObject<HTMLDivElement | null>;
+};
+
+function ProceduralModel(p: ModelProps & { builder: string }) {
+  const obj = useMemo(() => {
+    const build = builders[p.builder as ObjectId];
     const g = build ? build() : new THREE.Group();
     applyLook(g, "toon");
-    // Centre the model on its base so every object frames the same way.
-    const box = new THREE.Box3().setFromObject(g);
-    const size = box.getSize(new THREE.Vector3());
-    const centre = box.getCenter(new THREE.Vector3());
-    const wrap = new THREE.Group();
-    g.position.sub(centre);
-    wrap.add(g);
-    wrap.userData.radius = Math.max(size.x, size.y, size.z) / 2;
-    return wrap;
-  }, [artifact]);
+    return frame(g);
+  }, [p.builder]);
+  return <Model {...p} obj={obj} />;
+}
+
+function GlbModel(p: ModelProps & { url: string }) {
+  const obj = useGlbClone(p.url, frame);
+  return <Model {...p} obj={obj} />;
+}
+
+/** Code model now; a GLB replaces it by changing artifact.model.source only. */
+function ModelFromSource(p: ModelProps) {
+  const src = p.artifact.model.source;
+  if (src.kind === "glb")
+    return (
+      <Suspense fallback={null}>
+        <GlbModel {...p} url={src.url} />
+      </Suspense>
+    );
+  return <ProceduralModel {...p} builder={src.builder} />;
 }
 
 function Model({
   artifact,
   yaw,
   hotspots,
-}: {
-  artifact: Artifact;
-  yaw: React.RefObject<number>;
-  hotspots: React.RefObject<HTMLDivElement | null>;
-}) {
-  const obj = useModel(artifact);
+  obj,
+}: ModelProps & { obj: THREE.Object3D }) {
   const turn = useRef<THREE.Group>(null);
   const tmp = useMemo(
     () => ({
@@ -126,7 +149,7 @@ export function Viewer3D({
           intensity={0.6}
           color="#9fb8d8"
         />
-        <Model artifact={artifact} yaw={yaw} hotspots={hotspots} />
+        <ModelFromSource artifact={artifact} yaw={yaw} hotspots={hotspots} />
         <ContactShadows
           position={[0, -0.95, 0]}
           opacity={0.35}

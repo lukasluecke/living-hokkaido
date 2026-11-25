@@ -1,7 +1,7 @@
 "use client";
 // The 3D island. Ported from labs/island (src/lab/App.tsx World + Rig).
 import { CameraControls } from "@react-three/drei";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import {
   EffectComposer,
   SMAA,
@@ -9,8 +9,11 @@ import {
   Vignette,
 } from "@react-three/postprocessing";
 import { useEffect, useMemo, useRef } from "react";
+import { createToonUniforms, toonifyTree } from "../shared/toon";
 import { InkEdgesEffect } from "./InkEdges";
-import { MathUtils, Vector3 } from "three";
+import { type Color, MathUtils, Vector3 } from "three";
+import { season as seasonTokens } from "@/design/tokens";
+import { mix4, U } from "./world/season";
 import type { CameraView, IslandPartProps, Location } from "@/contracts";
 import {
   DriftIce,
@@ -122,6 +125,7 @@ export function World(props: WorldProps) {
         onArrive={onArrive}
         trail={!prefs.reducedMotion}
       />
+      <ToonLook ink={ink} />
       <Rig
         owl={owl}
         loc={flying ? loc : null}
@@ -145,6 +149,22 @@ export function World(props: WorldProps) {
       )}
     </>
   );
+}
+
+/** Two-tone shading, two-colour fog and ink colour, blended per season. */
+function ToonLook({ ink }: { ink: InkEdgesEffect }) {
+  const { scene } = useThree();
+  const T = useMemo(() => createToonUniforms(), []);
+  const n = useRef(0);
+  useFrame(() => {
+    // Patch new materials (mounts, LOD swaps) a few times a second.
+    if (n.current++ % 20 === 0) toonifyTree(scene, T);
+    mix4(U.uW.value, seasonTokens.shade, T.uShade.value);
+    mix4(U.uW.value, seasonTokens.fogNear, T.uFogNear.value);
+    const c = ink.uniforms.get("ink")?.value as Color | undefined;
+    if (c) mix4(U.uW.value, seasonTokens.ink, c);
+  });
+  return null;
 }
 
 const up = new Vector3(0, 5, 0);
