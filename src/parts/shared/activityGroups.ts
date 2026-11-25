@@ -37,6 +37,8 @@ const KIND_CAPTION: Record<string, string> = {
   board: "Play",
   canon: "Sing along",
   pluck: "Pluck",
+  "hide-seek": "Game",
+  "slope-run": "Game",
 };
 
 export function kindCaption(kind: string): string {

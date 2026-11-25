@@ -1,0 +1,119 @@
+// Headless physics checks: real Rapier, no rendering. Simulates whole runs.
+import R from "@dimforge/rapier3d-compat";
+import { beforeAll, describe, expect, it } from "vitest";
+import { generateTrack } from "../core/track";
+import type { Controls } from "../input/controls";
+import { createPhysics } from "./world";
+
+beforeAll(async () => {
+  await R.init();
+});
+
+const STEP = 1 / 60;
+const none: Controls = { lean: 0, brace: false };
+
+/** Steps until a contact or `seconds` pass. */
+function run(
+  physics: ReturnType<typeof createPhysics>,
+  seconds: number,
+  controls: (t: number) => Controls = () => none,
+) {
+  physics.slip();
+  for (let i = 0; i < seconds * 60; i++) {
+    const hit = physics.step(controls(i * STEP), STEP);
+    if (hit) return { hit, t: i * STEP, d: physics.distance() };
+  }
+  return { hit: null, t: seconds, d: physics.distance() };
+}
+
+describe("physics", () => {
+  it("slides downhill on an empty street, picking up speed", () => {
+    const empty = { ...generateTrack(1), obstacles: [] };
+    const p = createPhysics(R, empty);
+    const r = run(p, 5);
+    expect(r.hit).toBeNull();
+    // Start section is 9°: ½·g·sin(9°)·t² ≈ 19 m in 5 s, plus the slip.
+    expect(r.d).toBeGreaterThan(15);
+    expect(r.d).toBeLessThan(28);
+    expect(p.speed()).toBeGreaterThan(6);
+    p.free();
+  });
+
+  it("bracing slows the slide", () => {
+    const empty = { ...generateTrack(1), obstacles: [] };
+    const a = createPhysics(R, empty);
+    const b = createPhysics(R, empty);
+    const free = run(a, 6);
+    const braced = run(b, 6, (t) => ({ lean: 0, brace: t > 3 }));
+    expect(braced.d).toBeLessThan(free.d - 3);
+    a.free();
+    b.free();
+  });
+
+  it("leaning hard into a shopfront crashes", () => {
+    const empty = { ...generateTrack(1), obstacles: [] };
+    const p = createPhysics(R, empty);
+    const r = run(p, 8, () => ({ lean: 1, brace: false }));
+    expect(r.hit).toBe("shopfront");
+    p.free();
+  });
+
+  it("hits an obstacle straight ahead", () => {
+    const track = generateTrack(1);
+    const p = createPhysics(R, {
+      ...track,
+      obstacles: [
+        {
+          id: "x",
+          kind: "crate",
+          x: 0,
+          s: 25,
+          w: 1,
+          d: 1,
+          h: 1,
+          turn: 0,
+          look: 0,
+        },
+      ],
+    });
+    const r = run(p, 10);
+    expect(r.hit).toBe("crate");
+    expect(r.d).toBeGreaterThan(20);
+    p.free();
+  });
+
+  it("stays on the ice through curves and steep sections", () => {
+    const track = { ...generateTrack(3), obstacles: [] };
+    const p = createPhysics(R, track);
+    p.slip();
+    let maxH = 0;
+    for (let i = 0; i < 25 * 60; i++) {
+      const at = p.local();
+      // Steer to the middle so the curve doesn't carry us into a wall.
+      const lean = Math.max(-1, Math.min(1, -at.x * 0.8));
+      const hit = p.step({ lean, brace: p.speed() > 16 }, STEP);
+      expect(hit).toBeNull();
+      maxH = Math.max(maxH, at.h);
+      if (at.s > track.length) break;
+    }
+    expect(p.local().s).toBeGreaterThan(track.length * 0.9);
+    // Never flew off or sank through the ice.
+    expect(maxH).toBeLessThan(1.6);
+    expect(p.local().h).toBeGreaterThan(0.5);
+    p.free();
+  });
+
+  it("can reset and slide again", () => {
+    const empty = { ...generateTrack(1), obstacles: [] };
+    const p = createPhysics(R, empty);
+    run(p, 8, () => ({ lean: 1, brace: false }));
+    p.crash(() => 0.5);
+    for (let i = 0; i < 60; i++) p.step(none, STEP);
+    p.reset();
+    expect(p.distance()).toBeCloseTo(0, 1);
+    const r = run(p, 3);
+    expect(r.hit).toBeNull();
+    expect(r.d).toBeGreaterThan(5);
+    p.free();
+  });
+});

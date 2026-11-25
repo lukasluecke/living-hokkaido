@@ -6,7 +6,8 @@
       "tests/**",
       "scripts/**",
       "*.json",
-      "!package-lock.json"
+      "!package-lock.json",
+      "!!vendor"
     ]
   },
   "formatter": {
