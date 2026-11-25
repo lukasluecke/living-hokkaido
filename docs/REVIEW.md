@@ -6,6 +6,9 @@ a small "Draft" label. This file lists every item that the later pass must
 check. When an item is reviewed, set its data to the reviewed state and
 remove its row here.
 
+For the curator, every item is collected in one pack, grouped by place with
+the highest-risk items first: [`review-pack.md`](review-pack.md).
+
 How to find drafts in the data:
 
 - Knowledge entries with `presentation: "research-preview"` (shown as
