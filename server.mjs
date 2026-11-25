@@ -13,12 +13,13 @@ import { createHash, timingSafeEqual } from 'node:crypto';
 import { Readable } from 'node:stream';
 import { talkPrompt } from './talk-prompt.mjs';
 import { translateJa } from './translate.mjs';
+import { createGather } from './gather.mjs';
 
 try { process.loadEnvFile(); } catch { /* no .env */ }
 
 const ROOT = import.meta.dirname;
 const PORT = Number(process.env.PORT) || 8081;
-const PUBLIC_DIRS = ['src', 'characters', 'sample'];
+const PUBLIC_DIRS = ['src', 'characters', 'sample', 'gather'];
 const MIME = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.md': 'text/markdown; charset=utf-8',
@@ -310,7 +311,7 @@ async function listen(req, res) {
   const type = String(req.headers['content-type'] || 'audio/webm').split(';')[0];
   if (!/^audio\/|^video\/webm/.test(type)) return sendJson(res, 415, { error: 'Send audio.' });
   const chunks = []; let size = 0;
-  for await (const c of req) { size += c.length; if (size > 5e6) return sendJson(res, 413, { error: 'Recording too long.' }); chunks.push(c); }
+  for await (const c of req) { size += c.length; if (size > 2e7) return sendJson(res, 413, { error: 'Recording too long.' }); chunks.push(c); }
   const form = new FormData();
   form.append('model_id', STT_MODEL);
   const lang = new URL(req.url, 'http://x').searchParams.get('lang');
@@ -369,7 +370,11 @@ async function readJson(req, limit = 20000) {
 }
 const sendJson = (res, status, data) => { res.writeHead(status, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }); res.end(JSON.stringify(data)); };
 
+// Gather: the interviewer's input page (/gather/), with its own record apart from the Omusha demo.
+const gather = createGather({ ROOT, s3, sendJson, readJson, mimeOf });
+
 async function handleApi(req, res, pathname) {
+  if (pathname.startsWith('/api/gather/')) return gather.handle(req, res, pathname);
   if (pathname === '/api/envelopes' && req.method === 'GET') {
     const index = JSON.parse(fs.readFileSync(path.join(ROOT, 'envelopes', 'index.json'), 'utf8'));
     let forms = [];
