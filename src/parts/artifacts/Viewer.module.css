@@ -1,9 +1,10 @@
 .viewer {
   position: relative;
-  height: 280px;
-  border-radius: 10px;
+  flex: none;
+  height: 250px;
+  border-radius: var(--fl-radius, 6px);
+  border: 1px solid var(--fl-line, #d3d9de);
   overflow: hidden;
-  margin: 8px 0;
   touch-action: none;
   cursor: grab;
 }
@@ -17,24 +18,29 @@
   left: 0;
   top: 0;
   pointer-events: auto;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  border: 2px solid #fbf4e6;
-  background: #c99a3b;
-  color: #fff;
+  border: 3px solid var(--fl-season, #c9577a);
+  background: var(--fl-paper, #fbfaf6);
+  color: var(--fl-ink, #1d2a36);
   font: inherit;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
   padding: 0;
-  box-shadow: 0 2px 8px rgb(43 33 24 / 35%);
+  box-shadow:
+    0 0 0 4px rgb(255 255 255 / 55%),
+    0 3px 10px rgb(15 25 40 / 35%);
   transition: opacity 0.2s;
 }
 .read {
-  background: #2f4b6e;
+  background: var(--fl-season, #c9577a);
+  color: #fff;
 }
 .hotspot:focus-visible {
-  outline: 3px solid #e8c27a;
+  outline: 3px solid var(--fl-gold, #e8c27a);
+  outline-offset: 3px;
 }
 .turn {
   position: absolute;
@@ -45,7 +51,7 @@
   justify-content: space-between;
   align-items: center;
   font-size: 12px;
-  color: #5a4a3c;
+  color: var(--fl-ink-soft, #53606c);
 }
 .turn button {
   border: 0;
@@ -53,8 +59,14 @@
   width: 30px;
   height: 30px;
   padding: 0;
-  color: #2b2118;
-  background: #fbf4e6;
+  color: var(--fl-ink, #1d2a36);
+  background: var(--fl-paper, #fbfaf6);
+  box-shadow: 0 0 0 1px var(--fl-line, #d3d9de);
   cursor: pointer;
   font-size: 16px;
+}
+@media (max-width: 700px) {
+  .viewer {
+    height: 210px;
+  }
 }

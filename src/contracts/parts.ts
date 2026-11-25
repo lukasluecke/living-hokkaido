@@ -44,6 +44,12 @@ export type ArtifactViewerProps = PartContext & {
   claims: Record<string, ResolvedClaim>;
   /** Hotspots already read, as hotspot ids. */
   read: string[];
+  /**
+   * Activities the visitor has completed (e.g. `journal.completed`). The card
+   * marks them "Done" and offers the first one not done. Optional: without
+   * it no activity shows as done.
+   */
+  doneActivityIds?: string[];
 };
 
 /** One activity of any kind. Emit activity.complete or activity.close. */

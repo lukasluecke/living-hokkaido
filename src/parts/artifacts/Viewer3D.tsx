@@ -142,7 +142,7 @@ export function Viewer3D({
         camera={{ position: [0, 0.35, 2.6], fov: 35 }}
         gl={{ antialias: true }}
       >
-        <color attach="background" args={["#efe1c2"]} />
+        <color attach="background" args={["#eef1f2"]} />
         <hemisphereLight args={["#fff1d6", "#5a6a7a", 1.3]} />
         <directionalLight position={[3, 5, 3]} intensity={2.2} />
         <directionalLight
@@ -176,7 +176,7 @@ export function Viewer3D({
               })
             }
           >
-            {i + 1}
+            {read.includes(h.id) ? "✓" : i + 1}
           </button>
         ))}
       </div>
