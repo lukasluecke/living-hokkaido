@@ -16,6 +16,7 @@ import {
   type KnowledgeEntry,
   type ResolvedClaim,
 } from "./knowledge";
+import { voiceMemorySchema } from "./memory";
 import { detailSceneSchema } from "./scene";
 import { islandSchema } from "./world";
 
@@ -31,6 +32,8 @@ export const contentPackSchema = z.object({
   activities: z.array(activitySchema),
   stamps: z.array(stampSchema),
   guide: z.array(guideLineSchema),
+  /** Curator voice memories about artifacts (additive, default none). */
+  memories: z.array(voiceMemorySchema).default([]),
 });
 export type ContentPack = z.infer<typeof contentPackSchema>;
 export type ContentPackInput = z.input<typeof contentPackSchema>;
@@ -253,6 +256,32 @@ export function validateContentPack(input: unknown): string[] {
   for (const g of p.guide)
     for (const c of g.claimIds)
       if (!allClaims.has(c)) errors.push(`guide ${g.id}: unknown claim "${c}"`);
+  dupes(
+    "memory",
+    p.memories.map((m) => m.id),
+    errors,
+  );
+  for (const m of p.memories) {
+    const at = `memory ${m.id}`;
+    const art = artifacts.get(m.artifactId);
+    if (!art) errors.push(`${at}: unknown artifact "${m.artifactId}"`);
+    else if (art.knowledgeId !== m.knowledgeId)
+      errors.push(`${at}: knowledge must match artifact ${art.id}`);
+    visible(m.knowledgeId, at);
+    const k = knowledge.get(m.knowledgeId);
+    const s = k?.sources.find((x) => x.id === m.sourceId);
+    if (k && !s) errors.push(`${at}: unknown source "${m.sourceId}"`);
+    if (s && s.kind !== "audio")
+      errors.push(`${at}: source "${s.id}" is not an audio source`);
+    if (s && m.consent.recording === "granted" && s.consent === "withdrawn")
+      errors.push(`${at}: source "${s.id}" consent is withdrawn`);
+    if (
+      m.audio.kind === "file" &&
+      s &&
+      (s.rights !== "approved" || s.placeholder)
+    )
+      errors.push(`${at}: recording needs an approved, non-placeholder source`);
+  }
   return errors;
 }
 

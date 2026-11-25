@@ -18,6 +18,7 @@ Two layers:
 | `activity.ts` | `ActivityDefinition` (quiz / weave / sequence / story / words / trace), `MediaRef`, `ActivityResult` | grounded in ≥ 1 claim; weave is `illustrative` by default; story fact lines cite claims; `words` terms cite a claim and show as drafts until their five review checks are done (docs/REVIEW.md); the device voice never reads a real term; recordings are consented `audio` sources |
 | `journal.ts` | `Stamp`, `UnlockRule`, `JournalState` | progress holds only pack ids; storage key `lh-journal-v2` |
 | `season.ts` | `SeasonState`, `seasonWeights`, `seasonAt` | one value 0–4; shell owns the clock |
+| `memory.ts` | `VoiceMemory`, `MemoryTranslation`, `memoriesForArtifact`, `pickTranslation` | original audio stays playable; translations need translation consent; `cloned` voice needs voice-clone consent; translations are `machine` until `checkedBy`; Ainu content is flagged by `needsReview` (draft, prototype gate open); `placeholder` samples skip speaker consent but never use a cloned voice; withdrawn consent hides it; source must be an `audio` source |
 | `guide.ts` | `GuideLine` | owl navigates; facts need `claimIds` |
 | `events.ts` | `ExperienceEvent`, `createEventBus` | parts communicate only by events |
 | `experience.ts` | `ExperienceState`, `View`, `Prefs` | written only by `src/shell/state.ts` |
@@ -34,6 +35,7 @@ Two layers:
 
 | Version | Change |
 |---|---|
+| 1 (additive) | `ContentPack.memories` (default `[]`) and `memory.ts`: curator voice memories with consent and labelled translations. |
 | 1 (additive) | Activity kinds `story`, `words`, `trace` and `MediaRef` (labs/activities-kinds). |
 | 1 | First experience contracts (this file). Artifact id `loom` in the objects lab unified to `cloth`. Places from the island lab replaced by purpose-built `Location`s (no lon/lat). |
 
