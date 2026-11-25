@@ -1,0 +1,79 @@
+"use client";
+// React glue for the shell: one engine per page, fed by ExperienceState.
+//
+//   const sound = useSoundscape(state);   // in the shell
+//   sound.onEvent(e);                     // inside the shell's emit
+//   <SoundToggle sound={sound} />         // in the HUD
+import { useCallback, useEffect, useSyncExternalStore } from "react";
+import type { ExperienceEvent, ExperienceState } from "@/contracts";
+import { SoundEngine } from "./engine";
+import { soundManifest } from "./manifest";
+import { soundManifestSchema } from "./types";
+
+let engine: SoundEngine | null = null;
+
+/** The page's sound engine (client only). */
+export function getSoundEngine(): SoundEngine | null {
+  if (typeof window === "undefined") return null;
+  if (!engine) {
+    let storage: Storage | null = null;
+    try {
+      storage = window.localStorage;
+    } catch {}
+    engine = new SoundEngine(soundManifestSchema.parse(soundManifest), storage);
+  }
+  return engine;
+}
+
+export type Soundscape = {
+  onEvent: (e: ExperienceEvent) => void;
+  muted: boolean;
+  setMuted: (muted: boolean) => void;
+};
+
+export function useSoundscape(
+  state: Pick<ExperienceState, "view" | "overlay" | "season">,
+): Soundscape {
+  useEffect(() => getSoundEngine()?.attach(), []);
+
+  const { view, overlay } = state;
+  const season = state.season.value;
+  useEffect(() => {
+    getSoundEngine()?.setScene({ view, overlay, season });
+  }, [view, overlay, season]);
+
+  const muted = useSyncExternalStore(
+    (fn) => getSoundEngine()?.subscribe(fn) ?? (() => {}),
+    () => getSoundEngine()?.muted ?? false,
+    () => false,
+  );
+  const onEvent = useCallback((e: ExperienceEvent) => {
+    getSoundEngine()?.onEvent(e);
+  }, []);
+  const setMuted = useCallback((m: boolean) => {
+    const e = getSoundEngine();
+    e?.unlock();
+    e?.setMuted(m);
+  }, []);
+  return { onEvent, muted, setMuted };
+}
+
+export function SoundToggle({
+  sound,
+  className,
+}: {
+  sound: Soundscape;
+  className?: string;
+}) {
+  return (
+    <button
+      type="button"
+      className={className}
+      aria-pressed={!sound.muted}
+      data-sound="off"
+      onClick={() => sound.setMuted(!sound.muted)}
+    >
+      {sound.muted ? "Sound off" : "Sound on"}
+    </button>
+  );
+}
