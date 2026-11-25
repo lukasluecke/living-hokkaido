@@ -20,6 +20,15 @@ import {
 } from "@/contracts";
 import { seasonInk } from "@/design/tokens";
 import { useSoundscape } from "@/audio/react";
+import {
+  DEFAULT_LOCALE,
+  I18nProvider,
+  isLocale,
+  LOCALE_STORAGE_KEY,
+  type Locale,
+  localizePack,
+  translator,
+} from "@/i18n";
 import { Hud } from "./Hud";
 import { record } from "./progress";
 import { parts } from "./registry";
@@ -75,14 +84,20 @@ function claimsFor(pack: ContentPack, knowledgeId: string, ids: string[]) {
   return out;
 }
 
-export function Shell({ pack }: { pack: ContentPack }) {
+export function Shell({ pack: source }: { pack: ContentPack }) {
+  // Language (src/i18n): the shell owns the locale. Parts get the pack with
+  // translated text; ids stay the same, so state and journal do not change.
+  const [locale, setLocale] = useState<Locale>(DEFAULT_LOCALE);
+  const pack = useMemo(() => localizePack(source, locale), [source, locale]);
+  const t = useMemo(() => translator(locale), [locale]);
   const [state, setState] = useState<ExperienceState>(() =>
     initialState({ reducedMotion: false, webgl: true }),
   );
   const [journal, setJournal] = useState<JournalState>(EMPTY_JOURNAL);
   const [toast, setToast] = useState<string | null>(null);
+  // Guide line and toast hold English text; they are translated on render.
   const [guideLine, setGuideLine] = useState(
-    pack.guide.find((g) => g.on === "start")?.text ?? "",
+    source.guide.find((g) => g.on === "start")?.text ?? "",
   );
   const journalRef = useRef(journal);
   journalRef.current = journal;
@@ -98,6 +113,24 @@ export function Shell({ pack }: { pack: ContentPack }) {
       if (j) setJournal(j);
     } catch {}
   }, [pack]);
+
+  // Locale: ?lang=ja|en wins, then the stored choice.
+  useEffect(() => {
+    let next: unknown = new URLSearchParams(window.location.search).get("lang");
+    try {
+      if (!isLocale(next)) next = localStorage.getItem(LOCALE_STORAGE_KEY);
+    } catch {}
+    if (isLocale(next)) setLocale(next);
+  }, []);
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
+  const chooseLocale = useCallback((next: Locale) => {
+    setLocale(next);
+    try {
+      localStorage.setItem(LOCALE_STORAGE_KEY, next);
+    } catch {}
+  }, []);
 
   const emit = useCallback(
     (e: ExperienceEvent) => {
@@ -119,18 +152,18 @@ export function Shell({ pack }: { pack: ContentPack }) {
           : "sceneId" in e
             ? e.sceneId
             : undefined;
-      const line = pack.guide.find(
+      const line = source.guide.find(
         (g) => g.on === e.type && (!g.targetId || g.targetId === target),
       );
       if (line) setGuideLine(line.text);
       for (const id of earned) {
         soundEvent({ type: "stamp.earned", stampId: id });
-        setToast(pack.stamps.find((x) => x.id === id)?.title ?? id);
-        const stampLine = pack.guide.find((g) => g.on === "stamp.earned");
+        setToast(source.stamps.find((x) => x.id === id)?.title ?? id);
+        const stampLine = source.guide.find((g) => g.on === "stamp.earned");
         if (stampLine) setGuideLine(stampLine.text);
       }
     },
-    [pack, soundEvent],
+    [pack, source, soundEvent],
   );
 
   // Demo recorder and e2e hook (scripts/demo-video): scripts send the same
@@ -217,7 +250,7 @@ export function Shell({ pack }: { pack: ContentPack }) {
       ? (pack.timelines.find((t) => t.id === state.timelineId) ?? null)
       : null;
 
-  const { stations, next } = route(pack, state, journal);
+  const { stations, next } = route(pack, state, journal, t);
   const nextEvent = next?.event;
   const nextIcon =
     nextEvent?.type === "activity.start"
@@ -230,8 +263,6 @@ export function Shell({ pack }: { pack: ContentPack }) {
         : nextEvent?.type === "journal.open"
           ? UI_ICON.journal
           : UI_ICON.place;
-  // The icon says "look" or "try", so the button shows only the name.
-  const nextText = next?.label.replace(/^(Look at|Try|Next): /, "");
   const ink = seasonInk[SEASON_IDS.indexOf(seasonAt(state.season.value))];
 
   const stage =
@@ -250,161 +281,182 @@ export function Shell({ pack }: { pack: ContentPack }) {
     ) : null;
 
   return (
-    <main
-      className={s.shell}
-      data-view={state.view}
-      data-overlay={state.overlay ?? undefined}
-      style={{ "--fl-season": ink } as React.CSSProperties}
-    >
-      <div className={s.stage}>{stage}</div>
-      <Hud
-        season={state.season}
-        emit={emit}
-        stamps={journal.stamps.length}
-        total={pack.stamps.length}
-        sound={sound}
-        stations={stations}
-        onOverTime={
-          localTimeline
-            ? () =>
-                emit({ type: "timeline.open", timelineId: localTimeline.id })
-            : undefined
-        }
-      />
-      {guideLine && state.view !== "activity" && !state.overlay && (
-        <section className={s.owl} aria-label="Owl guide">
-          <OwlMark />
-          <div className={s.bubble}>
-            <p
-              key={guideLine}
-              className={s.line}
-              aria-live="polite"
-              data-still={state.prefs.reducedMotion || undefined}
-            >
-              <span className={s.visuallyHidden}>Owl: </span>
-              {guideLine}
-            </p>
-            {next && (
-              <button
-                type="button"
-                className={s.next}
-                aria-label={next.label}
-                onClick={() => emit(next.event)}
+    <I18nProvider locale={locale}>
+      <main
+        className={s.shell}
+        data-view={state.view}
+        data-overlay={state.overlay ?? undefined}
+        style={{ "--fl-season": ink } as React.CSSProperties}
+      >
+        <div className={s.stage}>{stage}</div>
+        <Hud
+          season={state.season}
+          emit={emit}
+          stamps={journal.stamps.length}
+          total={pack.stamps.length}
+          sound={sound}
+          stations={stations}
+          locale={locale}
+          onLocale={chooseLocale}
+          onOverTime={
+            localTimeline
+              ? () =>
+                  emit({ type: "timeline.open", timelineId: localTimeline.id })
+              : undefined
+          }
+        />
+        {guideLine && state.view !== "activity" && !state.overlay && (
+          <section className={s.owl} aria-label={t("Owl guide")}>
+            <OwlMark />
+            <div className={s.bubble}>
+              <p
+                key={guideLine}
+                className={s.line}
+                aria-live="polite"
+                data-still={state.prefs.reducedMotion || undefined}
               >
-                <Icon d={nextIcon} size={18} />
-                <span>{nextText}</span>
-                <Icon d={UI_ICON.go} size={16} className={s.nextGo} />
-              </button>
+                <span className={s.visuallyHidden}>{t("Owl: ")}</span>
+                {t(guideLine)}
+              </p>
+              {next && (
+                <button
+                  type="button"
+                  className={s.next}
+                  aria-label={next.label}
+                  onClick={() => emit(next.event)}
+                >
+                  <Icon d={nextIcon} size={18} />
+                  {/* The icon says "look" or "try", so show only the name. */}
+                  <span>{next.name ?? next.label}</span>
+                  <Icon d={UI_ICON.go} size={16} className={s.nextGo} />
+                </button>
+              )}
+            </div>
+          </section>
+        )}
+        <Ask
+          {...ctx}
+          // Retrieval matches English words, so the owl answers from the
+          // English pack for now (src/i18n/AGENTS.md, limitations).
+          content={source}
+          view={state.view}
+          locationId={state.locationId}
+          sceneId={state.sceneId}
+          artifactId={state.artifactId}
+          covered={state.overlay !== null}
+        />
+        {toast && (
+          <output className={s.toast}>
+            {t("New stamp: {title}", { title: t(toast) })}
+          </output>
+        )}
+        <aside className={s.side}>
+          {artifact && state.view === "focus" && (
+            <SidePanel
+              key="card"
+              title={artifact.label}
+              closeLabel={t("Close (put it back)")}
+              onClose={() => emit({ type: "artifact.blur" })}
+              index={placed.indexOf(artifact.id)}
+              total={placed.length}
+              onPrev={placed.length > 1 ? () => step(-1) : undefined}
+              onNext={placed.length > 1 ? () => step(1) : undefined}
+            >
+              <Viewer
+                {...ctx}
+                artifact={artifact}
+                claims={claimsFor(
+                  pack,
+                  artifact.knowledgeId,
+                  artifact.claimIds,
+                )}
+                read={journal.hotspotsRead
+                  .filter((k) => k.startsWith(`${artifact.id}/`))
+                  .map((k) => k.slice(artifact.id.length + 1))}
+                doneActivityIds={journal.completed}
+              />
+            </SidePanel>
+          )}
+          {activity && state.view === "activity" && (
+            <SidePanel
+              key="activity"
+              header={false}
+              title={activity.title}
+              closeLabel={t("Close activity")}
+              onClose={() =>
+                emit({ type: "activity.close", activityId: activity.id })
+              }
+            >
+              <Activity
+                {...ctx}
+                activity={activity}
+                claims={claimsFor(
+                  pack,
+                  activity.knowledgeId,
+                  activity.claimIds,
+                )}
+                found={journal.found.flatMap((key) =>
+                  key.startsWith(`${activity.id}/`)
+                    ? [key.slice(activity.id.length + 1)]
+                    : [],
+                )}
+              />
+            </SidePanel>
+          )}
+        </aside>
+        {openTimeline && (
+          <div className={s.timeline}>
+            <OverTime
+              {...ctx}
+              timeline={openTimeline}
+              claims={claimsFor(pack, openTimeline.knowledgeId, [
+                ...openTimeline.claimIds,
+                ...openTimeline.eras.flatMap((e) => e.claimIds),
+              ])}
+            />
+            <button
+              type="button"
+              className={s.timelineClose}
+              onClick={() => emit({ type: "nav.back" })}
+            >
+              {t("Close")}
+            </button>
+          </div>
+        )}
+        {state.overlay && state.overlay !== "timeline" && (
+          <div
+            className={s.overlay}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) emit({ type: "nav.back" });
+            }}
+            role="presentation"
+          >
+            {state.overlay === "journal" && (
+              <Journal {...ctx} journal={journal} />
+            )}
+            {state.overlay === "reveal" && state.reveal && (
+              <Reveal
+                {...ctx}
+                knowledgeId={state.reveal.knowledgeId}
+                claim={
+                  state.reveal.claimId
+                    ? resolveClaim(
+                        pack,
+                        state.reveal.knowledgeId,
+                        state.reveal.claimId,
+                      )
+                    : null
+                }
+                artifact={
+                  pack.artifacts.find(
+                    (a) => a.id === state.reveal?.artifactId,
+                  ) ?? null
+                }
+              />
             )}
           </div>
-        </section>
-      )}
-      <Ask
-        {...ctx}
-        view={state.view}
-        locationId={state.locationId}
-        sceneId={state.sceneId}
-        artifactId={state.artifactId}
-        covered={state.overlay !== null}
-      />
-      {toast && <output className={s.toast}>New stamp: {toast}</output>}
-      <aside className={s.side}>
-        {artifact && state.view === "focus" && (
-          <SidePanel
-            key="card"
-            title={artifact.label}
-            closeLabel="Close (put it back)"
-            onClose={() => emit({ type: "artifact.blur" })}
-            index={placed.indexOf(artifact.id)}
-            total={placed.length}
-            onPrev={placed.length > 1 ? () => step(-1) : undefined}
-            onNext={placed.length > 1 ? () => step(1) : undefined}
-          >
-            <Viewer
-              {...ctx}
-              artifact={artifact}
-              claims={claimsFor(pack, artifact.knowledgeId, artifact.claimIds)}
-              read={journal.hotspotsRead
-                .filter((k) => k.startsWith(`${artifact.id}/`))
-                .map((k) => k.slice(artifact.id.length + 1))}
-              doneActivityIds={journal.completed}
-            />
-          </SidePanel>
         )}
-        {activity && state.view === "activity" && (
-          <SidePanel
-            key="activity"
-            header={false}
-            title={activity.title}
-            closeLabel="Close activity"
-            onClose={() =>
-              emit({ type: "activity.close", activityId: activity.id })
-            }
-          >
-            <Activity
-              {...ctx}
-              activity={activity}
-              claims={claimsFor(pack, activity.knowledgeId, activity.claimIds)}
-              found={journal.found.flatMap((key) =>
-                key.startsWith(`${activity.id}/`)
-                  ? [key.slice(activity.id.length + 1)]
-                  : [],
-              )}
-            />
-          </SidePanel>
-        )}
-      </aside>
-      {openTimeline && (
-        <div className={s.timeline}>
-          <OverTime
-            {...ctx}
-            timeline={openTimeline}
-            claims={claimsFor(pack, openTimeline.knowledgeId, [
-              ...openTimeline.claimIds,
-              ...openTimeline.eras.flatMap((e) => e.claimIds),
-            ])}
-          />
-          <button
-            type="button"
-            className={s.timelineClose}
-            onClick={() => emit({ type: "nav.back" })}
-          >
-            Close
-          </button>
-        </div>
-      )}
-      {state.overlay && state.overlay !== "timeline" && (
-        <div
-          className={s.overlay}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) emit({ type: "nav.back" });
-          }}
-          role="presentation"
-        >
-          {state.overlay === "journal" && (
-            <Journal {...ctx} journal={journal} />
-          )}
-          {state.overlay === "reveal" && state.reveal && (
-            <Reveal
-              {...ctx}
-              knowledgeId={state.reveal.knowledgeId}
-              claim={
-                state.reveal.claimId
-                  ? resolveClaim(
-                      pack,
-                      state.reveal.knowledgeId,
-                      state.reveal.claimId,
-                    )
-                  : null
-              }
-              artifact={
-                pack.artifacts.find((a) => a.id === state.reveal?.artifactId) ??
-                null
-              }
-            />
-          )}
-        </div>
-      )}
-    </main>
+      </main>
+    </I18nProvider>
   );
 }

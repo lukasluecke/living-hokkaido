@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { type Emit, SEASON_IDS, type SeasonState, seasonAt } from "@/contracts";
 import { SoundToggle, type Soundscape } from "@/audio/react";
 import { Icon as LineIcon, UI_ICON } from "@/parts/shared/Icon";
+import { type Locale, LOCALE_NAMES, useI18n } from "@/i18n";
 import s from "./Hud.module.css";
 import type { Station } from "./route";
 
@@ -41,6 +42,8 @@ export function Hud({
   total,
   sound,
   stations,
+  locale,
+  onLocale,
   onOverTime,
 }: {
   season: SeasonState;
@@ -49,10 +52,14 @@ export function Hud({
   total: number;
   sound: Soundscape;
   stations: Station[];
+  locale: Locale;
+  onLocale: (locale: Locale) => void;
   /** Shown inside a location that has an "Over time" timeline. */
   onOverTime?: () => void;
 }) {
   const now = seasonAt(season.value);
+  const { t, draft } = useI18n();
+  const other: Locale = locale === "ja" ? "en" : "ja";
   const [menu, setMenu] = useState(false);
   const menuBtn = useRef<HTMLButtonElement>(null);
   const menuBox = useRef<HTMLDivElement>(null);
@@ -81,8 +88,15 @@ export function Hud({
 
   return (
     <header className={s.hud}>
-      <strong className={s.title}>Living Hokkaido</strong>
-      <nav className={s.rail} aria-label="Your route">
+      <strong className={s.title}>
+        {t("Living Hokkaido")}
+        {draft && (
+          <small className={s.draft} title={t("Draft translation note")}>
+            {t("Draft translation")}
+          </small>
+        )}
+      </strong>
+      <nav className={s.rail} aria-label={t("Your route")}>
         <ol>
           {stations.map((st, i) => {
             const text = `${st.label}${st.sub ? ` ${st.sub}` : ""}`;
@@ -95,7 +109,7 @@ export function Hud({
                   title={text}
                   disabled={!st.event}
                   aria-current={st.status === "now" ? "step" : undefined}
-                  aria-label={`${text}${st.status === "done" ? ", done" : ""}`}
+                  aria-label={`${text}${st.status === "done" ? t(", done") : ""}`}
                   onClick={() => st.event && emit(st.event)}
                 >
                   <i aria-hidden="true">
@@ -120,21 +134,33 @@ export function Hud({
       <div className={s.tools}>
         <button
           type="button"
+          className={`${s.round} ${s.lang}`}
+          lang={other}
+          aria-label={
+            other === "ja" ? "日本語で表示 (Japanese)" : "Show in English"
+          }
+          title={LOCALE_NAMES[other]}
+          onClick={() => onLocale(other)}
+        >
+          {other === "ja" ? "あ" : "EN"}
+        </button>
+        <button
+          type="button"
           className={s.counter}
-          aria-label={`Journal (${stamps}/${total})`}
-          title="Heritage Journal"
+          aria-label={t("Journal ({stamps}/{total})", { stamps, total })}
+          title={t("Heritage Journal")}
           onClick={() => emit({ type: "journal.open" })}
         >
           <b aria-hidden="true">{stamps}</b>
           <span className={s.counterText} aria-hidden="true">
-            of {total} stamps
+            {t("of {total} stamps", { total })}
           </span>
         </button>
         <button
           ref={menuBtn}
           type="button"
           className={s.round}
-          aria-label="Menu: seasons, sound and more"
+          aria-label={t("Menu: seasons, sound and more")}
           aria-expanded={menu}
           aria-controls="hud-menu"
           onClick={() => setMenu((m) => !m)}
@@ -143,18 +169,18 @@ export function Hud({
         </button>
         {menu && (
           <div id="hud-menu" ref={menuBox} className={s.menu}>
-            <p className={s.cap}>Season</p>
+            <p className={s.cap}>{t("Season")}</p>
             <div
               className={s.seasons}
               role="group"
-              aria-label={`Season: ${now}`}
+              aria-label={t("Season: {season}", { season: t(now) })}
             >
               {SEASON_IDS.map((id, i) => (
                 <button
                   key={id}
                   type="button"
-                  aria-label={id}
-                  title={id}
+                  aria-label={t(id)}
+                  title={t(id)}
                   aria-pressed={now === id}
                   onClick={() => emit({ type: "season.set", value: i })}
                 >
@@ -163,9 +189,11 @@ export function Hud({
               ))}
               <button
                 type="button"
-                aria-label={season.playing ? "Pause" : "Timelapse"}
+                aria-label={season.playing ? t("Pause") : t("Timelapse")}
                 title={
-                  season.playing ? "Pause the seasons" : "Play the seasons"
+                  season.playing
+                    ? t("Pause the seasons")
+                    : t("Play the seasons")
                 }
                 aria-pressed={season.playing}
                 onClick={() =>
@@ -189,7 +217,7 @@ export function Hud({
                   }}
                 >
                   <Icon d="M7 3h10M7 21h10M8 3c0 5 8 6 8 9s-8 4-8 9M16 3c0 5-8 6-8 9s8 4 8 9" />
-                  Over time
+                  {t("Over time")}
                 </button>
               )}
               <SoundToggle sound={sound} className={s.item}>
@@ -202,13 +230,13 @@ export function Hud({
                           : "M4 9h4l5-4v14l-5-4H4V9Zm12 0a4 4 0 0 1 0 6m2-9a8 8 0 0 1 0 12"
                       }
                     />
-                    {muted ? "Sound off" : "Sound on"}
+                    {muted ? t("Sound off") : t("Sound on")}
                   </>
                 )}
               </SoundToggle>
               <a className={s.item} href="/contribute">
                 <Icon d="M4 20l4-1 11-11-3-3L5 16l-1 4Zm10-13 3 3" />
-                Contribute a story
+                {t("Contribute a story")}
               </a>
             </div>
           </div>
