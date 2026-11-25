@@ -1,6 +1,7 @@
 // Four candidate looks applied to the same geometry.
 import * as THREE from "three";
 import { mergeVertices } from "three/examples/jsm/utils/BufferGeometryUtils.js";
+import { AREA_PALETTE } from "../../shared/areaObjects";
 import type { Part } from "./models";
 
 export type LookId = "pbr" | "flat" | "toon" | "matcap" | "painted";
@@ -37,6 +38,7 @@ export const PALETTE: Record<Part, string> = {
   fiber: "#d9bb86",
   bark: "#6e4b32",
   tie: "#9c4f2e",
+  ...AREA_PALETTE,
 };
 
 let ramp: THREE.DataTexture | null = null;

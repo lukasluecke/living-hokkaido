@@ -4,6 +4,7 @@ import {
   loadContentPack,
 } from "@/contracts";
 import { activities } from "./activities";
+import { areaActivities, areaArtifacts, areaScenes } from "./area-scenes";
 import { artifacts } from "./artifacts";
 import { guide } from "./guide";
 import { locations, overview, owlHome } from "./island";
@@ -25,9 +26,15 @@ export const barkToClothRaw = {
   id: "bark-to-cloth",
   knowledge: [barkToCloth, houseOverTime, hokkaidoMuseum, landAndSea],
   island: { owlHome, overview, locations },
-  scenes: [lakeHouse, listeningGrove, makersClearing, memoryCabin],
-  artifacts,
-  activities,
+  scenes: [
+    lakeHouse,
+    listeningGrove,
+    makersClearing,
+    memoryCabin,
+    ...areaScenes,
+  ],
+  artifacts: [...artifacts, ...areaArtifacts],
+  activities: [...activities, ...areaActivities],
   stamps,
   guide,
   memories,
