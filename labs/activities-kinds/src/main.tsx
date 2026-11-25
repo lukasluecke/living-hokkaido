@@ -38,7 +38,7 @@ function App() {
   }, [kind]);
 
   const a = activities[kind];
-  const props = { claims: claimsFor(a.claimIds), prefs, emit: bus.emit };
+  const props = { claims: claimsFor(a.knowledgeId, a.claimIds), prefs, emit: bus.emit };
 
   return (
     <div

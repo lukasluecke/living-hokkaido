@@ -5,7 +5,6 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -p . && vite build",
-    "check:schema": "node scripts/run.mjs scripts/schema-check.ts",
     "preview": "vite preview"
   },
   "dependencies": {
