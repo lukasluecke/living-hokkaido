@@ -11,7 +11,7 @@ src/content/<story>     content packs as data, validated against the contracts
 src/design              visual tokens (palette, seasons, motion, budgets)
 src/shell               ExperienceState reducer, journal progress, season clock, part registry
 src/parts/<part>        island, detail-scene, artifacts, activities, journal, reveal
-src/components/World    current 3D diorama, room, clickable objects (to be replaced by parts)
+src/components/Contributor  contributor review path, route /contribute (visitor app: src/shell + src/parts, route /)
 src/components/Experience navigation, narration, journal, visitor preview
 src/components/Contributor source staging and explicit human review
 src/data/story          research candidate, objects, source links, activities

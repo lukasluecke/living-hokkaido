@@ -204,6 +204,7 @@ export function Shell({ pack }: { pack: ContentPack }) {
           Journal ({journal.stamps.length}/{pack.stamps.length})
         </button>
         <SoundToggle sound={sound} />
+        <a href="/contribute">Contribute a story</a>
       </header>
       {guideLine && (
         <p className={s.guide} aria-live="polite">
