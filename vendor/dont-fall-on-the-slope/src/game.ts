@@ -24,6 +24,8 @@ import { easeLean } from "./input/controls";
 import { attachInput } from "./input/input";
 import type { SlopeProps } from "./integration/contracts";
 import { createPhysics, mul, PLAYER, SOFT } from "./physics/world";
+import { createSfx } from "./audio/sfx";
+import { closeCalls } from "./core/style";
 import { createExhibits } from "./render/exhibits";
 import { createHud } from "./render/hud";
 import { createView } from "./render/view";
@@ -78,6 +80,27 @@ export function startGame(
   const touch = window.matchMedia("(pointer: coarse)").matches;
   const hud = createHud(host, touch);
   let state: RunState = initialRun;
+  const sfx = createSfx(props.muted ?? false);
+  hud.setMuted(sfx.muted);
+  const toggleMute = () => {
+    sfx.setMuted(!sfx.muted);
+    hud.setMuted(sfx.muted);
+    hud.announce(sfx.muted ? "Sound off." : "Sound on.");
+  };
+  hud.buttons.mute.addEventListener("click", () => {
+    sfx.start();
+    toggleMute();
+  });
+  const onKey = (e: KeyboardEvent) => {
+    if (e.code === "KeyM" && !e.repeat) {
+      sfx.start();
+      toggleMute();
+    }
+  };
+  host.addEventListener("keydown", onKey);
+  /** Close calls this run (style points). */
+  let close = new Set<string>();
+  let noticeToastAt = -10;
   let slowmo = 0;
   const exhibits = createExhibits(
     view.scene,
@@ -121,12 +144,14 @@ export function startGame(
   hud.buttons.action.addEventListener("click", () => onAction());
 
   function onAction() {
+    sfx.start();
     if (state.phase === "ready") dispatch({ type: "start" });
     else if (state.phase === "crashed" || state.phase === "finished") {
       physics.reset();
       view.snap();
       slowmo = 0;
       noticed = [];
+      close = new Set();
       lean = 0;
       dispatch({ type: "restart" });
     }
@@ -158,7 +183,15 @@ export function startGame(
   }
 
   function enter(s: RunState) {
-    const stats = `${score(s)} m${s.best > 0 ? ` · best ${s.best} m` : ""}`;
+    const calls = close.size;
+    const stats = [
+      `${score(s)} m`,
+      s.best > 0 ? `best ${s.best} m` : "",
+      calls ? `${calls} close ${calls === 1 ? "call" : "calls"}` : "",
+      noticed.length ? `${noticed.length} noticed` : "",
+    ]
+      .filter(Boolean)
+      .join(" · ");
     switch (s.phase) {
       case "ready":
         showReady();
@@ -169,6 +202,7 @@ export function startGame(
         hud.announce("You slip. Lean with the arrow keys, brace with Space.");
         break;
       case "crashed": {
+        sfx.crash();
         physics.crash(random);
         if (!props.prefs.reducedMotion) slowmo = SLOWMO.seconds;
         const line = crashLine(s.hit);
@@ -190,6 +224,7 @@ export function startGame(
         break;
       }
       case "finished":
+        sfx.finish();
         physics.stop();
         hud.showCard("The canal", {
           heading: "You made it.",
@@ -242,10 +277,26 @@ export function startGame(
             noticed = [...noticed, id];
             const f = info(id);
             if (f) {
+              sfx.notice();
+              noticeToastAt = clock;
               hud.toast(`Noticed: ${f.label}${seen.has(id) ? "" : " · new"}`);
               hud.announce(`You noticed ${f.label}. The end card explains it.`);
             }
           }
+          if (!hit)
+            for (const id of closeCalls(
+              track.obstacles,
+              close,
+              here.s,
+              here.x,
+              PLAYER.radius,
+            )) {
+              close.add(id);
+              sfx.closeCall();
+              // A notice toast stays up; close calls only fill the gaps.
+              if (clock - noticeToastAt > 1.8)
+                hud.toast(`Close call! (${close.size})`);
+            }
           if (hit && SOFT[hit]) {
             hud.toast("Through the snow pile. Slower now.");
             hud.announce("You plough through a snow pile and slow down.");
@@ -255,6 +306,7 @@ export function startGame(
       }
     }
     hud.setMeter(score(state), state.best, [noticed.length, spots.length]);
+    sfx.speed(state.phase === "sliding" ? physics.speed() : 0);
     clock += real;
     exhibits.update(clock, real, noticed);
     const at = physics.local();
@@ -284,6 +336,8 @@ export function startGame(
       cancelAnimationFrame(raf);
       input.destroy();
       hud.destroy();
+      host.removeEventListener("keydown", onKey);
+      sfx.destroy();
       exhibits.destroy();
       view.destroy();
       physics.free();
