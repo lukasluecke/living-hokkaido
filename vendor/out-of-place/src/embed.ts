@@ -109,7 +109,7 @@ export function mountOutOfPlace(
       },
     };
     // Dev only (stripped from builds): lets tests step the game clock by hand.
-    if (import.meta.env.DEV)
+    if (import.meta.env?.DEV)
       (parent as HTMLElement & { __phaserGame?: unknown }).__phaserGame = game;
     game.scene.add("Game", GameScene, false);
     game.scene.add("Select", SelectScene, false);
