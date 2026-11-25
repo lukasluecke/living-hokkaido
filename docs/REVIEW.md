@@ -191,4 +191,4 @@ Knowledge in `vendor/out-of-place/content/scenes/*/knowledge.ts`, imported by
 | Entry | Claims | Used by | Needs |
 |---|---|---|---|
 | `otaru-herring-warehouse` | 7 (MLIT/JTA pages, Visit Hokkaido, HRO herring assessment) | `hide-seek-otaru-warehouse`, `slope-run-otaru` | Historian review (Chika); locators are coarse ("page text"); sources `rights: unknown` |
-| `meiji-sapporo-street` | 9 | `hide-seek-sapporo-street` | Same. Ainu people are not depicted in the scene (see `vendor/out-of-place/scenes/sapporo-street.md`); check that choice |
+| `meiji-sapporo-street` | 9 | `hide-seek-sapporo-street` (hidden for now, kept in `games.ts`) | Same. Ainu people are not depicted in the scene (see `vendor/out-of-place/scenes/sapporo-street.md`); check that choice |
