@@ -2,7 +2,7 @@
 import type { ActivityInput } from "@/contracts";
 import { activities as seed } from "@/data/story";
 import { activityKinds } from "./activity-kinds";
-import { museumActivities, museumMaps } from "./museum-activities";
+import { museumActivities, museumMaps, owlStory } from "./museum-activities";
 
 const artifactFor: Record<string, string> = {
   material: "fiber",
@@ -95,4 +95,5 @@ export const activities: ActivityInput[] = [
   ...activityKinds,
   ...museumActivities,
   ...museumMaps,
+  owlStory,
 ];

@@ -562,3 +562,13 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
+/* Story refrain (sakehe): shown in its own script, never voiced. */
+.root :global(.caption):global(.refrain) {
+  font-family: ui-serif, "Hiragino Mincho ProN", Georgia, serif;
+  color: #6a4a12;
+}
+.root :global(.refrain-roman) {
+  font-style: italic;
+  color: var(--lh-ink-soft);
+  margin: 2px 0;
+}

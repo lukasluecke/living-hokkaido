@@ -84,9 +84,10 @@ export const listeningGrove: DetailSceneInput = {
     },
   ],
   activityIds: [
+    "story-owl",
+    "map-greetings",
     "story-bark-to-cloth",
     "words-objects",
-    "map-greetings",
     "quiz-small-kana",
   ],
 };

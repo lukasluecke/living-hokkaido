@@ -317,3 +317,128 @@ export const museumMaps: ActivityInput[] = [
     placeholder: true,
   },
 ];
+
+const REFRAIN = { id: "", role: "refrain" as const };
+const refrainLine = (id: string) => ({ ...REFRAIN, id });
+
+export const owlStory: ActivityInput = {
+  kind: "story",
+  id: "story-owl",
+  knowledgeId: "hokkaido-museum",
+  title: "The owl and its refrain",
+  claimIds: [
+    "owl-kamuy",
+    "kamuy-visit",
+    "kamuy-differ",
+    "sakehe",
+    "owl-sakehe",
+    "telling-varies",
+    "green-pigeon",
+    "romanised-by-us",
+  ],
+  narrator: {
+    character: "owl",
+    credit: "Read by the owl guide · a fictional character",
+    voice: { kind: "device-voice-placeholder" },
+  },
+  refrain: {
+    text: "トゥノヤケ レノヤケ クントゥムケ カムイムイケ カムイチカッポ フム フム",
+    romanised: "tunoyake renoyake kuntumke kamuymuyke kamuychikappo hum hum",
+    lang: "ain",
+    credit:
+      "sakehe of the owl story of Shizunai, told by Suteno Orita (Hokkaido Museum, Q020)",
+    claimId: "owl-sakehe",
+  },
+  chapters: [
+    {
+      id: "watcher",
+      title: "The owl of the village",
+      lines: [
+        {
+          id: "w1",
+          role: "frame",
+          text: "Sit for a moment. This is a story about a story.",
+        },
+        {
+          id: "w2",
+          role: "fact",
+          text: "In many regions, Blakiston's fish owl is a kamuy with the role of watching over the village, and it is highly respected.",
+          claimIds: ["owl-kamuy"],
+        },
+        {
+          id: "w3",
+          role: "fact",
+          text: "Kamuy are thought to live in their own world, and to visit the human world as animals, plants, tools, rain or wind.",
+          claimIds: ["kamuy-visit"],
+        },
+        {
+          id: "w4",
+          role: "fact",
+          text: "Which beings are kamuy, and which matter most, differs by region and by person.",
+          claimIds: ["kamuy-differ"],
+        },
+      ],
+      pause: {
+        prompt: "What next?",
+        choices: [
+          { id: "go-on", label: "Keep listening", action: { to: "continue" } },
+          {
+            id: "how",
+            label: "How do we know?",
+            action: { to: "reveal", claimId: "owl-kamuy" },
+          },
+        ],
+      },
+    },
+    {
+      id: "refrain",
+      title: "A song that comes back",
+      lines: [
+        {
+          id: "r1",
+          role: "fact",
+          text: "A kamuy yukar, a song of the kamuy, has a word that comes back again and again: the sakehe. Some catch a kamuy's call or movement; many have no clear meaning.",
+          claimIds: ["sakehe"],
+        },
+        {
+          id: "r2",
+          role: "fact",
+          text: "The longest known sakehe is said to belong to the owl story of Shizunai, told by Suteno Orita. It ends with the owl's hum hum.",
+          claimIds: ["owl-sakehe"],
+        },
+        {
+          id: "r3",
+          role: "frame",
+          text: "Here it is, as the museum writes it.",
+        },
+        refrainLine("r4"),
+      ],
+    },
+    {
+      id: "telling",
+      title: "Every telling is new",
+      lines: [
+        {
+          id: "t1",
+          role: "fact",
+          text: "Oral literature changes a little each time it is told, even by the same teller.",
+          claimIds: ["telling-varies"],
+        },
+        {
+          id: "t2",
+          role: "fact",
+          text: "The museum once played a kamuy yukar told by Nabe Shirasawa of Chitose, and its library still keeps the recording.",
+          claimIds: ["green-pigeon"],
+        },
+        {
+          id: "t3",
+          role: "frame",
+          text: "So the owl guide does not retell the owl story. It points to its teller, and to the place that keeps it.",
+        },
+        refrainLine("t4"),
+      ],
+    },
+  ],
+  completion:
+    "In Shizunai, Suteno Orita told the owl story with the longest known refrain. Each telling changes a little: the story belongs to its teller.",
+};
