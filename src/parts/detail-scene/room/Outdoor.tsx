@@ -349,7 +349,7 @@ export function ClearingStatic({ season }: { season: SeasonState }) {
 export const CABIN_SCALE = 0.72;
 
 /** Memory cabin: the house shell at a smaller scale, with plain shelves. */
-export function CabinStatic() {
+export function CabinStatic({ lift }: { lift?: { current: number } }) {
   const wood = useMemo(
     () =>
       new THREE.MeshStandardMaterial({ map: woodTexture(), roughness: 0.85 }),
@@ -374,7 +374,7 @@ export function CabinStatic() {
     <group name="cabin">
       <group scale={CABIN_SCALE}>
         <Floor />
-        <Walls />
+        <Walls lift={lift} />
         <Outside />
       </group>
       {/* Plain storage shelves along the back wall. */}
