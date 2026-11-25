@@ -127,6 +127,16 @@ add({ id: id('bales-unrecorded'), envelopes: ['diorama-bales', 'kushun-kotan-180
   claim: 'What the stacked bales held, and whether they were part of the gifts, is not recorded here.',
   absence: { cause: 'never-collected' }, source: { type: 'project-note', ref: 'This project' }, evidence: 'none', standing: contributor, perspective: 'project' });
 
+// ---- The child (added 2026-11-26)
+add({ id: id('child-unrecorded'), envelopes: ['kushun-kotan-1808', 'omusha-diorama'], about: ['ainu-child'], kind: 'absence', stratum: 'depicted-1808',
+  claim: 'Who this child is, and what the ceremony meant to the children present, is not recorded here.',
+  absence: { cause: 'never-collected', note: 'The surviving records of the Omusha were written by Wajin officials.' },
+  source: { type: 'project-note', ref: ENVELOPE_DOC }, evidence: 'none', standing: contributor, perspective: 'project' });
+add({ id: id('child-model'), envelopes: ['omusha-diorama'], about: ['ainu-child'], kind: 'provenance', stratum: 'present-2026',
+  claim: 'The child\'s 3D model was generated on hyper3d.ai (generation 30551fbc). The reference image it was made from is not recorded here.',
+  source: { type: 'project-note', ref: 'assets/figures/figure-boy-brown-robe/hyper3d-generation.txt' }, evidence: 'inference', standing: contributor, perspective: 'project',
+  createdAt: '2026-11-26T03:00:00Z' });
+
 const file = path.join(import.meta.dirname, 'observations.jsonl');
 fs.writeFileSync(file, obs.map((o) => JSON.stringify(o)).join('\n') + '\n');
 console.log(`${obs.length} observations -> ${file}`);

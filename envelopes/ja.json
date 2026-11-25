@@ -142,6 +142,15 @@
     "obs-032-bales-unrecorded": {
       "claim": "積まれた俵に何が入っていたのか、またそれらが贈り物の一部であったのかどうかは、ここでは記録されていない。",
       "sourceRef": "本プロジェクト"
+    },
+    "obs-033-child-unrecorded": {
+      "claim": "この子供が誰であるか、また同席した子供たちにとってこの儀式が何を意味していたのかは、ここには記録されていない。",
+      "absenceNote": "現存するオムシャの記録は、和人の役人によって書かれたものである。",
+      "sourceRef": "\"The Envelope — Foundational Document\" (Shaw, 2026-11-25)"
+    },
+    "obs-034-child-model": {
+      "claim": "この子供の3Dモデルはhyper3d.ai（生成30551fbc）で生成された。作成の元となった参照画像は、ここには記録されていない。",
+      "sourceRef": "assets/figures/figure-boy-brown-robe/hyper3d-generation.txt"
     }
   }
 }
