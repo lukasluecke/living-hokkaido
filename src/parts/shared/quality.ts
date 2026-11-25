@@ -50,12 +50,16 @@ export function parseTier(value: string | null | undefined): Tier | null {
 }
 
 export type MonitorOptions = {
-  /** Ignore this long after start or a step (shader compile, loading). */
+  /** Ignore this long at start (shader compile, loading). */
   warmupMs: number;
+  /** Ignore this long after a step or a reset. */
+  rewarmMs: number;
   /** Length of one measuring window. */
   windowMs: number;
   /** A window under this average frame rate is "slow". */
   minFps: number;
+  /** Slow windows under this frame rate step down two tiers at once. */
+  veryLowFps: number;
   /** Step down after this many slow windows in a row. */
   slowWindows: number;
   /** A single frame gap longer than this (a load, a stall) is skipped.
@@ -65,46 +69,59 @@ export type MonitorOptions = {
 
 export const MONITOR: MonitorOptions = {
   warmupMs: 2500,
+  rewarmMs: 1000,
   windowMs: 1500,
   minFps: 40,
+  veryLowFps: 20,
   slowWindows: 2,
   maxGapMs: 2000,
 };
 
 /**
- * Frame-rate monitor. Feed it each frame's gap in ms; it answers true when
- * the tier should go down one step (then it starts a new warm-up).
+ * Frame-rate monitor. Feed it each frame's gap in ms; it answers how many
+ * tiers to step down now (0, 1 or 2), then starts a short warm-up.
  */
 export function createMonitor(opts: MonitorOptions = MONITOR) {
+  let need = opts.warmupMs;
   let warm = 0;
   let time = 0;
   let frames = 0;
   let slow = 0;
+  let worst = Number.POSITIVE_INFINITY;
+  const restart = () => {
+    need = opts.rewarmMs;
+    warm = 0;
+    time = 0;
+    frames = 0;
+    slow = 0;
+    worst = Number.POSITIVE_INFINITY;
+  };
   return {
-    frame(gapMs: number): boolean {
-      if (gapMs > opts.maxGapMs || gapMs <= 0) return false;
-      if (warm < opts.warmupMs) {
+    frame(gapMs: number): number {
+      if (gapMs > opts.maxGapMs || gapMs <= 0) return 0;
+      if (warm < need) {
         warm += gapMs;
-        return false;
+        return 0;
       }
       time += gapMs;
       frames++;
-      if (time < opts.windowMs) return false;
+      if (time < opts.windowMs) return 0;
       const fps = (frames * 1000) / time;
       time = 0;
       frames = 0;
-      slow = fps < opts.minFps ? slow + 1 : 0;
-      if (slow < opts.slowWindows) return false;
-      slow = 0;
-      warm = 0;
-      return true;
+      if (fps >= opts.minFps) {
+        slow = 0;
+        worst = Number.POSITIVE_INFINITY;
+        return 0;
+      }
+      slow++;
+      worst = Math.min(worst, fps);
+      if (slow < opts.slowWindows) return 0;
+      const steps = worst < opts.veryLowFps ? 2 : 1;
+      restart();
+      return steps;
     },
-    /** Start again with a warm-up (for example after a tier change). */
-    reset() {
-      warm = 0;
-      time = 0;
-      frames = 0;
-      slow = 0;
-    },
+    /** Start again with a short warm-up (for example after a tier change). */
+    reset: restart,
   };
 }
