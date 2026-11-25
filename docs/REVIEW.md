@@ -192,3 +192,17 @@ Knowledge in `vendor/out-of-place/content/scenes/*/knowledge.ts`, imported by
 |---|---|---|---|
 | `otaru-herring-warehouse` | 7 (MLIT/JTA pages, Visit Hokkaido, HRO herring assessment) | `hide-seek-otaru-warehouse`, `slope-run-otaru` | Historian review (Chika); locators are coarse ("page text"); sources `rights: unknown` |
 | `meiji-sapporo-street` | 9 | `hide-seek-sapporo-street` (hidden for now, kept in `games.ts`) | Same. Ainu people are not depicted in the scene (see `vendor/out-of-place/scenes/sapporo-street.md`); check that choice |
+
+## Omusha diorama (splat capture)
+
+Added 2026-11-25. Knowledge entry `omusha-diorama` in
+`src/content/bark-to-cloth/omusha.ts`, used by `omusha-look` (Memory cabin).
+Spot positions come from Shaw's `vendor/sapporo-omusha/src/hotspots.json`.
+
+| Item | Needs |
+|---|---|
+| 7 claims from panels 7835 and 7836 (`hm-panel-omusha-*`) | Check the paraphrases against the photos; translations are drafts by Claude. A colonial power scene: check the framing with a historian and with Ainu reviewers |
+| Figure labels from Shaw's character sheets (`name` + `variant`) | The sheets are drafts; check "Sakhalin Ainu" for every figure and the robe names |
+| The splat capture (`sapporo-omusha-capture`, `rights: unknown`) | Written permission from the Hokkaido Museum before the capture is public. Until then it is behind the demo password (Lukas, 2026-11-25) |
+| Shaw's observations and character sheets (`unverified`, `TODO`) | Not used for claims. Import only after a source is attached |
+

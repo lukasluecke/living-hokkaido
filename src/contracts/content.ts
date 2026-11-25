@@ -137,6 +137,17 @@ function checkActivityKind(
         errors.push(
           `${at}: find ${f.id} cites "${f.claimId}", not in claimIds`,
         );
+  if (a.kind === "splat-look") {
+    dupes(
+      `${at} spot`,
+      a.spots.map((x) => x.id),
+      errors,
+    );
+    for (const sp of a.spots)
+      for (const c of sp.claimIds)
+        if (!cited.has(c))
+          errors.push(`${at}: spot ${sp.id} cites "${c}", not in claimIds`);
+  }
   if (a.kind === "board" && !cited.has(a.rulesClaimId))
     errors.push(`${at}: rules claim "${a.rulesClaimId}" not in claimIds`);
   if (a.kind === "place")

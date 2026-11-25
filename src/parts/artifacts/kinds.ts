@@ -17,6 +17,7 @@ export const KIND_LABEL: Record<ActivityKind, string> = {
   "hide-seek": "Game",
   "slope-run": "Game",
   place: "Build the scene",
+  "splat-look": "Look closer",
 };
 
 export function kindLabel(kind: string): string {

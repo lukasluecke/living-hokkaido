@@ -162,6 +162,7 @@ export const memoryCabin: DetailSceneInput = {
     "trace-sources",
     "quiz-ainu-today",
     "sequence-postwar",
+    "omusha-look",
   ],
   timelineIds: ["house-over-time"],
 };

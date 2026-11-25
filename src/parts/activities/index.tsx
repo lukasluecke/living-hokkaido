@@ -5,6 +5,7 @@ import type { ActivityPartProps, Presentation } from "@/contracts";
 import { seasonWeights } from "@/contracts";
 import { PresentationBadge } from "../shared/Badges";
 import s from "./Activities.module.css";
+import { SplatLookActivity } from "./captures/SplatLook";
 import { HideSeekActivity } from "./games/HideSeek";
 import { SlopeRunActivity } from "./games/SlopeRun";
 import { Quiz } from "./Quiz";
@@ -34,6 +35,7 @@ const KIND_LABEL: Record<ActivityPartProps["activity"]["kind"], string> = {
   "hide-seek": "Game",
   "slope-run": "Game",
   place: "Build the scene",
+  "splat-look": "Look closer",
 };
 
 export function ActivityPart({
@@ -159,6 +161,14 @@ export function ActivityPart({
       )}
       {activity.kind === "place" && (
         <PlaceActivity
+          activity={activity}
+          claims={claims}
+          prefs={prefs}
+          emit={emit}
+        />
+      )}
+      {activity.kind === "splat-look" && (
+        <SplatLookActivity
           activity={activity}
           claims={claims}
           prefs={prefs}
