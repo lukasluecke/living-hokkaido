@@ -42,3 +42,6 @@ journal stamp appears after completion.
   `board`: the stick game on a 田 grid (Q021) against a gentle owl
   (`play/boardLogic.ts`: takes a win, avoids handing one over, else steps
   closer, with a little chance) or two players on one device.
+  `canon` (ukouk structure: bring in each voice on its mark) and `pluck`
+  (tonkori: pluck each open string, then the short tab) use `play/synth.ts`:
+  synthetic tones only, never a voice or a recording; the UI says so.

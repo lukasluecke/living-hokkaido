@@ -10,7 +10,9 @@ import { Story } from "./kinds/Story";
 import { Trace } from "./kinds/Trace";
 import { Words } from "./kinds/Words";
 import { BoardActivity } from "./play/Board";
+import { CanonActivity } from "./play/Canon";
 import { MapActivity } from "./play/Map";
+import { PluckActivity } from "./play/Pluck";
 import { Sequence } from "./Sequence";
 import { themeVars } from "./theme";
 import { Weave } from "./Weave";
@@ -24,6 +26,8 @@ const KIND_LABEL: Record<ActivityPartProps["activity"]["kind"], string> = {
   trace: "Follow the thread",
   map: "Map",
   board: "Game",
+  canon: "Listen",
+  pluck: "Play",
 };
 
 export function ActivityPart({
@@ -104,6 +108,22 @@ export function ActivityPart({
       )}
       {activity.kind === "board" && (
         <BoardActivity
+          activity={activity}
+          claims={claims}
+          prefs={prefs}
+          emit={emit}
+        />
+      )}
+      {activity.kind === "canon" && (
+        <CanonActivity
+          activity={activity}
+          claims={claims}
+          prefs={prefs}
+          emit={emit}
+        />
+      )}
+      {activity.kind === "pluck" && (
+        <PluckActivity
           activity={activity}
           claims={claims}
           prefs={prefs}

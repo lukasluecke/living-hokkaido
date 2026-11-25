@@ -457,3 +457,81 @@ export const stickGame: ActivityInput = {
     "Children played this game, and some games were for adults too. The museum also records a game of picking up vine rings with a stick.",
   opponent: "owl",
 };
+
+export const ukoukCanon: ActivityInput = {
+  kind: "canon",
+  id: "canon-ukouk",
+  knowledgeId: "hokkaido-museum",
+  title: "Follow the melody: ukouk",
+  claimIds: [
+    "ukouk",
+    "ukouk-asahikawa",
+    "ukouk-mukawa",
+    "ukouk-words",
+    "ukouk-meaning",
+  ],
+  prompt:
+    "In ukouk, singers follow one melody one after another, so the voices overlap. Start the first voice, then bring in each next voice one beat later, on its mark.",
+  voices: [
+    { id: "a", label: "Voice A" },
+    { id: "b", label: "Voice B" },
+    { id: "c", label: "Voice C" },
+  ],
+  offset: 1,
+  beats: 8,
+  structureClaimId: "ukouk-asahikawa",
+  lyrics: [
+    {
+      text: "フッサナ サンケナ ホーイヤ ホイ / フッサナ ハオ ホーイヤ ホイ",
+      lang: "ain",
+      claimId: "ukouk-words",
+    },
+    {
+      text: "アリ アンペタ トノト ハウ ネ ネ / エー ホーイヤー オホイヤーホー",
+      lang: "ain",
+      claimId: "ukouk-words",
+    },
+  ],
+  completion:
+    "That is the structure of ukouk: one melody, voices one after another. The museum says the point is to enjoy how the voices overlap and change; the meaning of the whole song is not known, though some words, like chikap 'bird', have a meaning.",
+};
+
+export const tonkoriPluck: ActivityInput = {
+  kind: "pluck",
+  id: "pluck-tonkori",
+  knowledgeId: "hokkaido-museum",
+  title: "Pluck the tonkori",
+  claimIds: [
+    "tonkori-strings",
+    "tonkori-open",
+    "tonkori-order",
+    "tonkori-heart",
+    "tonkori-tune",
+  ],
+  prompt:
+    "The tonkori has five open strings, thick and thin. The left hand plays strings 1 and 2, the right hand strings 2 to 5.",
+  strings: [
+    { id: "s1", gauge: "thick", hands: ["left"] },
+    { id: "s2", gauge: "medium", hands: ["left", "right"] },
+    { id: "s3", gauge: "thin", hands: ["right"] },
+    { id: "s4", gauge: "medium", hands: ["right"] },
+    { id: "s5", gauge: "thin", hands: ["right"] },
+  ],
+  stringsClaimId: "tonkori-strings",
+  tune: {
+    title: "ケヘ ケヘ ヘタニ パイエアン",
+    notes: [
+      { string: 3, hand: "right" },
+      { string: 3, hand: "right" },
+      { string: 3, hand: "right" },
+      { string: 1, hand: "left" },
+      { string: 3, hand: "right" },
+      { string: 4, hand: "right" },
+      { string: 5, hand: "right" },
+    ],
+    groups: [2, 2, 1, 2],
+    claimId: "tonkori-tune",
+  },
+  completion:
+    "You played the opening the museum's station invites visitors to try, from a tune played by Ume Nishihira. Inside the hollow body, a small ball is said to be the tonkori's heart or soul.",
+};

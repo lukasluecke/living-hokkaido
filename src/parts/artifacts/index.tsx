@@ -17,6 +17,8 @@ const VERB: Record<string, string> = {
   weave: "Weave",
   sequence: "Put in order",
   board: "Play",
+  canon: "Sing along",
+  pluck: "Pluck",
 };
 
 export function ArtifactViewer({

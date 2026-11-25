@@ -86,6 +86,8 @@ export const listeningGrove: DetailSceneInput = {
   activityIds: [
     "story-owl",
     "map-greetings",
+    "canon-ukouk",
+    "pluck-tonkori",
     "story-bark-to-cloth",
     "words-objects",
     "quiz-small-kana",

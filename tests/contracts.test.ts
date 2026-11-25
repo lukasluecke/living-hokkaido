@@ -359,3 +359,14 @@ test("story refrain lines need a refrain that cites a claim", () => {
     validateContentPack(p).some((e) => e.includes("is a refrain, but none")),
   );
 });
+
+test("music kinds cite their claims; tune notes name real strings", () => {
+  const p = clone();
+  const c = kindOf(p, "canon");
+  c.structureClaimId = "bark-fiber";
+  assert.ok(validateContentPack(p).some((e) => e.includes("canon-ukouk")));
+  const q = clone();
+  const t = kindOf(q, "pluck");
+  t.tune?.notes.push({ string: 9, hand: "right" });
+  assert.ok(validateContentPack(q).length > 0);
+});

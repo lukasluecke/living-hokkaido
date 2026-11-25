@@ -120,6 +120,13 @@ function checkActivityKind(
       }
     }
   }
+  if (a.kind === "canon")
+    for (const c of [a.structureClaimId, ...a.lyrics.map((l) => l.claimId)])
+      if (!cited.has(c)) errors.push(`${at}: claim "${c}" not in claimIds`);
+  if (a.kind === "pluck")
+    for (const c of [a.stringsClaimId, a.tune?.claimId])
+      if (c && !cited.has(c))
+        errors.push(`${at}: claim "${c}" not in claimIds`);
   if (a.kind === "board" && !cited.has(a.rulesClaimId))
     errors.push(`${at}: rules claim "${a.rulesClaimId}" not in claimIds`);
   if (a.kind === "map") {
