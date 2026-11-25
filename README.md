@@ -23,6 +23,30 @@ Hack Hokkaido Build Week, November 2026.
 | Voice (ElevenLabs) and dialogue | Not started |
 | Fine-tuned behaviour model (Adaption Labs) | Spec written ([training/SPEC.md](training/SPEC.md)) |
 
+## The Envelope
+
+The app is the first working example of **The Envelope**: a structure for gathering,
+correcting and voicing the memory held by a place or a thing, from a keepsake to a
+museum diorama.
+
+- **Envelopes nest** ([envelopes/index.json](envelopes/index.json)): Hokkaido Museum ›
+  Omusha diorama (made 1971), which *depicts* Kushun Kotan in 1808.
+- **Observations** are the atomic record ([schema](envelopes/schema/observation.schema.json),
+  [seed](envelopes/observations.jsonl)). Each states who said what, about what, in which
+  time stratum (1808 depicted · 1971 made · observed · 2026), from what source.
+- **Evidence and standing are two separate scores**, never merged: how well a claim is
+  supported, and whose knowledge it is to speak to.
+- **Absence is recorded with its cause** (never collected, destroyed, suppressed,
+  restricted, lost), so gaps read as gaps.
+- **Nothing is overwritten.** A correction is a new observation that `supersedes` an older
+  one; the card shows the earlier version. Additions made in the app go to an append-only
+  store (`POST /api/observations`).
+- **Protocol** is a gate on what may be seen (public / team / family / community); Local
+  Contexts TK Labels are planned for it.
+- **Voice** (next) will speak only from observations that pass the protocol, citing them.
+
+Open **About** in the app, or any figure, to see what is known and what is not.
+
 ## Run it
 
 ```powershell

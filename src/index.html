@@ -79,6 +79,35 @@
   .chip.draft { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, transparent); }
   .chips { display: flex; gap: 6px; flex-wrap: wrap; }
   .notice { font-size: 12px; color: var(--muted); border-left: 2px solid var(--accent); padding-left: 10px; }
+  .sheet[data-mode="scene"] .fig-only { display: none !important; }
+  .crumb { font-size: 12px; color: var(--muted); }
+  .crumb:empty { display: none; }
+  .known { display: grid; gap: 8px; border-top: 1px solid var(--line); padding-top: 12px; }
+  .known-h { font-weight: 600; font-size: 14px; } .known-h span { color: var(--muted); font-weight: 400; }
+  .legend { font-size: 11px; color: var(--muted); }
+  .stratum-h { margin-top: 6px; text-transform: uppercase; letter-spacing: .04em; font-size: 11px; }
+  .obs { border: 1px solid var(--line); border-radius: 10px; padding: 9px 10px; display: grid; gap: 6px; background: rgba(255,255,255,.02); }
+  .obs .claim { font-size: 13px; }
+  .obs.absence { border-style: dashed; border-color: color-mix(in srgb, var(--warn) 55%, transparent); background: color-mix(in srgb, var(--warn) 6%, transparent); }
+  .obs-unknown { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--warn); font-weight: 700; }
+  .obs .why { font-size: 12px; color: var(--warn); }
+  .obs .src { font-size: 11px; color: var(--muted); overflow-wrap: anywhere; }
+  .chip.stratum { color: var(--text); }
+  .chip.evidence { border-color: color-mix(in srgb, var(--aizu) 50%, transparent); color: var(--aizu); }
+  .chip.standing { border-color: color-mix(in srgb, var(--ainu) 50%, transparent); color: var(--ainu); }
+  .obs-actions { display: flex; gap: 12px; }
+  button.link { all: unset; cursor: pointer; font-size: 12px; color: var(--accent); }
+  button.link:hover { text-decoration: underline; }
+  .hist { border-left: 2px solid var(--line); padding-left: 8px; display: grid; gap: 4px; }
+  details.add { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+  details.add summary { cursor: pointer; font-size: 13px; color: var(--accent); }
+  details.add form { display: grid; gap: 8px; margin-top: 10px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } .grid2:empty { display: none; }
+  label.f { display: grid; gap: 3px; font-size: 11px; color: var(--muted); min-width: 0; }
+  label.f input, label.f select, label.f textarea { font: inherit; font-size: 13px; color: var(--text); background: #0f1216;
+    border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; width: 100%; min-width: 0; }
+  .replacing { font-size: 12px; color: var(--warn); }
+  button.primary { background: var(--accent); color: #111; border-color: var(--accent); font-weight: 600; }
   .k { color: var(--muted); font-size: 12px; margin-bottom: 2px; }
   .talk { width: 100%; height: 44px; font-size: 14px; }
   .figure3d { display: grid; gap: 6px; }
@@ -133,6 +162,10 @@
       <span class="label">Open</span>
       <input id="file" type="file" accept=".ply,.spz,.splat,.ksplat,.sog,.zip">
     </label>
+    <button id="about" title="About this scene: what is known, and what is not">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>
+      <span class="label">About</span>
+    </button>
     <button id="flip" aria-pressed="true" title="Flip upside-down scenes">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M7 8l5-5 5 5M7 16l5 5 5-5"/></svg>
     </button>
@@ -151,7 +184,7 @@
     <button id="sClose" title="Close">✕</button>
   </header>
   <div class="body">
-    <div class="figure3d" id="sModelWrap" hidden>
+    <div class="figure3d fig-only" id="sModelWrap" hidden>
       <model-viewer id="sModel" camera-controls auto-rotate auto-rotate-delay="1500" rotation-per-second="20deg"
         touch-action="pan-y" interaction-prompt="none" shadow-intensity="0.7" exposure="1.05"
         ar ar-modes="webxr scene-viewer quick-look" ar-scale="auto" alt="">
@@ -159,13 +192,18 @@
       </model-viewer>
       <div class="note" id="sModelLabel"></div>
     </div>
-    <div class="chips" id="sChips"></div>
-    <div><div class="k">Role</div><div id="sRole"></div></div>
-    <div id="sAppearanceWrap" hidden><div class="k">Appearance</div><div id="sAppearance"></div></div>
-    <div><div class="k">Summary</div><div id="sSummary"></div></div>
-    <div id="sDeclinesWrap" hidden><div class="k">Will not speculate on</div><div id="sDeclines"></div></div>
-    <button class="talk" id="sTalk" disabled title="Voice conversation is being wired up">🎙 Talk (coming soon)</button>
-    <div class="notice">This voice is a synthetic interpretation built from historical sources. It is not a historical record and does not speak for any person or community.</div>
+    <div class="crumb" id="sCrumb"></div>
+    <div class="chips fig-only" id="sChips"></div>
+    <div class="fig-only"><div class="k">Role</div><div id="sRole"></div></div>
+    <div id="sDeclinesWrap" class="fig-only" hidden><div class="k">Will not speculate on</div><div id="sDeclines"></div></div>
+    <button class="talk fig-only" id="sTalk" disabled title="Voice conversation is being wired up">🎙 Talk (coming soon)</button>
+    <div class="notice fig-only">This voice is a synthetic interpretation built from historical sources. It is not a historical record and does not speak for any person or community.</div>
+    <div class="known">
+      <div class="known-h">What is known <span>· and what is not</span></div>
+      <div class="legend">Every entry shows two separate scores: <b>evidence</b> (how well it is supported) and <b>standing</b> (whose knowledge it is). Nothing is overwritten; corrections keep the history.</div>
+      <div id="sKnown"></div>
+    </div>
+    <div id="sForm"></div>
   </div>
 </aside>
 
@@ -194,6 +232,8 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { SparkRenderer, SplatMesh } from "@sparkjsdev/spark";
+import * as Env from "./envelope.js";
+const SCENE_ENVELOPE = "omusha-diorama";
 
 // ?src=<splat>  ?edit=1  ?flip=0
 const params = new URLSearchParams(location.search);
@@ -319,13 +359,37 @@ function updateMarkers() {
 }
 
 // ---------- Character sheet
+// The record for a figure or for the whole scene, plus the add/correct form.
+function showRecord(list, { envelopes, about }) {
+  const form = Env.renderForm($("sForm"), { envelopes, about, onSaved: () => (active ? openSheet(active) : openScene()) });
+  Env.renderRecord($("sKnown"), list, { onCorrect: (o) => form?.correct(o) });
+}
+function openScene() {
+  active = null;
+  for (const [, m] of markerEls) m.el.dataset.active = "false";
+  const env = Env.envelopeById(SCENE_ENVELOPE);
+  $("sheet").dataset.mode = "scene";
+  $("sName").textContent = env?.name.en || "About this scene";
+  $("sJa").textContent = env?.name.ja || "";
+  $("sCrumb").textContent = Env.breadcrumb(SCENE_ENVELOPE);
+  $("sModel").removeAttribute("src");
+  // Scene-level record: everything in the diorama, the place it depicts and the museum,
+  // except per-figure appearance notes (those live on each figure's card).
+  const ids = [SCENE_ENVELOPE, env?.depicts, env?.parent].filter(Boolean);
+  showRecord(Env.inEnvelopes(ids).filter((o) => o.kind !== "appearance"), { envelopes: [SCENE_ENVELOPE], about: [] });
+  $("sheet").classList.add("open");
+}
+$("about").addEventListener("click", openScene);
+
 function openSheet(id) {
   const c = characters[id]; if (!c) return;
   active = id;
   for (const [cid, m] of markerEls) m.el.dataset.active = String(cid === id);
+  $("sheet").dataset.mode = "figure";
+  $("sCrumb").textContent = Env.breadcrumb(SCENE_ENVELOPE);
   $("sName").textContent = c.name.en; $("sJa").textContent = c.name.ja || "";
   $("sRole").textContent = c.role || "—";
-  $("sSummary").textContent = c.summary && !c.summary.startsWith("TODO") ? c.summary : "Not written yet.";
+  showRecord(Env.about(id), { envelopes: [SCENE_ENVELOPE], about: [id] });
   const chips = $("sChips"); chips.innerHTML = "";
   const chip = (text, cls = "") => { const s = document.createElement("span"); s.className = `chip ${cls}`; s.textContent = text; chips.appendChild(s); };
   chip(c.faction?.replace(/-/g, " ") || "unknown");
@@ -334,7 +398,6 @@ function openSheet(id) {
   if (c.voice?.routes_through) chip(`speaks through the ${characters[c.voice.routes_through]?.name.en.toLowerCase() || "interpreter"}`);
   const dec = c.declines || [];
   $("sDeclinesWrap").hidden = !dec.length; $("sDeclines").textContent = dec.join(" · ");
-  $("sAppearanceWrap").hidden = !c.appearance; $("sAppearance").textContent = c.appearance || "";
   // Close-up 3D model, when the figure has one
   const mv = $("sModel");
   $("sModelWrap").hidden = !c.model?.src;
@@ -430,11 +493,12 @@ function hint() {
 }
 
 // ---------- Go
-await loadData();
+await Promise.all([loadData(), Env.loadEnvelope()]);
 buildMarkers();
 if (EDIT) { $("editor").classList.add("on"); renderEditor(); }
 // ?figure=<character id> opens that figure's card straight away (QR codes, demo links)
 if (params.get("figure") && characters[params.get("figure")]) openSheet(params.get("figure"));
+else if (params.has("about")) openScene();
 renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); updateMarkers(); });
 loadSplat({ url: SRC, fileName: SRC.split("?")[0].split("/").pop() }, SRC.split("/").pop());
 </script>
