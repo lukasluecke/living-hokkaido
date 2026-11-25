@@ -23,6 +23,8 @@ export type DioramaProps = {
   seasonValue: number;
   reducedMotion: boolean;
   fx: boolean;
+  /** SMAA; off on slow GPUs (shared/quality.ts). */
+  extraFx?: boolean;
 };
 
 // ---------------------------------------------------------------- layout
@@ -741,6 +743,7 @@ export function Diorama({
   seasonValue,
   reducedMotion,
   fx,
+  extraFx = true,
 }: DioramaProps) {
   const m = useMats(seasonValue);
   const feats = useRef<Features>(featuresAt(eras, t.current));
@@ -843,7 +846,7 @@ export function Diorama({
         <EffectComposer multisampling={0} enableNormalPass={false}>
           <primitive object={ink} />
           <Vignette offset={0.28} darkness={0.4} />
-          <SMAA />
+          {extraFx ? <SMAA /> : <></>}
         </EffectComposer>
       )}
     </>

@@ -12,7 +12,8 @@ import {
 import { ToneMappingMode } from "postprocessing";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-import type { CameraView, DetailScenePartProps } from "@/contracts";
+import { type CameraView, type DetailScenePartProps, SCALE } from "@/contracts";
+import { useQuality } from "../shared/Quality";
 import { createToonUniforms, toonifyTree } from "../shared/toon";
 import { AreaStatic, isAreaSetting } from "./room/AreaSets";
 import { ArtifactShell, RoomObject } from "./room/Artifacts";
@@ -148,6 +149,7 @@ function Projector({
 
 export function Room(props: RoomProps) {
   const { scene, focusedArtifactId, emit, hovered, setHovered } = props;
+  const { extraFx } = useQuality(SCALE.maxDpr);
   const controls = useRef<CameraControls>(null);
   const lift = useRef(0);
   const [inside, setInside] = useState(false);
@@ -201,7 +203,11 @@ export function Room(props: RoomProps) {
       />
       <Projector overlay={props.overlay} />
       <EffectComposer multisampling={0}>
-        <Bloom luminanceThreshold={0.85} intensity={0.7} mipmapBlur />
+        {extraFx ? (
+          <Bloom luminanceThreshold={0.85} intensity={0.7} mipmapBlur />
+        ) : (
+          <></>
+        )}
         <ToneMapping mode={ToneMappingMode.AGX} />
         <Vignette offset={0.3} darkness={0.55} />
       </EffectComposer>

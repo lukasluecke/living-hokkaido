@@ -29,10 +29,13 @@ export type WorldProps = IslandPartProps & {
   onSelect: (l: Location) => void;
   pins: React.RefObject<Map<string, HTMLElement>>;
   fx: boolean;
+  /** Tilt-shift and SMAA; off on slow GPUs (shared/quality.ts). */
+  extraFx?: boolean;
 };
 
 export function World(props: WorldProps) {
   const { content, season, prefs, emit, view, locationId } = props;
+  const extraFx = props.extraFx ?? true;
   const island = content.island;
   const field = useMemo(() => buildField(island), [island]);
   const locations = island.locations;
@@ -136,15 +139,19 @@ export function World(props: WorldProps) {
       {props.fx && (
         <EffectComposer multisampling={0} enableNormalPass={false}>
           <primitive object={ink} />
-          <TiltShift2
-            blur={0.07}
-            taper={0.7}
-            start={[0.0, 0.45]}
-            end={[1.0, 0.45]}
-            samples={8}
-          />
+          {extraFx ? (
+            <TiltShift2
+              blur={0.07}
+              taper={0.7}
+              start={[0.0, 0.45]}
+              end={[1.0, 0.45]}
+              samples={8}
+            />
+          ) : (
+            <></>
+          )}
           <Vignette offset={0.25} darkness={0.45} />
-          <SMAA />
+          {extraFx ? <SMAA /> : <></>}
         </EffectComposer>
       )}
     </>
