@@ -51,6 +51,11 @@ const sources: Source[] = [
     "theme 2, Q&A binder (photo 7806)",
   ),
   onSite(
+    "hm-panel-canoe-tools",
+    "丸木舟をつくる (making a dugout canoe), マレク and キテ diagrams",
+    "theme 2 伝統を学ぶ (photos 7746, 7747)",
+  ),
+  onSite(
     "hm-panel-survey",
     "殖民地区画の作業をしているところ (land survey diorama), PC 314",
     "theme 4 自然の恵みとともに (photos 7865–7872)",
@@ -121,6 +126,40 @@ export const landAndSea: KnowledgeEntry = {
       ],
     ),
     c(
+      "salmon-film-1925",
+      "A 1925 documentary film, shot on the Chitose River, shows men standing in dugout canoes as they run the rapids and catch salmon with a hook spear called marek.",
+      [
+        "hm-panel-salmon-film",
+        "記録映像の中のサケ漁, sentences 1–2 (photo 7748)",
+      ],
+    ),
+    c(
+      "salmon-skill-quiet",
+      "The museum says the men's skilled hands in the film show a technique that was passed on quietly while their traditional fishing was called 'poaching'.",
+      [
+        "hm-panel-salmon-film",
+        "記録映像の中のサケ漁, last sentence (photo 7748)",
+      ],
+    ),
+    c(
+      "marek-tool",
+      "A marek (マレク) is a hook spear for fish. You aim at the fish and spear it, and the hook holds even when the fish struggles.",
+      ["hm-panel-canoe-tools", "マレクのしくみ diagram (photos 7746–7747)"],
+    ),
+    c(
+      "kite-tool",
+      "A kite (キテ) is a harpoon. It flies at the prey; after it goes in, its tip comes off and stays in the body. The hunter holds a rope tied to the kite.",
+      ["hm-panel-canoe-tools", "キテ(銛)のしくみ diagram (photos 7746–7747)"],
+    ),
+    c(
+      "canoe-1998",
+      "In 1998 the Ainu Museum made a dugout canoe the old way, from a katsura tree. A ceremony first told the gods that a boat would be made. Before the launch on Lake Poroto, people prayed that the boat would do its work safely.",
+      [
+        "hm-panel-canoe-tools",
+        "丸木舟をつくる, lead and photo steps (photos 7746–7747)",
+      ],
+    ),
+    c(
       "sea-bounty",
       "Herring, salmon, trout, kelp, squid, crab, cod, scallop, Okhotsk Atka mackerel, sea urchin, abalone and sea cucumber all stand for Hokkaido seafood.",
       ["hm-panel-sea", "Panel text, sentences 1–2 (photo 7873)"],
@@ -155,6 +194,14 @@ export const landAndSea: KnowledgeEntry = {
       "survey-tasks",
       "The panel's drawing of the survey diorama names four tasks: surveying, carrying the things the survey needs, cutting trees that are in the way of the survey, and putting up tents to stay the night.",
       ["hm-panel-survey", "Panel drawing, four callouts (photo 7865)"],
+    ),
+    c(
+      "survey-diorama-scene",
+      "The survey diorama itself shows an autumn woodland, a cut survey line, three canvas tents, pack horses with loads and two men sawing a tree. This is what the diorama shows; the panel text does not describe it.",
+      [
+        "hm-panel-survey",
+        "Survey diorama, observed in photos 7866–7872 (not panel text)",
+      ],
     ),
     c(
       "winter-logging",
@@ -223,6 +270,21 @@ export const landAndSea: KnowledgeEntry = {
         "hm-panel-beliefs-2",
         "いろいろなカムイ, owl photo caption (photo 7727)",
       ],
+    ),
+    c(
+      "kamuy-power",
+      "In traditional Ainu belief, everything has a soul. Among plants, animals, fire, water, tools and the weather, those with strong power beyond human power are respected as kamuy.",
+      ["hm-qa-kamuy", "Q019 (photo 7806), answer, sentences 1–2"],
+    ),
+    c(
+      "kamuy-fire",
+      "Besides kamuy such as the bear, the fox and standing trees, the fire kamuy is respected: it watches over human life and carries prayer words to the other kamuy.",
+      ["hm-qa-kamuy", "Q019 (photo 7806), answer, sentence 4"],
+    ),
+    c(
+      "kamuy-one-phrase",
+      "Kamuy cannot be summed up in one phrase such as 'everything with power that humans lack'. That strong power is understood within belief, not as a force of nature.",
+      ["hm-qa-kamuy", "Q019 (photo 7806), answer, last two sentences"],
     ),
     // ------------------------------------------------ mountains
     c(

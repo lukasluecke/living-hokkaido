@@ -281,6 +281,11 @@ export const hokkaidoMuseum: KnowledgeEntry = {
       ["hm-panel-food", "山菜、木の実など, photo labels (photo 7745)"],
     ),
     c(
+      "grain-shell-tool",
+      "To harvest grain, people used tools such as sickles, and also a tool made from a freshwater pearl mussel shell, from the Saru area of Hidaka. A finger goes through its string, and the edge of the shell picks off the ears.",
+      ["hm-panel-food", "穂をつむための道具と使い方, caption (photo 7745)"],
+    ),
+    c(
       "cise-plan",
       "Kayano Shigeru's plan of a cise (1978) names its parts in Ainu, with Japanese glosses: アペオイ hearth, シソ true seat, ハラキソ left seat, アペエトク head seat, ロルンプヤラ window of the kamuy seat, イトムンプヤラ window that takes in light, ヌプキクタプヤラ window to throw out dirty water, セマパ entrance, シントコ lacquer vessel, チセコロカムイ guardian kamuy of the house. The words are Saru usage.",
       ["kayano-1978", "Floor plan labels (Q&A card, photo 7810)"],
