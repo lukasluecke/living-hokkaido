@@ -277,6 +277,7 @@
   .sheet .body > *, .chat, .known, .layer { min-width: 0; grid-template-columns: minmax(0, 1fr); }
   .sheet header .who { grid-template-columns: minmax(0, 1fr); }
   .sheet .body > .tabs { grid-template-columns: 1fr 1fr; }
+  .sheet .tabs button, .sheet .tabs button * { white-space: nowrap; overflow-wrap: normal; }
   .lh { flex-wrap: wrap; } .lh small { flex-basis: 100%; order: 3; margin-left: 30px; }
   .sugg button { white-space: normal; text-align: left; height: auto; min-height: 28px; }
   .sheet button { border-radius: 3px; }
@@ -791,7 +792,7 @@ const I18N = {
     speaksThrough: (n) => `speaks through the ${n.toLowerCase()}`, modelAlt: (n) => `3D model of the ${n}`,
     lForm: "Form", lActors: "Actors",
     layers: { form: "Form: how it can be seen", time: "Time strata: depicted, made, observed, present", actors: "Actors: who is depicted, made it, speaks", types: "Observation types: event, contact, meaning, making", evidence: "Evidence and standing: two separate scores", absence: "Absence: what is unknown, and why", protocol: "Protocol: who may see what", voice: "Voice: speaks only from the record" },
-    tabTalk: "Talk", tabRecord: "Record", count: (n, u) => `${n}${u ? ` · ${u} unknown` : ""}`,
+    tabTalk: "Talk", tabRecord: "Record", count: (n, u) => `${n}${u ? ` · ${u} gaps` : ""}`,
     protocol: "Protocol: shown to the project team. Access rules are to be set with the Hokkaido Museum's Ainu Culture Research Center and community bodies.",
   },
   ja: {
