@@ -41,14 +41,44 @@ function authorised(req) {
 // ---- Bucket (optional)
 let s3 = null;
 if (process.env.BUCKET) {
-  const { S3Client, GetObjectCommand } = await import('@aws-sdk/client-s3');
+  const { S3Client, GetObjectCommand, PutObjectCommand, DeleteObjectCommand, ListObjectsV2Command } = await import('@aws-sdk/client-s3');
   const client = new S3Client({
     endpoint: process.env.ENDPOINT,
     region: process.env.REGION || 'auto',
     forcePathStyle: process.env.BUCKET_PATH_STYLE === 'true',
     credentials: { accessKeyId: process.env.ACCESS_KEY_ID, secretAccessKey: process.env.SECRET_ACCESS_KEY },
   });
-  s3 = { client, GetObjectCommand, bucket: process.env.BUCKET };
+  s3 = { client, GetObjectCommand, PutObjectCommand, DeleteObjectCommand, ListObjectsV2Command, bucket: process.env.BUCKET };
+}
+
+// Uploads and deletes of assets need the site password AND this token (x-upload-token header).
+const UPLOAD_TOKEN = process.env.UPLOAD_TOKEN || '';
+const tokenOk = (req) => UPLOAD_TOKEN && req.headers['x-upload-token'] &&
+  timingSafeEqual(digest(String(req.headers['x-upload-token'])), digest(UPLOAD_TOKEN));
+const ASSET_KEY = /^(figures\/[a-z0-9-]+\/model-web\.glb|[a-z0-9-]+\.(sog|spz))$/;
+
+async function writeAsset(req, res, key) {
+  if (!s3) { res.writeHead(501, { 'content-type': 'text/plain' }); return res.end('No bucket configured'); }
+  if (!tokenOk(req)) { res.writeHead(403, { 'content-type': 'text/plain' }); return res.end('Upload token required'); }
+  if (req.method === 'GET') { // listing: GET /assets/?list
+    const out = await s3.client.send(new s3.ListObjectsV2Command({ Bucket: s3.bucket }));
+    res.writeHead(200, { 'content-type': 'application/json' });
+    return res.end(JSON.stringify((out.Contents || []).map((o) => ({ key: o.Key, size: o.Size }))));
+  }
+  if (req.method === 'DELETE' && key === '*') { // take everything down
+    const out = await s3.client.send(new s3.ListObjectsV2Command({ Bucket: s3.bucket }));
+    for (const o of out.Contents || []) await s3.client.send(new s3.DeleteObjectCommand({ Bucket: s3.bucket, Key: o.Key }));
+    res.writeHead(200, { 'content-type': 'text/plain' }); return res.end(`Deleted ${(out.Contents || []).length}`);
+  }
+  if (!ASSET_KEY.test(key)) { res.writeHead(400, { 'content-type': 'text/plain' }); return res.end('Unexpected asset path'); }
+  if (req.method === 'DELETE') {
+    await s3.client.send(new s3.DeleteObjectCommand({ Bucket: s3.bucket, Key: key }));
+    res.writeHead(204); return res.end();
+  }
+  const length = Number(req.headers['content-length']);
+  if (!length) { res.writeHead(411); return res.end(); }
+  await s3.client.send(new s3.PutObjectCommand({ Bucket: s3.bucket, Key: key, Body: req, ContentLength: length, ContentType: mimeOf(key) }));
+  res.writeHead(201, { 'content-type': 'text/plain' }); res.end(`Stored ${key} (${length} bytes)`);
 }
 
 // Keeps a request path inside a base folder; returns null for anything that escapes it.
@@ -98,6 +128,10 @@ const server = http.createServer(async (req, res) => {
   }
   // Keep search engines and AI crawlers out of the whole site.
   res.setHeader('x-robots-tag', 'noindex, nofollow, noarchive, noai, noimageai');
+  if (pathname.startsWith('/assets/') && (req.method === 'PUT' || req.method === 'DELETE' || url.searchParams.has('list'))) {
+    try { return await writeAsset(req, res, pathname.slice('/assets/'.length)); }
+    catch (err) { console.error('upload error', err?.name, err?.message); res.writeHead(502); return res.end('Asset storage error'); }
+  }
   if (req.method !== 'GET' && req.method !== 'HEAD') { res.writeHead(405); return res.end(); }
 
   if (pathname === '/' || pathname === '') { res.writeHead(302, { location: '/src/' + url.search }); return res.end(); }
