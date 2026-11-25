@@ -57,4 +57,10 @@ journal stamp appears after completion.
   drawings in `play/PlaceArt.tsx`. A guided story, one step at a time; each
   step hands over ONE figure (named by hat and colour, never a personal
   name) or thing, with a clue, 2–3 rings and a pose sheet of 4. Ainu home
-  scenes use `subject: "objects"`. Later idea (Lukas): a 2.5D stage.
+  scenes use `subject: "objects"`.
+- 2026-11-26: 2.5D stage (Lukas): the stage sits in a `.case` with a plinth.
+  It tilts a little in 3D and the pointer turns it a little (CSS vars
+  `--px`/`--py`). Figures further back are smaller and stand behind front
+  ones (`--d` = ring y), with a contact shadow. Light air per stage (leaves,
+  winter snow, hearth smoke, sea mist) is decoration only. No look-around
+  and no air with `prefs.reducedMotion`. Hit-testing is unchanged.

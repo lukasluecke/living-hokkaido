@@ -558,29 +558,209 @@
   border-color: var(--lh-gold-deep);
   background: var(--lh-gold);
 }
+/* 2.5D case: a table-top diorama seen through glass. The pointer turns it a
+   little (--px, --py set by Place.tsx); near figures shift more than the
+   backdrop, further figures are smaller, and front ones stand in front. */
+.place :global(.case) {
+  --px: 0;
+  --py: 0;
+  perspective: 1100px;
+  perspective-origin: 50% 30%;
+}
 .place :global(.stage) {
   position: relative;
   aspect-ratio: 16 / 9;
-  border-radius: 8px;
+  border-radius: 8px 8px 2px 2px;
   overflow: hidden;
   background: #cdd6d0;
   touch-action: none;
+  transform: rotateX(calc(4deg + var(--py) * -1.5deg))
+    rotateY(calc(var(--px) * 2.5deg));
+  transform-origin: 50% 100%;
+  transition: transform 400ms ease-out;
+  box-shadow:
+    inset 0 0 0 3px rgb(29 42 54 / 55%),
+    inset 0 18px 30px -18px rgb(29 42 54 / 45%);
 }
 .place :global(.stage) > svg {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+  transform: translate(calc(var(--px) * -4px), calc(var(--py) * -3px))
+    scale(1.04);
+  transition: transform 400ms ease-out;
 }
 .place :global(.placed),
 .place :global(.ring) {
+  --d: 0.6;
+  --sx: calc(var(--px) * (3px + var(--d) * 16px));
+  --sy: calc(var(--py) * (2px + var(--d) * 6px));
+  --s: calc(0.72 + var(--d) * 0.42);
   position: absolute;
   width: 13%;
   aspect-ratio: 76 / 100;
-  transform: translate(-50%, -92%);
+  transform-origin: 50% 92%;
+  transform: translate(-50%, -92%) translate(var(--sx), var(--sy))
+    scale(var(--s));
+  transition: transform 400ms ease-out;
   border: 0;
   background: none;
   padding: 0;
+}
+.place :global(.placed):not(:global(.thing))::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 18%;
+  bottom: 3%;
+  width: 64%;
+  height: 10%;
+  border-radius: 50%;
+  background: radial-gradient(rgb(29 42 54 / 45%), transparent 70%);
+}
+.place :global(.light) {
+  position: absolute;
+  inset: 0;
+  z-index: 400;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      120% 90% at calc(30% + var(--px) * 8%) 0%,
+      rgb(255 240 210 / 22%),
+      transparent 55%
+    ),
+    radial-gradient(140% 100% at 50% 50%, transparent 60%, rgb(29 42 54 / 28%));
+  transition: background 400ms ease-out;
+}
+.place :global(.plinth) {
+  position: relative;
+  height: 22px;
+  margin: 0 -6px;
+  border-radius: 0 0 6px 6px;
+  background: linear-gradient(#8a6a48, #6b4f35 60%, #574029);
+  box-shadow: 0 6px 12px -6px rgb(29 42 54 / 60%);
+  display: grid;
+  place-items: center;
+}
+.place :global(.plinth) span {
+  padding: 1px 12px;
+  border-radius: 2px;
+  background: linear-gradient(#e8c27a, #c9a25a);
+  color: #3b2a22;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.place :global(.air) {
+  position: absolute;
+  inset: 0;
+  z-index: 350;
+  pointer-events: none;
+  overflow: hidden;
+}
+.place :global(.air) i {
+  position: absolute;
+  display: block;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+  animation-delay: calc(var(--i) * -1.7s);
+}
+.place :global(.air):global(.leaf) i {
+  top: -4%;
+  left: calc(mod(var(--i) * 37, 100) * 1%);
+  width: 9px;
+  height: 6px;
+  border-radius: 0 70% 0 70%;
+  background: #c8562e;
+  opacity: 0.85;
+  animation-name: placeleaf;
+  animation-duration: calc(9s + mod(var(--i), 4) * 2s);
+}
+.place :global(.air):global(.leaf) i:nth-child(3n) {
+  background: #d9a441;
+}
+.place :global(.air):global(.snow) i {
+  top: -3%;
+  left: calc(mod(var(--i) * 41, 100) * 1%);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #fbfaf6;
+  opacity: 0.9;
+  animation-name: placesnow;
+  animation-duration: calc(7s + mod(var(--i), 5) * 1.3s);
+}
+.place :global(.air):global(.smoke) i {
+  left: calc(57% + mod(var(--i), 3) * 2%);
+  top: 42%;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: radial-gradient(rgb(240 236 228 / 55%), transparent 70%);
+  animation-name: placesmoke;
+  animation-duration: 6s;
+  animation-delay: calc(var(--i) * -1s);
+}
+.place :global(.air):global(.mist) i {
+  left: -40%;
+  top: calc(18% + var(--i) * 9%);
+  width: 60%;
+  height: 34px;
+  border-radius: 50%;
+  background: radial-gradient(rgb(251 250 246 / 30%), transparent 70%);
+  animation-name: placemist;
+  animation-duration: calc(28s + var(--i) * 6s);
+  animation-delay: calc(var(--i) * -9s);
+}
+@keyframes placeleaf {
+  from {
+    transform: translate(0, 0) rotate(0);
+  }
+  50% {
+    transform: translate(30px, 230px) rotate(200deg);
+  }
+  to {
+    transform: translate(-10px, 480px) rotate(400deg);
+  }
+}
+@keyframes placesnow {
+  from {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(14px, 240px);
+  }
+  to {
+    transform: translate(-6px, 480px);
+  }
+}
+@keyframes placesmoke {
+  from {
+    transform: translate(0, 0) scale(0.5);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  to {
+    transform: translate(18px, -170px) scale(2.4);
+    opacity: 0;
+  }
+}
+@keyframes placemist {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(260%);
+  }
+}
+.place:global(.still) :global(.stage),
+.place:global(.still) :global(.stage) > svg,
+.place:global(.still) :global(.placed),
+.place:global(.still) :global(.ring) {
+  transition: none;
 }
 .place :global(.placed) svg {
   width: 100%;
@@ -644,9 +824,12 @@
   border: 2px solid #1d2a36;
 }
 .place :global(.thing) {
+  --s: calc(0.85 + var(--d) * 0.25);
   width: 9%;
   aspect-ratio: 1;
-  transform: translate(-50%, -50%);
+  transform-origin: 50% 50%;
+  transform: translate(-50%, -50%) translate(var(--sx), var(--sy))
+    scale(var(--s));
 }
 .place :global(.ring):global(.thing)::before {
   bottom: auto;
