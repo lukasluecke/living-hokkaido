@@ -34,6 +34,79 @@ const VERB: Record<string, string> = {
   map: "Explore",
 };
 
+/** Up to two activities show in the bar; more go in one "Activities" menu. */
+function ActivityMenu({
+  activities,
+  onStart,
+}: {
+  activities: { id: string; kind: string; title: string }[];
+  onStart: (id: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const root = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const off = (e: PointerEvent) => {
+      if (!root.current?.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("pointerdown", off);
+    root.current?.querySelector<HTMLButtonElement>("[role=menuitem]")?.focus();
+    return () => document.removeEventListener("pointerdown", off);
+  }, [open]);
+  const item = (a: { id: string; kind: string; title: string }) =>
+    `${VERB[a.kind] ?? "Try"}: ${a.title}`;
+  if (activities.length <= 2)
+    return (
+      <>
+        {activities.map((a) => (
+          <button key={a.id} type="button" onClick={() => onStart(a.id)}>
+            {item(a)}
+          </button>
+        ))}
+      </>
+    );
+  return (
+    <div
+      ref={root}
+      className={c.menuRoot}
+      onKeyDown={(e) => {
+        if (e.key === "Escape" && open) {
+          // Close the menu only; do not leave the scene.
+          e.stopPropagation();
+          setOpen(false);
+          root.current?.querySelector<HTMLButtonElement>("button")?.focus();
+        }
+      }}
+    >
+      <button
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        Activities ({activities.length}) {open ? "▾" : "▴"}
+      </button>
+      {open && (
+        <div className={c.menu} role="menu" aria-label="Activities">
+          {activities.map((a) => (
+            <button
+              key={a.id}
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setOpen(false);
+                onStart(a.id);
+              }}
+            >
+              {item(a)}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function DetailScenePart(props: DetailScenePartProps) {
   const { scene, artifacts, focusedArtifactId, emit, prefs } = props;
   const overlay = useRef<HTMLDivElement>(null);
@@ -109,30 +182,20 @@ export function DetailScenePart(props: DetailScenePartProps) {
             {label(p.artifactId)}
           </button>
         ))}
-        {scene.activityIds
-          .map((id) => props.content.activities.find((a) => a.id === id))
-          // Activities of a placed object start from its card; the rest here.
-          .filter(
-            (a) =>
-              a &&
-              !(
-                a.artifactId &&
-                scene.placements.some((pl) => pl.artifactId === a.artifactId)
-              ),
-          )
-          .map((a) =>
-            a ? (
-              <button
-                key={a.id}
-                type="button"
-                onClick={() =>
-                  emit({ type: "activity.start", activityId: a.id })
-                }
-              >
-                {VERB[a.kind] ?? "Try"}: {a.title}
-              </button>
-            ) : null,
-          )}
+        <ActivityMenu
+          activities={scene.activityIds
+            .map((id) => props.content.activities.find((a) => a.id === id))
+            // Activities of a placed object start from its card; the rest here.
+            .filter(
+              (a): a is NonNullable<typeof a> =>
+                !!a &&
+                !(
+                  a.artifactId &&
+                  scene.placements.some((pl) => pl.artifactId === a.artifactId)
+                ),
+            )}
+          onStart={(id) => emit({ type: "activity.start", activityId: id })}
+        />
         <button
           type="button"
           onClick={() => emit({ type: "scene.exit", sceneId: scene.id })}
