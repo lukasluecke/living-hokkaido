@@ -1,7 +1,16 @@
-// Low-poly owl + flight along a curve that clears the real terrain.
+// Spirit-like owl guide + flight along a curve that clears the real terrain.
 import { useFrame } from "@react-three/fiber";
 import { forwardRef, useImperativeHandle, useMemo, useRef } from "react";
-import { CatmullRomCurve3, type Group, Vector3 } from "three";
+import {
+  AdditiveBlending,
+  CanvasTexture,
+  CatmullRomCurve3,
+  type Group,
+  type InstancedMesh,
+  Matrix4,
+  Quaternion,
+  Vector3,
+} from "three";
 import { ISLAND } from "@/contracts";
 import type { Field } from "./field";
 
@@ -46,9 +55,18 @@ export const Owl = forwardRef<
     target: Vector3 | null;
     onArrive: () => void;
     scale?: number;
+    /** Light trail while flying; off for reduced motion. */
+    trail?: boolean;
   }
 >(function Owl(
-  { field, perch, target, onArrive, scale = ISLAND.owlWingspan / 2 },
+  {
+    field,
+    perch,
+    target,
+    onArrive,
+    scale = ISLAND.owlWingspan / 2,
+    trail = true,
+  },
   ref,
 ) {
   const g = useRef<Group>(null);
@@ -113,59 +131,205 @@ export const Owl = forwardRef<
     }
   });
   return (
-    <group ref={g} scale={scale}>
-      <mesh castShadow position={[0, 0.35, 0]} scale={[0.42, 0.52, 0.38]}>
-        <icosahedronGeometry args={[1, 1]} />
-        <meshStandardMaterial color="#8a5a3a" flatShading />
+    <>
+      <group ref={g} scale={scale}>
+        <SpiritOwlBody wl={wl} wr={wr} />
+      </group>
+      <Trail owl={g} api={api} enabled={trail} />
+    </>
+  );
+});
+
+// Fictional spirit-like guide (not a depiction of any kamuy; see PROJECT.md
+// and docs/RESEARCH.md § Owl). Snow-white, round, soft blue glow.
+const SNOW = "#f7fbff";
+const FROST = "#d6e6f5";
+const GLOW = "#bfe0ff";
+const INK = "#3b4a5e";
+
+function SpiritOwlBody({
+  wl,
+  wr,
+}: {
+  wl: React.RefObject<Group | null>;
+  wr: React.RefObject<Group | null>;
+}) {
+  const halo = useMemo(() => glowTexture(), []);
+  return (
+    <>
+      <mesh castShadow position={[0, 0.38, 0]} scale={[0.46, 0.5, 0.42]}>
+        <sphereGeometry args={[1, 20, 16]} />
+        <meshToonMaterial
+          color={SNOW}
+          emissive={GLOW}
+          emissiveIntensity={0.35}
+        />
       </mesh>
-      <mesh position={[0, 0.3, 0.2]} scale={[0.3, 0.36, 0.22]}>
-        <icosahedronGeometry args={[1, 1]} />
-        <meshStandardMaterial color="#e8d2ad" flatShading />
+      <mesh position={[0, 0.3, 0.18]} scale={[0.32, 0.34, 0.26]}>
+        <sphereGeometry args={[1, 16, 12]} />
+        <meshToonMaterial
+          color={FROST}
+          emissive={GLOW}
+          emissiveIntensity={0.25}
+        />
       </mesh>
       {[-1, 1].map((s) => (
         <group key={s}>
-          <mesh position={[s * 0.15, 0.55, 0.3]} scale={0.11}>
-            <icosahedronGeometry args={[1, 1]} />
-            <meshStandardMaterial color="#fff7e0" />
+          <mesh position={[s * 0.16, 0.56, 0.3]} scale={[0.15, 0.15, 0.08]}>
+            <sphereGeometry args={[1, 16, 12]} />
+            <meshBasicMaterial color="#ffffff" toneMapped={false} />
           </mesh>
-          <mesh position={[s * 0.15, 0.55, 0.39]} scale={0.055}>
-            <icosahedronGeometry args={[1, 1]} />
-            <meshStandardMaterial color="#1d2a2a" />
+          <mesh position={[s * 0.16, 0.55, 0.37]} scale={0.085}>
+            <sphereGeometry args={[1, 14, 10]} />
+            <meshBasicMaterial color={INK} />
+          </mesh>
+          <mesh position={[s * 0.14, 0.59, 0.44]} scale={0.025}>
+            <sphereGeometry args={[1, 8, 6]} />
+            <meshBasicMaterial color="#ffffff" toneMapped={false} />
           </mesh>
           <mesh
-            position={[s * 0.24, 0.85, 0]}
-            rotation={[0, 0, -s * 0.4]}
-            scale={[0.07, 0.18, 0.07]}
+            position={[s * 0.26, 0.82, 0.02]}
+            rotation={[0, 0, -s * 0.5]}
+            scale={[0.08, 0.14, 0.06]}
           >
-            <coneGeometry args={[1, 1, 4]} />
-            <meshStandardMaterial color="#6d4329" flatShading />
+            <sphereGeometry args={[1, 10, 8]} />
+            <meshToonMaterial
+              color={SNOW}
+              emissive={GLOW}
+              emissiveIntensity={0.35}
+            />
           </mesh>
         </group>
       ))}
       <mesh
-        position={[0, 0.47, 0.38]}
+        position={[0, 0.46, 0.41]}
         rotation={[Math.PI * 0.55, 0, 0]}
-        scale={[0.04, 0.09, 0.04]}
+        scale={[0.035, 0.07, 0.035]}
       >
-        <coneGeometry args={[1, 1, 4]} />
-        <meshStandardMaterial color="#d79a3c" />
+        <coneGeometry args={[1, 1, 8]} />
+        <meshToonMaterial color="#9fb4c8" />
       </mesh>
-      <group ref={wl} position={[0.38, 0.45, -0.02]}>
-        <mesh position={[0.28, -0.05, 0]} scale={[0.32, 0.05, 0.26]} castShadow>
-          <icosahedronGeometry args={[1, 0]} />
-          <meshStandardMaterial color="#6d4329" flatShading />
-        </mesh>
-      </group>
-      <group ref={wr} position={[-0.38, 0.45, -0.02]}>
-        <mesh
-          position={[-0.28, -0.05, 0]}
-          scale={[0.32, 0.05, 0.26]}
-          castShadow
+      {[
+        [wl, 1],
+        [wr, -1],
+      ].map(([ref, s]) => (
+        <group
+          key={s as number}
+          ref={ref as React.RefObject<Group>}
+          position={[(s as number) * 0.36, 0.45, -0.04]}
         >
-          <icosahedronGeometry args={[1, 0]} />
-          <meshStandardMaterial color="#6d4329" flatShading />
-        </mesh>
-      </group>
-    </group>
+          <mesh
+            position={[(s as number) * 0.3, -0.04, 0]}
+            scale={[0.36, 0.06, 0.24]}
+            castShadow
+          >
+            <sphereGeometry args={[1, 14, 8]} />
+            <meshToonMaterial
+              color={SNOW}
+              emissive={GLOW}
+              emissiveIntensity={0.4}
+            />
+          </mesh>
+        </group>
+      ))}
+      <sprite position={[0, 0.42, 0]} scale={2.4}>
+        <spriteMaterial
+          map={halo}
+          color={GLOW}
+          transparent
+          opacity={0.55}
+          depthWrite={false}
+          blending={AdditiveBlending}
+          toneMapped={false}
+        />
+      </sprite>
+    </>
   );
-});
+}
+
+function glowTexture() {
+  const c = document.createElement("canvas");
+  c.width = c.height = 64;
+  const x = c.getContext("2d");
+  if (x) {
+    const r = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+    r.addColorStop(0, "rgba(255,255,255,0.9)");
+    r.addColorStop(0.35, "rgba(255,255,255,0.25)");
+    r.addColorStop(1, "rgba(255,255,255,0)");
+    x.fillStyle = r;
+    x.fillRect(0, 0, 64, 64);
+  }
+  return new CanvasTexture(c);
+}
+
+const TRAIL = 28;
+
+/** Fading light motes behind the owl, in world space. One draw call. */
+function Trail({
+  owl,
+  api,
+  enabled,
+}: {
+  owl: React.RefObject<Group | null>;
+  api: OwlApi;
+  enabled: boolean;
+}) {
+  const mesh = useRef<InstancedMesh>(null);
+  const st = useMemo(
+    () => ({
+      pts: Array.from({ length: TRAIL }, () => new Vector3()),
+      age: new Float32Array(TRAIL).fill(9),
+      head: 0,
+      acc: 0,
+      m: new Matrix4(),
+      q: new Quaternion(),
+      v: new Vector3(),
+      sc: new Vector3(),
+    }),
+    [],
+  );
+  useFrame((_, dt) => {
+    const im = mesh.current,
+      o = owl.current;
+    if (!im || !o) return;
+    st.acc += dt;
+    if (enabled && api.flying && st.acc > 0.035) {
+      st.acc = 0;
+      st.head = (st.head + 1) % TRAIL;
+      st.pts[st.head]
+        .copy(o.position)
+        .add(
+          st.v
+            .set(Math.random() - 0.5, Math.random() - 0.3, Math.random() - 0.5)
+            .multiplyScalar(0.25),
+        );
+      st.age[st.head] = 0;
+    }
+    for (let i = 0; i < TRAIL; i++) {
+      st.age[i] += dt;
+      const life = 1 - st.age[i] / 1.1;
+      const k = life > 0 ? 0.06 * life : 0;
+      st.pts[i].y += dt * 0.15;
+      st.m.compose(st.pts[i], st.q, st.sc.setScalar(k));
+      im.setMatrixAt(i, st.m);
+    }
+    im.instanceMatrix.needsUpdate = true;
+  });
+  return (
+    <instancedMesh
+      ref={mesh}
+      args={[undefined, undefined, TRAIL]}
+      frustumCulled={false}
+    >
+      <sphereGeometry args={[1, 8, 6]} />
+      <meshBasicMaterial
+        color="#8cc4ff"
+        transparent
+        opacity={0.6}
+        depthWrite={false}
+        blending={AdditiveBlending}
+        toneMapped={false}
+      />
+    </instancedMesh>
+  );
+}

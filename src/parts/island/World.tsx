@@ -9,6 +9,7 @@ import {
   Vignette,
 } from "@react-three/postprocessing";
 import { useEffect, useMemo, useRef } from "react";
+import { InkEdgesEffect } from "./InkEdges";
 import { MathUtils, Vector3 } from "three";
 import type { CameraView, IslandPartProps, Location } from "@/contracts";
 import {
@@ -86,6 +87,7 @@ export function World(props: WorldProps) {
     emit({ type: "owl.arrived", locationId: loc.id });
   };
   const owl = useRef<OwlApi>(null);
+  const ink = useMemo(() => new InkEdgesEffect(), []);
   return (
     <>
       <SeasonDriver
@@ -118,6 +120,7 @@ export function World(props: WorldProps) {
         perch={home}
         target={target}
         onArrive={onArrive}
+        trail={!prefs.reducedMotion}
       />
       <Rig
         owl={owl}
@@ -128,6 +131,7 @@ export function World(props: WorldProps) {
       />
       {props.fx && (
         <EffectComposer multisampling={0} enableNormalPass={false}>
+          <primitive object={ink} />
           <TiltShift2
             blur={0.07}
             taper={0.7}

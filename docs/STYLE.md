@@ -97,6 +97,11 @@ may depend on an animation finishing (always emit the event).
   unless an approved claim supports the steps.
 * The owl is a fictional guide. Its lines navigate; they do not state cultural
   facts.
+* Owl look (Lukas, 2026-11-25): a snow-white, round, softly glowing spirit-like
+  owl with a pale blue light trail. It is our own character. Do not name it or
+  style it as Kotan-kor-kamuy (the Ainu name for Blakiston's fish owl, a highly
+  revered kamuy; JTA/MLIT R1-01865, R6-00291) and use no Ainu patterns on it,
+  unless an Ainu cultural reviewer approves.
 
 ## Assets
 
