@@ -275,7 +275,7 @@ export const jaClaims: Record<string, string> = {
   "In the museum's coal mine figures, one miner drills the coal face with a machine and another shovels the loose coal. This is what the figures show; the panel text does not name these tasks.":
     "博物館の炭鉱の人形では、ひとりの坑夫が機械で切羽を掘り、もうひとりがくずれた石炭をシャベルですくっています。これは人形に見えることで、パネルの文はこれらの仕事を名指ししていません。",
   "Otaru herring warehouse, late Meiji": "小樽のニシン倉庫、明治後期",
-  "Out of Place · illustrated scene": "時代ちがい探し · 絵の場面",
+  "Out of Place · illustrated scene": "場ちがい探し · 絵の場面",
   "The Otaru Warehouse was built in 1890 on newly reclaimed land by two ship-owning merchants from Kaga.":
     "小樽倉庫は1890年、新しく埋め立てられた土地に、加賀出身の二人の船主の商人によって建てられました。",
   "Each roof ridge of the Otaru Warehouse carries a pair of ceramic shachihoko: fish-shaped ornaments believed to protect against fire, and a sign of wealth.":

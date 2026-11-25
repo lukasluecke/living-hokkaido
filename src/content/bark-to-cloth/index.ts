@@ -17,6 +17,7 @@ import { hokkaidoMuseum } from "./museum";
 import { omushaKnowledge, omushaLook } from "./omusha";
 import { houseOverTime, houseTimeline } from "./over-time";
 import { placeActivities } from "./place-activities";
+import { placeArtifacts, placeObjectActivities } from "./place-objects";
 import {
   lakeHouse,
   listeningGrove,
@@ -49,12 +50,13 @@ export const barkToClothRaw = {
       ],
     })),
   ],
-  artifacts: [...artifacts, ...areaArtifacts],
+  artifacts: [...artifacts, ...areaArtifacts, ...placeArtifacts],
   activities: [
     ...activities,
     ...areaActivities,
     ...gameActivities,
     ...placeActivities,
+    ...placeObjectActivities,
     omushaLook,
   ],
   stamps,

@@ -4,9 +4,8 @@
 // its own boundary and reports only through emit.
 import { useCallback, useState } from "react";
 import type { Emit } from "@/contracts";
-import { mountOutOfPlace } from "@vendor/out-of-place/src/embed";
 import type { KindProps } from "../kinds/shared";
-import { GameStage, type MountGame } from "./GameStage";
+import { deferMount, GameStage, type MountGame } from "./GameStage";
 
 export function HideSeekActivity({
   activity: a,
@@ -22,7 +21,11 @@ export function HideSeekActivity({
   // Mounted once per Play; the game keeps the props it was given.
   const mount = useCallback<MountGame>(
     (host, out) =>
-      mountOutOfPlace(host, { activity: a, claims, prefs, emit: out }),
+      deferMount(
+        import("@vendor/out-of-place/src/embed").then((m) =>
+          m.mountOutOfPlace(host, { activity: a, claims, prefs, emit: out }),
+        ),
+      ),
     // claims and prefs are read at mount time on purpose (see GameStage).
     [a],
   );
