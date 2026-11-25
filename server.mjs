@@ -234,6 +234,91 @@ async function talk(body) {
   };
 }
 
+// ---- Voice (ElevenLabs): spoken answers and speech-to-text for questions.
+// Elders and the Ainu woman speak through the interpreter, so the interpreter's voice reads their answers.
+const ELEVEN_KEY = process.env.ELEVENLABS_API_KEY || '';
+const TTS_MODEL = process.env.ELEVENLABS_TTS_MODEL || 'eleven_multilingual_v2';
+const STT_MODEL = process.env.ELEVENLABS_STT_MODEL || 'scribe_v1';
+// Premade ElevenLabs voices; override with ELEVENLABS_VOICES='{"interpreter":"<voice id>",...}'.
+const VOICES = {
+  interpreter: 'JBFqnCBsd6RMkjVDRZzb', // George: warm, measured
+  officer: 'onwK4e9ZLuTAKqWW03F9', // Daniel: formal, authoritative
+  soldier: 'nPczCjzI2devNBz1zQrb', // Brian: plain, younger
+  narrator: 'JBFqnCBsd6RMkjVDRZzb',
+  ...(() => { try { return JSON.parse(process.env.ELEVENLABS_VOICES || '{}'); } catch { return {}; } })(),
+};
+function voiceFor(id) {
+  if (id === 'aizu-officer') return VOICES.officer;
+  if (id === 'aizu-soldier') return VOICES.soldier;
+  if (id === 'interpreter') return VOICES.interpreter;
+  const c = fs.existsSync(path.join(CHAR_DIR, `${id}.json`)) ? JSON.parse(fs.readFileSync(path.join(CHAR_DIR, `${id}.json`), 'utf8')) : null;
+  return c?.voice?.routes_through === 'interpreter' ? VOICES.interpreter : VOICES.narrator;
+}
+const ttsCache = new Map(); // text+voice -> mp3 Buffer, so replays cost no credits
+const forSpeech = (t) => t.replace(/\s*\[[^\]]*\]/g, '').replace(/^\(Through the interpreter\)\s*/i, 'Through the interpreter. ').trim();
+let voiceWindow = { start: 0, count: 0 };
+const voiceLimited = () => {
+  const now = Date.now();
+  if (now - voiceWindow.start > 60000) voiceWindow = { start: now, count: 0 };
+  return ++voiceWindow.count > 40;
+};
+
+async function speak(req, res) {
+  if (!ELEVEN_KEY) return sendJson(res, 503, { error: 'Voice is not set up on this server (ELEVENLABS_API_KEY is missing).' });
+  let body;
+  try { body = await readJson(req, 10000); } catch { return sendJson(res, 400, { error: 'Send JSON' }); }
+  const text = forSpeech(typeof body.text === 'string' ? body.text : '').slice(0, 1200);
+  if (!text) return sendJson(res, 400, { error: 'Nothing to say.' });
+  const voice = voiceFor(typeof body.figure === 'string' && /^[a-z0-9-]+$/.test(body.figure) ? body.figure : '');
+  const key = createHash('sha256').update(`${voice}|${TTS_MODEL}|${text}`).digest('hex');
+  let audio = ttsCache.get(key);
+  if (!audio) {
+    if (voiceLimited()) return sendJson(res, 429, { error: 'Too many voice requests this minute.' });
+    const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice}?output_format=mp3_44100_128`, {
+      method: 'POST',
+      headers: { 'xi-api-key': ELEVEN_KEY, 'content-type': 'application/json', accept: 'audio/mpeg' },
+      body: JSON.stringify({ text, model_id: TTS_MODEL, voice_settings: { stability: 0.55, similarity_boost: 0.75 } }),
+      signal: AbortSignal.timeout(45000),
+    });
+    if (!r.ok) {
+      console.error('elevenlabs tts', r.status, (await r.text()).slice(0, 300));
+      return sendJson(res, 502, { error: 'The voice could not be made just now.' });
+    }
+    audio = Buffer.from(await r.arrayBuffer());
+    if (ttsCache.size > 300) ttsCache.delete(ttsCache.keys().next().value);
+    ttsCache.set(key, audio);
+  }
+  res.writeHead(200, { 'content-type': 'audio/mpeg', 'content-length': audio.length, 'cache-control': 'private, max-age=86400' });
+  res.end(audio);
+}
+
+async function listen(req, res) {
+  if (!ELEVEN_KEY) return sendJson(res, 503, { error: 'Voice input is not set up on this server (ELEVENLABS_API_KEY is missing).' });
+  if (voiceLimited()) return sendJson(res, 429, { error: 'Too many voice requests this minute.' });
+  const type = String(req.headers['content-type'] || 'audio/webm').split(';')[0];
+  if (!/^audio\/|^video\/webm/.test(type)) return sendJson(res, 415, { error: 'Send audio.' });
+  const chunks = []; let size = 0;
+  for await (const c of req) { size += c.length; if (size > 5e6) return sendJson(res, 413, { error: 'Recording too long.' }); chunks.push(c); }
+  const form = new FormData();
+  form.append('model_id', STT_MODEL);
+  form.append('file', new Blob([Buffer.concat(chunks)], { type }), `question.${type.includes('mp4') ? 'mp4' : type.includes('ogg') ? 'ogg' : 'webm'}`);
+  const r = await fetch('https://api.elevenlabs.io/v1/speech-to-text', { method: 'POST', headers: { 'xi-api-key': ELEVEN_KEY }, body: form, signal: AbortSignal.timeout(45000) });
+  if (!r.ok) {
+    console.error('elevenlabs stt', r.status, (await r.text()).slice(0, 300));
+    return sendJson(res, 502, { error: 'Could not hear that. Try again or type the question.' });
+  }
+  const out = await r.json();
+  return sendJson(res, 200, { text: String(out.text || '').trim(), language: out.language_code || '' });
+}
+
+async function voiceList(res) {
+  if (!ELEVEN_KEY) return sendJson(res, 503, { error: 'ELEVENLABS_API_KEY is missing.' });
+  const r = await fetch('https://api.elevenlabs.io/v1/voices', { headers: { 'xi-api-key': ELEVEN_KEY } });
+  if (!r.ok) return sendJson(res, 502, { error: `ElevenLabs ${r.status}` });
+  const out = await r.json();
+  return sendJson(res, 200, { model: TTS_MODEL, using: VOICES, voices: (out.voices || []).map((v) => ({ id: v.voice_id, name: v.name, category: v.category, labels: v.labels })) });
+}
+
 let appendQueue = Promise.resolve();
 async function readJson(req, limit = 20000) {
   let size = 0; const chunks = [];
@@ -265,6 +350,10 @@ async function handleApi(req, res, pathname) {
     const { status, data } = await result;
     return sendJson(res, status, data);
   }
+  if (pathname === '/api/speak' && req.method === 'POST') return speak(req, res);
+  if (pathname === '/api/listen' && req.method === 'POST') return listen(req, res);
+  if (pathname === '/api/voices' && req.method === 'GET') return voiceList(res);
+  if (pathname === '/api/voice-status' && req.method === 'GET') return sendJson(res, 200, { voice: Boolean(ELEVEN_KEY), talk: Boolean(GEMINI_API_KEY) });
   if (pathname === '/api/talk' && req.method === 'POST') {
     let body;
     try { body = await readJson(req, 20000); } catch (err) { return sendJson(res, err.status || 400, { error: 'Send JSON' }); }
