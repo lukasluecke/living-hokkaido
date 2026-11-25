@@ -3,6 +3,7 @@
 // backs it. Built only from the knowledge entry, so it cannot invent content.
 import { useLayoutEffect, useRef, useState } from "react";
 import type { Source } from "@/contracts";
+import { useT } from "@/i18n";
 import { complete, type KindProps } from "./shared";
 import k from "./kinds.module.css";
 
@@ -19,6 +20,7 @@ export function Trace({ activity: a, claims, emit }: KindProps<"trace">) {
     const s = resolved.flatMap((c) => c.sources).find((x) => x.id === id);
     if (s) sources.push(s);
   }
+  const tr = useT();
   const [pick, setPick] = useState<string | null>(null);
   const [links, setLinks] = useState<Record<string, string>>({});
   const [misses, setMisses] = useState(0);
@@ -38,7 +40,7 @@ export function Trace({ activity: a, claims, emit }: KindProps<"trace">) {
         complete(emit, a.id, resolved.length / (resolved.length + misses));
     } else {
       setMisses((m) => m + 1);
-      setNote("This source does not back that sentence. Try another.");
+      setNote(tr("This source does not back that sentence. Try another."));
     }
     setPick(null);
   };
@@ -118,7 +120,8 @@ export function Trace({ activity: a, claims, emit }: KindProps<"trace">) {
               >
                 <strong>{s.title}</strong>
                 <small>
-                  {s.kind} · rights {s.rights} · consent {s.consent}
+                  {tr(s.kind)} · {tr("rights")} {tr(s.rights)} · {tr("consent")}{" "}
+                  {tr(s.consent)}
                 </small>
               </button>
             ))}
@@ -127,12 +130,13 @@ export function Trace({ activity: a, claims, emit }: KindProps<"trace">) {
         <p className="feedback" aria-live="polite">
           {finished
             ? a.completion
-            : note || (pick ? "Now pick its source." : "Pick a sentence.")}
+            : note ||
+              (pick ? tr("Now pick its source.") : tr("Pick a sentence."))}
         </p>
         {finished && (
           <div className="review-strip">
-            <span>Source</span>→<span>Claim</span>→
-            <span className="pending">Human review · pending</span>
+            <span>{tr("Source")}</span>→<span>{tr("Claim")}</span>→
+            <span className="pending">{tr("Human review · pending")}</span>
             <button
               type="button"
               className="btn"
@@ -140,7 +144,7 @@ export function Trace({ activity: a, claims, emit }: KindProps<"trace">) {
                 emit({ type: "reveal.open", knowledgeId: a.knowledgeId })
               }
             >
-              Turn the card
+              {tr("Turn the card")}
             </button>
           </div>
         )}
