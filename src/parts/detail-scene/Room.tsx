@@ -14,6 +14,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import type { CameraView, DetailScenePartProps } from "@/contracts";
 import { createToonUniforms, toonifyTree } from "../shared/toon";
+import { AreaStatic, isAreaSetting } from "./room/AreaSets";
 import { ArtifactShell, RoomObject } from "./room/Artifacts";
 import { Dust, Hearth, WindowLight } from "./room/Hearth";
 import { HouseStatic, Roof } from "./room/House";
@@ -215,7 +216,7 @@ function Setting({
   season,
   prefs,
 }: RoomProps & { kind: string; lift: { current: number } }) {
-  if (kind === "grove" || kind === "clearing")
+  if (kind === "grove" || kind === "clearing" || isAreaSetting(kind))
     return (
       <>
         <OutdoorSky season={season.value} />
@@ -226,7 +227,9 @@ function Setting({
           color="#fff1df"
         />
         <MergeStatic>
-          {kind === "grove" ? (
+          {isAreaSetting(kind) ? (
+            <AreaStatic kind={kind} season={season} />
+          ) : kind === "grove" ? (
             <GroveStatic season={season} />
           ) : (
             <ClearingStatic season={season} />

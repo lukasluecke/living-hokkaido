@@ -31,7 +31,7 @@ const std = (color: string, extra: THREE.MeshStandardMaterialParameters = {}) =>
   new THREE.MeshStandardMaterial({ color, roughness: 0.95, ...extra });
 
 /** Shared materials; ground and leaves follow the season clock. */
-function useOutdoorMats(season: SeasonState) {
+export function useOutdoorMats(season: SeasonState) {
   const m = useMemo(
     () => ({
       ground: std("#8fb06a"),
@@ -58,7 +58,7 @@ function useOutdoorMats(season: SeasonState) {
   });
   return m;
 }
-type Mats = ReturnType<typeof useOutdoorMats>;
+export type Mats = ReturnType<typeof useOutdoorMats>;
 
 function Tree({
   p,
@@ -100,7 +100,7 @@ function Tree({
 }
 
 /** A ring of trees around an open middle, seeded so it stays the same. */
-function TreeRing({
+export function TreeRing({
   m,
   seed,
   inner,
@@ -135,7 +135,7 @@ function TreeRing({
   );
 }
 
-function Ground({ m, patch }: { m: Mats; patch: number }) {
+export function Ground({ m, patch }: { m: Mats; patch: number }) {
   return (
     <>
       <mesh
@@ -156,7 +156,7 @@ function Ground({ m, patch }: { m: Mats; patch: number }) {
   );
 }
 
-function Log({
+export function Log({
   p,
   r = 0,
   len = 1.4,
@@ -190,7 +190,7 @@ function Log({
   );
 }
 
-function Stump({
+export function Stump({
   p,
   h = 0.4,
   rad = 0.32,
@@ -213,7 +213,7 @@ function Stump({
   );
 }
 
-function Stones({
+export function Stones({
   m,
   seed,
   n,

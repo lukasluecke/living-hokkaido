@@ -3,6 +3,11 @@
 // can assign materials per part without touching geometry.
 import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
+import {
+  type AreaObjectId,
+  type AreaPart,
+  areaObjects,
+} from "../../shared/areaObjects";
 
 export type Part =
   | "cloth"
@@ -11,8 +16,9 @@ export type Part =
   | "thread"
   | "fiber"
   | "bark"
-  | "tie";
-export type ObjectId = "fiber" | "cloth" | "garment";
+  | "tie"
+  | AreaPart;
+export type ObjectId = "fiber" | "cloth" | "garment" | AreaObjectId;
 
 function mesh(geo: THREE.BufferGeometry, part: Part, name: string) {
   const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial());
@@ -250,6 +256,8 @@ export const builders: Record<ObjectId, () => THREE.Group> = {
   fiber,
   cloth: loom,
   garment,
+  // Themed-area objects (coast, forest, hills, mountains).
+  ...areaObjects,
 };
 
 export const OBJECT_IDS: ObjectId[] = ["fiber", "cloth", "garment"];
