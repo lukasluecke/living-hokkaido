@@ -13,6 +13,11 @@
       "properties": { "en": { "type": "string" }, "ja": { "type": "string" } },
       "description": "A role-based name (e.g. 'Aizu interpreter') unless a historical name is documented."
     },
+    "variant": {
+      "type": "object",
+      "properties": { "en": { "type": "string" }, "ja": { "type": "string" } },
+      "description": "What tells this figure apart from others with the same name (e.g. the robe). Used only in lists for the team, not in the visitor's view."
+    },
     "role": { "type": "string", "description": "Role in the ceremony." },
     "faction": { "enum": ["aizu", "shogunate", "wajin-interpreter", "sakhalin-ainu"] },
     "perspective": {

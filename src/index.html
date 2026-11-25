@@ -610,7 +610,7 @@ function showFigureList() {
   for (const id of CHARACTER_IDS) {
     const c = characters[id]; if (!c) continue;
     if (!c.model?.src && !Env.about(id).length) continue;
-    add(nameOf(c), () => openSheet(id), c.model?.src ? t("model3d") : "");
+    add(listName(c), () => openSheet(id), c.model?.src ? t("model3d") : "");
   }
   card.appendChild(list);
   ui.loader.classList.add("interactive");
@@ -831,6 +831,7 @@ const I18N = {
 };
 // Name and sheet text in the current language. Japanese sheet text is a machine translation.
 const nameOf = (c) => (LANG === "ja" ? c.name.ja || c.name.en : c.name.en);
+const listName = (c) => (c.variant ? `${nameOf(c)} (${c.variant[LANG] || c.variant.en})` : nameOf(c));
 const otherNameOf = (c) => (LANG === "ja" ? c.name.en : c.name.ja || "");
 const sheetText = (c, f) => (LANG === "ja" && CHAR_JA[c.id]?.[f]) || (f === "modelLabel" ? c.model?.label : c[f]);
 let LANG = params.get("lang") === "ja" || params.get("lang") === "en" ? params.get("lang") : null;
@@ -1030,7 +1031,7 @@ function renderEditor() {
   const list = $("edList"); list.innerHTML = "";
   for (const id of CHARACTER_IDS) {
     const row = document.createElement("div"); row.className = "row";
-    const b = document.createElement("button"); b.className = "pick"; b.textContent = characters[id]?.name.en || id;
+    const b = document.createElement("button"); b.className = "pick"; b.textContent = characters[id] ? listName(characters[id]) : id;
     b.setAttribute("aria-pressed", String(editing === id));
     b.addEventListener("click", () => { editing = editing === id ? null : id; renderEditor(); });
     const mark = document.createElement("span"); mark.className = "placed";

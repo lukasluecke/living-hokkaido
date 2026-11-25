@@ -2,8 +2,12 @@
   "$schema": "../schema/character.schema.json",
   "id": "elder-chrysanthemum",
   "name": {
-    "en": "Sakhalin Ainu elder (chrysanthemum robe)",
-    "ja": "樺太アイヌの長老（菊柄の着物）"
+    "en": "Sakhalin Ainu elder",
+    "ja": "樺太アイヌの長老"
+  },
+  "variant": {
+    "en": "chrysanthemum robe",
+    "ja": "菊柄の着物"
   },
   "role": "Elder seated on a mat in front of the building, facing the officials",
   "faction": "sakhalin-ainu",

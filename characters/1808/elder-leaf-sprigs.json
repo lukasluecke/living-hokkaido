@@ -2,8 +2,12 @@
   "$schema": "../schema/character.schema.json",
   "id": "elder-leaf-sprigs",
   "name": {
-    "en": "Sakhalin Ainu elder (leaf-sprig robe)",
-    "ja": "樺太アイヌの長老（葉柄の着物）"
+    "en": "Sakhalin Ainu elder",
+    "ja": "樺太アイヌの長老"
+  },
+  "variant": {
+    "en": "leaf-sprig robe",
+    "ja": "葉柄の着物"
   },
   "role": "Elder seated on a mat in front of the building, facing the officials",
   "faction": "sakhalin-ainu",

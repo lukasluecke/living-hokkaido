@@ -2,8 +2,12 @@
   "$schema": "../schema/character.schema.json",
   "id": "elder-pink-flowers",
   "name": {
-    "en": "Sakhalin Ainu elder (pink flowered robe)",
-    "ja": "樺太アイヌの長老（桃色の花柄の着物）"
+    "en": "Sakhalin Ainu elder",
+    "ja": "樺太アイヌの長老"
+  },
+  "variant": {
+    "en": "pink flowered robe",
+    "ja": "桃色の花柄の着物"
   },
   "role": "Elder seated on a mat in front of the building, facing the officials",
   "faction": "sakhalin-ainu",

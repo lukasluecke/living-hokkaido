@@ -2,8 +2,12 @@
   "$schema": "../schema/character.schema.json",
   "id": "elder-star-flowers",
   "name": {
-    "en": "Sakhalin Ainu elder (star-flower robe)",
-    "ja": "樺太アイヌの長老（星形の花柄の着物）"
+    "en": "Sakhalin Ainu elder",
+    "ja": "樺太アイヌの長老"
+  },
+  "variant": {
+    "en": "star-flower robe",
+    "ja": "星形の花柄の着物"
   },
   "role": "Elder seated on a mat in front of the building, facing the officials",
   "faction": "sakhalin-ainu",

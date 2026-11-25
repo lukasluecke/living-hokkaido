@@ -2,8 +2,12 @@
   "$schema": "../schema/character.schema.json",
   "id": "elder-black-crest",
   "name": {
-    "en": "Sakhalin Ainu elder (black crested robe)",
-    "ja": "樺太アイヌの長老（紋付きの黒い着物）"
+    "en": "Sakhalin Ainu elder",
+    "ja": "樺太アイヌの長老"
+  },
+  "variant": {
+    "en": "black crested robe",
+    "ja": "紋付きの黒い着物"
   },
   "role": "Elder seated on a mat in front of the building, facing the officials",
   "faction": "sakhalin-ainu",

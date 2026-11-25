@@ -2,8 +2,12 @@
   "$schema": "../schema/character.schema.json",
   "id": "elder-brushstrokes",
   "name": {
-    "en": "Sakhalin Ainu elder (brush-stroke robe)",
-    "ja": "樺太アイヌの長老（筆跡模様の着物）"
+    "en": "Sakhalin Ainu elder",
+    "ja": "樺太アイヌの長老"
+  },
+  "variant": {
+    "en": "brush-stroke robe",
+    "ja": "筆跡模様の着物"
   },
   "role": "Elder seated on a mat in front of the building, facing the officials",
   "faction": "sakhalin-ainu",

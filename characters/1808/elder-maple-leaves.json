@@ -2,8 +2,12 @@
   "$schema": "../schema/character.schema.json",
   "id": "elder-maple-leaves",
   "name": {
-    "en": "Sakhalin Ainu elder (maple-leaf robe)",
-    "ja": "樺太アイヌの長老（紅葉柄の着物）"
+    "en": "Sakhalin Ainu elder",
+    "ja": "樺太アイヌの長老"
+  },
+  "variant": {
+    "en": "maple-leaf robe",
+    "ja": "紅葉柄の着物"
   },
   "role": "Elder seated on a mat in front of the building, facing the officials",
   "faction": "sakhalin-ainu",
