@@ -7,6 +7,7 @@ import { useMemo } from "react";
 import * as THREE from "three";
 import type { Artifact, ArtifactPlacement } from "@/contracts";
 import { GlbObject } from "../../shared/Glb";
+import { type AreaObjectId, areaObjects } from "../../shared/areaObjects";
 import { clothTexture, rng, woodTexture } from "./textures";
 
 function useHoverGlow(group: React.RefObject<THREE.Group | null>, on: boolean) {
@@ -222,8 +223,16 @@ function GarmentOnStand() {
   );
 }
 
+/** Themed-area objects, shared with the artifacts viewer. */
+function AreaObject({ id }: { id: AreaObjectId }) {
+  const obj = useMemo(() => areaObjects[id](), [id]);
+  return <primitive object={obj} />;
+}
+
 /** Room model by artifact id. Unknown ids get a neutral plinth. */
 export function RoomModel({ artifactId }: { artifactId: string }) {
+  if (artifactId in areaObjects)
+    return <AreaObject id={artifactId as AreaObjectId} />;
   if (artifactId === "fiber") return <FiberBundle />;
   if (artifactId === "cloth") return <Loom />;
   if (artifactId === "garment") return <GarmentOnStand />;
