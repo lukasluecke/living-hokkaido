@@ -168,6 +168,25 @@ export function Tray({
     return () => document.removeEventListener("pointerdown", off);
   }, [open]);
 
+  // Keyboard path: when focus was lost (the card closed with Esc, or the
+  // room just opened), put it on the object's card, else the first card.
+  const lastFocused = useRef<string | null>(null);
+  useEffect(() => {
+    const prev = lastFocused.current;
+    lastFocused.current = focusedArtifactId ?? null;
+    if (focusedArtifactId) return;
+    const lost =
+      !document.activeElement || document.activeElement === document.body;
+    if (!lost) return;
+    const cards = wrap.current?.querySelectorAll<HTMLButtonElement>(
+      "button[data-artifact]",
+    );
+    const target =
+      (prev && [...(cards ?? [])].find((b) => b.dataset.artifact === prev)) ||
+      cards?.[0];
+    target?.focus({ preventScroll: true });
+  }, [focusedArtifactId, scene.id]);
+
   const close = () => {
     setOpen(false);
     tryCard.current?.focus();
@@ -226,6 +245,7 @@ export function Tray({
                 <button
                   type="button"
                   className={t.card}
+                  data-artifact={p.artifactId}
                   aria-pressed={on}
                   data-done={done ? "" : undefined}
                   onClick={() =>

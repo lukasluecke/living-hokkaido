@@ -87,11 +87,26 @@ export function IslandPart(props: IslandPartProps) {
  *  what you can do there, and a sheet that lists every activity. */
 function PlaceTray({
   content,
+  locationId,
   onSelect,
 }: IslandPartProps & { onSelect: (l: Location) => void }) {
   const t = useT();
   const [sheet, setSheet] = useState(false);
   const opener = useRef<HTMLButtonElement>(null);
+  const tray = useRef<HTMLElement>(null);
+  // Keyboard path: back from a place (Esc), focus was on a button that is
+  // gone; put it on that place's card so Tab goes on from there.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: on mount only
+  useEffect(() => {
+    if (!locationId) return;
+    if (document.activeElement && document.activeElement !== document.body)
+      return;
+    tray.current
+      ?.querySelector<HTMLButtonElement>(
+        `button[data-location="${locationId}"]`,
+      )
+      ?.focus({ preventScroll: true });
+  }, []);
   // Open places first, then the closed ones, each in pack order.
   const locations = [...content.island.locations].sort(
     (a, b) => Number(b.status === "open") - Number(a.status === "open"),
@@ -110,7 +125,7 @@ function PlaceTray({
           onClose={closeSheet}
         />
       )}
-      <nav className={c.tray} aria-label={t("Places on the island")}>
+      <nav ref={tray} className={c.tray} aria-label={t("Places on the island")}>
         <div className={c.trayHead}>
           <span className={c.cap}>{t("Places on the island")}</span>
           <span className={c.count}>
@@ -140,6 +155,7 @@ function PlaceTray({
                 <button
                   type="button"
                   className={c.card}
+                  data-location={l.id}
                   aria-disabled={l.status !== "open"}
                   data-open={l.status === "open" || undefined}
                   aria-label={
