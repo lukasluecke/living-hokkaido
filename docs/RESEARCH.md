@@ -12,7 +12,7 @@ Checked 25 November 2026 JST. This is a candidate research packet, not cultural 
   - Lists a bark-fiber garment under “Attus/Ahrus”. Used to assess the candidate’s museum relevance, not as a license to download its model.
 - `editorial-policy`: Living Hokkaido’s original policy in PROJECT.md supports the third reflection about consent and accuracy. It is not a museum fact.
 
-No images, 3D models, recordings, quotations or museum page dumps are bundled. Scene/objects are original abstract geometry. Source summaries are brief paraphrases. Rights to actual source media, expert review and practitioner participation remain unconfirmed. Vocabulary: per Lukas (2026-11-25) the words activity now shows two Ainu words from cited public sources (attus, isitaykini) as drafts; spelling, region, meaning and pronunciation review comes later (docs/REVIEW.md).
+No images, 3D models, recordings, quotations or museum page dumps are bundled in the app. Exception in the docs only: the Hokkaido Museum panel transcriptions in `docs/research/hokkaido-museum/transcriptions/` (research notes, not MIT, not shipped; decision Lukas, 2026-11-25). Scene/objects are original abstract geometry. Source summaries are brief paraphrases. Rights to actual source media, expert review and practitioner participation remain unconfirmed. Vocabulary: per Lukas (2026-11-25) the words activity now shows two Ainu words from cited public sources (attus, isitaykini) as drafts; spelling, region, meaning and pronunciation review comes later (docs/REVIEW.md).
 
 ## Candidate: the house over time (`house-over-time`)
 
@@ -40,8 +40,8 @@ cleared (`rights: unknown`); we only paraphrase short facts.
 
 - Hokkaido Museum exhibit panels at the restored house (theme 2; panels
   住まい, 家屋の移り変わり, 家の中をよく見てみよう, 技術を受け継ぐ), photographed
-  by Lukas on 2026-11-25 and transcribed in the private project files, not
-  in Git: flat-ground houses common by about the 13th century; Kuril and
+  by Lukas on 2026-11-25 and transcribed in
+  `docs/research/hokkaido-museum/transcriptions/` (not MIT, see RIGHTS.md): flat-ground houses common by about the 13th century; Kuril and
   Sakhalin pit dwellings as winter homes until the 19th century; regional
   wall and roof materials; Meiji-era pressure to move to Japanese-style
   houses, Sunazawa Kura's recollection, gradual change (1934 Biratori
@@ -74,3 +74,12 @@ The chat reader returned six recent turns with no older cursor and no attachment
 Useful optional follow-up to the earlier chat: “List only decisions missing from this consolidated Living Hokkaido brief: chosen museum/story, source URLs and evidence, actual permission/consent commitments, exact organizer wording on video duration and category eligibility, API documentation/access already obtained, design references and asset files. Separate confirmed facts from proposals. Do not repeat the full brief.”
 
 Still needed for a genuine public cultural experience: selected/approved source packet and qualified review, permission for any real scan/recording, written timing clarification, and credentials/docs only for integrations the team decides to keep. Do not send secrets in public issues or commit them.
+
+## Hokkaido Museum visit catalog (2026-11-25)
+
+[`docs/research/hokkaido-museum/README.md`](research/hokkaido-museum/README.md):
+150 photos grouped by EXIF time into sequences S00–S16, with the useful items
+for each place (Listening grove, Makers' clearing, Lake house, Memory cabin,
+island art direction), the Pocket Curator numbers seen, related records in the
+public collection database (https://jmapps.ne.jp/hmcollection1/), and the full
+transcriptions (not MIT). Research preview, not reviewed.

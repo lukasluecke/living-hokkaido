@@ -49,9 +49,10 @@ Added 2026-11-25 from Lukas's photos of the Hokkaido Museum's restored house
 `research-preview`). Sources `hm-panel-dwelling`, `hm-panel-house-change`,
 `hm-panel-inside`, `hm-panel-skills`: `rights: "unknown"`,
 `consent: "pending"`, no URL (read on site). The full transcription and
-translation are in the private project files
-(`museum/house-panels.md`), not in Git, because the panel text belongs to
-the museum. The photos are not shipped.
+translation are in
+[`docs/research/hokkaido-museum/transcriptions/house-panels.md`](research/hokkaido-museum/transcriptions/house-panels.md)
+(panel text belongs to the museum, not MIT; see its `RIGHTS.md`). The photos
+are not shipped.
 
 | Claim | Panel (locator) | Needs |
 |---|---|---|
@@ -114,3 +115,20 @@ after the photos (visual reference only):
       remove. It never reads Ainu.
 - [ ] Kept on purpose (not part of the open gates): voice-clone consent,
       translation consent for real speakers, withdrawal hides the memory.
+
+## Hokkaido Museum catalog (whole visit)
+
+Added 2026-11-25: [`docs/research/hokkaido-museum/`](research/hokkaido-museum/)
+holds the catalog of all 150 relevant and dropped photos (S00–S16), the full
+transcriptions (`transcriptions/`, not MIT) and links to related records in
+the museum's public collection database.
+
+- [ ] Rights: ask the Hokkaido Museum about the transcriptions in Git. Until
+      then the folder is research notes only (`transcriptions/RIGHTS.md`).
+- [ ] Check every "EN (mine)" translation before it backs a claim.
+- [ ] Collection database records are the same type of object, not the
+      photographed object. Do not present them as the exhibit.
+- [ ] Items with `ritualContext: true` are included in full (decision Lukas,
+      2026-11-25). A cultural reviewer still checks them before approval.
+- [ ] Cross-check claims with Pocket Curator (numbers in the catalog). The app
+      text stays out of Git.

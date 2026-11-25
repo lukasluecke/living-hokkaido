@@ -1,0 +1,240 @@
+# Hokkaido Museum panels: transcriptions and translations
+
+See [RIGHTS.md](RIGHTS.md) first. Panel text © Hokkaido Museum (北海道博物館).
+Not MIT. Research preview: transcribed and translated by Claude from Lukas's
+photos (2026-11-25), not reviewed. "EN (panel)" is the museum's own English;
+"EN (mine)" is a draft translation. `[?]` marks text that was not legible.
+The catalog rows are in [`../catalog.json`](../catalog.json).
+
+## Photo order
+
+## 7717 樹皮衣をつくる (Making a bark-fiber robe) — theme 2, clothing
+Lead: 日高地方の平取町二風谷に住む藤谷るみ子さんが、母から受け継いだ制作方法で、夫の憲幸さんが着るオヒョウの樹皮衣を作った記録です。
+Source note: 『アイヌ生活文化再現マニュアル 織る 樹皮衣』をもとに作成。6の図のみ、児玉マリ「衣服の種々相 II」『ひとものこころ アイヌのきもの』(天理教道友社, 1991) の「衣服の仕立て方スケッチ」をもとに作成。
+1 幹の根もとに切れ目を入れ、皮を剥ぎます。季節は、春から夏ごろが、木の水分が多くてきれいに剥がしやすい、とされます。剥いだ皮は、内皮と外皮に分けます。
+2 内皮をお湯につけ、やわらかくなるまで煮ます。(10日間ほど沼につける方法や、温泉につける方法もあります。)
+3 やわらかくなったら、水でよく洗ってぬめりをとり(写真左)、繊維の層をはがしていきます(写真右)。
+4 細く裂いて、糸にしていきます。
+5 布を織ります。
+6 できあがった布から図のように服を仕立てます。刺しゅうを施して、出来上がりです。
+## 7720 2 衣服 Clothing (Pocket Curator 239) — bilingual panel; English on panel.
+JP: 昔の衣服の素材には、樹木や草の皮からとった繊維で織った布のほか、けものの皮、魚の皮などが使われました。のちに交易をしたり漁場で働いたりして木綿が手に入るようになると木綿の布切れや糸で模様を付けた着物や、木綿で仕立てた着物がつくられるようになります。現在、これらの衣服を日常の生活で着ることはありません。けれども、儀式を行うときや行事で歌や踊りなどを披露するときに、伝統的な衣服を着ることが増えてきています。
+EN (panel): The traditional garments of the Ainu were made of materials such as animal hides, fish skins, or cloth woven from the fibers of tree bark or grass stalks. When cotton became available through trade, the Ainu began to decorate clothes with cotton cloth strips or thread, and produce clothes primarily made of cotton. These traditional clothes are no longer worn in contemporary daily life. However, it is becoming more common to see traditional Ainu clothing at ceremonies and during song or dance presentations at events.
+Photo caption: 伊達市有珠地方の木綿衣 ブダペスト民族学博物館所蔵 (Cotton robe, Usu area, Date City; Museum of Ethnography, Budapest)
+## 7722 Necklace label (PC 247) — 儀式のときなどに女性が身につける首飾り / Necklace for Women to Wear at a Ritual or Ceremonial Occasion. (glass beads, metal disc). Ritual context. ritual use.
+## 7725 3 いのる Beliefs (PC 243) — multilingual heading: Beliefs 祈祷 祈禱 신앙 Религия
+JP: アイヌ民族の信仰では、この世のあらゆるものに〈魂〉があると考えられています。なかでも、動物や植物など人間に自然の恵みをあたえてくれるもの、火や水、生活用具などくらしに欠かせないもの、天候や伝染病など人間の力がおよばないものなどを〈カムイ〉として敬います。そして、この世界は、人間とカムイとがかかわりあい影響しあってなり立っていると考えられています。この考え方は、自分や家族などの健康や安全をまもるための知恵や心がまえにつながるものでもありました。
+EN (panel, verbatim incl. typos): According to the beliefs of the Ainu, a spirit dwells within every being in this world. Among these spirits, animals and plants which providenatural bounty,the fire water,tools that are indispensable in daily life,or things beyond human control such as weather or epidemics are respected as Kamuy. Ainu belief holds that this world exists due to the interaction and relationship between Kamuy and human beings. This belief is related to the Ainu awareness of how to protect themselves, their families and their health.
+Caption: 炉で燃える火 (一般財団法人アイヌ民族博物館提供) — 火のカムイは、大切で身近なカムイとされています。人間にぬくもりやあかりをあたえてくれるだけでなく、人間の願いや… [cut off]
+Caption top right: 祭壇で祈る男性 (アイヌ民族博物館提供)
+## 7724 overview of panel 3 いのる (same content as 7725+7727). Top photo caption: 「札幌国際芸術祭2014」の開催初日に、札幌市の北三条広場で行われたカムイノミの儀式 (札幌国際芸術祭事務局提供)
+## 7727 3 いのる — subsections (PC 256 on ヌサとイナウ)
+いろいろなカムイ: カムイたちは、いつもはカムイの世界で人間と同じようなすがたでくらしていると考えられています。そして、何らかの役割をはたすときや、遊びに行きたくなったりしたときにカムイの世界から人間の世界にやってきます。そのときに動物や植物、あるいは道具、雨や風などにすがたを変えるのだといわれています。
+ - Bear photo (山本盛雄写真事務所提供): どのようなものをカムイと考えるのか、そのなかでどのカムイを重んじるのか、などについては地域や個人によってさまざまです。それでも、動物のなかで、ヒグマや、今は絶滅してしまったオオカミなどが大切なカムイとされていたことは、多くの地域で共通しています。
+ - Owl photo (平矢住有子さん撮影 [name partly ?]): シマフクロウは、村を見守る役目があるカムイとされ、多くの地域でたいへん重んじられています。
+ヌサとイナウ: 家から少し離れた場所にヌサ(祭壇)を設けました。ふだんのくらしのなかでのいのりは、家の中の炉ばたなどで行いますが、比較的大事な儀式のときは、ヌサに行き、祭るカムイに新しいイナウ(木幣)をささげていのります。
+ - photo (新ひだか町アイヌ民俗資料館提供): 上は儀式がおわって数か月たったヌサ。下は同じヌサの儀式の前日のようす。新しいイナウがそなえられています。
+ - photo: イナウにはさまざまな形のものがあります。カムイへささげたり、魔物をはらうときに使ったりイナウそのものを「家を守るカムイ」として祭るなど、いろいろな用途があります。
+「あの世」に関する考え方: 伝統的な信仰では、人間は、亡くなったら「死後の世界」へ行くと考えられています。そこでは、亡くなった人たちが生前と同じように村をつくってくらしていると考えられています。一方で、あの世のことなどはよくわからないものなのだと語る古老もいます。
+ - photo (アイヌ民族博物館提供): 「死後の世界」の入り口と言われた洞穴のひとつ。各地に、このような入り口の穴についての伝承が残されています。
+ - photo (新ひだか町アイヌ民俗資料館提供): 先祖供養をする女性。先祖たちのくらす「死後の世界」へそなえ物を届けてもらえるよう、火のカムイへたのみます。
+Ritual context. whole panel 3 is ritual/belief. Owl line is citable as a short paraphrase for Listening grove (theme only). Nusa/inau/ancestor rite:
+## 7728 Case: ritual headdress + earrings (PC 248; PC 242 seen at back)
+- 儀式のとき男性が頭にかぶるもの / 冠(サパンペ) [reading of small text uncertain] / Headdress for Men. Ritual context. ritual.
+- 耳飾り / Earrings. (metal hoops, some with red bead, some with ribbed ball) — clothing/adornment, visual ref OK.
+## 7729 Case: ritual sword + lacquer cups + libation sticks (PC 244, 245)
+- 儀式のとき男性が[身につける]刀と、刀を掛ける帯 / 刀、刀掛け帯(儀式用) / Sword with Carrying Band. These type of sword and carrying band [are] used in Ainu rituals.
+- カムイや先祖にお酒を捧げるへら / 捧酒箸(イクパスイ) 左・右 登別市 中央 白老町 / Libation Stick, "ikupasuy"
+- Side label: 儀式で使う、カムイに捧げるお酒を入れる椀は、食事用の椀と区別して用いられました。ここでは、儀式で使う椀の上に、お酒を捧げるためのへらを置いた状態を展示しています。 (Lacquer bowls for ceremonial sake were kept apart from bowls for meals; shown here with the libation stick laid on top.)
+Ritual context. ritual objects. Matches the lacquerware on the upper-seat in the lake house (already in REVIEW.md).
+## 7730 Case: inau, ritual quiver, arrows (PC 244)
+- カムイへの捧げものなどになる木幣 / 木幣(イナウ) 白老町 1932(昭和7)年 宮本エカシマトクさん製作 / Ritual staff. Sacred sticks decorated with shavings, "inaw".
+- 儀式の時に祭壇に飾る、装飾のついた矢筒 / 矢筒(儀式用) / Ritual Quiver.
+- クマ送りなどの儀式で使う矢 / 花矢 / Ritual Arrows for Bear Ceremony.
+Ritual context (sacred: inau, bear-sending ceremony items).; no depiction plans without review.
+## 7744 1 食べる: hunting + fishing (bench panel)
+狩猟 けものをとる: 大きな動物ではエゾシカやヒグマなど、そのほかにタヌキやウサギなど鳥ではエゾライチョウ、カケスなどを食材にしていました。
+ Diagram 仕掛け弓 (set bow): 動物の通り道に仕掛けておきます。歩いてきた動物が❶の糸に触れると、糸が引かれて❷が外れ、❸の方向に矢が発射される仕組みです。多くの場合、矢の先端には、トリカブトの根などからとった毒が塗られており、雨や露で流れ落ちてしまわないよう、先の部分に蓋をかぶせています。
+漁労 魚や海獣、海藻をとる: 川では、サケ、マス、イトウ、シシャモなどをとりました。海では、タラ、カレイ、ニシン、メカジキなどの魚のほか、オットセイなどの海獣、ホタテ、ホッキガイなどの貝類、コンブ、ワカメなどの海藻をとりました。
+ Image: 『蝦夷島奇観』に描かれた海漁のようす (秦檍麿筆『蝦夷島奇観』)
+## 7745 1 食べる (cont.)
+山菜、木の実など — photo labels: 山菜: ギョウジャニンニク, ニリンソウ / 木の実など: ミズナラとそのドングリ, サルナシの実 / デンプンを利用: カタクリ, オオウバユリとオオウバユリから採ったデンプン. (写真は全て新ひだか町アイヌ民俗資料館提供)
+農耕: ヒエやアワなどは、遺跡の発掘調査などをとおして、かなり古い時代から栽培されていたことがわかっています。江戸時代の中ごろからは、ジャガイモ、キビなどの穀類、大豆などの豆類、大根やアタネとよばれる根菜などがつくられていたことが記録されています。時代がたつにつれ、さらにいろいろなものがつくられていきました。
+ Photos: ヒエ, ヒエの穂, アワの採り入れ.
+ 穂をつむための道具と使い方: 穀物の採り入れのときは、鎌などの道具のほか写真のような道具も用いられました。写真は日高の沙流地方のもので、カワシンジュガイの貝殻を使っています。(北海道大学北方生物圏フィールド科学センター植物園所蔵) ❶紐に指を通して持ち ❷穂を握りこむようにして貝殻の縁を使って摘みとります。
+## 7746 / 7747 丸木舟をつくる (Making a dugout canoe)
+Lead: 1998年、アイヌ民族博物館において昔のやり方にしたがって丸木舟を作ったときの記録です。(写真は全て一般財団法人アイヌ民族博物館提供)
+Steps: カツラの木を使いました → これから舟を作ることを神さまに知らせる儀式 → 舳先を削っています(底になるほうを上にしています) → 中を削っていきます → 舟ができあがったら、水に浮かべる前に、この舟が無事につとめを果たせるよう、神さまに祈ります → アイヌ民族博物館の前に広がる、ポロト湖に進水です
+マレクのしくみ (marek hook-spear): 魚にねらいを定めて → 突く → 魚が暴れても抜けない
+キテ(銛)のしくみ (kite toggling harpoon): 獲物にねらいを定めて → キテは獲物めがけて飛んでいく → 体に刺さったあと → 先端は外れて獲物から抜けなくなる / 射手はキテにつながれたロープをにぎっている
+## 7748 Fishing case + video (PC 234, PC 235 top-left)
+Labels: 魚をすくい獲る網 / たも網 / Landing net. ; 上の漁具の先端の部分(柄から外れて、獲物の体に残る部分) / キテ(銛)先 / The tip of the harpoon. ; 舟にたまった水をくみ出す道具 / あか汲み / 1965(昭和40)年ごろ(復製) / Scoop, used to bail water out of a boat [legible approx].
+Video caption: 千歳川での丸木舟の操縦とマレクを使った漁のようす — 男性たちが、丸木舟でこぎ出していきます。映画「白老アイヌの生活」(八田三郎撮影、1925年)より
+Panel 写真と映像に見る丸木舟・アイヌの川漁・アイヌの海漁: captions 1899(明治32)年ごろの千歳川(北海道大学附属図書館所蔵) / 夕張川を進む丸木舟(北海道大学附属図書館所蔵) / 白老・木下写真館の撮影によるアイヌの海漁の様子(国立アイヌ民族博物館所蔵) / 千歳川での丸木舟の操縦とマレク(映画「白老アイヌの生活」(八田三郎撮影、1925年)より)
+Panel 記録映像の中のサケ漁: 1925(大正14)年に製作された記録映画で、千歳川で撮影された映像を紹介しています。丸木舟の中に立って急流をくだったり、マレクとよばれる鉤銛でサケを捕らえる場面が映っています。千歳川でのサケ漁は、この映像が撮影される約半世紀前の1878(明治11)年に、開拓使によって禁止されています。しかし、これまで自由に漁をしてきた人びとによって、生活をささえる手段だったサケ漁は、継続して行われる場合もありました。映像の中でサケを捕らえる男性たちの熟練した手さばきは、伝統的な生業が「密漁」とされるなかでひっそりと受け継がれてきた技術が、記録映像の撮影という機会に陽の目をみたものです。
+EN (mine): A 1925 documentary film shot on the Chitose River shows men standing in dugout canoes running rapids and catching salmon with a hooked spear called marek. Salmon fishing on the Chitose had been banned by the Kaitakushi in 1878, about half a century earlier. But people who had fished freely continued it at times as a means of living. The men's skilled hands show a technique passed on quietly while traditional livelihood was called "poaching", which came to light through the filming.
+## 7750 2 伝統を学ぶ / 1 食べる Diet (PC 232) — multilingual section header: The Traditional Culture and Ways of Life of the Ainu / 爱努民族的传统生活文化 / 愛努民族的傳統生活文化 / 아이누 민족의 전통적인 생활문화 / Традиционная культура и образ жизни айнов
+JP: アイヌ民族は、山での狩猟、川や海での漁のほか、山菜や木の実を採ったり農耕をしたりして食べ物を手に入れていました。たとえば川ではサケやマスなど、山ではヒグマやエゾシカなどを、さまざまな道具や、えものの特徴をよく理解してつくったワナでとらえました。そのほか、自分たちで栽培したアワやヒエ、和人から手に入れた米や塩、味噌なども食材になりました。ヒグマの場合、肉や脂は食べ物に、毛皮は生活用具や交易品にするなど、手に入れた物を余すところなく使いました。
+EN (panel): The traditional diet of the Ainu is based on foods obtained by hunting in the hills, fishing in the rivers and seas, foraging in fields and forests for plants and nuts, and farming the lands. Fishers and hunters relied on thorough knowledge of their prey, crafting traps to capture salmon and trout in the rivers or brown bear and Hokkaido sika deer in the hills. The Ainu cultivated their own foxtail millet and Japanese millet, and also used rice, salt, and miso which were obtained from the Wajin. These resources were carefully used to avoid waste - for example, the meat and fat of a brown bear became food, while the pelt became furnishings or trade goods.
+Captions: 上 マレクを使った漁のようす 映画「白老アイヌの生活」(八田三郎撮影、1925年) / 下 儀式のときのごちそう 新ひだか町アイヌ民俗資料館提供
+## 7754–7762 Manga wall: a present-day family talk (theme 2/今 section; illustrated fictional dialogue boy / mother / father). Read in file order.
+7754 Narration: おばあちゃんの家で長い時間を過ごして、ぼくは家に帰ってきた。もう夕方になっていた / 少年:ただいま! 母:お帰りなさい。お父さんも、帰ってきてるわ。 / 少年:ただいま! 父:お帰り!
+7755 母:おばあちゃんから、電話あったわよ。ずいぶん長く話してたのね。 少年:うん、まあね。 / 少年:で、お母さんの話も、聞かせてよ。 母:私? そうね、あれは高校生のときかしら…
+7756 母:総理大臣が「日本は単一民族国家だ」と発言をして、「じゃあ、アイヌ民族などは、いないっていうことなのか」って抗議する運動が起こったの。 少年:そうなんだ… 母:まだ世の中にはそういう考えの人が多かったのよ。でも、すぐにたくさんの人が抗議したのは、アイヌとして社会に発言する、ということがようやく広がってきたのね。
+7757 父:でも、お父さんは、「そういえば、そんなことあったかなあ」ぐらいの記憶しかないんだよね…。 母:そこはやっぱりね…。でも、うまく言えないけど、こういう時代の難しさのようなものも、感じたの。…なんだか固い話になるけど、いい? 少年:うん、聞かせて。
+7758 母:アイヌとして声を上げて動く人が増えてくると、じゃあ自分は、って考えちゃうし、新聞に大きく出たりすると、まわりからどう見られているのか、気になったりするの。 少年:…わかる気がするな…。 母:お母さんは、そのころ、栄養士になることが目標だったから、まずは自分の勉強を頑張ることにきめたの。
+7759 母:東京のおばさんいるでしょ? 若いころからアイヌのことに取り組んでいて、大学で英語を専攻したから、アイヌの代表団の通訳になって、国連にも行ったわ。 少年:そうなんだ…。歌とスイーツに詳しい、「さすが東京の人!」っておもってたけど。 母:もちろん、それもおばさんの得意分野よ。
+7760 母:お母さんの弟は、自動車会社でセールスやってるでしょ。彼はアイヌのことには特に関わらないし、何よりクルマのことが一番。 少年:そうだよね。おじさん、新車の話になると止まらないもんね。 母:昔からね、僕の趣味はエンジンです。とか言ってたから。
+7761 母:お母さんも弟もね、自分がアイヌだっていうことは、しっかり思ってる。だけど、二人とも、ふだんは、それぞれの仕事をまず第一にしてる。それが、何ていうかな、私の生き方なの。今も、昔も、いろいろな考え方・生き方の人があちこちにいる、当たり前のことなんだけどね。 (side photo caption: 朝の新札幌駅)
+7762 父:お父さんも、おかげで久しぶりにいろいろ考えたよ。ありがとう。 少年:うん…、お母さん、ありがとう。 (グー: stomach growls) 母:あらあら、お腹にもお礼言われちゃった。さあ、晩ごはんにしましょう!
+Key message (EN, mine): A mother tells her son about her high-school years, when a prime minister said "Japan is a single-ethnic nation" and many Ainu protested. As more people spoke up as Ainu, she wondered about herself and worried how others saw her; she chose to focus on becoming a dietitian. Her sister (the "Tokyo aunt") worked on Ainu issues and went to the UN as an interpreter; her brother sells cars and is not involved. "Both of us know clearly that we are Ainu... Now and in the past, people with many ways of thinking and living are everywhere. It is a natural thing."
+Note: fictional characters written by the museum, NOT real testimony. Do not present as a real person's memory.
+## 7764 Two painted family portraits (PC 202): older family in Ainu robes; present-day family in suits with a baby in a robe with Ainu patterns. Small caption 朝の札幌駅 belongs to a neighbouring photo. Visual reference for the "then and now" idea.
+## 7765 Population panel (PC 201; audio guide 06)
+JP: 現在のアイヌ民族の人口は数万人ともそれ以上ともいわれています。多くは北海道に住んでいますが、就職や進学、結婚などをきっかけに、東京や大阪など各地にくらしの場を移した人たちもたくさんいます。北海道でも、ここ札幌市をふくむ各地にくらしています。現代では、アイヌの人たちだけが住む村のようなものがあるわけではありません。現在のアイヌ民族は日本のほかの人びとと同じ地域のなかで、ともにくらしているのです。
+EN (panel): While the current Ainu population is not precisely known, it is thought to number in the tens of thousands. Most reside in Hokkaido, but much of the Ainu population has migrated to Tokyo, Osaka, and other regions throughout Japan in pursuit of careers, education, or marriage. Hokkaido's Ainu population live in various regions throughout the island, including Sapporo City. However, this does not mean that there are communities populated entirely by Ainu people. In contemporary society, the Ainu live side-by-side with the other residents of Japan.
+## 7767/7768 Screen: アイヌの物語アニメーション 白キツネのひとめぼれ (Ainu story animation "The white fox falls in love at first sight"). 7768 shows another character with a red-and-white headband (other story screen). Third-party animation: Shows that the museum tells kamui stories as cartoons. This supports the owl-story approach.
+## 7769 Black cotton robe with appliqué and chain-stitch embroidery, displayed with arms spread. The label is not legible (glare). Good visual reference for the cloth artifact: black base, light appliqué bands, diamond motifs.
+## 7772 ウコウク Ukouk (PC 272) — music, interactive listening station
+いくつかの歌い方の一つに「ウコウク」と呼ばれるものがあります。一つのメロディを次々と追いかけるように歌うことで、声の複雑な重なりをうみだしていきます。このような歌い方は、アイヌの音楽の特徴の一つとして知られています。
+EN (mine): One way of singing is called "ukouk". Singers follow one melody one after another, which makes a complex overlap of voices. This way of singing is known as one feature of Ainu music.
+Photo: 旭川チカップニアイヌ民族文化保存会による「ロク ウポポ」(『アイヌ古式舞踊写真集 中』北海道アイヌ古式舞踊連合保存会, 1999年)
+## 7771 ウコウクで歌われる曲を聴いてみましょう (下の2曲が続けて再生されます) — listening station with timing diagrams
+Song 1: 旭川地方に伝わる「フッサナ サンケナ…」〜「アリ アン ペ タ…」 約30秒. 4人で3手に分かれて歌っています。途中で「フッサナ サンケナ…」から「アリ アン ペ タ…」に歌が移っていきます。このとき3番手は「アリ アン ペ タ」の「ペタ」から入っています。 Diagram: singers A, B, C enter one after another, offset by one beat; a row of dots shows the beat (拍子をとる音).
+Song 2: 鵡川アイヌ文化伝承保存会による「ウポポ (ハオ ハオ ハン トリ…)」 約30秒. 2つのグループに分かれて歌っています。 Diagram: group A and group B, B enters later; beat dots.
+Use: The canon STRUCTURE (voices enter one after another on a shared beat) is a strong idea for a Listening-grove activity. The song syllables are transcribed in full. Credit the museum and the preservation societies that own the recordings.
+## 7781 トンコリ: アイヌの楽器「トンコリ」を弾いてみよう (PC 271) — tonkori hands-on station
+入門1 トンコリにさわってみよう: 太い弦と細い弦とを、1〜2本おきに張っています。近年は、三味線の弦(絹糸)を使うことが一般的になってきました。 / 穴にさし込んである細長い棒をねじり回して弦の張りぐあいを変え、音の高さを整えます。(注意! あまりきつく巻きすぎないでね。) / 弦を支えて、弦の振動を伝える働きをするものです。(注意! 楽器から外さないでね。) / 三角形に切り取った革に弦を結んでいます。 / 内側はくりぬいて、小さな穴を開けた薄い板をはってあります。トンコリの内部には、「心臓」または「魂」とされる小さな玉が入っています。
+EN (mine): Thick and thin strings alternate every 1–2 strings. Recently shamisen strings (silk) are common. You turn long pegs in holes to change string tension and tune. A bridge holds the strings and carries their vibration. Strings are tied to a triangle of leather. The body is hollow with a thin board with small holes; inside is a small ball said to be its "heart" or "soul".
+## 7782 入門2 持ってみよう / 初級 基本的な弾きかた / 中級 伝統曲にトライ!
+持ってみよう: 座って弾くときの持ち方のひとつです。※左利きの人は、説明文の左右を逆にして構えてください。[1] 左の手のひらの手首に近いあたりで支えてから、[2] 包むように左右の指先を軽く弦に当てて持ちます。[3] 左の肩から胸のあたりにやや斜めに立てたトンコリをもたせかけ、バランスのよい位置で支えます。
+初級: 左手=❶❷を弾く / 右手=❷❸❹❺を弾く [strings numbered 1–5]. ギターみたいに、弦を押さえて弾いたりしないの? → 押さえないで、開放弦で弾くんだよ [paraphrase of small bubbles, partly ?]
+音の高さを整える: それぞれの弦の、音の高さの整えかたにはいくつかの方法があります。右は、そのうちのひとつです。 細長い棒を回して、それぞれの音の高さを整えます。
+中級 伝統曲にトライ!: 下の曲の、はじめのところ「トケッ ケッ ヘターニ パイェアン」が弾けるかな? Photo of a player: 西平ウメさん? [name partly ?]
+## 7783 トンコリ (cont.) 音の高さを整える / 中級 伝統曲にトライ!
+それぞれの弦の、音の高さの整えかたには、いくつか種類があります。右は、そのうちのひとつです。細長い棒を回して、それぞれの音の高さを整えます。※弦がゆるまないよう、最後に棒を穴にちょっと押し込むようにして止めます。 Bubbles: 音の高さの順に弦が並んでいるわけじゃないんだね。 → そう、それもトンコリの特徴の一つなんだよ。 (※楽譜は相対音高です; 弦名 1–5)
+中級: 下の曲の、はじめのところ「♪ケッ ケッ ヘターニ パイェアン」が弾けるかな? みんな、トライしてみよう。 Tab: 3 3 / 3 1 / 3 / 4 5 with hand 右 右 / 右 左 / 右 / 右 右. Song title line: ケヘ ケヘ ヘタニ パイエアン (keh keh hetani payean). 演奏者 西平ウメ; 採録・採譜 富田友子; 採録年月日 1959年〜1963年. Source: 富田友子(採譜)、西平ウメ(演奏)『トンコリ曲集』(北海道大学アイヌ・先住民研究センター, 2013年) をもとに作成 [small print, partly ?]. Photo note: 西平ウメさん (1901?–1977?) — サハリン(樺太)で生まれ育った… [lifespan not legible: ?].
+Use: The instrument diagram (5 strings, open strings, not ordered by pitch, two hands) is strong for a Listening-grove "pluck the tonkori" mini-activity, as a mechanic only. The traditional tune and the tab belong to a named performer:, needs review before use.
+## 7785 Picture books: 四宅ヤエ(語り) 藤村久和(文) 手島圭三郎(絵)『カムイ・ユーカラの絵本 神々の物語』(ベネッセコーポレーション, 1984〜1990年) — 白糠に生まれた四宅ヤエさんの語った物語を絵本にしたシリーズです。 Covers: カムイチカプ (owl), チピヤクカムイ (snipe), ケマコシネカムイ (fox), エタシペカムイ (sea lion). Copyrighted books; owl title is a published source pointer for the Listening grove (read it; do not copy the art).
+## Q&A binder「アイヌ文化Q&A」(visitor questions, answers by museum staff) — 7787–7810, wall 7811
+Q001 (7787) 縄文文化も、アイヌ民族の文化なのでしょうか? (アイヌ民族は縄文文化の頃から北海道にいたのでは、と思うのですが。)
+A: 単純に「同じ」とは言えません。でも、文化を担った〈人〉はつながっています。「これが伝統的なアイヌ文化だ」と考えられている文化と、縄文文化とを比べると、動物に対する儀礼を行うことなど、似ている面もありますが、異なるところがたくさんあります。したがって、単純にひとくくりにすることはできません。けれども、現在のアイヌ民族の遺伝的な特徴などは、すくなくとも縄文時代までさかのぼって確認できることがわかっているので、縄文文化の担い手は、現在のアイヌの人びとの祖先と重なるところがあることはまちがいないと考えられます。本州、九州、四国などでは、縄文文化、弥生文化…と続く時代を「日本史」としているように、アイヌ民族にとっても、「アイヌ史」をずっとさかのぼって考えることができるはずです。
+EN (mine): Not simply "the same", but the people who carried the culture are connected. Compared with what is thought of as traditional Ainu culture, Jomon culture is similar in some ways (rituals for animals) but differs in many. Genetic features of today's Ainu can be traced back at least to the Jomon period, so the bearers of Jomon culture surely overlap with the ancestors of today's Ainu. As Honshu etc. count Jomon, Yayoi... as "Japanese history", the Ainu too can think of "Ainu history" going far back.
+Q002 (7788) 東北地方にもアイヌ語に由来する地名がある、というのは本当ですか? (展示のなかでは北海道の地名しか紹介されていないようですが、青森県や秋田県にもアイヌ語に由来する地名があると聞きました。)
+A: その通りです。とくに、東北地方の北部には、アイヌ語に由来すると考えられる地名が多く確認されています。たとえば、縄文文化の遺跡で知られる、青森市の三内丸山遺跡の「三内」は、北海道の積丹半島にある「珊内」などと同じく、アイヌ語に由来する地名です。青森県の下北半島には、大間町の「奥戸」や東通村の「白糠」のように、北海道の町の名と同じかたちの地名もあります。アイヌ語地名研究の第一人者である山田秀三(1899〜1992)は、東北地方のこのような地名を、同型・同類と考えられる北海道の地名と突き合わせながら、多くの資料を読み比べ、現地を確認する調査を行いました。そして、東北地方にもアイヌ語に由来すると考えられる地名が確認できること、とくに、東北地方の北部には多く見られることを指摘しています。
+EN (mine): Yes. Especially in northern Tohoku many place names are thought to come from Ainu, e.g. "Sannai" of Sannai-Maruyama (Aomori), like "Sannai" on the Shakotan Peninsula. Shimokita has names like Okoppe (Oma) and Shiranuka (Higashidori), the same forms as Hokkaido towns. Hidezo Yamada (1899–1992), the leading researcher of Ainu place names, compared them with Hokkaido names, read many sources and checked the sites.
+Q003 (7789) トンコリのいろいろな曲を知りたい! (映像や実物を見て、もっと聞いてみたくなりました。)
+A: 伝統的な曲を収録したレコードやCDなどがいくつか製作されています。主なものは当館アイヌ民族文化研究センターによる『アイヌ文化紹介小冊子 ポン カンピソシ 7 芸能』で紹介しています。当館の図書室にもいくつかCDやCD・DVD付きの図書があるので、ぜひ聞いてみてください。(『ポン カンピソシ』は、図書室や「はっけん広場」でお配りしています。) Examples: OKI『TONKORI』チカルスタジオ / 『アイヌ・北方民族の芸能』日本伝統文化振興財団 / 『西平ウメとトンコリ』アイヌ民族博物館.
+Q004 (7790) 以前の展示でかかっていた、おばあさんが歌っていた歌を聞きたいです。
+A: 旧北海道開拓記念館の展示では、千歳の白沢ナベさん(1905〜93年)が語る、「アオバトの物語」を流していました。「アオバトの物語」は、アイヌ口承文芸の中では「神謡」と呼ばれるジャンルのお話です。残念ながら、今は展示室で聞いていただくことはできませんが、同じ録音を当館の図書室で聞くことができますので、ご希望の方は図書室でお申し出ください。また、口承文芸は同じ人でも語るたびに少しずつ言い回しが違ってくるので、展示室で流していたものとは少し違っている部分もありますが、片山言語文化研究所(編・発行)『カムイユカラ』(1995年)に付いているCDでも、白沢ナベさんが語る「アオバトの物語」(CDのタイトルは「ワオ カムイ(アオバトの神)」)を聞くことができます。
+EN (mine): The former Historical Museum of Hokkaido played "The story of the green pigeon" told by Nabe Shirasawa of Chitose (1905–93), a kamuy yukar (神謡, "song of the gods"). It is no longer played in the gallery, but the same recording can be heard in the museum library. Oral literature changes a little each time, even from the same teller. A CD with the book 『カムイユカラ』(片山言語文化研究所, 1995) also has her telling, titled "Wao kamuy (god of the green pigeon)".
+Use: important design lesson for the owl story: a kamuy yukar is a named teller's performance; it varies each telling. The museum library has archival recordings (access by request).
+Q005 (7791) 小さいカタカナで書かれているところはどう発音するのですか?
+A: 「プ」「ッ」「ク」「シ」「ム」や小さいカタカナのラ行は、その音節末に母音(ア・イ・ウ・エ・オ)が来ないことを表しています。たとえば「サプ(sap)」という単語の場合、「サプ(sapu)」のように後ろに「ウ(u)」を付けて言ってしまうと、正しく発音できていないことになります。
+Table: カナ表記 / ローマ字表記 / 単語の意味 — サプ sap 前に出る(複数形) ; サッ sat 乾く ; サク sak 〜を欠く、夏
+「サプ(sap)」は、「さっぽろ」の「ぽろ」を言う直前の口の形で止めると、発音できます。最後は、くちびるが閉じた形です。「サッ(sat)」は、「サッと」の「と」を言う直前で止めます。最後は、舌先が上の歯の裏についた状態です。「サク(sak)」は「サッカー」の「カー」を言う直前で止めます。舌の奥でのどを閉じるような状態で終わります。
+北海道新聞社「アイヌ語小文字発音講座」では、動画で小さいカタカナの発音を紹介しています。(QRコード)
+EN (mine): Small katakana (プ ッ ク シ ム and small ラ-row) mark a syllable that ends with no vowel. "sap" must not be said "sapu". sap = come out (plural), sat = dry, sak = lack / summer. To say sap, stop with lips closed as before "po" of "Sapporo"; sat: tongue tip on back of upper teeth; sak: close the throat with the back of the tongue.
+Use: HIGH value for the Listening grove word cards: a pronunciation hint UI ("small kana = no vowel"). The three example words come with museum glosses (cite this card). Have a speaker/reviewer confirm before shipping words.
+Q006 (7792) 毒矢に使われる「毒」は、どんなものを使ったのですか?
+A: 動物の狩猟に用いる毒は、シカ・クマ猟の矢やクジラ猟の銛に塗って用いられました。トリカブトの根を中心に、いくつかの動物や植物、昆虫を混ぜたことが知られています。混ぜるものの中には、毒を強めることが期待されているもののほかに、クジラが陸に打ち上がることを期待して陸の獣に関わる物を混ぜるなど、呪術的な意味合いが強いものもありました。 Photo: 噴火湾沿岸の長万部町で用いられた捕鯨用の銛先 — 先端にはめ込まれた鉄製の鏃が折り曲げてあり、そのくぼみに毒を塗り込んで使用した。
+Q007 (7793) アイヌ語にも方言があるのですか
+A: もちろん、アイヌ語にも方言はあります。おおまかに北海道・サハリン(樺太)・北千島・東北北部の4つの地域の方言に分かれると考えられています。さらに、同じ方言とされる中でも地域によって、単語や文法などに違いはあります。この展示室のなかでも、アイヌ語の方言の違いを紹介しています。このQ&Aが貼ってある黒い格子の壁に沿って、左側に進んでみてください。「アイヌ文化の多様性」という、地図が載っているパネルでは「頭」「火」などの単語の地域差がわかるようになっています。『アイヌ語千歳方言辞典』(草風館)や公益財団法人アイヌ民族文化財団のアイヌ語教材テキスト(※1)のように、信頼性の高い辞典や教材は、方言によって違いがあることを踏まえていて、タイトルや本文中などで、どこの方言の単語・文法なのかを明記しています。 ※1 アイヌ民族文化財団アイヌ語教材 (QR)
+EN (mine): Yes. Roughly four dialect areas: Hokkaido, Sakhalin, northern Kurils, northern Tohoku; and within one dialect, words and grammar differ by place. A map panel "Diversity of Ainu culture" shows regional words for "head", "fire". Reliable dictionaries/textbooks state which dialect each word or grammar point comes from.
+Use: HIGH. Each Ainu word in the app must carry a dialect/region field and source (contract check). I did NOT photograph the "アイヌ文化の多様性" map panel (no photo found).
+Q008 (7794) 衣服に刺繍された文様は皆同じ(似たよう)に見えますが、違いはありますか
+A: アイヌの衣服の文様は、衣服の生地に直接糸で刺繍をしたもの、生地の上に別な布をつけたもの、その上からさらに刺繍をするなどの方法で作られています。渦巻きなどの文様が使われることも多く、一見して似た印象を受けることもありますが、昔の衣服を見ると、文様のつけ方や配置(構図)はひとつひとつ異なり、地域によってもさまざまな特徴があります。さらに、衣服の文様には背中に沿って左右対称の文様に見えるものもありますが、よく見ると完全なる対称ではなかったりと作り手の丁寧かつ細やかな手仕事とともにそれぞれに違う衣服の個性を発見できます。展示場の衣服についてもぜひじっくりとご覧ください。
+EN (mine): Patterns are made by embroidering directly on the cloth, by sewing other cloth on (appliqué), or by embroidering over that. Spirals are common, so robes can look alike, but each placement/composition differs, and regions have features. Patterns that look symmetric along the back are often not perfectly symmetric: you find each robe's individuality in the maker's careful handwork.
+Use: HIGH for Makers' clearing / cloth artifact: (1) three techniques = embroidery / appliqué / appliqué+embroidery; (2) design rule for procedural patterns: never perfectly mirror; add small per-maker asymmetry. Do not generate "authentic" patterns; label as stylised.
+Q009 (7795) 身近でアイヌ語が使われているものには何がありますか
+A: ファッション雑誌『nonno(ノンノ)』の誌名がアイヌ語の「花」を意味することは有名です。その他に北海道や樺太(サハリン)にいる生き物や地名に見ることができます。たとえば、トナカイやラッコは多くの人が知らずに使っているアイヌ語ですが、居酒屋さんでおなじみのシシャモはススハム(スサム)(ヤナギの葉)。凍った鮭の刺身は、ルイベ(溶ける食べ物)。ウミツバメ科の鳥のエトピリカとケイマフリは、それぞれエトゥピリカ(くちばしが美しい)やケマフレ(足が赤い)というアイヌ語が語源です。地名では、道内各地にペッ(川)やナイ(沢)というアイヌ語に「別」や「内」の漢字があてられていることが多く、登別はヌプルペッ(濃い川)、各地にあるフレナイ(赤い川)、サッナイ(乾く川)などもアイヌ語由来です。
+EN (mine): nonno = "flower". Tonakai (reindeer), rakko (sea otter) are Ainu words. Shishamo from susuham/susam (willow leaf); ruibe (frozen salmon sashimi) = "melting food"; etopirika from etupirika (beautiful beak), keimafuri from kemahure (red legs). Place names: pet (river) and nay (stream) written 別 / 内; Noboribetsu = nupurpet (dark/strong river); Furenai (red river), Satnay (dry river).
+Use: HIGH for word cards / island place labels — each with museum card as source; still mark dialect and reviewer status.
+Q010 (7796) ムックリやトンコリ以外のアイヌの楽器はありますか
+A: 古くから伝わる楽器のうち、現在でも演奏される機会が多いものとしては、ムックリ(口琴)やトンコリ(五弦琴)がよく知られていますが、昔の文献、たとえば松浦武四郎(1818〜1888)による『蝦夷漫画』(1859年刊)には、それらのほかにもさまざまな楽器が描かれています。その中の一つに、楕円形の木枠の片面に皮を張った一面太鼓が描かれています。これは、儀礼の道具として、樺太(サハリン)で使われていたものといわれます。また、ヨブスマソウの茎を利用したと思われるもの、木の皮をねじり巻いて管としたものなども描かれています。口にあてたようすが描かれていることから、笛もしくはラッパの類と考えられますが、どのようなときにどのように鳴らすのかなど、詳しいことはわかっていません。 Image: 松浦武四郎『蝦夷漫画』に描かれたさまざまな楽器のようす(個人蔵)
+EN (mine): mukkuri (mouth harp) and tonkori (five-string) are best known. Matsuura Takeshiro's "Ezo Manga" (1859) shows others: a one-sided frame drum (ritual, Sakhalin), and wind instruments of yobusumaso stems or twisted bark tubes; how they were played is not known.
+Q011 (7797) アイヌ語をたくさん知りたい
+A: 小・中学生からアイヌ語を学べる本には、公益財団法人アイヌ民族文化財団のアイヌ語教材テキスト(※1)や、『子どもとまなぶアイヌ語』(瀧口夕美著、編集工房SURE)があります。アイヌ語の辞典には、『アイヌ語千歳方言辞典』(中川裕著、草風館)、『アイヌ語沙流方言辞典』(田村すゞ子著、草風館)などがあります。国立アイヌ民族博物館がインターネット上に開設している「アイヌと自然デジタル図鑑」(※2)でも、いろいろなアイヌ語を学ぶことができます。いずれも、アイヌ語の専門的な研究や確実な出典にもとづいていることが特徴です。なお、インターネットで検索すると、いろいろなアイヌ語やその日本語訳が出てきますが、不正確な情報も多いので、ここで紹介したウエブサイトを中心に利用することをおすすめします。 ※1 アイヌ民族文化財団アイヌ語教材テキスト ※2 アイヌと自然 デジタル図鑑 (QR codes)
+Use: HIGH — this is the museum's own list of reliable sources for Ainu words. Use these (Chitose / Saru dialect dictionaries, NAM "Ainu and nature digital encyclopedia", Foundation textbooks) as the source IDs for word cards, not random web pages.
+Q012 (7798) 自分の道具は自分で彫るのですか。親などから受け継ぐのですか。
+A: かつては生活の中で用いる臼や杵、箕といった道具をひととおり作れてはじめて一人前と認められたともいいます。ただし、当然ながら全ての道具を自作していたわけではありません。ある人物が使用する道具の中には、世代を超えて受け継がれたものと、自ら新たに入手したり製作したりしたものの両方が含まれています。しばしば世代を超えて受け継がれるものとしては、和人社会との交易によって入手する刀や漆器、装身具、アイヌ民族が製作した儀礼用の道具など、いわゆる「宝物」の多くが該当します。もちろん、これらは新たに入手・製作されることもあります。中にはまれに、世代を超えて受け継いではいけないとされるものもあります。例えば日高・十勝地方では、男性が儀礼の際に被る冠は一代限りのものとされており、使っていた人が亡くなると、なきがらとともに埋葬されました。
+EN (mine): It is said that only someone who could make the everyday tools (mortar, pestle, winnow) was seen as a full adult. But not everything was self-made: a person's tools mix inherited things and things newly got or made. Often inherited: "treasures" such as swords, lacquerware and ornaments from trade with Wajin, and ritual tools made by Ainu. Rarely, some things must not be inherited: in Hidaka and Tokachi the crown men wear at rituals was for one lifetime only, buried with its owner.
+Use: Makers' clearing: "a full adult can make mortar, pestle, winnow" (cite, paraphrase). Ritual context. the crown (sapanpe, 7728) — never show as a collectible/heirloom.
+Q013 (7799) 儀式で女の人がつけるネックレスは何でできているのですか。
+A: 首飾り(ネックレス)には、主にタマサイなどと呼ばれるガラス玉やトンボ玉をたくさん繋げたものを、首から下げて身につけるタイプ、また、レクトゥンペなどと呼ばれ、布製でチョーカーのように首に巻いて身につけるタイプがあります。首飾りの素材には、青色や黒色などのガラス玉や模様の入ったトンボ玉が多く使われますが、金属製や石製、木製の玉なども使われ、日本刀の部品や古銭、耳飾りをつけたものもあります。かつては、こうした部品をイラクサやシナノキなど靭皮を使用した紐や、手ぬぐいを裂いて作った紐などに通していました。また、身につけるとちょうど胸の辺りとなる位置に、金属製や木製、あるいは金属と木の両方を組み合わせた板飾りがつくものも多く残されています。レクトゥンペは、黒や紺色の木綿布を帯状にして、中央部分には古銭や真鍮製の飾りを縫い付けるなどしたもの。木綿糸を使って、刺繍がほどこされるものもあります。
+EN (mine): Two types: tamasay (many glass/lampwork beads, hung from the neck) and rektunpe (cloth choker). Mostly blue/black glass beads and patterned beads, also metal, stone, wood beads, sword-fittings, old coins, earrings; strung on bast-fiber cord (nettle, linden) or torn tenugui. Many have a metal/wood plate at chest height. Rektunpe: band of black/navy cotton with old coins or brass sewn on centre; some embroidered.
+Q014 (7801) アイヌ語には日本語と同じような単語がありますが、日本語と何か関係があるのですか
+A: 「日本語と同じような単語」は、偶然の一致を除けば、①アイヌ語から日本語に取り入れられた語か、②日本語からアイヌ語に取り入れられた語である可能性が考えられます。①は、たとえばrakko(ラッコ)「ラッコ」やsusam(スサム)「シシャモ」などですが、数はあまり多くありません。②はkane(カネ)「鉄、金属」、menoko(メノコ)「女」、pasuy(パスイ)「箸」、kosonte(コソンテ)「小袖」、maciya(マチヤ)「町」、unma(ウンマ)「馬」、sippo(シッポ)「塩」など、さまざまな語があります。②のなかでも、peko(ペコ)「牛」、cape(チャペ)「ネコ」、kimi(キミ)「とうもろこし」などは、北海道方言や東北方言からアイヌ語に入った言葉だと考えられています。このように、ある言語から別の言語にそのまま取り入れられた語のことを借用語といいます。言葉の借用は、それらの言語を話す地域に文化的な接触があったことの証拠のひとつです。
+EN (mine): Similar words are (except chance) loanwords: Ainu→Japanese e.g. rakko (sea otter), susam (shishamo) — few; Japanese→Ainu e.g. kane (iron, metal), menoko (woman), pasuy (chopsticks), kosonte (kosode robe), maciya (town), unma (horse), sippo (salt); peko (cow), cape (cat), kimi (corn) came from Hokkaido/Tohoku Japanese dialects. Loanwords are evidence of cultural contact.
+Use: Words with romanisation + gloss from a museum source. Good for word cards; note "pasuy" = chopsticks (cf. ikupasuy libation stick, which is sacred).
+## 7800 Two ritual necklaces photographed on the Q013 card page (a tamasay with metal disc; a blue-bead one). Small captions (北海道博物館所蔵?) partly legible. Footnote: ※2023年12月16日(土)から、当館所蔵の首飾りを、このパネルの背面「クローズアップ4 首飾りのいろいろ」で展示しています。ぜひ、そちらもご覧ください。 Ritual context (ritual). —
+Q015 (7802) このコーナーの近くで聞ける、ウコウク(メロディを追いかけながら歌う歌)の歌詞はどんな意味なのですか
+A: この展示室の「ウコウク」のコーナーでは、旭川地方に伝わる「フッサナ サンケナ ホーイヤ ホイ / フッサナ ハオ ホーイヤ ホイ」「アリ アンペタ トノト ハウ ネ ネ / エー ホーイヤー オホイヤーホー」という2曲が連続して歌われるものと、鵡川アイヌ文化伝承保存会による「ハーオー ハーオー ハントリ ハンチカプ ハー」という歌が聞けます。歌詞を細かく見ていくと、「ホーイヤ ホイ」「ハーオー」など、意味のない囃子のことばだけではなく、サンケ「〜を出す」、トノト「酒」、チカプ「鳥」など、意味がある単語だと考えられるものもあります。けれど、全体としては、どういう意味なのかわかりません。ウコウクは、声の重なりや声の変化を楽しむことに主眼がおかれています。日本のわらべ歌などでもそうですが、特定の内容を伝えることが目的ではない場合には、歌詞の意味がわからなかったり、抽象的な内容だったりすることは、よくあります。
+EN (mine): Some words have meaning (sanke "put out", tonoto "sake", chikap "bird") but as a whole the meaning is not known; ukouk focuses on enjoying overlapping and changing voices, like Japanese children's songs.
+Use: supports a Listening-grove "canon" activity where the point is the overlap, not translation. Note chikap = bird (also in "Kamuy chikap" = owl book title 7785). Lyrics are transcribed in full above; credit the source.
+Q016 (7803) 北海道の地名はすべてアイヌ語がもとになっているのですか
+A: 北海道はアイヌ語を話すアイヌの人びとが先住している土地です。そのため北海道にはアイヌ語に由来する地名がたくさんあります。北海道の地図を見ると、あちこちに「川」や「沢」を意味する「ペッ」や「ナイ」ということばが付いた地名があります。それが漢字の「別」や「内」などで書かれるようになりました。また、人びとが生活するうえで欠かせない食料や道具などの材料が手に入る場所、山や川などの地形やその特徴を表す意味のアイヌ語で付けられた地名も数多くあります。一方で、本州などから北海道へ移住してきた人たちが名付けた地名も少なくありません。例えば、広島県から移住した人たちが付けた「北広島」、奈良県十津川から移住した人たちが多かったところは「新十津川」などと、北海道の市町村には日本語に由来する地名もあります。
+EN (mine): Hokkaido is land where Ainu-speaking people lived first, so many names are Ainu: pet / nay (river / stream) became 別 / 内; also names for places where food or tool materials were found, and for landforms. But settlers also named places (Kitahiroshima from Hiroshima, Shintotsukawa from Totsukawa, Nara).
+Use: HIGH for the island map: place-name labels with "Ainu origin" + meaning; ties to "Over time" slider (Meiji settler names).
+Q017 (7804) トンコリの弦はすべて同じ太さなのですか。
+A: すべて同じ太さではありません。大まかに分けて細い弦と太い弦とを使っています。展示場のハンズオンコーナーにあるトンコリでは、西平ウメさんが使った楽器の情報を参考にしながら、楽器に向かって左から順に「太-やや太-細-やや太-細」の弦を張ってあります。これらの弦の張りぐあいを、きつくしたり緩めたりして、曲の基本になる音の高さにそれぞれ調節してから、演奏します。
+EN (mine): No. Roughly thin and thick strings. The hands-on tonkori follows the instrument Ume Nishihira used: from left, thick–medium-thick–thin–medium-thick–thin. Each is tightened/loosened to the base pitches of a tune before playing.
+Use: concrete parameters for a stylised 5-string tonkori model and pluck sound (string thickness pattern). Still a reference to a named performer: cite.
+Q018 (7805) アイヌはなぜ文字を持たなかったのですか。
+A: まず大事なことは、「アイヌ(語)は文字を持たない」のではなく、遅くとも明治時代(19世紀の終わりごろ)にはアイヌ民族が自らアイヌ語を文字で書き表していることです。世界に数千あるとされる言語の多くは、他で既に用いられていた文字をそれぞれにアレンジして用いています。日本語が漢字を採り入れ、そこから仮名文字を作ったのもその例で、アイヌ語も、ローマ字やカタカナを採り入れた表記が行われるようになりました。アイヌ語と日本語を比べると、ひろく文字を用いるようになった年代に千年ぐらいの違いがあるので、「アイヌ語には文字がない」という見方が広まったと考えられます。アイヌ語を表わす文字が用いられるようになった20世紀初めごろが、アイヌ語・アイヌ文化に対する同化の圧力が強くなった時代でもあり、アイヌ語そのものが社会の中で急速に用いられなくなっていったため、アイヌ語の文字表記が広く用いられることがなく、社会の中でほとんど知られることのない時代が続いてしまったと考えられます。
+EN (mine): Important: it is not that Ainu "has no writing" — by the Meiji era (late 19th c.) at the latest, Ainu people themselves wrote Ainu. Most languages adapt an existing script (as Japanese did with kanji → kana); Ainu adopted Roman letters and katakana. Wide use of writing came ~1000 years later than for Japanese, hence the idea "no script". When writing began (early 20th c.) assimilation pressure was strong and the language fell out of use fast, so written Ainu stayed little known.
+Use: HIGH for language framing: never say "Ainu has no writing". Show words in both katakana (with small kana) and romanisation.
+Q019 (7806) 動物のすべてがカムイなのですか。カムイではない動物はいますか。
+A: アイヌの伝統的な信仰では、あらゆるものには「魂」が宿っていると考えます。そのなかでも、植物、動物、火や水、生活用具あるいは天候などで、人間の力がおよばない強い力を持つものを、とくにカムイ(神)として敬います。動物でもすべてがカムイなのではなく、たとえばシカをカムイとしない伝承は北海道の各地で知られています。クマやキツネあるいは立ち木などの神々のほか、火の神は人間の生活を見守りまた祈り言葉を神々に伝えるとして敬われます。虫のなかでもハチは平取町の伝承などで強い力を持つカムイとされ、新ひだか町では穀物の生育を見守るキリギリスの神の伝承があります。シカの例をみても、「カムイ」を「人間にない力を持ったものすべて」のようにひとことで言うことはできません。「人間の力がおよばない強い力」というのは自然のなかでの力ではなく、信仰のなかでわかることなのです。
+EN (mine): Everything has a soul, but kamuy are those with strong power beyond humans. Not all animals are kamuy: many places have traditions in which deer are not kamuy. Bear, fox, standing trees are gods; the fire god watches over human life and carries prayer words to other gods. Bees (Biratori), a katydid god watching grain (Shin-hidaka). You cannot define kamuy in one phrase; the "power" is understood within belief, not as natural force.
+Use: framing for owl story: say "the owl is respected as a kamuy in many regions" (from 7727), avoid "all animals are gods".
+Q020 (7807) この展示室のモニターで見られる、「エゾリスが山でくらすようになったワケ」について、出てくる言葉の区切りのはじめについている「ヘ」というのは何ですか。
+A: 「エゾリスが山でくらすようになったワケ」は神謡とよばれるジャンルの物語ですが、神謡では、決まった言葉が繰り返し挿入されます。この繰り返しの言葉は「サケヘ」や「サハ」などとよばれます。(方言差あり。以下、紙面の都合上「サケヘ」で統一。) 神謡にはそれぞれ独自のサケヘがあり、この物語では、「ヘ」がサケヘです。サケヘには、カムイの鳴き声や動きなどの特徴をとらえた言葉などがありますが、言葉自体の意味がよくわからないものもあり、この「ヘ」もよく意味がわかっていません。ちなみに、「ヘ」は一番短いサケヘのひとつです。一番長いサケヘとされているのは、織田ステノさんが語った静内地方の神謡「フクロウの物語」の「トゥノヤケ レノヤケ クントゥムケ カムイムイケ カムイチカッポ フム フム」です。これもモニターで視聴できますので、ご覧になってみてください。
+EN (mine): A kamuy yukar inserts a fixed repeated word, the sakehe (dialect: saha etc.). Each kamuy yukar has its own; it may imitate the kamuy's call or movement; many have no clear meaning. "he" is one of the shortest. The longest is said to be in the Shizunai "Owl story" told by Suteno Orita: "tunoyake renoyake kuntumke kamuymuyke kamuychikappo hum hum" — watchable on the gallery monitor.
+Use: VERY HIGH for the Listening grove owl story: the museum documents an owl kamuy yukar (Shizunai, teller Suteno Orita) with a sakehe ending "hum hum". Design implication: a story told with a repeated refrain; the owl call "hum hum". The sakehe text is included in full; it is a named teller's performance, so credit Suteno Orita and the museum with it. Do not invent a new sakehe.
+Q021 (7808) アイヌの子どもたちの遊びについて知りたい。
+A: ご質問の主旨は、伝統的な生活文化の中での、子どもたちの遊びや娯楽についてだと思いますので、その前提で回答します。昔の文献や聞き書きなどによれば、ヤマブドウのツルなどを編んで作った輪を地面に置き、棒を使ってそれを取り上げ、その数をきそうことや、漢字の「田」の字のように線をひいて、二人がその両側にそれぞれ3本ずつ棒を立て、互いに1本を1コマずつ前後左右に動かして、どちらが先に自分の棒を相手側に並べることができるかをきそった遊びなどが見られます。(photo: 互いに棒を動かしていく遊びは、近年に商品化もされています(写真参照) — box "UKONIAS"?) 遊びのいくつかは、大人の娯楽でもあったようです。たとえば、大人たちが二組に分かれ、片方の組の者が直径6インチ(約15cm)の輪を高く投げ上げ、もう片方の組の者が長いさおでその輪をつっかけようとするゲームを見た、という記録もあります(※)。更科源蔵『アイヌの童戯』(みやま書房、1983年)には、このほかさまざまな遊びが紹介されています。 ※開拓使のお雇い外国人の一人であった、地質学者ベンジャミン・スミス・ライマン(1835〜1920)による記録。
+EN (mine): Old records/interviews: (1) rings woven from wild-grape vine placed on the ground, picked up with a stick, compete on count; (2) a "田"-shaped grid, each of two players sets 3 sticks on their side and moves one stick one step (front/back/left/right) per turn; first to line up own sticks on the opponent side wins (now sold as a product). Adults too: two teams, one throws a 6-inch (~15 cm) ring high, the other tries to catch it on a long pole (record by B. S. Lyman, 1835–1920). More in 更科源蔵『アイヌの童戯』(1983).
+Use: VERY HIGH: a non-sacred, documented, playable mini-game for the demo (Makers' clearing / village): the 3-stick grid game or the ring-and-pole game. Rules come from a museum card + cited book; keep "research preview" status.
+Q022 (7809) トイレはチセのどこにあったのですか
+A: 伝統的な暮らしにおいて、トイレは家の外にあり、祭壇と反対の方向に位置するように建てられました。また、神窓が東向きになるよう建てられた家では、家の西北側にちょうど1人が入れるくらいの大きさのトイレを建てました。地域によっては、男女兼用で一つのトイレを建てるところや、男女別に二つのトイレを建てるところもありました。男女で分けて建てられたトイレは、外観も全く異なる形で建てられ、男性用を家の近くに、女性用を家から離れた少し遠いところに建てた、という地域もあります。トイレ内部の穴がいっぱいになると、そこを埋めて、別の場所にトイレを移動させました。また、家から少し離れた藪の中にトイレを建てたり、トイレがまったくなかった、という話も残されています。
+EN (mine): Outside the house, on the side opposite the altar. In houses with the kamuy window facing east, a one-person toilet stood to the north-west. Some regions: one shared; others two by gender with different shapes, men's near, women's farther. When full, the pit was filled and the toilet moved. Some built it in bushes, or had none.
+Use: Lake-house layout reference (orientation: sacred window east, altar outside on that side; toilet opposite). Layout only; the altar is not drawn (REVIEW.md).
+## 7810 Q022 card image: chise elevation + floor plan 1/90 — 出典: 萱野茂(1978)『アイヌの民具』. Labels (Ainu word + Japanese gloss as printed): チセ 家 chise / キタイオマニ(屋根にある木) / イクシペ(柱) / キ(かや) / サクマ(かやおさえしば) / サキリ(かやおさえしば) / チセアパ(家の入口) / セマパ(入口) / アペオイ(いろり) / シソ(本当の座) / ハラキソ(左座) / アペエトク(横座) / ロルンプヤラ(神座の窓) / シントコ(行器) / チセコロカムイ(家の守護神) / プヤロッキ(すだれ) / ヌプキクタプヤラ(にごり水すてる窓) / イトムンプヤラ(光うける窓); outbuilding labels partly ? (…便所). Dimensions: house 7720 × 5400? (main), overall 9650 incl. entrance room; width segments 1860/1960/1780/1830/1840 = 9070? [digits partly ?]; depth 1920/1680/1980.
+Use: VERY HIGH for the Lake house model: a published, cited floor plan with room/feature names. Seats (shiso = "true seat", harakiso = left seat, apeetok = head seat), three windows (rorunpuyar = kamuy window: Ritual context., not drawn per REVIEW.md), hearth (apeoy). Dimensions let you check proportions (approx 9.6 m × 5.6 m incl. entry). Words are Saru (Biratori/Nibutani) usage by Shigeru Kayano — mark dialect = Saru.
+## 7811 Q&A wall「アイヌ文化Q&A」: 展示をご覧になったあとの、「アイヌ文化の、ここがもっと知りたい」にお答えします。 + call for visitor questions (questions checked by staff and answered in turn).
+Q023 丸木舟はどうやって乗るのですか
+A: 丸木舟で川を渡ったりくだったりするときは、長さが3〜4メートルくらいの棹を使って舟をあやつります。棹が川の底にとどかないような深いところや湖などでは、櫂を使ってこぎます。棹や櫂を持つ人は、一つの舟に一人や二人の場合があります。通常は棹を持つ人が舟の先や後ろに立ったままで舟をあやつり、櫂を持つ人は舟に座った状態で舟をこぎます。こちらで展示している丸木舟のところに大型ディスプレイがあり、短い映画が放映されています。そこでは、千歳川の急な流れのところでも、立ったままの男性がたくみに舟をあやつって、川をくだっていくようすを見ることができます。(右画像:千歳川での丸木舟の操縦 映画「白老アイヌの生活」(八田三郎撮影、1925年)より) 舟は人や荷物を運んでくれる大切なカムイですから、舟に乗る前は事故が起きないように、身の安全を舟のカムイへ祈りました。
+EN (mine): To cross/descend rivers, steer with a 3–4 m pole; in deep water or lakes, paddle. One or two people; the pole-man stands at bow or stern, the paddler sits. A canoe is an important kamuy that carries people and goods; before boarding people prayed to the canoe kamuy for safety.
+Use: Lake-house canoe on the shore: standing pole-steering pose (animation reference = 1925 film stills); "canoe is a kamuy" (light, paraphrase only).
+Q024 アイヌ語のあいさつにはどんなものがありますか
+A: イカタイ! アイヌ語のあいさつには、人に会ったときのあいさつだけあげても、地域によっていろいろな言いかたがあります。最初にあげた「イカタイ」は、日高地方東部(新ひだか、浦河など)から北海道東部にかけて使い、「久しぶり」という意味だとされますが、よく会う親しい人どうしでも「こんにちは」のように使うことがあります。日高地方東部には「イアンカラプテ」という言いかたもあり、これは大人の人が道で出会ったときなどに使うそうです。よく似た言いかたには、北海道東部での「イナンカラプテ」、西部での「イランカラプテ」、樺太での「イランカラハテ」などがあります。日高地方東部から北海道東部にかけては「イッソロレ」という言いかたも「こんにちは」という意味で使います。「元気だったかい?」というような意味で「エイワンケ・ア?(あなたは元気だっ・た?)」という言いかたもあります。
+EN (mine): Greetings vary by region. "ikatay" (east Hidaka — Shin-hidaka, Urakawa — to eastern Hokkaido) = "long time no see", also used like "hello" between close people. East Hidaka also "iankarapte" (adults meeting on the road); similar: "inankarapte" (eastern Hokkaido), "irankarapte" (western Hokkaido), "irankarahte" (Sakhalin). "issorore" = hello (east Hidaka to eastern Hokkaido). "eiwanke a?" = "were you well?".
+Use: VERY HIGH for the owl / Listening grove greeting: if the app says "irankarapte", tag region = western Hokkaido and cite Q024; show the regional variants as a tiny map (great demo moment: "one hello, many places"). Romanisation of katakana is mine (check with a reviewer).
+## 7812 あたりまえの社会に向けて (Toward an ordinary/natural society) — theme 2 "today" wall
+JP: 1960年代の終わりごろから、自分たちによる伝統文化のとらえなおしや、歴史の見直しをめざす取り組みが見られるようになります。アイヌ語や伝統文化などを、過去のものだけにしないよう、自分たちが知りたいかたちで学び・身につけていこうとする活動や、移住者だけを中心に置く歴史の見かたを改め、先住してきた人たちの歴史の積み重ねも大事にしていこうとする声などが、少しずつですが、増えていきます。さらに、世界の先住民族の活動や国際的な人権尊重の動きとともに、アイヌ民族としての権利の獲得や差別・偏見の解消をめざそうとする活動が拡がりつつあります。社会はさまざまな民族的出自の人によって成り立っていて、それぞれが対等・平等に生きていける——あたりまえの社会をつくることに向けた取り組みが続けられています。
+EN (mine): From the late 1960s, Ainu people began to re-view their own traditional culture and history: learning Ainu language and culture in the way they want so they are not only "past", and calls to change a history centred only on settlers and to value the history of those who lived here first. With world Indigenous movements and international human rights, activity grows for Ainu rights and against discrimination. Work continues toward an "ordinary" society where people of many ethnic origins live as equals.
+Captions (small, partly legible): 北海道ウタリ協会(現北海道アイヌ協会)が求めた、新しい法律の案(表紙); 国立アイヌ民族博物館の展示「私たちのしごと」 (2020年に白老町に開設). Side text on 北海道アイヌ協会 renamed 北海道ウタリ協会 in 1961 [details ?].
+## 7813 自分たちのことを伝える —観光というしごとの、難しさのなかで— (Telling about ourselves: amid the difficulty of tourism work)
+JP: アイヌ民族の樹皮衣や木彫品などは、江戸時代から和人の社会でも実用品や土産物として知られていました。しかし明治時代以降、アイヌ民族が北海道でも少数者となる中で、その生活文化が、和人たちからの「昔のままのくらし」「珍しい風俗」といった関心による「見学」や「視察」の対象になっていきます。風景を味わい文化や歴史の理解を深めるはずの観光が、相手を見下すような一方的な興味関心を満たすためのものになってしまう——観光に従事した人びとは、そんな空気の中で仕事をしながら、ときには同じアイヌ民族からも観光に対する批判を受けながら、自分たちのことをどうやって正しく伝えていくか、努力と工夫を続けました。
+EN (mine): Ainu bark-fiber robes and carvings were known in Wajin society as useful goods and souvenirs since the Edo period. After Meiji, as Ainu became a minority even in Hokkaido, their life became an object of "visits" and "inspections" driven by interest in "life as of old" and "strange customs". Tourism, which should deepen understanding, served one-sided, looking-down curiosity. People working in tourism, sometimes criticised by other Ainu too, kept working on how to tell about themselves correctly.
+Captions: 昭和初期、登別温泉で働いていた砂沢クラさんによるスケッチ(『ク スクップ オルシペ 私の一代の話』より); 登別温泉にやってきた観光客にアイヌ文化を説明する萱野茂さん(萱野れい子『写真で綴る萱野茂の生涯 アイヌの魂と文化を求めて』より); 1961(昭和36)年、登別温泉ケーブル株式会社が、アイヌの伝統的な家屋をケーブルの山上に移築して見学施設として運営を始めます。… 萱野茂さん(1926〜2006)は… [partly ?]
+Use: HIGH as a design principle for the whole app: avoid "life as of old / exotic customs" framing; show Ainu as present-day people who tell their own story; "research preview" status and review gate. Good line for the pitch (paraphrased, cited).
+## 7814 日本の敗戦から 戦後民主主義へと向かう社会のなかで — 1946(昭和21)年3月 社団法人北海道アイヌ協会 創立 [small text, partly read from thumbnail] + documents (北海道アイヌ協会創立総会の案内状 釧路市立中央図書館所蔵…). Not fully transcribed (small text).
+## 7814 日本の敗戦から 戦後民主主義へと向かう社会のなかで
+JP: 長く続いた戦争が日本の降伏によって終わった後、それまでの日本の政治や社会のあり方を改めようとする動きが起こる中で、アイヌの人びとも、自分たちの生活をまもり、築きなおしていこうとする活動に取り組み、差別をなくしていくべきとする訴えを続けました。1946(昭和21)年3月に、各地の人びとが日高の静内町(現新ひだか町)に集まって創立大会を開き、社団法人北海道アイヌ協会が発足したのも、そのあらわれの一つです。しかし、アイヌの人びとの訴えの多くは実現されることなく、日本が復興から経済成長へと向かう中で、民族的少数者が社会の主体として認識されない時代が続きました。
+EN (mine): After the war, as Japan reformed politics and society, Ainu people worked to protect and rebuild their lives and kept calling to end discrimination. In March 1946 people gathered in Shizunai (now Shin-hidaka) and founded the Hokkaido Ainu Association. But most demands were not realised; during recovery and growth, ethnic minorities were not recognised as actors in society.
+Captions: 北海道アイヌ協会創立総会の案内状(釧路市立中央図書館所蔵山本多助資料) — invitation from the founding committee to 山本多助(1904〜93) [summary]; 長万部の北海道アイヌ協会支部の結成を報じる「長万部民報」記事(長万部町教育委員会所蔵) ※人名の一部を伏せています.
+## 7815 北海道アイヌ協会が発行した『北の光』 創刊号 1948(昭和23)年 北海道アイヌ協会 / "Kitano Hikari" No.1. Issued by the Ainu Association of Hokkaido.
+## 7816 幕別の吉田菊太郎が、アイヌ民族への理解を求めるために執筆した図書 — 吉田菊太郎『アイヌ文化史』1957(昭和32)年 / "Ainu Bunka-shi" ("History of Ainu Culture") written by Yoshida Kikutarou. Left: 平取アイヌ資料館 趣意書 — 資料館を設立するための文書の原稿 1970(昭和45)年ごろ / report about establishing a museum, Biratori town [partly ?].
+## 7817 Three zines "I-KO-HUSSA-OMAP" (CHIKAP ORU PEKA AN NE KYOTO AYNU MOSIR, 1990s?), English/Ainu/Japanese mix, features e.g. "THE HOOCHI COOCHI COO" (魔法をかける), "ALICE'S WONDERLAND", "THE FIRST BLACK HEAVY METAL" — modern Ainu-language creative publishing from Kyoto [title and dates partly ?; label not photographed]. Visual reference for "living culture today" (Memory cabin).
+## 7830 Bark-fiber robe (attus type: light brown woven bast cloth, dark blue cotton appliqué on the back and shoulders, dark hem and cuffs). Theme 1 case (Ezo trade period, near furs). Label not photographed. VERY HIGH visual ref for the Makers' clearing cloth artifact (colour, weave texture, appliqué layout). Matches 7717 process.
+## 7835 ジオラマの中をのぞいてみよう (Omusha diorama, theme 1)
+まわりに会津葵の紋を入れた幔幕を張り、鉄砲や弓矢、甲冑や旗指物などをならべかざり、藩士が威儀を正して居並ぶ情景は、「武威」を演出していて非常に威圧的です。建物の前に横一列にならぶ7人は村の長老たちです。まん中の最長老と思われる人は黒の羽織、その他の長老たちは色鮮やかな和製の着物を身につけています。この着物は、和人が長老たちにあたえたものです。(caption: 7人の長老たちと酒樽、タバコ、刀の鍔・刀身) 長老たちの前におかれているのは、酒樽、タバコ、刀の鍔や刀身です。中央の建物の中にいる通詞(アイヌ語の通訳)が法度や決まりごとを読み上げたあと、それらの品物がふるまわれます。右側には大勢のアイヌの人たちが座り、そのまわりには山積みされた米俵や酒樽がおかれています。儀式のあと、これらの品物がふるまわれ、たのしい酒宴がはじまるのです。まだか! まだか! と待ちわびている人が、中にはいるのかもしれません。
+EN (mine): Curtains with the Aizu hollyhock crest, guns, bows, armour and banners, samurai seated in rows: a staged "military authority", very intimidating. Seven village elders in a line; the eldest in a black haori, others in bright Japanese robes given by the Wajin. Before them sake barrels, tobacco, sword guards and blades. After an interpreter reads out laws and rules, the goods are handed out; many Ainu sit to the right among piled rice bales and sake barrels; a feast follows.
+## 7836 クシュンコタンで行われたオムシャ (Omusha at Kushunkotan, Sakhalin, 1808)
+1806〜07(文化3〜4)年、ロシア船がクシュンコタンやエトロフ島の和人関係者の建物や船、アイヌ民族の家や庫などをおそい、家財道具や武器・防具、古文書などを持ち去ったうえで焼き払う事件が起こりました(フヴォストフ事件、文化露寇などとよばれています)。この事件のあと、江戸幕府は会津藩にサハリン(樺太)、仙台藩にエトロフ島の警備を命じました。1808(文化5)年のオムシャは、会津藩の軍勢約700名がクシュンコタンへ押しかけ、物騒がしい雰囲気のなかで執り行われたものでした。 Caption: 1808(文化5)年にサハリン(樺太)のクシュンコタンで会津藩が行ったオムシャの様子(『文化五年会津藩唐太出陣絵巻』函館市中央図書館所蔵).
+Use: Memory cabin / Over-time slider "Edo trade" era: power imbalance framing. Diorama figures (7837–7842) are good visual reference for Ainu elders' robes and the Wajin camp, but this is a colonial power scene: handle with care, no "fun" interaction.
+## 7849 Trade panels (PC 135): 商場知行制のはじまり — 江戸時代の大名は、領地での米の生産高をもとに石高を示し、それが藩の経済の土台となります。しかし、松前藩は米がとれなかったので、石高がゼロの大名(無高の大名)でした。松前藩の経済は、本州の和人やアイヌ民族と交易を行うことによって得る利益や、和人商人から徴収する税金により成り立っていました。家臣に対しては、本州の藩のように土地や給料を与えるのではなく、蝦夷地のある特定の場所(商場)を指定し、そこでアイヌ民族と交易を行う権利を与えました。これを商場知行制とよびます。 / map: 1669(寛文9)年の商場の分布(推定も入る) / アイヌ民族と商場交易 — 1630年代ごろ、アイヌ民族の住む地が蝦夷地とよばれ、蝦夷地の各地に商場がおかれるようになると、松前藩の家臣たちがアイヌ民族の住む地(商場)に入りこんできて、交易を行うようになります。アイヌ民族が松前城下へ赴き、良い商売相手を自由にさがして交易を行う機会は失われ、蝦夷地へやってきた限られた人びとしか交易できなくなりました。交易品の交換比率なども和人主導のもとに決められるようになり、アイヌ民族は不利な立場に追いこまれていきました。
+EN (mine): Matsumae domain grew no rice (0 koku); it lived on trade profit and merchant taxes, and paid retainers with the right to trade with Ainu at fixed places (akinaiba). From the 1630s Ainu lost the chance to trade freely at Matsumae; only a few could trade with them; exchange rates were set by Wajin, putting Ainu at a disadvantage.
+## 7844–7848, 7851 Trade goods display: piles of dried salmon (sakes) and dried fish bundles, rice bales/straw-wrapped bundles (7846) on blue plinths — trade goods of the Ezo trade. 7850/7852: stuffed red-crowned crane and Steller's sea eagle (feathers were trade goods), with an Ainu-patterned mat/sail behind; 7853 trade ship model with a red-diamond-pattern woven sail ("和人への交易品" banner); 7843 lamellar armour (wood/bone plates) with bow and gun — northern-peoples trade/armour [label not photographed; region ?].
