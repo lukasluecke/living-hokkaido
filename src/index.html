@@ -121,7 +121,7 @@
   .figure3d model-viewer { width: 100%; height: 300px; border-radius: 12px;
     background: radial-gradient(circle at 50% 40%, #2a2f37, #14171c 70%); --poster-color: transparent; }
   @media (max-width: 720px) { .figure3d model-viewer { height: 34dvh; } }
-  .figure3d .ar { position: absolute; }
+  .figure3d .print { justify-self: start; height: 32px; font-size: 12px; }
   .figure3d .note { font-size: 11px; color: var(--muted); }
 
   /* Edit mode */
@@ -202,6 +202,7 @@
         touch-action="pan-y" interaction-prompt="none" shadow-intensity="0.7" exposure="1.05" alt="">
       </model-viewer>
       <div class="note" id="sModelLabel"></div>
+      <button class="print" id="sStl" title="Shape only (STL has no colour). Team use only: not for sharing.">Download for 3D printing (STL)</button>
     </div>
     <div class="crumb" id="sCrumb"></div>
     <div class="chips fig-only" id="sChips"></div>
@@ -455,6 +456,7 @@ function openSheet(id) {
     mv.setAttribute("alt", `3D model of the ${c.name.en}${c.appearance ? ": " + c.appearance : ""}`);
     mv.cameraOrbit = "0deg 80deg auto";
     $("sModelLabel").textContent = c.model.label || "";
+    $("sStl").dataset.src = c.model.src; $("sStl").dataset.name = id;
   } else {
     mv.removeAttribute("src");
   }
@@ -536,6 +538,35 @@ $("file").addEventListener("change", async (e) => {
   loadSplat({ fileBytes: new Uint8Array(await f.arrayBuffer()), fileName: f.name }, f.name);
 });
 $("flip").addEventListener("click", () => { flipped = !flipped; applyFlip(); frameScene(); });
+// 3D-print download: unpack the Meshopt web model in the browser and save it as binary STL,
+// scaled to 100 mm tall (generated models have no real-world scale). Shape only; STL has no colour.
+const PRINT_HEIGHT_MM = 100;
+$("sStl").addEventListener("click", async (event) => {
+  const btn = event.currentTarget, label = btn.textContent;
+  btn.disabled = true; btn.textContent = "Preparing STL…";
+  try {
+    const [{ GLTFLoader }, { STLExporter }, { MeshoptDecoder }] = await Promise.all([
+      import("three/addons/loaders/GLTFLoader.js"),
+      import("three/addons/exporters/STLExporter.js"),
+      import("three/addons/libs/meshopt_decoder.module.js"),
+    ]);
+    const gltf = await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync(btn.dataset.src);
+    gltf.scene.updateMatrixWorld(true);
+    const size = new THREE.Box3().setFromObject(gltf.scene).getSize(new THREE.Vector3());
+    gltf.scene.scale.multiplyScalar(PRINT_HEIGHT_MM / (size.y || 1));
+    gltf.scene.updateMatrixWorld(true);
+    const stl = new STLExporter().parse(gltf.scene, { binary: true });
+    const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(new Blob([stl], { type: "model/stl" })), download: `${btn.dataset.name}.stl` });
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+    toast(`STL saved: ${PRINT_HEIGHT_MM} mm tall. Scale it in your slicer.`);
+  } catch (err) {
+    console.error(err); toast(`Couldn't make the STL: ${err.message}`);
+  } finally {
+    btn.disabled = false; btn.textContent = label;
+  }
+});
+
 // ?dots=0 or the eye button: hide the dots, keep the figures tappable. Remembered per browser.
 let dotsOn = params.get("dots") !== "0";
 try { if (!params.has("dots") && localStorage.getItem("omusha.dots") === "0") dotsOn = false; } catch { /* storage blocked */ }
