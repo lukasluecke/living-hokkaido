@@ -73,16 +73,16 @@ in the file go to the app as usual.
 npm run demo:video -- --list
 ```
 
-| Shot        | What it shows                                           |
-| ----------- | ------------------------------------------------------- |
-| `island`    | Island, slow orbit, pick the lake house, owl flight     |
-| `scene`     | Roof-lift entry into the lake house                     |
-| `artifact`  | Inner bark fibers: turn it, hotspots, "How do we know?" |
-| `ask`       | Ask the owl a question; answer with cited claims        |
-| `build`     | Herring coast: Build the herring yard (two steps)       |
-| `games`     | Erina's games: Out of Place panel, then the Slope       |
-| `seasons`   | Season timelapse on the island                          |
-| `journal`   | Heritage Journal with the earned stamps                 |
+| Shot       | What it shows                                           |
+| ---------- | ------------------------------------------------------- |
+| `island`   | Island, slow orbit, pick the lake house, owl flight     |
+| `scene`    | Roof-lift entry into the lake house                     |
+| `artifact` | Inner bark fibers: turn it, hotspots, "How do we know?" |
+| `ask`      | Ask the owl a question; answer with cited claims        |
+| `build`    | Herring coast: Build the herring yard (two steps)       |
+| `games`    | Erina's games: Out of Place panel, then the Slope       |
+| `seasons`  | Season timelapse on the island                          |
+| `journal`  | Heritage Journal with the earned stamps                 |
 
 The order follows [docs/DEMO-SCRIPT.md](../../docs/DEMO-SCRIPT.md).
 
@@ -134,14 +134,14 @@ it, `waitForEvent` waits `fallbackMs` and `emit` steps fail. See
 
 ## Files
 
-| File         | Role                                                         |
-| ------------ | ------------------------------------------------------------ |
-| `steps.ts`   | The shot list (edit this)                                    |
-| `dsl.ts`     | Step types and builders, no Playwright import                |
-| `record.ts`  | CLI: app server, browser, step runner, ffmpeg                |
-| `overlay.ts` | In-page cursor, click ripple, captions, countdown, event log |
-| `vclock.ts`  | Virtual page clock for `--capture frames`                    |
-| `ask-live.json` | One recorded live Ask reply for `--ask-fixture`           |
+| File            | Role                                                         |
+| --------------- | ------------------------------------------------------------ |
+| `steps.ts`      | The shot list (edit this)                                    |
+| `dsl.ts`        | Step types and builders, no Playwright import                |
+| `record.ts`     | CLI: app server, browser, step runner, ffmpeg                |
+| `overlay.ts`    | In-page cursor, click ripple, captions, countdown, event log |
+| `vclock.ts`     | Virtual page clock for `--capture frames`                    |
+| `ask-live.json` | One recorded live Ask reply for `--ask-fixture`              |
 
 ## Limits
 
