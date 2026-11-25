@@ -173,6 +173,7 @@ export function Shell({ pack }: { pack: ContentPack }) {
     journal: Journal,
     reveal: Reveal,
     "over-time": OverTime,
+    ask: Ask,
   } = parts;
   // "Over time" is offered inside a location that has a timeline.
   const localTimeline =
@@ -234,6 +235,14 @@ export function Shell({ pack }: { pack: ContentPack }) {
           {guideLine}
         </p>
       )}
+      <Ask
+        {...ctx}
+        view={state.view}
+        locationId={state.locationId}
+        sceneId={state.sceneId}
+        artifactId={state.artifactId}
+        covered={state.overlay !== null}
+      />
       {toast && <output className={s.toast}>New stamp: {toast}</output>}
       <aside className={s.side}>
         {artifact && state.view === "focus" && (

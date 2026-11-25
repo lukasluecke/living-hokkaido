@@ -2,6 +2,7 @@
 // the implementation inside src/parts/<part>/ and keep the export name.
 // Only change this file to swap a whole part (for example a lazy 3D version).
 import { ActivityPart } from "@/parts/activities";
+import { AskPart } from "@/parts/ask";
 import { ArtifactViewer } from "@/parts/artifacts";
 import { DetailScenePart } from "@/parts/detail-scene";
 import { IslandPart } from "@/parts/island";
@@ -17,4 +18,5 @@ export const parts = {
   journal: JournalPart,
   reveal: RevealPart,
   "over-time": TimelinePart,
+  ask: AskPart,
 } as const;

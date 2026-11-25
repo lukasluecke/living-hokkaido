@@ -73,6 +73,17 @@ export type TimelinePartProps = PartContext & {
   initialEra?: number;
 };
 
+/** "Ask the owl" box. Emits location.select, artifact.focus, timeline.open
+ *  and reveal.open; never answers without a cited claim. */
+export type AskPartProps = PartContext & {
+  view: ExperienceState["view"];
+  locationId: string | null;
+  sceneId: string | null;
+  artifactId: string | null;
+  /** True while an overlay (journal, reveal, timeline) covers the stage. */
+  covered: boolean;
+};
+
 export type PartPropsMap = {
   island: IslandPartProps;
   "detail-scene": DetailScenePartProps;
