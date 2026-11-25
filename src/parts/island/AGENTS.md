@@ -44,3 +44,4 @@ keyboard path works with WebGL off.
 * 2026-11-25: 3D island ported from labs/island into `World.tsx` + `world/`. Owl flight is the travel step; `owl.arrived` hands off to the detail scene (no roof lift on the island).
 * 2026-11-25: spirit-like snow owl (`world/Owl.tsx`), trail off with reduced motion. See docs/STYLE.md § owl look.
 * 2026-11-25: toon pass via `src/parts/shared/toon.ts` (two-tone light, cool shade, two-colour fog) with season tokens `shade`, `fogNear`, `ink`.
+* 2026-11-25: `building: "house"` is drawn as a chise (`Chise` in `world/Places.tsx`), after Lukas's Hokkaido Museum photos (visual reference only): low reed walls on posts, steep thatched hip roof in bands with a ridge bundle, small entry porch at the west end. About 20 extra meshes.

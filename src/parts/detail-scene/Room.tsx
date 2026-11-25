@@ -247,7 +247,7 @@ function Setting({
       {kind === "cabin" ? (
         <>
           <MergeStatic>
-            <CabinStatic />
+            <CabinStatic lift={lift} />
           </MergeStatic>
           <group scale={CABIN_SCALE}>
             <Roof lift={lift} />
@@ -258,7 +258,7 @@ function Setting({
       ) : (
         <>
           <MergeStatic>
-            <HouseStatic />
+            <HouseStatic lift={lift} />
           </MergeStatic>
           <Roof lift={lift} />
           <Hearth shadows={false} />

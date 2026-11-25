@@ -112,108 +112,216 @@ export function Poles({
 const std = (color: string, roughness = 0.9, metalness = 0) =>
   new THREE.MeshStandardMaterial({ color, roughness, metalness });
 
-export function Walls() {
-  const wall = useMemo(
-    () =>
+type Side = "n" | "s" | "e" | "w";
+const SIDES: Side[] = ["n", "s", "e", "w"];
+/** Outward normal and centre (room space) of each wall side. */
+const SIDE_GEO: Record<Side, { n: V3; c: V3 }> = {
+  n: { n: [0, 0, -1], c: [0, ROOM.h / 2, -HD] },
+  s: { n: [0, 0, 1], c: [0, ROOM.h / 2, HD] },
+  e: { n: [1, 0, 0], c: [HW, ROOM.h / 2, 0] },
+  w: { n: [-1, 0, 0], c: [-HW, ROOM.h / 2, 0] },
+};
+/** Opacity of a wall that faces the camera in the explore views. */
+const FADED = 0.14;
+
+type WallMats = {
+  reed: THREE.Material;
+  reedLong: THREE.Material;
+  pole: THREE.Material;
+  rope: THREE.Material;
+};
+function wallMats(): WallMats {
+  const t = (m: THREE.MeshStandardMaterial) => {
+    m.transparent = true;
+    return m;
+  };
+  return {
+    reedLong: t(
       new THREE.MeshStandardMaterial({
         map: reedTexture([6, 1.4]),
         roughness: 0.95,
       }),
-    [],
-  );
-  const wallShort = useMemo(
-    () =>
+    ),
+    reed: t(
       new THREE.MeshStandardMaterial({
         map: reedTexture([2, 1.4]),
         roughness: 0.95,
       }),
-    [],
-  );
-  const pole = useMemo(() => std("#b99466", 0.8), []);
-  const rope = useMemo(() => std("#6e5434", 1), []);
+    ),
+    pole: t(std("#b99466", 0.8)),
+    rope: t(std("#6e5434", 1)),
+  };
+}
+
+/** Wall pieces by side. Corner posts belong to a pair of sides and fade
+ * only when both sides fade. */
+function wallParts() {
   const t = 0.18;
   const h = ROOM.h;
   // East wall has a plain side window between z -0.6..0.6, y 0.9..1.6.
   const win = { z0: -0.6, z1: 0.6, y0: 0.9, y1: 1.6 };
   const southL = DOOR.x0 + HW;
   const southR = HW - DOOR.x1;
-  const walls: Box[] = [
-    { p: [0, h / 2, -HD], s: [ROOM.w, h, t] }, // north
-    { p: [-HW + southL / 2, h / 2, HD], s: [southL, h, t] }, // south, west of door
-    { p: [HW - southR / 2, h / 2, HD], s: [southR, h, t] }, // south, east of door
+  type Part = { walls: Box[]; long: Box[]; poles: Pole[]; ties: Box[] };
+  const part = (): Part => ({ walls: [], long: [], poles: [], ties: [] });
+  const by: Record<string, Part> = {};
+  const at = (k: string) => {
+    by[k] ??= part();
+    return by[k];
+  };
+  at("n").long.push({ p: [0, h / 2, -HD], s: [ROOM.w, h, t] });
+  at("s").walls.push(
+    { p: [-HW + southL / 2, h / 2, HD], s: [southL, h, t] },
+    { p: [HW - southR / 2, h / 2, HD], s: [southR, h, t] },
     {
       p: [(DOOR.x0 + DOOR.x1) / 2, (h + DOOR.h) / 2, HD],
       s: [DOOR.x1 - DOOR.x0, h - DOOR.h, t],
-    }, // above door
-    { p: [-HW, h / 2, 0], s: [t, h, ROOM.d] }, // west
-    // east, around window
+    },
+  );
+  at("w").walls.push({ p: [-HW, h / 2, 0], s: [t, h, ROOM.d] });
+  at("e").walls.push(
     { p: [HW, h / 2, (-HD + win.z0) / 2], s: [t, h, win.z0 + HD] },
     { p: [HW, h / 2, (HD + win.z1) / 2], s: [t, h, HD - win.z1] },
     { p: [HW, win.y0 / 2, 0], s: [t, win.y0, win.z1 - win.z0] },
     { p: [HW, (h + win.y1) / 2, 0], s: [t, h - win.y1, win.z1 - win.z0] },
-  ];
-  const { poles, ties } = useMemo(() => {
-    const poles: Pole[] = [];
-    const ties: Box[] = [];
-    const i = 0.12; // inside offset from the wall centre line
-    // Round posts at corners and along the walls.
-    const postsX = [-HW, -HW / 2, 0, HW / 2, HW];
-    for (const x of postsX)
-      for (const z of [-HD, HD])
-        poles.push({ a: [x, 0, z], b: [x, h + 0.05, z], r: 0.1 });
-    for (const z of [-HD / 2, HD / 2])
-      for (const x of [-HW, HW])
-        poles.push({ a: [x, 0, z], b: [x, h + 0.05, z], r: 0.1 });
-    // Door posts.
-    for (const x of [DOOR.x0, DOOR.x1])
-      poles.push({ a: [x, 0, HD - i], b: [x, DOOR.h, HD - i], r: 0.06 });
-    // Horizontal poles tied across the reed walls, inside.
-    for (const y of [0.55, 1.15, 1.75]) {
-      poles.push({ a: [-HW, y, -HD + i], b: [HW, y, -HD + i], r: 0.035 });
-      poles.push({ a: [-HW, y, HD - i], b: [DOOR.x0, y, HD - i], r: 0.035 });
-      if (y > DOOR.h)
-        poles.push({ a: [DOOR.x0, y, HD - i], b: [HW, y, HD - i], r: 0.035 });
-      else
-        poles.push({ a: [DOOR.x1, y, HD - i], b: [HW, y, HD - i], r: 0.035 });
-      poles.push({ a: [-HW + i, y, -HD], b: [-HW + i, y, HD], r: 0.035 });
-      if (y < win.y0 || y > win.y1)
-        poles.push({ a: [HW - i, y, -HD], b: [HW - i, y, HD], r: 0.035 });
-      else {
-        poles.push({ a: [HW - i, y, -HD], b: [HW - i, y, win.z0], r: 0.035 });
-        poles.push({ a: [HW - i, y, win.z1], b: [HW - i, y, HD], r: 0.035 });
-      }
-      // Rope ties where the poles cross the posts.
-      for (const x of postsX)
-        for (const z of [-HD + i, HD - i])
-          ties.push({ p: [x, y, z], s: [0.24, 0.07, 0.09] });
-      for (const z of [-HD / 2, HD / 2])
-        for (const x of [-HW + i, HW - i])
-          ties.push({ p: [x, y, z], s: [0.09, 0.07, 0.24] });
+  );
+  const i = 0.12; // inside offset from the wall centre line
+  const post = (x: number, z: number) => ({
+    a: [x, 0, z] as V3,
+    b: [x, h + 0.05, z] as V3,
+    r: 0.1,
+  });
+  // Corner posts.
+  at("ne").poles.push(post(HW, -HD));
+  at("nw").poles.push(post(-HW, -HD));
+  at("se").poles.push(post(HW, HD));
+  at("sw").poles.push(post(-HW, HD));
+  for (const x of [-HW / 2, 0, HW / 2]) {
+    at("n").poles.push(post(x, -HD));
+    at("s").poles.push(post(x, HD));
+  }
+  for (const z of [-HD / 2, HD / 2]) {
+    at("w").poles.push(post(-HW, z));
+    at("e").poles.push(post(HW, z));
+  }
+  for (const x of [DOOR.x0, DOOR.x1])
+    at("s").poles.push({ a: [x, 0, HD - i], b: [x, DOOR.h, HD - i], r: 0.06 });
+  // Horizontal poles tied across the reed walls, inside, with rope ties
+  // where they cross the posts.
+  const postsX = [-HW, -HW / 2, 0, HW / 2, HW];
+  for (const y of [0.55, 1.15, 1.75]) {
+    at("n").poles.push({ a: [-HW, y, -HD + i], b: [HW, y, -HD + i], r: 0.035 });
+    at("s").poles.push({
+      a: [-HW, y, HD - i],
+      b: [DOOR.x0, y, HD - i],
+      r: 0.035,
+    });
+    at("s").poles.push({
+      a: [y > DOOR.h ? DOOR.x0 : DOOR.x1, y, HD - i],
+      b: [HW, y, HD - i],
+      r: 0.035,
+    });
+    at("w").poles.push({ a: [-HW + i, y, -HD], b: [-HW + i, y, HD], r: 0.035 });
+    if (y < win.y0 || y > win.y1)
+      at("e").poles.push({ a: [HW - i, y, -HD], b: [HW - i, y, HD], r: 0.035 });
+    else
+      at("e").poles.push(
+        { a: [HW - i, y, -HD], b: [HW - i, y, win.z0], r: 0.035 },
+        { a: [HW - i, y, win.z1], b: [HW - i, y, HD], r: 0.035 },
+      );
+    for (const x of postsX) {
+      at("n").ties.push({ p: [x, y, -HD + i], s: [0.24, 0.07, 0.09] });
+      at("s").ties.push({ p: [x, y, HD - i], s: [0.24, 0.07, 0.09] });
     }
-    // Wall plates on top of the walls.
-    poles.push({ a: [-HW - 0.15, h, -HD], b: [HW + 0.15, h, -HD], r: 0.09 });
-    poles.push({ a: [-HW - 0.15, h, HD], b: [HW + 0.15, h, HD], r: 0.09 });
-    poles.push({ a: [-HW, h, -HD - 0.15], b: [-HW, h, HD + 0.15], r: 0.09 });
-    poles.push({ a: [HW, h, -HD - 0.15], b: [HW, h, HD + 0.15], r: 0.09 });
-    // Window frame.
-    poles.push({
-      a: [HW - 0.1, win.y0, -0.65],
-      b: [HW - 0.1, win.y0, 0.65],
-      r: 0.04,
-    });
-    poles.push({
-      a: [HW - 0.1, win.y1, -0.65],
-      b: [HW - 0.1, win.y1, 0.65],
-      r: 0.04,
-    });
-    return { poles, ties };
-  }, [h]);
+    for (const z of [-HD / 2, HD / 2]) {
+      at("w").ties.push({ p: [-HW + i, y, z], s: [0.09, 0.07, 0.24] });
+      at("e").ties.push({ p: [HW - i, y, z], s: [0.09, 0.07, 0.24] });
+    }
+  }
+  // Wall plates on top of the walls; window frame.
+  at("n").poles.push({
+    a: [-HW - 0.15, h, -HD],
+    b: [HW + 0.15, h, -HD],
+    r: 0.09,
+  });
+  at("s").poles.push({
+    a: [-HW - 0.15, h, HD],
+    b: [HW + 0.15, h, HD],
+    r: 0.09,
+  });
+  at("w").poles.push({
+    a: [-HW, h, -HD - 0.15],
+    b: [-HW, h, HD + 0.15],
+    r: 0.09,
+  });
+  at("e").poles.push(
+    { a: [HW, h, -HD - 0.15], b: [HW, h, HD + 0.15], r: 0.09 },
+    { a: [HW - 0.1, win.y0, -0.65], b: [HW - 0.1, win.y0, 0.65], r: 0.04 },
+    { a: [HW - 0.1, win.y1, -0.65], b: [HW - 0.1, win.y1, 0.65], r: 0.04 },
+  );
+  return by;
+}
+
+/**
+ * Reed walls on a pole frame. With `lift`, it is an explorable dollhouse:
+ * once the roof is up, the walls whose outside faces the camera fade, and
+ * they come back when the camera moves (all walls are solid when the
+ * camera is inside the room, as in the focus views).
+ */
+export function Walls({ lift }: { lift?: { current: number } }) {
+  const parts = useMemo(wallParts, []);
+  const mats = useMemo(
+    () => Object.fromEntries(Object.keys(parts).map((k) => [k, wallMats()])),
+    [parts],
+  );
+  const ref = useRef<THREE.Group>(null);
+  const fade = useRef<Record<Side, number>>({ n: 0, s: 0, e: 0, w: 0 });
+  const tmp = useMemo(
+    () => ({
+      c: new THREE.Vector3(),
+      n: new THREE.Vector3(),
+      q: new THREE.Quaternion(),
+    }),
+    [],
+  );
+  useFrame(({ camera }, dt) => {
+    const g = ref.current;
+    if (!g || !lift) return;
+    const open = lift.current > 0.6;
+    g.getWorldQuaternion(tmp.q);
+    for (const side of SIDES) {
+      const { c, n } = SIDE_GEO[side];
+      tmp.c.set(...c);
+      g.localToWorld(tmp.c);
+      tmp.n.set(...n).applyQuaternion(tmp.q);
+      const facing = tmp.c.sub(camera.position).dot(tmp.n) < 0;
+      fade.current[side] = THREE.MathUtils.damp(
+        fade.current[side],
+        open && facing ? 1 : 0,
+        6,
+        dt,
+      );
+    }
+    for (const [k, m] of Object.entries(mats)) {
+      // A corner fades only when both of its sides fade.
+      const f = Math.min(...[...k].map((s) => fade.current[s as Side]));
+      const op = 1 - (1 - FADED) * f;
+      for (const mat of Object.values(m)) {
+        mat.opacity = op;
+        mat.depthWrite = op > 0.95;
+      }
+    }
+  });
   return (
-    <group name="walls">
-      <Boxes items={walls.slice(0, 1)} material={wall} />
-      <Boxes items={walls.slice(1)} material={wallShort} />
-      <Poles items={poles} material={pole} />
-      <Boxes items={ties} material={rope} />
+    <group name="walls" ref={ref}>
+      {Object.entries(parts).map(([k, p]) => (
+        <group key={k} name={`wall-${k}`}>
+          <Boxes items={p.long} material={mats[k].reedLong} />
+          <Boxes items={p.walls} material={mats[k].reed} />
+          <Poles items={p.poles} material={mats[k].pole} />
+          <Boxes items={p.ties} material={mats[k].rope} />
+        </group>
+      ))}
     </group>
   );
 }
@@ -892,11 +1000,17 @@ export function Outside() {
 }
 
 /** Static shell of the room. Splat mode samples these meshes. */
-export function HouseStatic({ outside = true }: { outside?: boolean }) {
+export function HouseStatic({
+  outside = true,
+  lift,
+}: {
+  outside?: boolean;
+  lift?: { current: number };
+}) {
   return (
     <group name="house">
       <Floor />
-      <Walls />
+      <Walls lift={lift} />
       <Furniture />
       {outside && <Outside />}
     </group>
