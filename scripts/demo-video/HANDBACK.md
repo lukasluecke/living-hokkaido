@@ -47,7 +47,7 @@ Optional extra: `data-view={state.view}` and `data-overlay` on the shell
 
 The recorder finds controls by role and accessible name (from the content
 pack), for example the button named after the open location, `How do we
-know?`, `Turn back`, `Try the activity`, `Close`, `Journal (…)`, the region
+know?`, `Turn back`, `Weave: …` (activity buttons show their kind and title), `Close`, `Journal (…)`, the region
 named after the scene title and `Heritage Journal`. If a 3D part replaces
 these, keep accessible names (the a11y rule asks for that anyway) or tell
 whoever edits `steps.ts`. Key fallbacks already in the steps: `1`–`3` for

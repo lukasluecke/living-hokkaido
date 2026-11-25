@@ -26,7 +26,8 @@ const VERB: Record<string, string> = {
   story: "Listen",
   words: "Learn",
   trace: "Trace",
-  weave: "Make",
+  weave: "Weave",
+  sequence: "Put in order",
 };
 
 export function DetailScenePart(props: DetailScenePartProps) {
