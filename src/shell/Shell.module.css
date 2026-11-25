@@ -1,0 +1,35 @@
+.shell {
+  min-height: 100vh;
+  background: #1f2d46;
+  color: #fbf4e6;
+  padding: 16px;
+  display: grid;
+  gap: 16px;
+  align-content: start;
+  font-family: system-ui, sans-serif;
+}
+.hud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.hud button {
+  font: inherit;
+  border-radius: 999px;
+  border: 1px solid #e8c27a;
+  background: transparent;
+  color: inherit;
+  padding: 4px 12px;
+  cursor: pointer;
+}
+.guide {
+  font-style: italic;
+}
+.toast {
+  background: #e8c27a;
+  color: #2b2118;
+  border-radius: 8px;
+  padding: 6px 12px;
+  justify-self: start;
+}
