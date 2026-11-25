@@ -25,6 +25,7 @@ function frame(g: THREE.Object3D) {
   g.position.sub(centre);
   wrap.add(g);
   wrap.userData.radius = Math.max(size.x, size.y, size.z) / 2;
+  wrap.userData.halfHeight = size.y / 2;
   return wrap;
 }
 
@@ -76,7 +77,12 @@ function Model({
     }),
     [],
   );
-  const scale = (0.9 / (obj.userData.radius || 1)) * 1;
+  // Fit the longest side, but keep tall objects (a stake, a post) inside the
+  // short height of the card viewer (about 0.8 units visible above centre).
+  const scale = Math.min(
+    0.9 / (obj.userData.radius || 1),
+    0.68 / (obj.userData.halfHeight || 1),
+  );
   useFrame(({ camera, size }, dt) => {
     const t = turn.current;
     if (t)

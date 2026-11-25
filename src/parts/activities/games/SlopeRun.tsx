@@ -7,6 +7,7 @@
 // own HTML card.
 import { useCallback, useRef, useState } from "react";
 import type { Emit } from "@/contracts";
+import { useT } from "@/i18n";
 import type { KindProps } from "../kinds/shared";
 import g from "./games.module.css";
 import { deferMount, GameStage, type MountGame } from "./GameStage";
@@ -18,6 +19,7 @@ export function SlopeRunActivity({
   emit,
   found = [],
 }: KindProps<"slope-run">) {
+  const tr = useT();
   const [done, setDone] = useState(false);
   // Read at mount (each Play): the journal's list of exhibits seen before.
   const foundRef = useRef(found);
@@ -78,7 +80,10 @@ export function SlopeRunActivity({
         a.finds.length > 0 && (
           <div className={g.notebook}>
             <strong>
-              Street notebook: {notebook.length} of {a.finds.length} seen
+              {tr("Street notebook: {n} of {total} seen", {
+                n: notebook.length,
+                total: a.finds.length,
+              })}
             </strong>
             {notebook.length > 0 && (
               <span> · {notebook.map((f) => f.label).join(" · ")}</span>
@@ -88,8 +93,9 @@ export function SlopeRunActivity({
       }
       controls={
         <>
-          ← → or A D lean (tap for a small correction), ↓ or Space brace, Enter
-          starts again. On a phone, drag sideways or use the buttons.
+          {tr(
+            "← → or A D lean (tap for a small correction), ↓ or Space brace, Enter starts again. On a phone, drag sideways or use the buttons.",
+          )}
         </>
       }
     />

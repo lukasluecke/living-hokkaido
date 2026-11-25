@@ -2,6 +2,7 @@
 // Story kind: a retold story in chapters, with synced captions, a narrator,
 // pauses with small navigation choices, and a citation on every fact line.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useT } from "@/i18n";
 import { Owl } from "./Owl";
 import { Cite, complete, deviceVoice, type KindProps } from "./shared";
 import k from "./kinds.module.css";
@@ -18,6 +19,7 @@ export function Story({
   emit,
 }: KindProps<"story">) {
   const [pos, setPos] = useState<Pos>({ ch: 0, line: 0 });
+  const tr = useT();
   const [word, setWord] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [atPause, setAtPause] = useState(false);
@@ -166,13 +168,13 @@ export function Story({
             <p className="credit">{a.narrator.credit}</p>
             <p className="voice-label">
               {voice.kind === "recording"
-                ? "Recorded voice"
+                ? tr("Recorded voice")
                 : voiceOn && canVoiceStory
-                  ? "Device voice"
-                  : "Captions"}
+                  ? tr("Device voice")
+                  : tr("Captions")}
             </p>
           </div>
-          <nav aria-label="Chapters">
+          <nav aria-label={tr("Chapters")}>
             <ol className="chapters">
               {a.chapters.map((c, i) => (
                 <li key={c.id}>
@@ -244,13 +246,15 @@ export function Story({
                   />
                 ))
               ) : (
-                <p className="frame-note">Guide line · no cultural claim</p>
+                <p className="frame-note">
+                  {tr("Guide line · no cultural claim")}
+                </p>
               )}
             </div>
           )}
 
           {atPause && chapter?.pause && (
-            <div className="pause" role="group" aria-label="Pause">
+            <div className="pause" role="group" aria-label={tr("Pause")}>
               <p>{chapter.pause.prompt}</p>
               <div className="row">
                 {chapter.pause.choices.map((c) => (
@@ -294,7 +298,7 @@ export function Story({
                 } else setPlaying((p) => !p);
               }}
             >
-              {done ? "Listen again" : playing ? "Pause" : "Play"}
+              {done ? tr("Listen again") : playing ? tr("Pause") : tr("Play")}
             </button>
             <button
               type="button"
@@ -302,7 +306,7 @@ export function Story({
               disabled={atPause || done}
               onClick={advance}
             >
-              Next line
+              {tr("Next line")}
             </button>
             <label className={`toggle ${canVoiceStory ? "" : "off"}`}>
               <input
@@ -311,7 +315,7 @@ export function Story({
                 disabled={!canVoiceStory}
                 onChange={(e) => setVoiceOn(e.target.checked)}
               />
-              Device voice
+              {tr("Device voice")}
             </label>
             <label className="toggle">
               <input
@@ -319,7 +323,7 @@ export function Story({
                 checked={transcript}
                 onChange={(e) => setTranscript(e.target.checked)}
               />
-              Transcript
+              {tr("Transcript")}
             </label>
           </div>
 

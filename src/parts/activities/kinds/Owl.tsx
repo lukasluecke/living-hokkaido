@@ -1,5 +1,7 @@
 // Original owl sketch (MIT, Living Hokkaido team). A fictional guide, not a
 // spiritual representation. Simple shapes to match the low-poly island owl.
+import { useT } from "@/i18n";
+
 export function Owl({
   speaking,
   size = 120,
@@ -7,6 +9,7 @@ export function Owl({
   speaking: boolean;
   size?: number;
 }) {
+  const tr = useT();
   return (
     <svg
       className={`owl ${speaking ? "owl-speaking" : ""}`}
@@ -14,7 +17,7 @@ export function Owl({
       height={size}
       viewBox="0 0 120 120"
       role="img"
-      aria-label="Owl guide"
+      aria-label={tr("Owl guide")}
     >
       <ellipse cx="60" cy="112" rx="34" ry="5" fill="#000" opacity="0.18" />
       <g className="owl-body">

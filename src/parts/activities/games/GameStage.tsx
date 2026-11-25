@@ -9,6 +9,7 @@ import { type ReactNode, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { CSSProperties } from "react";
 import type { Emit, ResolvedClaim } from "@/contracts";
+import { useT } from "@/i18n";
 import { ui } from "@/design/tokens";
 import { Cite } from "../kinds/shared";
 import p from "../play/play.module.css";
@@ -91,6 +92,7 @@ export function GameStage({
   /** Optional extra panel content under the Play button (progress). */
   notes?: ReactNode;
 }) {
+  const tr = useT();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -158,7 +160,7 @@ export function GameStage({
       <div className={g.labels}>
         {labels.map((l) => (
           <span key={l} className={g.label}>
-            {l}
+            {tr(l)}
           </span>
         ))}
       </div>
@@ -169,13 +171,15 @@ export function GameStage({
           className="btn primary"
           onClick={() => setOpen(true)}
         >
-          {done ? "Play again" : "Play"}
+          {done ? tr("Play again") : tr("Play")}
         </button>
       </div>
       {done && <p className="feedback">{completion}</p>}
       {notes}
       <details className={g.facts}>
-        <summary>What the game is based on ({claimIds.length})</summary>
+        <summary>
+          {tr("What the game is based on ({n})", { n: claimIds.length })}
+        </summary>
         <ul>
           {claimIds.map((id) => {
             const c = claims[id];
@@ -202,11 +206,11 @@ export function GameStage({
               <strong className={g.barTitle}>{title}</strong>
               {labels.map((l) => (
                 <span key={l} className={g.barLabel}>
-                  {l}
+                  {tr(l)}
                 </span>
               ))}
               <button type="button" className={g.closeGame} onClick={close}>
-                Close game <kbd>Esc</kbd>
+                {tr("Close game")} <kbd>Esc</kbd>
               </button>
             </div>
             <div className={g.area}>

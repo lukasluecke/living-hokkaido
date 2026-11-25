@@ -244,6 +244,10 @@
   .trigger {
     bottom: calc(124px + env(safe-area-inset-bottom, 0px));
   }
+  /* The places tray on the island is taller than the room's object tray. */
+  .trigger[data-island] {
+    bottom: calc(170px + env(safe-area-inset-bottom, 0px));
+  }
   .trigger[data-sheet] {
     display: none;
   }
