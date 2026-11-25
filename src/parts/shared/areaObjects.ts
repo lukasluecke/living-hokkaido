@@ -8,7 +8,16 @@
 // here). Artifact space: metres, origin at the base centre, front +Z.
 import * as THREE from "three";
 
-export type AreaPart = "fish" | "coal" | "metal" | "canvas" | "fur" | "float";
+export type AreaPart =
+  | "fish"
+  | "coal"
+  | "metal"
+  | "canvas"
+  | "fur"
+  | "float"
+  | "lacquer"
+  | "lacquer-red"
+  | "vine";
 export type AreaObjectId =
   | "herring"
   | "coal"
@@ -17,7 +26,11 @@ export type AreaObjectId =
   | "net"
   | "saw"
   | "deer"
-  | "shovel";
+  | "shovel"
+  | "tonkori"
+  | "vine-rings"
+  | "canoe"
+  | "lacquer-vessel";
 
 /** Colours for the parts this file adds (the viewer's toon look uses them). */
 export const AREA_PALETTE: Record<AreaPart, string> = {
@@ -27,6 +40,9 @@ export const AREA_PALETTE: Record<AreaPart, string> = {
   canvas: "#efe4c8",
   fur: "#b07a45",
   float: "#d8c49a",
+  lacquer: "#2a1714",
+  "lacquer-red": "#8e2a1e",
+  vine: "#7a6040",
 };
 /** Colours of parts that already exist in the viewer palette. */
 const BASE: Record<string, string> = {
@@ -379,6 +395,194 @@ function shovel() {
   return g;
 }
 
+// ------------------------------------------------ the other places
+// Sketches after objects in Lukas's Hokkaido Museum photos (visual reference
+// only), for knowledge "hokkaido-museum". Shapes are simplified.
+
+/** A tonkori on a low stand: five strings played open (tonkori-strings,
+ * tonkori-open). About 1.1 m long. */
+function tonkori() {
+  const g = new THREE.Group();
+  g.name = "tonkori";
+  // Long, narrow, flat body, lying on two small blocks.
+  for (const x of [-0.35, 0.35])
+    g.add(
+      mesh(
+        new THREE.BoxGeometry(0.06, 0.05, 0.16).translate(x, 0.025, 0),
+        "bark",
+        "stand",
+      ),
+    );
+  const shape = new THREE.Shape();
+  shape.moveTo(-0.55, -0.05);
+  shape.lineTo(0.42, -0.06);
+  shape.quadraticCurveTo(0.5, 0, 0.42, 0.06);
+  shape.lineTo(-0.55, 0.05);
+  shape.closePath();
+  const body = new THREE.ExtrudeGeometry(shape, {
+    depth: 0.045,
+    bevelEnabled: false,
+  })
+    .rotateX(-Math.PI / 2)
+    .translate(0, 0.05, 0);
+  g.add(mesh(body, "wood", "body"));
+  // Head with five pegs (one per string).
+  g.add(
+    mesh(
+      new THREE.BoxGeometry(0.1, 0.05, 0.09).translate(-0.6, 0.075, 0),
+      "wood",
+      "head",
+    ),
+  );
+  for (let i = 0; i < 5; i++) {
+    const z = -0.032 + i * 0.016;
+    g.add(
+      mesh(
+        new THREE.CylinderGeometry(0.006, 0.006, 0.07, 5).translate(
+          -0.62 + (i % 2) * 0.03,
+          0.12,
+          z,
+        ),
+        "bark",
+        "peg",
+      ),
+    );
+    // Strings from the pegs to the tail, open (no frets).
+    g.add(
+      mesh(
+        new THREE.BoxGeometry(1.0, 0.003, 0.003).translate(-0.08, 0.1, z),
+        "thread",
+        `string-${i + 1}`,
+      ),
+    );
+  }
+  g.add(
+    mesh(
+      new THREE.BoxGeometry(0.02, 0.012, 0.09).translate(0.4, 0.1, 0),
+      "bark",
+      "tail",
+    ),
+  );
+  return g;
+}
+
+/** Rings of wild grape vine on the ground and a stick to pick them up
+ * (ring-game). About 0.8 m across. */
+function vineRings() {
+  const g = new THREE.Group();
+  g.name = "vine-rings";
+  const spots: [number, number, number][] = [
+    [-0.2, 0.1, 0.2],
+    [0.05, -0.15, 1.1],
+    [0.25, 0.12, 2.3],
+    [-0.05, 0.25, 0.6],
+    [0.3, -0.2, 1.7],
+  ];
+  spots.forEach(([x, z, r], i) => {
+    const ring = new THREE.TorusGeometry(0.075, 0.012, 5, 14)
+      .rotateX(Math.PI / 2)
+      .rotateY(r)
+      .translate(x, 0.012, z);
+    g.add(mesh(ring, "vine", i === 0 ? "ring" : `ring-${i}`));
+  });
+  const stick = new THREE.CylinderGeometry(0.012, 0.016, 0.8, 6)
+    .rotateZ(Math.PI / 2 - 0.08)
+    .rotateY(0.4)
+    .translate(-0.05, 0.03, -0.05);
+  g.add(mesh(stick, "wood", "stick"));
+  return g;
+}
+
+/** A dugout canoe with its steering pole (canoe-pole, canoe-kamuy).
+ * About 2.6 m long; the pole about 3.4 m. */
+function canoe() {
+  const g = new THREE.Group();
+  g.name = "canoe";
+  // Hull: a log shape, hollowed (a dark inner box), with pointed ends.
+  const hull = new THREE.CylinderGeometry(0.28, 0.28, 2.1, 10, 1)
+    .rotateZ(Math.PI / 2)
+    .scale(1, 0.7, 1)
+    .translate(0, 0.2, 0);
+  g.add(mesh(hull, "wood", "hull"));
+  for (const s of [-1, 1]) {
+    const end = new THREE.ConeGeometry(0.28, 0.32, 10)
+      .rotateZ((-s * Math.PI) / 2)
+      .scale(1, 0.7, 1)
+      .translate(s * 1.21, 0.2, 0);
+    g.add(mesh(end, "wood", "end"));
+  }
+  g.add(
+    mesh(
+      new THREE.BoxGeometry(1.9, 0.02, 0.36).translate(0, 0.39, 0),
+      "bark",
+      "inside",
+    ),
+  );
+  // The pole, laid along the side.
+  g.add(
+    mesh(
+      new THREE.CylinderGeometry(0.02, 0.025, 3.4, 6)
+        .rotateZ(Math.PI / 2)
+        .translate(0.1, 0.03, 0.45),
+      "wood",
+      "pole",
+    ),
+  );
+  return g;
+}
+
+/** A lidded lacquer vessel on short feet, a treasure passed down
+ * (tools-mixed). About 0.4 m wide. */
+function lacquerVessel() {
+  const g = new THREE.Group();
+  g.name = "lacquer-vessel";
+  g.add(
+    mesh(
+      new THREE.CylinderGeometry(0.19, 0.17, 0.24, 20).translate(0, 0.17, 0),
+      "lacquer",
+      "body",
+    ),
+  );
+  g.add(
+    mesh(
+      new THREE.CylinderGeometry(0.2, 0.2, 0.04, 20).translate(0, 0.31, 0),
+      "lacquer",
+      "lid",
+    ),
+  );
+  g.add(
+    mesh(
+      new THREE.TorusGeometry(0.19, 0.008, 4, 24)
+        .rotateX(Math.PI / 2)
+        .translate(0, 0.25, 0),
+      "lacquer-red",
+      "band",
+    ),
+  );
+  g.add(
+    mesh(
+      new THREE.CylinderGeometry(0.04, 0.05, 0.03, 10).translate(0, 0.345, 0),
+      "lacquer-red",
+      "knob",
+    ),
+  );
+  for (let i = 0; i < 4; i++) {
+    const a = (i / 4) * Math.PI * 2 + Math.PI / 4;
+    g.add(
+      mesh(
+        new THREE.BoxGeometry(0.05, 0.06, 0.05).translate(
+          Math.cos(a) * 0.13,
+          0.03,
+          Math.sin(a) * 0.13,
+        ),
+        "lacquer",
+        "foot",
+      ),
+    );
+  }
+  return g;
+}
+
 export const areaObjects: Record<AreaObjectId, () => THREE.Group> = {
   herring,
   coal,
@@ -388,4 +592,8 @@ export const areaObjects: Record<AreaObjectId, () => THREE.Group> = {
   saw,
   deer,
   shovel,
+  tonkori,
+  "vine-rings": vineRings,
+  canoe,
+  "lacquer-vessel": lacquerVessel,
 };

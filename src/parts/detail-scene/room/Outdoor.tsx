@@ -309,6 +309,73 @@ export function GroveStatic({ season }: { season: SeasonState }) {
       <Log p={[1.9, 0, 0.6]} r={-0.9} m={m} />
       <Stump p={[-1.4, 0, -1.3]} m={m} />
       <Stones m={m} seed={5} n={9} r0={3} />
+      {/* A fish owl on a branch of the old tree, watching (owl-kamuy). */}
+      <mesh
+        position={[1.2, 1.0, -2.55]}
+        rotation={[0.3, 0, Math.PI / 2 + 0.1]}
+        material={m.trunk}
+      >
+        <cylinderGeometry args={[0.06, 0.1, 1.5, 6]} />
+      </mesh>
+      <Owl p={[1.6, 1.02, -2.45]} />
+    </group>
+  );
+}
+
+/** A toy fish owl (owl-kamuy): body, head, ear tufts, yellow eyes. */
+function Owl({ p }: { p: V3 }) {
+  const mats = useMemo(
+    () => ({
+      body: std("#7d6a55", { flatShading: true }),
+      face: std("#a8957a", { flatShading: true }),
+      eye: std("#f2c230", { emissive: "#6b4a00", emissiveIntensity: 0.4 }),
+    }),
+    [],
+  );
+  return (
+    <group position={p} rotation={[0, 0.5, 0]}>
+      <mesh position={[0, 0.2, 0]} scale={[1, 1.35, 0.9]} material={mats.body}>
+        <icosahedronGeometry args={[0.17, 0]} />
+      </mesh>
+      <mesh position={[0, 0.5, 0.02]} material={mats.face}>
+        <icosahedronGeometry args={[0.13, 0]} />
+      </mesh>
+      {[-1, 1].map((s) => (
+        <group key={s}>
+          <mesh
+            position={[s * 0.08, 0.64, 0]}
+            rotation={[0, 0, -s * 0.4]}
+            material={mats.body}
+          >
+            <coneGeometry args={[0.035, 0.1, 4]} />
+          </mesh>
+          <mesh position={[s * 0.05, 0.52, 0.12]} material={mats.eye}>
+            <sphereGeometry args={[0.025, 8, 6]} />
+          </mesh>
+        </group>
+      ))}
+    </group>
+  );
+}
+
+/** Mortar and pestle by the bench (full-adult: everyday tools such as the
+ * mortar, pestle and winnow). */
+function MortarPestle({ p, m }: { p: V3; m: Mats }) {
+  return (
+    <group position={p}>
+      <mesh position={[0, 0.27, 0]} material={m.trunk}>
+        <cylinderGeometry args={[0.24, 0.2, 0.54, 10]} />
+      </mesh>
+      <mesh position={[0, 0.545, 0]} material={m.cut}>
+        <cylinderGeometry args={[0.17, 0.17, 0.01, 10]} />
+      </mesh>
+      <mesh
+        position={[0.05, 0.85, 0]}
+        rotation={[0, 0, 0.15]}
+        material={m.wood}
+      >
+        <cylinderGeometry args={[0.04, 0.05, 0.9, 6]} />
+      </mesh>
     </group>
   );
 }
@@ -372,6 +439,7 @@ export function ClearingStatic({ season }: { season: SeasonState }) {
       <Log p={[2.4, 0, -1.6]} r={1.3} len={1.2} m={m} />
       <Log p={[2.7, 0.34, -1.5]} r={1.4} len={1.0} m={m} />
       <Stones m={m} seed={8} n={7} r0={3.4} />
+      <MortarPestle p={[-2.9, 0, -0.3]} m={m} />
     </group>
   );
 }
@@ -400,6 +468,57 @@ export function Surroundings({
       </mesh>
       <TreeRing m={m} seed={42} inner={7} count={26} pines={0.8} />
       {children?.(m)}
+    </group>
+  );
+}
+
+/** Around the lake house: a garden of millet rows (crops) and the edge of
+ * the lake behind the house. */
+export function HouseYard({ m, season }: { m: Mats; season: SeasonState }) {
+  const mats = useMemo(
+    () => ({
+      soil: std("#6b5238", { flatShading: true }),
+      millet: std("#7f9a45", { flatShading: true }),
+      head: std("#d8b65a", { flatShading: true }),
+      lake: std("#3f7f98", { roughness: 0.35 }),
+    }),
+    [],
+  );
+  const snowy = useMemo(() => [mats.soil, mats.head], [mats]);
+  useSnow(season, snowy);
+  const plants = useMemo(() => {
+    const out: V3[] = [];
+    for (let row = 0; row < 4; row++)
+      for (let i = 0; i < 7; i++)
+        out.push([-6.1 + i * 0.32, 0, 2.2 + row * 0.42]);
+    return out;
+  }, []);
+  return (
+    <group name="yard">
+      <mesh position={[-5.15, 0.04, 2.83]} material={mats.soil}>
+        <boxGeometry args={[2.6, 0.08, 1.9]} />
+      </mesh>
+      {plants.map((p, i) => (
+        <group key={i} position={p}>
+          <mesh position={[0, 0.35, 0]} material={mats.millet}>
+            <coneGeometry args={[0.07, 0.6, 5]} />
+          </mesh>
+          <mesh position={[0, 0.7, 0]} material={mats.head}>
+            <icosahedronGeometry args={[0.06, 0]} />
+          </mesh>
+        </group>
+      ))}
+      {/* Lake edge, back left, and a stake to tie up at. */}
+      <mesh
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[-6, 0.0, -7]}
+        material={mats.lake}
+      >
+        <circleGeometry args={[6, 28]} />
+      </mesh>
+      <mesh position={[1.9, 0.35, 3.5]} material={m.trunk}>
+        <cylinderGeometry args={[0.05, 0.06, 0.7, 6]} />
+      </mesh>
     </group>
   );
 }

@@ -25,6 +25,7 @@ import {
   CabinStatic,
   ClearingStatic,
   GroveStatic,
+  HouseYard,
   Lantern,
   Surroundings,
 } from "./room/Outdoor";
@@ -264,7 +265,9 @@ function Setting({
         <>
           <MergeStatic>
             <HouseStatic lift={lift} outside={false} />
-            <Surroundings season={season} />
+            <Surroundings season={season}>
+              {(m) => <HouseYard m={m} season={season} />}
+            </Surroundings>
           </MergeStatic>
           <Roof lift={lift} />
           <Hearth shadows={false} />
