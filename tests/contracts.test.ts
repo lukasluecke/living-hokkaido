@@ -423,3 +423,37 @@ test("slope-run finds default their look (older definitions parse)", () => {
   assert.ok(a.kind === "slope-run");
   assert.equal(a.finds[0]?.look, "straw-sacks");
 });
+
+test("place: stage hills and the hill things parse (additive enum values)", () => {
+  const step = (id: string, thing: string, right = true) => ({
+    id,
+    say: "Fact.",
+    claimIds: ["c"],
+    ask: "Where?",
+    figure: { label: "Thing", thing },
+    options: [
+      { x: 0.2, y: 0.2, right },
+      { x: 0.6, y: 0.6 },
+    ],
+  });
+  const r = activitySchema.safeParse({
+    id: "x",
+    knowledgeId: "k",
+    title: "T",
+    claimIds: ["c"],
+    kind: "place",
+    stage: "hills",
+    subject: "objects",
+    completion: "Done.",
+    steps: [
+      "deer",
+      "bear",
+      "hare",
+      "salmon",
+      "set-bow",
+      "pelt",
+      "fish-owl",
+    ].map((t) => step(t, t)),
+  });
+  assert.ok(r.success);
+});
