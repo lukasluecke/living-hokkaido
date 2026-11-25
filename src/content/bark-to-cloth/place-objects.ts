@@ -1,0 +1,268 @@
+// More objects and activities for the lake house, the listening grove, the
+// makers' clearing and the memory cabin. Every fact comes from a claim in
+// "hokkaido-museum" (Lukas's photos of the Q&A cards and hands-on stations,
+// research preview). The objects are toy sketches (claim object-sketch),
+// built in src/parts/shared/areaObjects.ts. Quiz explanations only restate
+// claims; wrong options are plain distractors, not claims.
+import type { ActivityInput, ArtifactInput } from "@/contracts";
+
+const K = "hokkaido-museum";
+
+const sketch = (builder: string) => ({
+  representation: "illustrative" as const,
+  license: "MIT (original)",
+  rights: "approved" as const,
+  consent: "not-required" as const,
+  attribution: "Living Hokkaido team, original sketch geometry",
+  assetId: `${builder}-sketch`,
+  source: { kind: "procedural" as const, builder },
+});
+
+const aboutModel = (position: [number, number, number], node: string) => ({
+  id: "about-model",
+  position,
+  normal: [0, 0.8, 0.6] as [number, number, number],
+  node,
+  title: "About this model",
+  claimId: "object-sketch",
+  kind: "disclaimer" as const,
+});
+
+export const placeArtifacts: ArtifactInput[] = [
+  {
+    id: "tonkori",
+    knowledgeId: K,
+    title: "A tonkori",
+    label: "Five strings, played open",
+    summaryClaimId: "tonkori-strings",
+    claimIds: [
+      "tonkori-strings",
+      "tonkori-open",
+      "tonkori-order",
+      "tonkori-heart",
+      "object-sketch",
+    ],
+    model: { ...sketch("tonkori"), nodes: ["body", "head", "string-3"] },
+    display: {
+      restRotation: [0.5, 0.3, 0],
+      inspectScale: 1.1,
+      pitchLimit: 0.9,
+    },
+    hotspots: [
+      {
+        id: "open",
+        position: [-0.1, 0.1, 0],
+        normal: [0, 1, 0],
+        node: "string-3",
+        title: "Played open",
+        claimId: "tonkori-open",
+        kind: "claim",
+      },
+      {
+        id: "heart",
+        position: [0.15, 0.095, 0.03],
+        normal: [0, 1, 0.2],
+        node: "body",
+        title: "Its heart",
+        claimId: "tonkori-heart",
+        kind: "claim",
+      },
+      aboutModel([0.35, 0.05, 0.08], "stand"),
+    ],
+    activityIds: ["quiz-tonkori-order", "quiz-tonkori-heart", "pluck-tonkori"],
+  },
+  {
+    id: "vine-rings",
+    knowledgeId: K,
+    title: "Rings of vine",
+    label: "A game of rings",
+    summaryClaimId: "ring-game",
+    claimIds: ["ring-game", "games-adults", "object-sketch"],
+    model: { ...sketch("vine-rings"), nodes: ["ring", "stick"] },
+    display: { restRotation: [0.6, 0, 0], inspectScale: 1.4, pitchLimit: 0.9 },
+    hotspots: [
+      {
+        id: "pick",
+        position: [-0.05, 0.04, -0.05],
+        normal: [0, 1, 0],
+        node: "stick",
+        title: "Pick them up and count",
+        claimId: "ring-game",
+        kind: "claim",
+      },
+      {
+        id: "adults",
+        position: [-0.2, 0.03, 0.1],
+        normal: [0, 1, 0],
+        node: "ring",
+        title: "A game for adults too",
+        claimId: "games-adults",
+        kind: "claim",
+      },
+      aboutModel([0.3, 0.02, -0.2], "ring-4"),
+    ],
+    activityIds: ["quiz-ring-game", "quiz-ring-pole", "game-sticks"],
+  },
+  {
+    id: "canoe",
+    knowledgeId: K,
+    title: "A dugout canoe",
+    label: "By the lake",
+    summaryClaimId: "canoe-pole",
+    claimIds: ["canoe-pole", "canoe-kamuy", "object-sketch"],
+    model: { ...sketch("canoe"), nodes: ["hull", "pole", "inside"] },
+    display: {
+      restRotation: [0.35, 0.5, 0],
+      inspectScale: 0.45,
+      pitchLimit: 0.8,
+    },
+    hotspots: [
+      {
+        id: "pole",
+        position: [1.2, 0.04, 0.45],
+        normal: [0, 1, 0.3],
+        node: "pole",
+        title: "Steered with a pole",
+        claimId: "canoe-pole",
+        kind: "claim",
+      },
+      {
+        id: "kamuy",
+        position: [0, 0.4, 0],
+        normal: [0, 1, 0],
+        node: "inside",
+        title: "A safe trip",
+        claimId: "canoe-kamuy",
+        kind: "claim",
+      },
+      aboutModel([-1.3, 0.25, 0], "end"),
+    ],
+    activityIds: ["quiz-canoe", "quiz-canoe-prayer"],
+  },
+  {
+    id: "lacquer-vessel",
+    knowledgeId: K,
+    title: "A lacquer vessel",
+    label: "Passed down",
+    summaryClaimId: "tools-mixed",
+    claimIds: ["tools-mixed", "full-adult", "object-sketch"],
+    model: { ...sketch("lacquer-vessel"), nodes: ["body", "lid", "band"] },
+    display: { restRotation: [0.3, 0.4, 0], inspectScale: 2, pitchLimit: 0.9 },
+    hotspots: [
+      {
+        id: "treasure",
+        position: [0, 0.2, 0.18],
+        normal: [0, 0, 1],
+        node: "body",
+        title: "Treasures from trade",
+        claimId: "tools-mixed",
+        kind: "claim",
+      },
+      aboutModel([0.13, 0.03, 0.13], "foot"),
+    ],
+    activityIds: ["quiz-tools-mixed", "quiz-full-adult"],
+  },
+];
+
+const quiz = (
+  id: string,
+  artifactId: string | undefined,
+  claimIds: string[],
+  title: string,
+  question: string,
+  options: string[],
+  explanation: string,
+): ActivityInput => ({
+  kind: "quiz",
+  id,
+  knowledgeId: K,
+  title,
+  claimIds,
+  ...(artifactId ? { artifactId } : {}),
+  question,
+  options,
+  answer: 0,
+  explanation,
+});
+
+export const placeObjectActivities: ActivityInput[] = [
+  quiz(
+    "quiz-tonkori-order",
+    "tonkori",
+    ["tonkori-order", "tonkori-strings"],
+    "Strings out of order",
+    "Are the tonkori's strings in order of pitch?",
+    [
+      "No. That is one feature of the tonkori",
+      "Yes, from low to high",
+      "Yes, from high to low",
+    ],
+    "The strings are not in order of pitch; that is one feature of the tonkori. The one at the museum's hands-on station has five strings, from the left: thick, fairly thick, thin, fairly thick, thin.",
+  ),
+  quiz(
+    "quiz-tonkori-heart",
+    "tonkori",
+    ["tonkori-heart"],
+    "Inside the tonkori",
+    "The tonkori's body is hollow. What is said about the small ball inside?",
+    [
+      "It is said to be its heart or soul",
+      "It is a weight to keep it still",
+      "There is nothing inside",
+    ],
+    "The body is hollow, and a small ball inside is said to be its heart or soul.",
+  ),
+  quiz(
+    "quiz-owl-kamuy",
+    undefined,
+    ["owl-kamuy"],
+    "The owl of the grove",
+    "What role does Blakiston's fish owl have as a kamuy?",
+    [
+      "It watches over the village",
+      "It brings the rain",
+      "It guards the canoes",
+    ],
+    "Blakiston's fish owl is a kamuy with the role of watching over the village, and it is highly respected in many regions.",
+  ),
+  quiz(
+    "quiz-ring-game",
+    "vine-rings",
+    ["ring-game"],
+    "A game of rings",
+    "In the ring game, what are the rings woven from?",
+    ["Wild grape vine", "Birch bark", "Fish skin"],
+    "In this game, rings woven from wild grape vine lie on the ground, and players pick them up with a stick and count them.",
+  ),
+  quiz(
+    "quiz-ring-pole",
+    "vine-rings",
+    ["games-adults"],
+    "Catch the ring",
+    "In one game for adults, how did the second team catch the ring?",
+    ["On a long pole", "In a net", "With their hands only"],
+    "One record tells of two teams: one threw a ring about 15 cm wide high in the air, and the other caught it on a long pole.",
+  ),
+  quiz(
+    "quiz-canoe-prayer",
+    "canoe",
+    ["canoe-kamuy"],
+    "Before the trip",
+    "What did people do before they boarded a canoe?",
+    ["They prayed to it for a safe trip", "They painted it", "Nothing special"],
+    "A canoe carries people and goods and is an important kamuy; before boarding, people prayed to it for a safe trip.",
+  ),
+  quiz(
+    "quiz-tools-mixed",
+    "lacquer-vessel",
+    ["tools-mixed"],
+    "Made or passed down?",
+    "Were all of a person's tools made by that person?",
+    [
+      "No. They mixed things passed down and things newly made or got",
+      "Yes, every tool was self-made",
+      "No, every tool was bought",
+    ],
+    "Not every tool was self-made: a person's tools mixed things passed down the generations and things newly made or got. Treasures from trade, such as swords and lacquerware, were often passed down.",
+  ),
+];

@@ -125,6 +125,14 @@ export const hokkaidoMuseum: KnowledgeEntry = {
       ["museum-visit-notes", "transcriptions/panels.md, Q024 and 7810 notes"],
     ),
     c(
+      "object-sketch",
+      "The tonkori, the vine rings, the canoe and the lacquer vessel on this island are toy sketches after things seen at the museum. They are not reconstructions of real objects.",
+      [
+        "museum-visit-notes",
+        "src/content/bark-to-cloth/place-objects.ts, header",
+      ],
+    ),
+    c(
       "map-sketch",
       "The map and the plan are sketches made for this demo. Places on them are approximate.",
       ["museum-visit-notes", "README.md, Most useful for the demo"],
