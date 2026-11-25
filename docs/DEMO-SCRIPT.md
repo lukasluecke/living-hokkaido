@@ -90,9 +90,16 @@ code is open source under MIT."
 
 ## If you have more time
 
-- **Sapporo Omusha (Shaw's splat diorama):** add a step here when it is on the
-  live site. Show it, say that it is a Gaussian splat made by Shaw, and say
-  where the capture comes from.
+- **The Omusha diorama (Shaw's Gaussian splat):** island → **Memory cabin** →
+  **Try here** → **The Omusha diorama, up close** → **Look closer**. Enter the
+  demo password when the form asks (the capture of museum material is private
+  and not in Git). Turn the splat, then open the spots: each spot shows its
+  cited panel text. Say: "Shaw captured the Hokkaido Museum's 1808 Omusha
+  diorama as a Gaussian splat. The museum calls the scene very
+  intimidating: a show of military power, so it has no score and no game."
+  Practise this once before the demo; it needs a good GPU.
+- **Japanese:** the **あ** button (top right) shows the whole site in
+  Japanese. The Japanese text is a machine-made draft for review.
 - **Contribute a story:** menu → **Contribute a story**. Shows the
   source → draft → human review → approve flow, and withdraw.
 - **Over time:** ask the owl "How did Ainu houses change?" and open the
