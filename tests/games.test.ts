@@ -10,13 +10,14 @@ import {
   validateContentPack,
 } from "@/contracts";
 import { barkToClothPack, barkToClothRaw } from "@/content/bark-to-cloth";
+import { hiddenGameActivities } from "@/content/bark-to-cloth/games";
 
 const clone = () => structuredClone(barkToClothRaw) as typeof barkToClothRaw;
 
 const prefs = { reducedMotion: false, webgl: true };
 const noop = () => {};
 
-test("both games are activities on the herring coast and survey forest", () => {
+test("both games are activities on the herring coast", () => {
   const kinds = barkToClothPack.activities.map((a) => a.kind);
   assert.ok(kinds.includes("hide-seek"));
   assert.ok(kinds.includes("slope-run"));
@@ -25,8 +26,14 @@ test("both games are activities on the herring coast and survey forest", () => {
   assert.ok(coast?.activityIds.includes("slope-run-otaru"));
   // The area's own quizzes stay.
   assert.ok(coast?.activityIds.includes("quiz-sea-products"));
-  const forest = barkToClothPack.scenes.find((s) => s.id === "survey-forest");
-  assert.ok(forest?.activityIds.includes("hide-seek-sapporo-street"));
+  // The Meiji Sapporo street is hidden for now (kept in games.ts).
+  assert.ok(
+    !barkToClothPack.activities.some(
+      (a) => a.id === "hide-seek-sapporo-street",
+    ),
+  );
+  for (const a of hiddenGameActivities)
+    assert.equal(activitySchema.safeParse(a).success, true);
 });
 
 test("hide-seek: referenced claims must be in claimIds; defaults apply", () => {

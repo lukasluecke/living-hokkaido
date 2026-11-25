@@ -30,18 +30,19 @@ const slopeRun: ActivityInput = {
     "Otaru Canal was built from 1914 to 1923, to ease moving goods between ships in the bay and the warehouses on shore.",
 };
 
-export const gameActivities: ActivityInput[] = [
-  otaruHideSeek,
-  sapporoStreetHideSeek,
-  slopeRun,
-];
+export const gameActivities: ActivityInput[] = [otaruHideSeek, slopeRun];
+
+/**
+ * Hidden for now (Lukas, 2026-11-25): the Meiji Sapporo street has no fitting
+ * place on the island yet. Kept so a place can offer it again: add it to
+ * gameActivities and to gameActivityIdsByScene.
+ */
+export const hiddenGameActivities: ActivityInput[] = [sapporoStreetHideSeek];
 
 /**
  * Which place offers which game (a placement choice, not a claim). The
- * Otaru games go to the herring coast; the Meiji Sapporo street (planned
- * grid, Kaitakushi era) to the survey forest.
+ * Otaru games go to the herring coast.
  */
 export const gameActivityIdsByScene: Record<string, string[]> = {
   "herring-coast": [otaruHideSeek.id, slopeRun.id],
-  "survey-forest": [sapporoStreetHideSeek.id],
 };
