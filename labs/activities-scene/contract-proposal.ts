@@ -23,9 +23,26 @@ export const PlaceSpot = z.object({
 
 export const PlaceActivity = z.object({
   kind: z.literal("place"),
-  learn: z.enum(["read", "listen", "look", "season"]),
+  /** Steps in story order. Each step: one cited fact, then one figure. */
+  steps: z.array(
+    z.object({
+      sayClaimId: Id,
+      figure: Id.optional(),
+      /** Ring ids offered in this step (2-3); one is right. */
+      options: z.array(Id).optional(),
+      /** Pose ids on the sheet in this step (4). */
+      poses: z.array(Id).optional(),
+      season: z.enum(["spring", "summer", "autumn", "winter"]).optional(),
+    }),
+  ),
   figures: z.array(
-    z.object({ id: Id, label: z.string(), note: z.string().optional() }),
+    z.object({
+      id: Id,
+      /** Named by look ("Straw hat"), never a personal name. */
+      label: z.string(),
+      look: z.object({ hat: z.string(), colour: z.string() }).optional(),
+      note: z.string().optional(),
+    }),
   ),
   /** Pose ids shown on the pose sheet, including decoys. */
   poses: z.array(Id),

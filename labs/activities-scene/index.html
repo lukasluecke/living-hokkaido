@@ -4,11 +4,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@700&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap" rel="stylesheet">
 <style>
 /* VOICE everyday learning, museum hands-on station
-   IDEA a museum field label beside a diorama case: read the label, then put the figures back
-   PICTURE the diorama stage itself, playable, with figures, drop rings and a pose spritesheet
+   IDEA a guide walks you through a diorama case one step at a time; you put each person or thing in place
+   PICTURE the diorama stage itself, growing step by step, with a pose sheet below
    COLOUR snow-white card stock, deep sea-blue ink, one seasonal ink for progress, gold for focus
    TYPE Shippori Mincho B1 headings + Zen Kaku Gothic New text
-   LAYOUT laptop: tabs, then stage (left, wide) + label and tray (right); phone: tabs, stage, label, tray */
+   LAYOUT laptop: tabs, then stage (left, wide) + step card (right); phone: tabs, stage, step card, pose sheet */
 :root{color-scheme:light dark;--bg:light-dark(#fbfaf6,#111a23);--stock:light-dark(#eef1f2,#1a2632);--line:light-dark(#d3d9de,#2e3c4a);--ink:light-dark(#1d2a36,#e9eef2);--soft:light-dark(#53606c,#a9b6c2);--gold:#e8c27a;--goldd:#c99a3b;--season:light-dark(#2f6f9c,#7fb3d9);--draft:light-dark(#7a5a12,#f0d38a);--draftbg:light-dark(#fbf1d8,#3a2f14);--ok:light-dark(#2e6b47,#8fd1a7);--no:light-dark(#9c4f2e,#f0a27e);--card:light-dark(#ffffff,#16212c)}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
@@ -19,7 +19,7 @@ h1,h2,h3{font-family:"Shippori Mincho B1","Hiragino Mincho ProN",Georgia,serif;l
 h1{font-size:clamp(30px,4.4vw,46px)}
 h2{font-size:clamp(22px,2.6vw,28px);margin-bottom:12px}
 h3{font-size:19px;margin-bottom:6px}
-.lede{max-width:70ch;color:var(--soft);margin:10px 0 0}
+.lede{max-width:72ch;color:var(--soft);margin:10px 0 0}
 .lede b{color:var(--ink)}
 .chip{display:inline-block;font-size:13px;font-weight:700;color:var(--draft);background:var(--draftbg);border-radius:4px;padding:1px 7px;vertical-align:2px;white-space:nowrap}
 .tabs{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 14px}
@@ -36,64 +36,62 @@ h3{font-size:19px;margin-bottom:6px}
 .casehead b{font-family:"Shippori Mincho B1",Georgia,serif;font-size:18px}
 .casehead span{color:var(--soft);font-size:14px}
 .stage{position:relative;aspect-ratio:16/9;border-radius:6px;overflow:hidden;background:#cdd6d0;touch-action:none}
+@media(max-width:600px){.stage{aspect-ratio:4/3}}
 .stage>svg{position:absolute;inset:0;width:100%;height:100%}
-.spot{position:absolute;width:13%;aspect-ratio:7/10;transform:translate(-50%,-88%);border:0;background:none;padding:0;cursor:pointer;display:grid;place-items:end center}
-.spot .ring{position:absolute;left:50%;bottom:-6%;width:84%;aspect-ratio:2/1;transform:translateX(-50%);border:2.5px dashed rgb(255 255 255 / 92%);border-radius:50%;background:rgb(29 42 54 / 22%)}
-.spot .num{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);width:30px;height:30px;border-radius:50%;background:#fbfaf6;color:#1d2a36;font-weight:700;font-size:15px;display:grid;place-items:center;border:2px solid #1d2a36}
-.spot svg{position:relative;width:100%;height:100%;overflow:visible}
-.spot.filled .num{display:none}
-.spot.sel .ring,.spot.over .ring{border-color:var(--gold);border-style:solid;background:rgb(232 194 122 / 35%)}
-.spot.ok .ring{border-style:solid;border-color:#8fd1a7}
-.spot.bad .ring{border-style:solid;border-color:#f0a27e}
-.spot:disabled{cursor:not-allowed;opacity:.45}
-.spot.obj{width:9%;aspect-ratio:1;transform:translate(-50%,-50%)}
-.spot.obj .ring{bottom:auto;top:50%;width:100%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:10px}
-.spot.obj .num{top:50%}
-.callout{position:absolute;transform:translate(-50%,-100%);background:#fbfaf6;color:#1d2a36;border:1.5px solid #1d2a36;border-radius:5px;font-size:13px;font-weight:700;padding:2px 7px;white-space:nowrap;pointer-events:none}
+.spot,.placed{position:absolute;width:13%;aspect-ratio:76/100;transform:translate(-50%,-92%);border:0;background:none;padding:0;display:grid;place-items:end center}
+.spot{cursor:pointer}
+.spot .ring{position:absolute;left:50%;bottom:-5%;width:90%;aspect-ratio:2/1;transform:translateX(-50%);border:3px dashed #fff;border-radius:50%;background:rgb(232 194 122 / 30%);box-shadow:0 0 0 2px rgb(29 42 54 / 45%)}
+.spot .q{position:absolute;left:50%;bottom:22%;transform:translateX(-50%);width:28px;height:28px;border-radius:50%;background:#fbfaf6;color:#1d2a36;font-weight:700;font-size:15px;display:grid;place-items:center;border:2px solid #1d2a36}
+.spot.over .ring,.spot:hover .ring{border-style:solid;border-color:var(--gold);background:rgb(232 194 122 / 55%)}
+.spot.bad .ring{border-color:#f0a27e;border-style:solid}
+.placed svg,.spot svg{width:100%;height:100%;overflow:visible}
+.placed.now svg{filter:drop-shadow(0 0 5px #e8c27a)}
+.obj{width:9%;aspect-ratio:1;transform:translate(-50%,-50%)}
+.obj .ring{bottom:auto;top:50%;width:100%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:10px}
+.obj .q{bottom:auto;top:50%;transform:translate(-50%,-50%)}
 .side{display:grid;gap:12px}
-.label{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px 16px;position:relative}
-.label .pc{position:absolute;right:12px;top:12px;width:40px;height:40px;border-radius:50%;border:2.5px solid var(--ink);display:grid;place-items:center;font-weight:700;font-size:13px}
-.label p{margin:6px 0}
-.label h3{padding-right:50px}
-.label .body>p:first-child{padding-right:40px}
-.label ol{margin:6px 0 4px;padding-left:22px}
-.label .src{font-size:13px;color:var(--soft);margin-top:8px}
-.label.covered .body{filter:blur(6px);user-select:none}
+.rail{display:flex;align-items:center;gap:0;margin:0 0 10px;padding:0;list-style:none}
+.rail li{display:flex;align-items:center;flex:1}
+.rail li:last-child{flex:none}
+.rail i{width:14px;height:14px;border-radius:50%;border:3px solid var(--ink);background:var(--card);flex:none}
+.rail li.done i{background:var(--ink)}
+.rail li.now i{width:18px;height:18px;border-color:var(--season);background:var(--season);box-shadow:0 0 0 4px color-mix(in srgb,var(--season) 20%,transparent)}
+.rail li b{flex:1;height:3px;background:repeating-linear-gradient(90deg,var(--ink) 0 4px,transparent 4px 8px)}
+.rail li.done b{background:var(--ink)}
+.stepcard{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.stepno{font-size:14px;font-weight:700;color:var(--soft);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.caption{background:#1d2a36;color:#fbfaf6;border-radius:6px;padding:10px 12px;font-size:16px;margin:8px 0}
+.caption small{color:#a9b6c2;display:block;font-size:13px;margin-top:4px}
+.ask{font-weight:700;margin:8px 0}
+.hand{display:flex;gap:12px;align-items:center;background:var(--stock);border-radius:8px;padding:8px 10px;margin:8px 0}
+.card{font:inherit;background:var(--card);color:var(--ink);border:1.5px solid var(--goldd);border-radius:8px;padding:4px;cursor:grab;touch-action:none;width:74px;height:96px;flex:none;box-shadow:0 0 0 3px rgb(232 194 122 / 40%)}
+.card svg{width:100%;height:100%}
+.hand p{margin:0;font-size:15px}
+.hand p b{display:block}
+.msg{border-left:5px solid var(--line);background:var(--stock);border-radius:6px;padding:8px 10px;margin:8px 0;font-size:15px}
+.msg.ok{border-left-color:var(--ok)}
+.msg.no{border-left-color:var(--no)}
+.msg small{display:block;color:var(--soft);font-size:13px;margin-top:2px}
 .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .btn{font:inherit;font-weight:700;font-size:15px;min-height:44px;padding:8px 16px;border-radius:6px;border:1.5px solid var(--ink);background:var(--ink);color:var(--bg);cursor:pointer}
 .btn.ghost{background:transparent;color:var(--ink)}
-.btn:disabled{opacity:.4;cursor:default}
-.tray{background:var(--stock);border-radius:8px;padding:10px 12px}
-.tray h3{font-size:16px;font-family:inherit;font-weight:700}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin-top:6px}
-.card{font:inherit;font-size:13px;line-height:1.25;text-align:center;background:var(--card);color:var(--ink);border:1.5px solid var(--line);border-radius:8px;padding:6px 4px 8px;cursor:grab;touch-action:none;display:grid;justify-items:center;gap:3px}
-.card svg{width:44px;height:62px}
-.card.obj svg{width:52px;height:52px}
-.card.sel{border-color:var(--goldd);box-shadow:0 0 0 3px rgb(232 194 122 / 50%)}
-.card.used{opacity:.35}
-.card small{color:var(--soft);font-size:13px}
-.ghostfig{position:fixed;z-index:9;pointer-events:none;width:70px;height:100px;transform:translate(-50%,-80%)}
 .sheet{margin-top:10px;background:#1d2a36;border-radius:8px;padding:8px 10px 10px;color:#e9eef2}
 .sheet .t{font-size:14px;font-weight:700;margin:0 2px 6px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .sheet .t span{color:#a9b6c2;font-weight:400}
-.frames{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:0;border:1px solid #53606c}
+.frames{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid #53606c}
 .frame{font:inherit;font-size:13px;color:#e9eef2;background:repeating-linear-gradient(45deg,#24323f 0 6px,#213040 6px 12px);border:1px solid #53606c;padding:4px 2px 6px;cursor:pointer;display:grid;justify-items:center;gap:2px;position:relative;min-height:44px}
+.frame:disabled{cursor:default;opacity:.45}
 .frame em{position:absolute;left:4px;top:2px;font-style:normal;font-size:11px;color:#8a98a6}
-.frame svg{width:46px;height:66px}
-.frame[aria-pressed=true]{background:#2f4b6e;outline:2px solid var(--gold);outline-offset:-2px}
-.feedback{margin:10px 0 0;padding:0;list-style:none;display:grid;gap:6px}
-.feedback li{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--line);border-radius:6px;padding:8px 10px;font-size:15px}
-.feedback li.ok{border-left-color:var(--ok)}
-.feedback li.no{border-left-color:var(--no)}
-.feedback li small{display:block;color:var(--soft);font-size:13px;margin-top:2px}
-.stamp{display:none;align-items:center;gap:12px;margin-top:10px}
-.stamp.on{display:flex}
+.frame svg{width:52px;height:72px}
+.frame.bad{outline:2px solid #f0a27e;outline-offset:-2px}
+.frame.good{background:#2f4b6e;outline:2px solid var(--gold);outline-offset:-2px}
+.recap{margin:8px 0 0;padding-left:20px;font-size:15px}
+.recap li{margin:4px 0}
+.recap small{color:var(--soft);font-size:13px}
+.stamp{display:flex;align-items:center;gap:12px;margin-top:10px}
 .stamp svg{width:74px;height:74px;flex:none}
-.caption{min-height:3.2em;background:#1d2a36;color:#fbfaf6;border-radius:6px;padding:8px 12px;font-size:16px}
-.caption small{color:#a9b6c2;display:block;font-size:13px}
-.season{display:inline-flex;border:1.5px solid var(--ink);border-radius:999px;overflow:hidden}
-.season button{font:inherit;font-weight:700;font-size:14px;border:0;background:transparent;color:var(--ink);padding:8px 14px;min-height:40px;cursor:pointer}
-.season button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.ghostfig{position:fixed;z-index:9;pointer-events:none;width:70px;height:92px;transform:translate(-50%,-80%)}
+.toggle{font:inherit;font-size:14px;font-weight:700;border:1.5px solid var(--ink);background:transparent;color:var(--ink);border-radius:999px;padding:4px 12px;cursor:pointer;min-height:32px}
 .notes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}
 @media(max-width:820px){.notes{grid-template-columns:minmax(0,1fr)}}
 .note{background:var(--stock);border-radius:8px;padding:12px 14px;font-size:15px}
@@ -111,63 +109,49 @@ td.pick{font-weight:700}
 .rec{border:2px solid var(--ink);border-radius:8px;padding:12px 16px;margin-top:16px;max-width:900px}
 .rec p{margin:4px 0}
 footer{color:var(--soft);font-size:14px}
-@media(prefers-reduced-motion:no-preference){.spot svg{transition:transform .18s}.spot.filled svg{animation:pop .22s ease-out}@keyframes pop{from{transform:translateY(-8px)}to{transform:none}}}
+@media(prefers-reduced-motion:no-preference){.placed.now svg{animation:pop .25s ease-out}@keyframes pop{from{transform:translateY(-10px)}to{transform:none}}}
 </style>
 
 <div class="band"><div class="wrap">
   <h1>Rebuild the scene</h1>
-  <p class="lede">Four design directions for the heritage game. In each one you <b>learn a slice of life</b> (read, listen or look), then <b>put the people or things back</b> and <b>choose what each one does</b> from a pose sheet. You check your scene against the museum source. All four run below. <span class="chip">Draft · research preview</span></p>
-
+  <p class="lede">Version 2. A guide takes you through a museum scene <b>one step at a time</b>. Each step tells you a little, then hands you <b>one person or thing</b>. You reason from the clue: where does it go, and what does the person do? Then the step shows what the museum source says. <span class="chip">Draft · research preview</span></p>
   <div class="tabs" role="tablist" id="tabs"></div>
-
   <div class="game">
     <div class="case">
       <div class="casehead"><b id="sceneTitle"></b><span id="sceneMeta"></span></div>
       <div class="stage" id="stage"></div>
       <div id="sheetBox"></div>
     </div>
-    <div class="side">
-      <div id="learn"></div>
-      <div class="tray"><h3 id="trayTitle">Figures</h3><div class="cards" id="cards"></div></div>
-      <div>
-        <div class="row"><button class="btn" id="check">Check my scene</button><button class="btn ghost" id="reset">Start again</button></div>
-        <ul class="feedback" id="feedback" aria-live="polite"></ul>
-        <div class="stamp" id="stamp"></div>
-      </div>
-    </div>
+    <div class="side" id="side"></div>
   </div>
-
   <div class="notes" id="notes"></div>
 </div></div>
 
 <div class="band" style="background:var(--stock)"><div class="wrap">
-  <h2>Survey camp first, with Listen as an option</h2>
+  <h2>One step-by-step engine, two scenes first</h2>
   <div class="scroll"><table>
-    <thead><tr><th></th><th>Learn by</th><th>You place</th><th>Source strength</th><th>Care needed</th><th>Build size</th></tr></thead>
+    <thead><tr><th></th><th>Steps</th><th>You place</th><th>Source strength</th><th>Care needed</th></tr></thead>
     <tbody>
-      <tr><th>A · Survey camp</th><td>Read the label, cover it, rebuild</td><td>5 people + actions</td><td class="pick">Strong: the panel names every task</td><td>Ainu guides and porters: say it in text, never in costume</td><td>Small: one new activity kind</td></tr>
-      <tr><th>B · Herring yard</th><td>Listen to a narrated walk-through</td><td>3 workers + actions, in story order</td><td>Medium: panel gives nets and products; tasks are seen in the diorama only</td><td>Mark "seen in the diorama"; get a second source for tasks</td><td>Small, plus captions and device voice</td></tr>
-      <tr><th>C · Inside the chise</th><td>Look closely at numbered spots</td><td>6 things, no people</td><td class="pick">Strong: panel names what lies where</td><td>Highest: no posed Ainu figures, no ritual area, review by an Ainu reviewer</td><td>Small: the same engine without the pose step</td></tr>
-      <tr><th>D · Mine and forest</th><td>Read, then switch the season</td><td>4 workers + actions</td><td>Medium: forest work is cited; mine tasks are seen in figures only</td><td>Show it as hard labour, not as fun</td><td>Medium: season rule in the engine</td></tr>
+      <tr><th>A · Survey camp</th><td>5</td><td>5 people, each with their own look and role</td><td class="pick">Strong: panel PC 314 names every task</td><td>Hired guides and porters: some were Ainu people. Said in text, never in costume</td></tr>
+      <tr><th>B · Herring yard</th><td>5</td><td>3 workers with different hats</td><td>Medium: nets and products on the panel; carry and dry only seen in the diorama</td><td>Needs a second source for the tasks</td></tr>
+      <tr><th>C · Inside the chise</th><td>7</td><td>6 things, no people</td><td class="pick">Strong: the panel says what lies where</td><td>Highest: no posed Ainu figures, no ritual area, Ainu reviewer</td></tr>
+      <tr><th>D · Mine and forest</th><td>5</td><td>4 workers; winter arrives at step 4</td><td>Medium: forest work cited; mine tasks seen in figures only</td><td>Hard labour, not fun</td></tr>
     </tbody>
   </table></div>
   <div class="rec">
-    <p><b>My recommendation.</b> Build A as the first slice. Its museum panel already has numbered callouts for each task, so every answer has a source. Add B's Listen mode as an option on the same data, not as a separate game. Use C's rule for every Ainu scene: we place things and tasks, not posed people. Keep D as a later season twist.</p>
-    <p>All four use one engine with one new, additive activity kind (<code>place</code>: spots, figures, poses, each with a claim id). Nothing goes into <code>main</code> until you pick a direction.</p>
+    <p><b>My recommendation.</b> Build the step engine as one new, additive activity kind (<code>place</code>), and ship two scenes with strong sources: <b>C · Inside the chise</b> (things) and <b>A · Survey camp</b> (people). Herring and mine come after we find a second source for their tasks. Voice and captions are on in every scene.</p>
   </div>
 </div></div>
 
 <div class="band"><div class="wrap">
-  <h2>What changed when I iterated on the idea</h2>
+  <h2>What changed from version 1</h2>
   <ol class="rules">
-    <li><b>The museum panel is the answer key.</b> You rebuild a real diorama and compare it with the panel. You do not guess a quiz answer.</li>
-    <li><b>Learn, cover, rebuild.</b> Recall after reading is the learning step. A "peek" is always allowed and is not a penalty.</li>
-    <li><b>Who matters only where the source says who.</b> In the survey camp the panel names hired guides and porters, so the figure counts. In other scenes only place and action count.</li>
-    <li><b>Wrong answers point back to the source.</b> Feedback quotes the cited claim and its locator, not just a red mark.</li>
-    <li><b>No posed Ainu figures, no dress-up.</b> For Ainu homes and life we place objects and tasks. Ethnicity comes from the source text, never from costume colour.</li>
-    <li><b>Keep the two histories apart.</b> Settler labour scenes (survey, herring, mine) and Ainu scenes are separate cases with separate sources.</li>
-    <li><b>"Seen in the diorama" is a weaker source.</b> We label it as such and list it in REVIEW.md until a panel or text supports it.</li>
-    <li><b>Three ways to place.</b> Drag, or tap a figure then tap a ring, or use the keyboard (Tab, Enter). The pose sheet is a row of buttons.</li>
+    <li><b>No "read, cover, recall".</b> That felt like a memory game. Now you learn in small steps while you build.</li>
+    <li><b>A clue to reason from.</b> Each step asks a question you can work out ("smoke makes fish keep: where do they hang?"). The source then confirms it.</li>
+    <li><b>One figure per step.</b> You never pick from a row of the same "Worker". The step hands you one person, named by their own hat and colour.</li>
+    <li><b>Only real choices.</b> Two or three rings, and four poses on the sheet. Wrong answers get a hint; after two tries, "Show me".</li>
+    <li><b>The scene grows.</b> At the end you see the full scene and a recap of every cited point, like the museum label.</li>
+    <li><b>Same rules as before.</b> No posed Ainu figures in Ainu scenes; histories kept apart; "seen in the diorama" marked as a weaker source.</li>
   </ol>
 </div></div>
 
@@ -181,9 +165,8 @@ const S314={t:"Hokkaido Museum, theme 4, 「殖民地区画の作業をしてい
 const S318={t:"Hokkaido Museum, theme 4, 「海に生きる」 Living off the Sea, PC 318, IMG_7873",pc:"318"};
 const S325={t:"Hokkaido Museum, theme 4, 「山に生きる」 Living off the Mountains, PC 325, IMG_7877",pc:"325"};
 const SH={t:"Hokkaido Museum, theme 2, restored house, 「家の中をよく見てみよう」, IMG_7739",pc:"◎"};
-const OBSH="Seen in the herring diorama (IMG_7874–7875). The panel does not name this task.";
-const OBSM="Seen in the mine figures (IMG_7878–7880). The panel does not name this task.";
-
+const OBSH={t:"Seen in the herring diorama (IMG_7874–7875). The panel does not name this task.",weak:true};
+const OBSM={t:"Seen in the mine figures (IMG_7878–7880). The panel does not name this task.",weak:true};
 /* ---------- figures and poses (spritesheet) ---------- */
 const HIP=[35,60];
 const rot=(p,d)=>{const a=d*Math.PI/180,x=p[0]-HIP[0],y=p[1]-HIP[1];return[HIP[0]+x*Math.cos(a)-y*Math.sin(a),HIP[1]+x*Math.sin(a)+y*Math.cos(a)]};
@@ -202,13 +185,19 @@ const POSES={
   sleigh:{label:"Drive a horse sleigh",lean:-6,legs:"wide",hands:[[54,48],[50,52]],prop:'<path d="M54 48 72 40" stroke="#c9a46a" stroke-width="2"/><path d="M44 90h30l4-5" stroke="#6e4b32" stroke-width="3" fill="none"/><rect x="48" y="80" width="24" height="8" rx="3" fill="#8a5a35"/>'}
 };
 function legs(t){if(t==="wide")return"M35 60 24 96M35 60 46 96";if(t==="bent")return"M35 60 28 78 26 96M35 60 45 80 47 96";return"M35 60 31 96M35 60 39 96"}
-function person(pose,col){
+function hatSvg(h,x,y,col){
+  if(h==="straw")return `<ellipse cx="${x}" cy="${y-3}" rx="14" ry="3.5" fill="#d9bb86" stroke="#8a5a35" stroke-width="1"/><path d="M${x-7} ${y-3}a7 6 0 0 1 14 0z" fill="#d9bb86" stroke="#8a5a35" stroke-width="1"/>`;
+  if(h==="band")return `<path d="M${x-7.5} ${y-2}a7.5 7.5 0 0 1 15 0z" fill="#2f3b48"/><path d="M${x-8} ${y-2}h16" stroke="#fbfaf6" stroke-width="3"/>`;
+  if(h==="hood")return `<path d="M${x-9} ${y+6}V${y-2}a9 9 0 0 1 18 0V${y+6}" fill="none" stroke="${col}" stroke-width="4"/>`;
+  if(h==="helmet")return `<path d="M${x-9} ${y-1}a9 9 0 0 1 18 0z" fill="#e8c27a" stroke="#8a5a35" stroke-width="1"/><circle cx="${x+6}" cy="${y-4}" r="2.6" fill="#fff8d0" stroke="#1d2a36" stroke-width=".8"/>`;
+  return `<path d="M${x-8} ${y-1}a8 8 0 0 1 16 0z" fill="#53606c"/><path d="M${x+4} ${y-1}h7" stroke="#53606c" stroke-width="2.5"/>`;
+}
+function person(pose,col,hat){
   const P=POSES[pose]||POSES.stand,neck=rot([35,34],P.lean),head=rot([35,23],P.lean),sh=rot([35,38],P.lean);
   const arms=P.hands.map(h=>`M${sh[0]} ${sh[1]} ${h[0]} ${h[1]}`).join("");
   const back=P.back?`<g transform="rotate(${P.lean} 35 60)"><rect x="14" y="30" width="15" height="24" rx="4" fill="#c9a46a" stroke="#6e4b32" stroke-width="1.5"/><path d="M16 38h11M16 46h11" stroke="#6e4b32"/></g>`:"";
-  return `<svg viewBox="0 0 76 100" aria-hidden="true"><ellipse cx="38" cy="97" rx="20" ry="3.5" fill="rgb(0 0 0 / 22%)"/>${P.prop||""}${back}<path d="${legs(P.legs)}" stroke="#2f3b48" stroke-width="7" stroke-linecap="round" fill="none"/><path d="M35 60 ${neck[0]} ${neck[1]}" stroke="${col}" stroke-width="15" stroke-linecap="round"/><path d="${arms}" stroke="${col}" stroke-width="5.5" stroke-linecap="round" fill="none"/><circle cx="${head[0]}" cy="${head[1]}" r="7.5" fill="#e7c9a6" stroke="#1d2a36" stroke-width="1.2"/><path d="M${head[0]-8} ${head[1]-1}a8 8 0 0 1 16 0z" fill="#53606c"/></svg>`;
+  return `<svg viewBox="0 0 76 100" aria-hidden="true"><ellipse cx="38" cy="97" rx="20" ry="3.5" fill="rgb(0 0 0 / 22%)"/>${P.prop||""}${back}<path d="${legs(P.legs)}" stroke="#2f3b48" stroke-width="7" stroke-linecap="round" fill="none"/><path d="M35 60 ${neck[0]} ${neck[1]}" stroke="${col}" stroke-width="15" stroke-linecap="round"/><path d="${arms}" stroke="${col}" stroke-width="5.5" stroke-linecap="round" fill="none"/><circle cx="${head[0]}" cy="${head[1]}" r="7.5" fill="#e7c9a6" stroke="#1d2a36" stroke-width="1.2"/>${hatSvg(hat,head[0],head[1],col)}</svg>`;
 }
-function horse(){return `<svg viewBox="0 0 76 100" aria-hidden="true"><ellipse cx="38" cy="97" rx="28" ry="3.5" fill="rgb(0 0 0 / 22%)"/><path d="M14 66 12 96M24 68 24 96M52 68 52 96M60 66 63 96" stroke="#5a3f2b" stroke-width="5" stroke-linecap="round"/><rect x="10" y="50" width="54" height="22" rx="11" fill="#7a5233"/><path d="M58 56 68 34l6 4-6 22z" fill="#7a5233"/><rect x="20" y="36" width="34" height="16" rx="4" fill="#c9a46a" stroke="#6e4b32" stroke-width="1.5"/></svg>`}
 const OBJ={
   cattail:`<svg viewBox="0 0 60 60" aria-hidden="true"><g stroke="#6f7f3e" stroke-width="2.5">${[14,22,30,38,46].map((x,i)=>`<path d="M${x} 56 ${x+(i-2)*2} 8"/>`).join("")}</g>${[14,22,30,38,46].map((x,i)=>`<rect x="${x+(i-2)*1.4-3}" y="14" width="6" height="14" rx="3" fill="#7a5233"/>`).join("")}<path d="M10 44h40" stroke="#c99a3b" stroke-width="4"/></svg>`,
   bark:`<svg viewBox="0 0 60 60" aria-hidden="true"><path d="M10 10c8 4 8 36 2 42h10c6-10 4-34-2-42zM26 8c8 6 6 38 0 44h10c6-10 6-36-2-44zM42 10c6 6 6 36 0 42h8c4-10 4-34-2-42z" fill="#b98a55" stroke="#6e4b32" stroke-width="1.5"/></svg>`,
@@ -228,160 +217,160 @@ chise:(s)=>`<svg viewBox="0 0 800 450" preserveAspectRatio="xMidYMid meet"><rect
 mine:(s)=>{const w=s.season==="winter";return`<svg viewBox="0 0 800 450" preserveAspectRatio="xMidYMid slice"><rect width="800" height="450" fill="${w?"#dfe7ee":"#9fc0d2"}"/><rect x="400" y="300" width="400" height="150" fill="${w?"#f4f7fa":"#6f9a4e"}"/>${trees(14,5,[420,170,790,300],w?["#5b6e66","#6d7f78"]:["#3f6b3a","#4f7f45"],22,40)}${w?trees(14,5,[420,166,790,296],["#ffffff"],10,18):""}<path d="M560 300c20-6 40-6 60 0" stroke="${w?"#c9d4dc":"#5d8642"}" stroke-width="4" fill="none"/><rect width="400" height="450" fill="#2b2a2c"/><path d="M0 0h400v70C300 90 100 90 0 70z" fill="#1a191b"/>${[60,200,340].map(x=>`<rect x="${x-8}" y="70" width="16" height="320" fill="#a8835a"/><rect x="${x-50}" y="62" width="100" height="16" fill="#a8835a"/>`).join("")}<path d="M0 395h400M0 425h400" stroke="#6b6e72" stroke-width="5"/>${Array.from({length:12},(_,i)=>`<path d="M${10+i*34} 390v40" stroke="#5a3f2b" stroke-width="6"/>`).join("")}${trees(40,3,[0,300,400,390],["#151416","#232224","#0e0d0f"],4,10)}<path d="M400 0v450" stroke="#1d2a36" stroke-width="6"/><g font-size="16" font-weight="700" style="font-family:Zen Kaku Gothic New,sans-serif"><text x="20" y="40" fill="#e9eef2">Coal mine</text><text x="780" y="40" fill="#1d2a36" text-anchor="end">Forest · ${w?"winter":"summer"}</text></g></svg>`}
 };
 
-/* ---------- directions ---------- */
-const COL=["#2f4b6e","#9c4f2e","#4f6f3a","#7a5fc0","#53606c"];
+
+/* ---------- scenes: one step at a time ---------- */
 const D=[
-{id:"A",name:"Survey camp",title:"1890 land survey camp, Naie",meta:"Learn by reading · settler history",art:"survey",mode:"read",src:S314,
- label:{h:"Dividing the land for settler farms",p:["1890, Naie village in Sorachi (today Naie town). A survey team sent by the Hokkaido government studies the climate, soil, plants and animals, and cuts the land into straight plots so that settlers can farm it later.","Some of the people hired to guide the way and to carry loads were Ainu people."],ol:["Surveying","Carrying what the survey needs","Cutting trees that block the survey line","Putting up tents to stay the night"]},
- figures:[{id:"m1",name:"Survey team member",col:COL[0]},{id:"m2",name:"Survey team member",col:COL[4]},{id:"guide",name:"Hired guide",col:COL[1],note:"Hired locally"},{id:"porter",name:"Hired porter",col:COL[2],note:"Hired locally"},{id:"m3",name:"Survey team member",col:COL[3]}],
- poses:["survey","carry","saw","tent","lead","watch","net"],
- spots:[
-  {x:150,y:420,pose:"survey",fig:["m1","m2","m3"],ok:"Panel callout: the team is surveying along the straight line.",hint:"Look at callout 1 on the label: what is the team doing on the line?",src:S314},
-  {x:300,y:420,pose:"carry",fig:["porter"],ok:"Panel: people were hired to carry loads, and some were Ainu people. Callout 2: carrying what the survey needs.",hint:"The label says some people were hired to carry loads. Who on your list was hired for that?",src:S314},
-  {x:380,y:300,pose:"saw",show:"m2",ok:"Panel callout: cutting trees that block the survey line.",hint:"Callout 3: what happens to trees in the way of the line?",src:S314},
-  {x:640,y:250,pose:"tent",show:"m3",ok:"Panel callout: the team puts up tents and stays the night.",hint:"Callout 4 is about where the team sleeps.",src:S314},
-  {x:470,y:220,pose:"lead",fig:["guide"],ok:"Panel: people were hired to guide the way, and some were Ainu people.",hint:"The label names two hired jobs. One is to show the way.",src:S314}],
- notes:[["How it teaches",["Read the label. Cover it. Rebuild the case from memory.","The finished diorama shows first, like in the museum, then the figures go back to the tray.","Peek at the label any time."]],["Why it works here",["The panel has 4 numbered callouts: each one is a spot.","The text names who was hired, so the figure choice matters for 2 spots."]],["Care",["Hired guides and porters look the same as other figures. The source text tells who they were.","Link to Over time for what the survey meant for Ainu homes and land."]]]},
-{id:"B",name:"Herring yard",title:"Herring fishery on the coast",meta:"Learn by listening · settler history",art:"herring",mode:"listen",src:S318,
- lines:[{t:"Herring, salmon, kelp, squid, crab and cod: each one is a gift of Hokkaido's sea.",s:S318},{t:"In bays not far from land, fishers cast large nets.",s:S318,spot:0},{t:"In the diorama, workers carry the catch from the boats up to the yard.",s:{t:OBSH,pc:"318"},spot:1},{t:"The catch was made into dried food that keeps for a long time, canned food, and even fertilizer for fields and rice paddies. In the diorama, fish lie on mats to dry.",s:S318,spot:2}],
- figures:[{id:"w1",name:"Worker",col:COL[0]},{id:"w2",name:"Worker",col:COL[1]},{id:"w3",name:"Worker",col:COL[2]}],
- poses:["net","carry","rake","saw","survey","watch"],
- spots:[
-  {x:260,y:300,pose:"net",ok:"Panel: in bays not far from land, fishers cast large nets.",hint:"Listen to line 2 again: what happens in the bay?",src:S318},
-  {x:430,y:240,pose:"carry",ok:"Seen in the diorama: the catch is carried up from the boats.",hint:"Line 3: how does the catch get from the boats to the yard?",src:{t:OBSH,pc:"318"},obs:true},
-  {x:620,y:400,pose:"rake",ok:"Panel: dried food that keeps. Diorama: fish spread on mats.",hint:"Line 4: what happens to the fish on the mats?",src:S318}],
- notes:[["How it teaches",["Press Listen. A device voice reads short lines with captions.","Each line opens the next ring, so you build in story order."]],["Why it works here",["The herring work is a process: haul, carry, dry, make into products.","The panel has official English we can paraphrase."]],["Care",["The panel names nets and products, not the tasks. Two tasks are only seen in the diorama, so they carry a weaker source mark.","Find a second source on herring work before we approve it."]]]},
-{id:"C",name:"Inside the chise",title:"Inside the restored house (chise)",meta:"Learn by looking · Ainu home · objects only",art:"chise",mode:"look",src:SH,objects:true,
- label:{h:"Look closely inside the house",p:["The museum asks visitors to sit on the bench and look at the inside of the house and the roof frame."],ol:["Between the house entrance and the room: cattail for mats, ohyo bark for cloth, a mortar and pestle for grain.","Around the hearth the family spends its time. A pot hangs over the fire; things for weaving and cooking lie near it.","Fish such as salmon and cod hang above the hearth and are smoked into food that keeps."]},
- figures:[{id:"cattail",name:"Cattail",note:"for mats"},{id:"bark",name:"Ohyo bark",note:"for cloth"},{id:"mortar",name:"Mortar and pestle",note:"for grain"},{id:"pot",name:"Pot"},{id:"weave",name:"Weaving things"},{id:"fish",name:"Salmon and cod"}],
- spots:[
-  {show:"cattail",x:110,y:170,fig:["cattail","bark","mortar"],ok:"Panel point 1: this lies between the entrance and the room.",hint:"Point 1 lists three things near the entrance.",src:SH},
-  {show:"bark",x:144,y:260,fig:["cattail","bark","mortar"],ok:"Panel point 1: this lies between the entrance and the room.",hint:"Point 1 lists three things near the entrance.",src:SH},
-  {show:"mortar",x:178,y:340,fig:["cattail","bark","mortar"],ok:"Panel point 1: this lies between the entrance and the room.",hint:"Point 1 lists three things near the entrance.",src:SH},
-  {x:440,y:230,fig:["pot"],ok:"Panel point 2: a pot hangs over the hearth.",hint:"Point 2: what hangs over the fire?",src:SH},
-  {x:640,y:250,fig:["weave"],ok:"Panel point 2: things for weaving lie around the hearth.",hint:"Point 2: what lies around the hearth where the family sits?",src:SH},
-  {x:540,y:200,fig:["fish"],ok:"Panel point 3: fish hang above the hearth and are smoked.",hint:"Point 3 is about the rack above the fire.",src:SH}],
- notes:[["How it teaches",["Look at the finished room with numbered points, like the museum bench.","Then the things go back to the tray and you return each to its place."]],["Why it works here",["The panel says exactly what lies where.","No pose step: this is a home, not a stage."]],["Care",["No posed Ainu figures, no costumes, no dress-up.","The upper seat and its window are not drawn and not named (REVIEW.md).","Needs an Ainu cultural reviewer before it ships."]]]},
-{id:"D",name:"Mine and forest",title:"Coal mine and winter forest",meta:"Learn by season · settler and industry history",art:"mine",mode:"season",src:S325,
- label:{h:"Living off the mountains",p:["Hokkaido held a lot of coal. From the end of the 19th century mines opened, many people worked there and towns grew. Hokkaido became one of Japan's top coal producers, with Kitakyushu.","In winter many people worked in the forests. They cut thick trees with large saws and hauled the wood on horse-drawn sleighs."]},
- figures:[{id:"k1",name:"Worker",col:COL[0]},{id:"k2",name:"Worker",col:COL[1]},{id:"k3",name:"Worker",col:COL[2]},{id:"k4",name:"Worker",col:COL[4]}],
- poses:["drill","shovel","saw","sleigh","net","carry"],
- spots:[
-  {x:130,y:390,pose:"drill",ok:"Seen in the mine figures: a worker drills the coal face.",hint:"In the mine, one figure works at the rock face with a machine.",src:{t:OBSM,pc:"325"},obs:true},
-  {x:290,y:390,pose:"shovel",ok:"Seen in the mine figures: a worker shovels the loose coal.",hint:"What happens to the broken coal on the floor?",src:{t:OBSM,pc:"325"},obs:true},
-  {x:520,y:330,pose:"saw",winter:true,ok:"Panel: in winter, people cut thick trees with large saws.",hint:"The label: what did people do with large saws in winter?",src:S325},
-  {x:680,y:350,pose:"sleigh",winter:true,ok:"Panel: in winter, the cut wood was hauled on horse-drawn sleighs.",hint:"The label: how was the wood moved in winter?",src:S325}],
- notes:[["How it teaches",["Read the label, then switch the season.","In summer the forest rings are closed; the label says this work was done in winter."]],["Why it works here",["It ties into the island's season clock.","Two places, one label: mining and winter forestry."]],["Care",["This is hard, dangerous work: no score race, no jokes.","Mine tasks are only seen in figures, so they carry a weaker source mark."]]]}
+{id:"A",name:"Survey camp",title:"1890 land survey camp, Naie",meta:"Settler history · people",art:"survey",
+ steps:[
+  {say:"1890, Naie village in Sorachi. The Hokkaido government sends a survey team into the forest. The team studies the climate, soil, plants and animals.",src:S314},
+  {say:"The team divides the land into straight plots, so that settlers can farm it later.",src:S314,ask:"The person in the blue cap is on the survey team. Where do they work, and what do they do?",
+   fig:{name:"Blue cap",note:"Survey team",col:"#2f4b6e",hat:"cap"},opts:[[200,432,1],[690,250],[70,330]],pose:"survey",poses:["survey","carry","saw","watch"],
+   hintPlace:"The plots have straight edges. Look for the straight cut line.",hintPose:"They measure the land along the line.",why:"Panel callout: the team surveys the land and cuts it into straight plots."},
+  {say:"Out in the forest the team needs many things for the survey. It hires people to carry loads. The panel says that some of them were Ainu people.",src:S314,ask:"The person in the headband was hired to carry. Where do they go, and what do they do?",
+   fig:{name:"Headband",note:"Hired porter",col:"#4f6f3a",hat:"band"},opts:[[300,372,1],[650,410],[90,250]],pose:"carry",poses:["lead","carry","tent","survey"],
+   hintPlace:"Loads move along the line to where the team works.",hintPose:"A porter carries a load on the back.",why:"Panel callout 2: carrying what the survey needs. Some hired porters were Ainu people."},
+  {say:"The survey line must run straight. But the forest is thick, and trees stand in the way.",src:S314,ask:"The person in the straw hat is on the survey team. Where is a tree in the way of the line? What do they do?",
+   fig:{name:"Straw hat",note:"Survey team",col:"#53606c",hat:"straw"},opts:[[370,292,1],[95,300],[700,400]],pose:"saw",poses:["watch","survey","saw","net"],
+   hintPlace:"Only a tree on the line is in the way.",hintPose:"The tree must come down.",why:"Panel callout 3: cutting trees that block the survey line."},
+  {say:"The team also hires people to guide the way. Some of the hired guides were Ainu people too.",src:S314,ask:"The person in the red hood was hired as a guide. Does the guide walk ahead on the line, or wait at the camp?",
+   fig:{name:"Red hood",note:"Hired guide",col:"#9c4f2e",hat:"hood"},opts:[[452,206,1],[720,250]],pose:"lead",poses:["lead","tent","carry","watch"],
+   hintPlace:"A guide shows the way, so the guide goes first.",hintPose:"The guide points the way ahead.",why:"Panel: people were hired to guide the way, and some of them were Ainu people."},
+  {say:"The team does not go back to a town at night. It stays in the forest.",src:S314,ask:"The person in the purple cap is on the survey team. Where do they set up for the night?",
+   fig:{name:"Purple cap",note:"Survey team",col:"#7a5fc0",hat:"cap"},opts:[[655,236,1],[560,420],[250,300]],pose:"tent",poses:["tent","saw","survey","carry"],
+   hintPlace:"The tents stand in the camp at the top right.",hintPose:"They put up a tent.",why:"Panel callout 4: the team puts up tents and stays the night."}],
+ notes:[["How it teaches",["Each step gives one fact, then one person to place.","The question is a clue you can reason from. The panel then confirms it."]],["Why names by look",["Each person has their own hat and colour, and we name them by it. The role comes from the panel.","We give no personal names, so no name suggests who is Ainu and who is not."]],["Care",["Hired guides and porters look like everyone else. The text says who they were.","Do not give an Ainu-sounding name without review."]]]},
+{id:"B",name:"Herring yard",title:"Herring fishery on the coast",meta:"Settler history · people",art:"herring",
+ steps:[
+  {say:"Herring, salmon, kelp, squid, crab and cod. Each one is a gift of Hokkaido's sea.",src:S318},
+  {say:"In bays not far from land, fishers cast large nets.",src:S318,ask:"The fisher in the straw hat works where the boats meet the water. Where, and doing what?",
+   fig:{name:"Straw hat",note:"Fisher",col:"#2f4b6e",hat:"straw"},opts:[[255,335,1],[620,430],[520,175]],pose:"net",poses:["net","carry","rake","watch"],
+   hintPlace:"The nets come in where the boats are.",hintPose:"Pull the net in.",why:"Panel: in bays not far from land, fishers cast large nets."},
+  {say:"In the diorama, many workers carry the catch from the boats up to the yard.",src:OBSH,ask:"The worker with the white headband moves the catch. Where does the worker walk, and what does the worker do?",
+   fig:{name:"Headband",note:"Worker",col:"#9c4f2e",hat:"band"},opts:[[430,255,1],[200,420],[720,430]],pose:"carry",poses:["rake","carry","net","survey"],
+   hintPlace:"Between the boats and the yard.",hintPose:"The catch goes on the back.",why:"Seen in the diorama: workers carry the catch from the boats to the yard."},
+  {say:"Much of the catch became food that keeps for a long time, like dried fish. In the diorama, fish lie on mats on the ground.",src:S318,ask:"The worker in the green hood helps the fish dry. Where, and doing what?",
+   fig:{name:"Green hood",note:"Worker",col:"#4f6f3a",hat:"hood"},opts:[[612,345,1],[340,205],[150,420]],pose:"rake",poses:["carry","watch","rake","net"],
+   hintPlace:"Look for the mats.",hintPose:"Spread the fish out so they dry.",why:"Panel: dried food that keeps. Diorama: fish spread on mats."},
+  {say:"Some of the catch became canned food, and even fertilizer for fields and rice paddies.",src:S318}],
+ notes:[["How it teaches",["The voice reads each step with captions. The beach fills up as the story goes on."]],["Why it works here",["Herring work is a process: haul, carry, dry, make into products."]],["Care",["Two tasks are only seen in the diorama, so they carry a weaker source mark.","Find a second source before we approve it."]]]},
+{id:"C",name:"Inside the chise",title:"Inside the restored house (chise)",meta:"Ainu home · things only",art:"chise",objects:true,
+ steps:[
+  {say:"The museum asks visitors to sit on the bench and look closely at the inside of the house and at the roof frame.",src:SH},
+  {say:"Between the door and the main room is the entrance room. Materials and tools are kept here.",src:SH,ask:"Cattail will become mats. Where is it kept until then?",
+   fig:{name:"Cattail",note:"for mats",obj:"cattail"},opts:[[115,160,1],[300,200],[480,175]],
+   hintPlace:"Materials are kept near the door.",why:"Panel point 1: cattail for mats is kept between the entrance and the room."},
+  {say:"Bark from the ohyo tree is made into cloth for clothing.",src:SH,ask:"Where is the ohyo bark kept before it is used?",
+   fig:{name:"Ohyo bark",note:"for cloth",obj:"bark"},opts:[[300,330],[115,255,1],[680,160]],
+   hintPlace:"It is a material, like the cattail.",why:"Panel point 1: ohyo bark for cloth is kept in the entrance room too."},
+  {say:"A mortar and pestle are used to pound grain.",src:SH,ask:"Where are they kept?",
+   fig:{name:"Mortar and pestle",note:"for grain",obj:"mortar"},opts:[[640,330],[170,340,1],[300,200]],
+   hintPlace:"It is a tool for work, kept with the materials.",why:"Panel point 1: the mortar and pestle are kept in the entrance room."},
+  {say:"Around the hearth is where the family usually spends its time.",src:SH,ask:"This pot is for cooking. Where does it hang?",
+   fig:{name:"Pot",obj:"pot"},opts:[[445,232,1],[300,330],[680,160]],
+   hintPlace:"Cooking needs the fire.",why:"Panel point 2: a pot hangs over the hearth."},
+  {say:"Things for weaving, sewing and wood carving are kept close to where the family sits.",src:SH,ask:"Where do the weaving things go?",
+   fig:{name:"Weaving things",obj:"weave"},opts:[[160,205],[640,330,1]],
+   hintPlace:"The family sits around the hearth.",why:"Panel point 2: things for weaving and sewing lie around the hearth."},
+  {say:"Fish such as salmon and cod are kept as food for later. Smoke turns fish into food that keeps.",src:SH,ask:"Where do the fish hang?",
+   fig:{name:"Salmon and cod",obj:"fish"},opts:[[300,330],[520,180,1],[680,160]],
+   hintPlace:"Where is there smoke?",why:"Panel point 3: fish hang above the hearth and are smoked into food that keeps."}],
+ notes:[["How it teaches",["A walk from the door to the hearth. Each step brings one thing and one clue about its use."]],["Why it works here",["The panel says exactly what lies where.","No pose step: this is a home, not a stage."]],["Care",["No posed Ainu figures, no costumes, no dress-up.","The upper seat and its window are not drawn or named (REVIEW.md).","Needs an Ainu cultural reviewer."]]]},
+{id:"D",name:"Mine and forest",title:"Coal mine and winter forest",meta:"Settler and industry history · people",art:"mine",season:"summer",
+ steps:[
+  {say:"Hokkaido held a lot of coal. From the end of the 19th century mines opened, many people worked there, and towns grew.",src:S325},
+  {say:"In the diorama, a miner works at the coal face with a machine.",src:OBSM,ask:"The miner with the lamp helmet works at the face. Where, and doing what?",
+   fig:{name:"Lamp helmet",note:"Miner",col:"#e9e2c8",hat:"helmet"},opts:[[140,392,1],[560,340]],pose:"drill",poses:["shovel","drill","saw","watch"],
+   hintPlace:"The coal face is inside the mine.",hintPose:"A machine breaks the rock.",why:"Seen in the mine figures: drilling at the coal face."},
+  {say:"Broken coal lies on the floor of the tunnel.",src:OBSM,ask:"The miner in the blue cap clears the coal. Where, and doing what?",
+   fig:{name:"Blue cap",note:"Miner",col:"#2f4b6e",hat:"cap"},opts:[[700,350],[300,396,1]],pose:"shovel",poses:["carry","net","shovel","drill"],
+   hintPlace:"Next to the coal face.",hintPose:"Move the loose coal.",why:"Seen in the mine figures: shovelling the loose coal."},
+  {say:"Now it is winter. In winter many people worked in the forests. They cut thick trees with large saws.",src:S325,season:"winter",ask:"The worker in the red hood goes to the forest. Where, and doing what?",
+   fig:{name:"Red hood",note:"Forest worker",col:"#9c4f2e",hat:"hood"},opts:[[200,300],[515,335,1]],pose:"saw",poses:["saw","drill","sleigh","rake"],
+   hintPlace:"The forest is on the right.",hintPose:"Large saws cut thick trees.",why:"Panel: in winter, people cut thick trees with large saws."},
+  {say:"The cut wood was hauled out on horse-drawn sleighs.",src:S325,ask:"The worker in the straw hat moves the wood. Where, and doing what?",
+   fig:{name:"Straw hat",note:"Forest worker",col:"#4f6f3a",hat:"straw"},opts:[[690,385,1],[260,396]],pose:"sleigh",poses:["carry","sleigh","shovel","net"],
+   hintPlace:"The wood is in the forest.",hintPose:"Horses pull the sleigh.",why:"Panel: the cut wood was hauled on horse-drawn sleighs."}],
+ notes:[["How it teaches",["The season changes in the middle of the story: winter opens the forest work."]],["Why it works here",["It ties into the island's season clock."]],["Care",["Hard, dangerous work: no score race, no jokes.","Mine tasks are only seen in figures: weaker source."]]]}
 ];
 
-/* ---------- state ---------- */
-const ST={};
-D.forEach(d=>{ST[d.id]={place:{},pose:{},phase:d.mode==="listen"?"build":"learn",covered:false,sel:null,spot:null,checked:null,line:-1,season:"summer",tries:{}}});
-let cur=D[0];
+const fresh=d=>({step:0,placed:[],phase:"done",tries:0,msg:null,bad:null,season:d.season||"summer",finished:false});
+const ST={};D.forEach(d=>{ST[d.id]=fresh(d)});
+let cur=D[0],voice=true;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const figOf=(d,id)=>d.figures.find(f=>f.id===id);
-const figSvg=(d,f,pose)=>d.objects?OBJ[f.id]:person(pose||"stand",f.col);
-function spotOpen(d,i){const st=ST[d.id],s=d.spots[i];if(st.phase!=="build")return false;if(s.winter&&st.season!=="winter")return false;if(d.mode==="listen"){const opened=d.lines.filter((l,k)=>k<=st.line&&l.spot!==undefined).map(l=>l.spot);return opened.includes(i)}return true}
+const figSvg=(f,pose)=>f.obj?OBJ[f.obj]:person(pose||"stand",f.col,f.hat);
+const step=()=>cur.steps[ST[cur.id].step];
+function enter(d){const st=ST[d.id],s=d.steps[st.step];st.phase=s.fig?"place":"done";st.tries=0;st.msg=null;st.bad=null;if(s.season)st.season=s.season}
+D.forEach(d=>enter(d));
+function speak(){if(!voice)return;const s=step();try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(s.say+(s.ask?" "+s.ask:""));u.lang="en-GB";u.rate=.95;speechSynthesis.speak(u)}catch(_){}}
 
-function renderTabs(){$("tabs").innerHTML=D.map(d=>`<button class="tab${ST[d.id].done?" done":""}" role="tab" aria-selected="${d===cur}" data-tab="${d.id}"><i>${ST[d.id].done?"✓":d.id}</i>${esc(d.name)}</button>`).join("")}
-
+function renderTabs(){$("tabs").innerHTML=D.map(d=>`<button class="tab${ST[d.id].finished?" done":""}" role="tab" aria-selected="${d===cur}" data-tab="${d.id}"><i>${ST[d.id].finished?"✓":d.id}</i>${esc(d.name)}</button>`).join("")}
 function renderStage(){
-  const d=cur,st=ST[d.id];
+  const d=cur,st=ST[d.id],s=step();
   $("sceneTitle").textContent=d.title;$("sceneMeta").textContent=d.meta;
   let h=ART[d.art](st);
-  const showAnswer=st.phase==="learn"&&(d.mode==="read"||d.mode==="look");
-  d.spots.forEach((s,i)=>{
-    const L=(s.x/800*100).toFixed(2),T=(s.y/450*100).toFixed(2);
-    let fid=st.place[i],pose=st.pose[i];
-    if(showAnswer){fid=s.show||(s.fig?s.fig[0]:d.figures[i%d.figures.length].id);pose=s.pose}
-    const f=fid&&figOf(d,fid);
-    const res=st.checked&&st.checked[i];
-    const cls=["spot",d.objects?"obj":"",f?"filled":"",st.spot===i?"sel":"",res===true?"ok":res===false?"bad":""].join(" ");
-    const open=spotOpen(d,i)||showAnswer;
-    const lab=f?`${f.name}${pose&&!d.objects?", "+POSES[pose].label:""}`:"empty";
-    h+=`<button class="${cls}" style="left:${L}%;top:${T}%" data-spot="${i}" ${open?"":"disabled"} aria-label="Spot ${i+1}: ${esc(lab)}"><span class="ring"></span><span class="num">${i+1}</span>${f?figSvg(d,f,pose):""}</button>`;
-  });
-  if(showAnswer&&d.label&&d.label.ol){const pts=d.mode==="look"?[[144,150],[440,195],[540,155]]:d.spots.slice(0,4).map(s=>[s.x,s.y-95]);pts.forEach((p,k)=>{h+=`<span class="callout" style="left:${p[0]/8}%;top:${p[1]/4.5}%">${k+1}</span>`})}
+  st.placed.forEach((p,k)=>{const now=k===st.placed.length-1&&st.phase!=="place"&&!st.finished;h+=`<div class="placed${d.objects?" obj":""}${now?" now":""}" style="left:${p.x/8}%;top:${p.y/4.5}%" role="img" aria-label="${esc(p.fig.name)}">${figSvg(p.fig,p.pose)}</div>`});
+  if(st.phase==="place")s.opts.forEach((o,k)=>{h+=`<button class="spot${d.objects?" obj":""}${st.bad===k?" bad":""}" style="left:${o[0]/8}%;top:${o[1]/4.5}%" data-opt="${k}" aria-label="Place ${esc(s.fig.name)} at spot ${k+1}"><span class="ring"></span><span class="q">${k+1}</span></button>`});
   $("stage").innerHTML=h;
-  renderSheet();
+  if(d.objects){$("sheetBox").innerHTML="";return}
+  const poses=s.poses||[],last=st.placed[st.placed.length-1];
+  $("sheetBox").innerHTML=`<div class="sheet"><div class="t">Pose sheet<span>${st.phase==="pose"?esc(s.fig.name)+": what does this person do here? (keys 1–4)":st.phase==="place"?"First put "+esc(s.fig.name)+" in place.":"Pick a pose after placing."}</span></div><div class="frames">${(poses.length?poses:["stand","watch","carry","saw"]).map((p,k)=>`<button class="frame${st.phase==="pose"&&st.bad===p?" bad":""}${st.phase==="done"&&s.pose===p?" good":""}" data-pose="${p}" ${st.phase==="pose"?"":"disabled"}><em>${k+1}</em>${person(p,s.fig?s.fig.col:"#7d8a96",s.fig?s.fig.hat:"cap")}${esc(POSES[p].label)}</button>`).join("")}</div></div>`;
 }
-
-function renderSheet(){
-  const d=cur,st=ST[d.id],i=st.spot;
-  if(d.objects||i===null||st.place[i]===undefined||st.phase!=="build"){$("sheetBox").innerHTML=d.objects?"":`<div class="sheet"><div class="t">Pose sheet<span>Place a figure, then pick what it does.</span></div><div class="frames">${d.poses.map((p,k)=>`<button class="frame" disabled><em>${k+1}</em>${person(p,"#7d8a96")}${esc(POSES[p].label)}</button>`).join("")}</div></div>`;return}
-  const f=figOf(d,st.place[i]);
-  $("sheetBox").innerHTML=`<div class="sheet"><div class="t">Pose sheet · spot ${i+1}<span>${esc(f.name)}: what does this person do here?</span></div><div class="frames">${d.poses.map((p,k)=>`<button class="frame" data-pose="${p}" aria-pressed="${st.pose[i]===p}"><em>${k+1}</em>${person(p,f.col)}${esc(POSES[p].label)}</button>`).join("")}</div></div>`;
-}
-
-function renderLearn(){
-  const d=cur,st=ST[d.id];let h="";
-  if(d.mode==="listen"){
-    const l=d.lines[st.line];
-    h=`<div class="label"><div class="pc">${d.src.pc}</div><h3>Listen: a day at the herring yard</h3><p>Press Listen. Each line opens the next ring on the beach.</p><div class="caption" id="cap">${l?esc(l.t)+`<small>${esc(l.s.t)}</small>`:"Captions appear here."}</div><div class="row" style="margin-top:8px"><button class="btn" id="listen">${st.line<0?"Listen":st.line<d.lines.length-1?"Next line":"Hear it again"}</button><span class="chip">Draft</span></div></div>`;
-  }else{
-    const L=d.label;
-    h=`<div class="label${st.covered?" covered":""}"><div class="pc">${d.src.pc}</div><h3>${esc(L.h)}</h3><div class="body">${L.p.map(p=>`<p>${esc(p)}</p>`).join("")}${L.ol?`<ol>${L.ol.map(x=>`<li>${esc(x)}</li>`).join("")}</ol>`:""}</div><div class="src">${esc(d.src.t)} · our paraphrase <span class="chip">Draft</span></div>`;
-    if(d.mode==="season")h+=`<div class="row" style="margin-top:10px"><span>Season</span><span class="season">${["summer","winter"].map(s=>`<button data-season="${s}" aria-pressed="${st.season===s}">${s[0].toUpperCase()+s.slice(1)}</button>`).join("")}</span></div>`;
-    h+=`<div class="row" style="margin-top:10px">${st.phase==="learn"?`<button class="btn" id="go">${d.mode==="look"?"Take things out and put them back":d.mode==="season"?"Start placing":"Cover the label and rebuild"}</button>`:st.covered?`<button class="btn ghost" id="peek">Peek at the label</button>`:""}</div></div>`;
+function renderSide(){
+  const d=cur,st=ST[d.id],s=step(),n=d.steps.length;
+  let h=`<div class="stepcard"><ol class="rail" aria-label="Steps">${d.steps.map((x,k)=>`<li class="${k<st.step||st.finished?"done":k===st.step?"now":""}"><i></i>${k<n-1?"<b></b>":""}</li>`).join("")}</ol>`;
+  h+=`<div class="stepno"><span>Step ${st.step+1} of ${n}</span><button class="toggle" id="voice" aria-pressed="${voice}">Voice ${voice?"on":"off"}</button></div>`;
+  h+=`<div class="caption">${esc(s.say)}<small>${esc(s.src.t)}${s.src.weak?" · weaker source":""}</small></div>`;
+  if(s.fig){
+    h+=`<p class="ask">${esc(s.ask)}</p>`;
+    if(st.phase==="place")h+=`<div class="hand"><button class="card" id="handcard" aria-label="${esc(s.fig.name)}: drag to a ring, or press a ring">${figSvg(s.fig,"stand")}</button><p><b>${esc(s.fig.name)}</b>${s.fig.note?esc(s.fig.note)+". ":""}Drag to a ring, or tap a ring.</p></div>`;
   }
-  $("learn").innerHTML=h;
+  if(st.msg)h+=`<div class="msg ${st.msg[0]}">${esc(st.msg[1])}${st.msg[0]==="ok"?`<small>${esc(s.src.t)}${s.src.weak?" · weaker source":""} <span class="chip">Draft</span></small>`:""}</div>`;
+  h+=`<div class="row"><button class="btn ghost" id="listen">Listen</button>`;
+  if(st.phase!=="done"&&st.tries>=2)h+=`<button class="btn ghost" id="show">Show me</button>`;
+  if(st.phase==="done"&&st.step<n-1)h+=`<button class="btn" id="next">Next step</button>`;
+  if(st.phase==="done"&&st.step===n-1&&!st.finished)h+=`<button class="btn" id="finish">See the whole scene</button>`;
+  h+=`</div>`;
+  if(st.finished){
+    h+=`<div class="stamp"><svg viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="40" r="34" fill="none" stroke="var(--season)" stroke-width="4"/><circle cx="40" cy="40" r="27" fill="none" stroke="var(--season)" stroke-width="1.5" stroke-dasharray="3 3"/><text x="40" y="38" text-anchor="middle" font-size="12" font-weight="700" fill="var(--season)">REBUILT</text><text x="40" y="53" text-anchor="middle" font-size="18" font-weight="700" fill="var(--season)">${d.id}</text></svg><div><b>Scene rebuilt.</b> In the app this adds a station stamp to the journal.</div></div>`;
+    h+=`<ol class="recap">${d.steps.filter(x=>x.why).map(x=>`<li>${esc(x.why)} <small>${x.src.weak?"weaker source":x.src.pc==="◎"?"IMG_7739":"PC "+esc(x.src.pc)}</small></li>`).join("")}</ol><div class="row" style="margin-top:8px"><button class="btn ghost" id="reset">Start again</button></div>`;
+  }
+  $("side").innerHTML=h+`</div>`;
 }
-
-function renderTray(){
-  const d=cur,st=ST[d.id],used=Object.values(st.place);
-  $("trayTitle").textContent=d.objects?"Things from the house":"Figures";
-  $("cards").innerHTML=d.figures.map(f=>`<button class="card${d.objects?" obj":""}${st.sel===f.id?" sel":""}${used.includes(f.id)?" used":""}" data-fig="${f.id}" ${st.phase!=="build"?"disabled":""}>${d.objects?OBJ[f.id]:person("stand",f.col)}${esc(f.name)}${f.note?`<small>${esc(f.note)}</small>`:""}</button>`).join("");
-}
-
-function renderFeedback(){
-  const d=cur,st=ST[d.id];
-  if(!st.checked){$("feedback").innerHTML="";$("stamp").className="stamp";return}
-  $("feedback").innerHTML=d.spots.map((s,i)=>{const r=st.checked[i];if(r===null)return `<li>Spot ${i+1}: still empty.</li>`;const src=`<small>${esc(s.src.t)}${s.obs?" · weaker source":""}</small>`;return r?`<li class="ok">Spot ${i+1}: ${esc(s.ok)}${src}</li>`:`<li class="no">Spot ${i+1}: not quite. ${esc((st.tries[i]||0)>1?"Answer: "+s.ok:s.hint)}${src}</li>`}).join("");
-  const all=st.checked.every(x=>x===true);
-  st.done=all;
-  $("stamp").className="stamp"+(all?" on":"");
-  $("stamp").innerHTML=all?`<svg viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="40" r="34" fill="none" stroke="var(--season)" stroke-width="4"/><circle cx="40" cy="40" r="27" fill="none" stroke="var(--season)" stroke-width="1.5" stroke-dasharray="3 3"/><text x="40" y="38" text-anchor="middle" font-size="12" font-weight="700" fill="var(--season)">REBUILT</text><text x="40" y="53" text-anchor="middle" font-size="18" font-weight="700" fill="var(--season)">${d.id}</text></svg><div><b>Scene rebuilt.</b> In the app this adds a station stamp to the journal.</div>`:"";
-}
-
-function render(){renderTabs();renderStage();renderLearn();renderTray();renderFeedback()}
-
-/* ---------- actions ---------- */
-function place(i,fid){
-  const d=cur,st=ST[d.id];if(!spotOpen(d,i))return;
-  if(d.objects){/* one object per slot; moving an object frees its old slot */for(const k in st.place)if(st.place[k]===fid)delete st.place[k]}
-  else for(const k in st.place)if(st.place[k]===fid){delete st.place[k];delete st.pose[k]}
-  st.place[i]=fid;delete st.pose[i];st.sel=null;st.spot=i;st.checked=null;render();
-}
-function check(){
-  const d=cur,st=ST[d.id];
-  st.checked=d.spots.map((s,i)=>{const f=st.place[i];if(f===undefined)return null;const okFig=!s.fig||s.fig.includes(f);const okPose=d.objects||st.pose[i]===s.pose;const ok=okFig&&okPose;if(!ok)st.tries[i]=(st.tries[i]||0)+1;return ok});
-  st.spot=null;render();
-}
-document.addEventListener("click",e=>{
-  const t=e.target.closest("button");if(!t)return;
-  const d=cur,st=ST[d.id];
-  if(t.dataset.tab){cur=D.find(x=>x.id===t.dataset.tab);try{speechSynthesis.cancel()}catch(_){}render();return}
-  if(t.dataset.fig){if(dragMoved)return;st.sel=st.sel===t.dataset.fig?null:t.dataset.fig;renderTray();return}
-  if(t.dataset.spot!==undefined){const i=+t.dataset.spot;if(st.sel)place(i,st.sel);else{st.spot=st.place[i]!==undefined?i:null;renderStage()}return}
-  if(t.dataset.pose){st.pose[st.spot]=t.dataset.pose;st.checked=null;renderStage();renderFeedback();return}
-  if(t.dataset.season){st.season=t.dataset.season;if(st.season==="summer")d.spots.forEach((s,i)=>{if(s.winter){delete st.place[i];delete st.pose[i]}});st.checked=null;render();return}
-  if(t.id==="go"){st.phase="build";st.covered=d.mode==="read";render();return}
-  if(t.id==="peek"){st.covered=false;render();return}
-  if(t.id==="listen"){st.line=st.line<d.lines.length-1?st.line+1:0;const l=d.lines[st.line];try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(l.t);u.lang="en-GB";u.rate=.95;speechSynthesis.speak(u)}catch(_){}render();return}
-  if(t.id==="check"){check();return}
-  if(t.id==="reset"){ST[d.id]={place:{},pose:{},phase:d.mode==="listen"?"build":"learn",covered:false,sel:null,spot:null,checked:null,line:-1,season:"summer",tries:{}};try{speechSynthesis.cancel()}catch(_){}render();return}
-});
-/* drag from tray to a ring */
-let drag=null,dragMoved=false;
-document.addEventListener("pointerdown",e=>{const c=e.target.closest(".card");if(!c||c.disabled)return;drag={fid:c.dataset.fig,x:e.clientX,y:e.clientY,el:null};dragMoved=false});
-document.addEventListener("pointermove",e=>{if(!drag)return;if(!drag.el&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>6){const d=cur,f=figOf(d,drag.fid);drag.el=document.createElement("div");drag.el.className="ghostfig";drag.el.innerHTML=figSvg(d,f,"stand");document.body.appendChild(drag.el);dragMoved=true}if(drag.el){drag.el.style.left=e.clientX+"px";drag.el.style.top=e.clientY+"px";document.querySelectorAll(".spot.over").forEach(s=>s.classList.remove("over"));const s=document.elementFromPoint(e.clientX,e.clientY)?.closest(".spot");if(s&&!s.disabled)s.classList.add("over")}});
-document.addEventListener("pointerup",e=>{if(!drag)return;const el=drag.el,fid=drag.fid;drag=null;if(!el)return;el.remove();const s=document.elementFromPoint(e.clientX,e.clientY)?.closest(".spot");if(s&&!s.disabled)place(+s.dataset.spot,fid);setTimeout(()=>{dragMoved=false},0)});
-/* keys 1-9 pick a pose frame */
-document.addEventListener("keydown",e=>{const st=ST[cur.id];if(st.spot===null||cur.objects)return;const n=+e.key;if(n>=1&&n<=cur.poses.length&&st.place[st.spot]!==undefined){st.pose[st.spot]=cur.poses[n-1];st.checked=null;renderStage()}});
-
 function renderNotes(){$("notes").innerHTML=cur.notes.map(n=>`<div class="note"><h3>${esc(n[0])}</h3><ul>${n[1].map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`).join("")}
-const _render=render;render=function(){_render();renderNotes()};
+function render(){renderTabs();renderStage();renderSide();renderNotes()}
+
+function placeAt(k){
+  const d=cur,st=ST[d.id],s=step();if(st.phase!=="place")return;const o=s.opts[k];
+  if(!o[2]){st.tries++;st.bad=k;st.msg=["no",(st.tries>1?"Not there. ":"Not quite. ")+s.hintPlace];render();return}
+  st.placed.push({x:o[0],y:o[1],fig:s.fig,pose:"stand"});st.bad=null;
+  if(d.objects||!s.pose){st.phase="done";st.msg=["ok",s.why]}else{st.phase="pose";st.tries=0;st.msg=["ok","Good place. Now pick a pose."]}
+  render();
+}
+function poseAs(p){
+  const st=ST[cur.id],s=step();if(st.phase!=="pose")return;
+  st.placed[st.placed.length-1].pose=p;
+  if(p===s.pose){st.phase="done";st.bad=null;st.msg=["ok",s.why]}else{st.tries++;st.bad=p;st.msg=["no","Not quite. "+s.hintPose]}
+  render();
+}
+function showMe(){const st=ST[cur.id],s=step();if(st.phase==="place"){const k=s.opts.findIndex(o=>o[2]);placeAt(k)}if(st.phase==="pose")poseAs(s.pose)}
+document.addEventListener("click",e=>{
+  const t=e.target.closest("button");if(!t)return;const d=cur,st=ST[d.id];
+  if(t.dataset.tab){cur=D.find(x=>x.id===t.dataset.tab);try{speechSynthesis.cancel()}catch(_){}render();return}
+  if(t.dataset.opt!==undefined){placeAt(+t.dataset.opt);return}
+  if(t.dataset.pose){poseAs(t.dataset.pose);return}
+  if(t.id==="next"){st.step++;enter(d);render();speak();return}
+  if(t.id==="finish"){st.finished=true;render();return}
+  if(t.id==="listen"){speak();return}
+  if(t.id==="voice"){voice=!voice;if(!voice)try{speechSynthesis.cancel()}catch(_){}renderSide();return}
+  if(t.id==="show"){showMe();return}
+  if(t.id==="reset"){ST[d.id]=fresh(d);enter(d);render();return}
+});
+let drag=null;
+document.addEventListener("pointerdown",e=>{const c=e.target.closest("#handcard");if(!c)return;drag={x:e.clientX,y:e.clientY,el:null}});
+document.addEventListener("pointermove",e=>{if(!drag)return;if(!drag.el&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>6){drag.el=document.createElement("div");drag.el.className="ghostfig";drag.el.innerHTML=figSvg(step().fig,"stand");document.body.appendChild(drag.el)}if(drag.el){drag.el.style.left=e.clientX+"px";drag.el.style.top=e.clientY+"px";document.querySelectorAll(".spot.over").forEach(s=>s.classList.remove("over"));const s=document.elementFromPoint(e.clientX,e.clientY)?.closest(".spot");if(s)s.classList.add("over")}});
+document.addEventListener("pointerup",e=>{if(!drag)return;const el=drag.el;drag=null;if(!el)return;el.remove();const s=document.elementFromPoint(e.clientX,e.clientY)?.closest(".spot");if(s)placeAt(+s.dataset.opt)});
+document.addEventListener("keydown",e=>{const st=ST[cur.id],s=step();if(st.phase!=="pose")return;const n=+e.key;if(n>=1&&n<=s.poses.length)poseAs(s.poses[n-1])});
 render();
 }
 </script>

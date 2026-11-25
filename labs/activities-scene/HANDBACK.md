@@ -2,14 +2,17 @@
 
 Part: activities
 Author: Lukas (+ agent)   Date: 2026-11-25
-Status: exploring (design phase; Lukas picks a direction before any app code)
+Status: exploring, version 2 (design phase; Lukas picks a direction before any app code)
 
 ## Recommendation
-Build direction A (1890 land survey camp) first as one new, additive activity
-kind `place`. Its museum panel (PC 314) has four numbered callouts, so each
-spot has a cited answer. Add B's Listen mode as a `learn` option on the same
-data. Use C's rule for any Ainu scene: place objects and tasks, never posed
-Ainu figures. Keep D (mine and winter forest, season switch) for later.
+Version 2 (after Lukas's feedback, 2026-11-26): every scene is a guided,
+step-by-step story with voice and captions. Each step gives one cited fact,
+then hands over ONE person (named by hat and colour) or thing, with a clue to
+reason from, 2-3 rings and 4 poses. The cited point is shown after the action.
+No "read, cover, recall" (it felt like a memory game). Ship the engine as one
+additive activity kind `place` with two strong-source scenes first: C (chise,
+things only) and A (survey camp, people). Herring and mine need a second
+source for their tasks.
 
 ## Keep
 | What | Files | Notes for porting |
@@ -20,8 +23,9 @@ Ainu figures. Keep D (mine and winter forest, season switch) for later.
 | Contract sketch | contract-proposal.ts | Additive kind `place` |
 
 ## Drop
-- Character choice where the source does not say who did what (herring,
-  mine): there only place and action count.
+- v1 "read the label, cover it, rebuild": felt like a memory game.
+- v1 tray of identical "Worker" figures: hard to tell apart.
+- Personal names for figures: a name could suggest who is Ainu. Name by look.
 - Any dress-up or costume colour to show who is Ainu.
 
 ## Contract impact
