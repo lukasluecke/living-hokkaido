@@ -94,6 +94,11 @@ Talk and Gather are not built or served here.
 **The splat is not in Git** (here or upstream: museum material, NOTICE.md).
 Get `omusha.sog` from Shaw, then:
 
+Both the bucket and the password are optional: without them the deploy
+works and the diorama shows the spot list with a "capture not available"
+note. To turn the capture on, add the binding from the comment in
+`wrangler.jsonc`, then:
+
 ```bash
 npx wrangler r2 bucket create living-hokkaido-museum   # once
 npx wrangler r2 object put living-hokkaido-museum/omusha.sog --file omusha.sog --remote

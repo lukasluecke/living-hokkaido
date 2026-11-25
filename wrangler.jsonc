@@ -6,11 +6,10 @@
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
   "observability": { "enabled": true },
-  // Museum captures (Omusha splat), never in Git. Create the bucket once:
-  // `npx wrangler r2 bucket create living-hokkaido-museum` (vendor/README.md).
-  "r2_buckets": [
-    { "binding": "MUSEUM_ASSETS", "bucket_name": "living-hokkaido-museum" }
-  ],
+  // Museum captures (Omusha splat) are optional. Without this binding or
+  // MUSEUM_ASSET_PASSWORD the diorama shows its spot list only. To turn the
+  // capture on, create the bucket and add (vendor/README.md):
+  //   "r2_buckets": [{ "binding": "MUSEUM_ASSETS", "bucket_name": "living-hokkaido-museum" }],
   // Secrets (set with `wrangler secret put`): LLM_API_KEY, optional ELEVENLABS_API_KEY,
   // MUSEUM_ASSET_PASSWORD (demo password for museum captures).
   "vars": { "LLM_PROVIDER": "carbonforge" }

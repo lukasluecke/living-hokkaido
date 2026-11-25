@@ -35,8 +35,8 @@ type Phase = "checking" | AssetPhase | "loading" | "shown" | "no-webgl";
 const STATUS: Partial<Record<Phase, string>> = {
   checking: "Checking access to the capture…",
   missing:
-    "The capture is not on this server yet. You can still open every spot in the list.",
-  off: "Museum captures are not set up on this server. You can still open every spot in the list.",
+    "Splat not available: the capture is not on this server yet. You can still open every spot in the list.",
+  off: "Splat not available on this server. You can still open every spot in the list.",
   "no-webgl":
     "This device cannot show the 3D capture. You can still open every spot in the list.",
 };
