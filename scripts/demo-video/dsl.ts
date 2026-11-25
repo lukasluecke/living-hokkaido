@@ -35,6 +35,8 @@ export type Step = Common &
       }
     | { do: "hover"; target: Target; moveMs?: number; timeoutMs?: number }
     | { do: "press"; key: string }
+    /** Click a text field, then type like a person (charMs per key). */
+    | { do: "type"; target: Target; text: string; charMs?: number }
     /** Drag from the target centre (or viewport centre) by dx/dy pixels. */
     | { do: "drag"; target?: Target; by: [number, number]; ms?: number }
     | { do: "wheel"; dy: number; ms?: number }
@@ -109,6 +111,11 @@ export const press = (key: string, opts: Partial<Common> = {}): Step => ({
   key,
   ...opts,
 });
+export const typeInto = (
+  target: Target,
+  t: string,
+  opts: Partial<Common> & { charMs?: number } = {},
+): Step => ({ do: "type", target, text: t, ...opts });
 export const hold = (ms: number): Step => ({ do: "hold", ms });
 export const waitFor = (
   target: Target,

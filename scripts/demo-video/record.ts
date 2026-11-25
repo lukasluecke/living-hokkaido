@@ -1,7 +1,13 @@
 // Backup demo video recorder. Drives the /shell flow from steps.ts and records
 // a fixed-size video. Run `npm run demo:video -- --help` for options.
 import { type ChildProcess, spawn, spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, renameSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  renameSync,
+  writeFileSync,
+} from "node:fs";
 import path from "node:path";
 import { createInterface } from "node:readline/promises";
 import { parseArgs } from "node:util";
@@ -15,6 +21,7 @@ import {
 import type { Shot, Step, Target } from "./dsl";
 import { installOverlay } from "./overlay";
 import { preroll, shots } from "./steps";
+import { installVirtualClock } from "./vclock";
 
 const HELP = `Backup demo video recorder
 
@@ -28,7 +35,10 @@ Output: recordings/demo-<time>.mp4 (needs ffmpeg; else .webm) + markers.
   --size <WxH>        Viewport and video size (default 1920x1080)
   --headed            Show the browser window (real GPU, best for WebGL)
   --browser <name>    chromium (default) | chrome | msedge (installed browser)
-  --capture <mode>    playwright (default) | none (drive only; record with
+  --capture <mode>    playwright (default) | frames (virtual clock, one
+                      screenshot per frame: smooth video on a slow or
+                      software GPU, renders slower than real time) | none
+                      (drive only; record with
                       OBS / QuickTime / Cmd+Shift+5, which also gets audio)
   --shots <a,b>       Only these shots, in this order
   --with <a,b>        Add shots that are off by default (e.g. timelapse)
@@ -38,6 +48,10 @@ Output: recordings/demo-<time>.mp4 (needs ffmpeg; else .webm) + markers.
   --no-cursor         Hide the drawn cursor
   --reduced-motion    Emulate prefers-reduced-motion
   --rehearse          No video, speed 0.3: check that the flow still works
+  --fps <n>           Frame rate for --capture frames (default 30)
+  --ask-fixture <f>   Answer POST /api/ask from a JSON file of recorded
+                      replies ({"<question>": <reply>}); other questions
+                      go to the app as usual
   --out <dir>         Output folder (default recordings)
   --list              List the shots and exit
 `;
@@ -60,6 +74,8 @@ const { values: opt } = parseArgs({
     "reduced-motion": { type: "boolean", default: false },
     rehearse: { type: "boolean", default: false },
     out: { type: "string", default: "recordings" },
+    fps: { type: "string", default: "30" },
+    "ask-fixture": { type: "string" },
     list: { type: "boolean", default: false },
     help: { type: "boolean", short: "h", default: false },
   },
@@ -88,7 +104,7 @@ const [width, height] = (opt.size ?? "").split("x").map(Number);
 if (!width || !height) throw new Error(`Bad --size "${opt.size}" (use WxH)`);
 const speed = Number(opt.speed ?? (opt.rehearse ? 0.3 : 1));
 const capture = opt.rehearse ? "none" : opt.capture;
-if (capture !== "playwright" && capture !== "none")
+if (capture !== "playwright" && capture !== "none" && capture !== "frames")
   throw new Error(`Bad --capture "${opt.capture}"`);
 
 function selectShots(): Shot[] {
@@ -198,7 +214,21 @@ async function launch(): Promise<Browser> {
 
 // ---- step runner ----------------------------------------------------------
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const realSleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const fps = Number(opt.fps) || 30;
+const frameMs = 1000 / fps;
+/** Frame mode: the page clock, in ms, as last advanced by the pump. */
+const vclock = { on: false, now: 0 };
+/** Waits page time in frame mode (after warm-up), real time otherwise. */
+async function sleep(ms: number) {
+  if (!vclock.on) return realSleep(ms);
+  const end = vclock.now + ms;
+  while (vclock.on && vclock.now < end) await realSleep(15);
+}
+/** Video time: page time in frame mode, wall time otherwise. */
+const clockNow = () => (vclock.on ? vclock.now : Date.now());
+/** Real-time timeouts must cover the slow frames of frame mode. */
+const tmo = (ms: number) => (capture === "frames" ? ms * 40 : ms);
 const scaled = (ms: number) => Math.max(0, Math.round(ms * speed));
 
 type Ctx = {
@@ -277,7 +307,11 @@ async function runStep(c: Ctx, s: Step): Promise<void> {
       return;
     case "click":
     case "hover": {
-      const { loc, x, y } = await centreOf(c, s.target, s.timeoutMs ?? 8000);
+      const { loc, x, y } = await centreOf(
+        c,
+        s.target,
+        tmo(s.timeoutMs ?? 8000),
+      );
       await glide(c, x, y, s.moveMs ?? 700);
       if (s.do === "hover") return;
       await sleep(scaled(s.pauseMs ?? 150));
@@ -288,15 +322,28 @@ async function runStep(c: Ctx, s: Step): Promise<void> {
         { x, y },
       );
       if (hit) await page.mouse.click(x, y);
+      // Frame mode: 3D labels move every frame, so Playwright never sees
+      // them "stable"; send the click to the element itself.
+      else if (capture === "frames") await loc.dispatchEvent("click");
       else await loc.click({ timeout: 3000 });
       return;
     }
     case "press":
       await page.keyboard.press(s.key);
       return;
+    case "type": {
+      const { loc, x, y } = await centreOf(c, s.target, tmo(8000));
+      await glide(c, x, y, 600);
+      await loc.focus({ timeout: tmo(3000) });
+      for (const ch of s.text) {
+        await page.keyboard.type(ch);
+        await sleep(scaled(s.charMs ?? 55));
+      }
+      return;
+    }
     case "drag": {
       const start = s.target
-        ? await centreOf(c, s.target, 5000)
+        ? await centreOf(c, s.target, tmo(5000))
         : { x: width / 2, y: height / 2 };
       await glide(c, start.x, start.y, 500);
       // No text selection while dragging over HTML (the stub parts).
@@ -324,7 +371,7 @@ async function runStep(c: Ctx, s: Step): Promise<void> {
     case "waitFor": {
       const loc = locate(page, s.target).first();
       const state = s.state ?? "visible";
-      await loc.waitFor({ state, timeout: s.timeoutMs ?? 8000 });
+      await loc.waitFor({ state, timeout: tmo(s.timeoutMs ?? 8000) });
       // Bring a new panel on screen (matters for the stacked HTML stubs).
       if (state === "visible")
         await loc.evaluate((el) =>
@@ -346,7 +393,7 @@ async function runStep(c: Ctx, s: Step): Promise<void> {
           return n > after ? n : false;
         },
         { type: s.type, after },
-        { timeout: s.timeoutMs ?? 10000 },
+        { timeout: tmo(s.timeoutMs ?? 10000), polling: 100 },
       );
       c.seen.set(s.type, (await handle.jsonValue()) as number);
       return;
@@ -376,7 +423,7 @@ async function runStep(c: Ctx, s: Step): Promise<void> {
       );
       return;
     case "mark":
-      c.markers.push({ at: (Date.now() - c.t0) / 1000, label: s.label });
+      c.markers.push({ at: (clockNow() - c.t0) / 1000, label: s.label });
       return;
   }
 }
@@ -399,6 +446,97 @@ async function run(c: Ctx, s: Step, where: string): Promise<boolean> {
     console.error(`  ✗ ${where}: ${describe(s)}\n    ${why}`);
     return false;
   }
+}
+
+// ---- frame mode -----------------------------------------------------------
+
+/**
+ * Drives the page's virtual clock (vclock.ts). Before `record` it follows
+ * wall time, so the warm-up loads at normal speed. After `record` every step
+ * moves the clock by one frame and pipes one screenshot to ffmpeg.
+ */
+function startPump(page: Page) {
+  let stopping = false;
+  const sink: { p: ChildProcess | null } = { p: null };
+  let frames = 0;
+  let file = "";
+  const advance = (ms: number) =>
+    page.evaluate(
+      (d) =>
+        (
+          window as { __vclock?: { advance: (n: number) => number } }
+        ).__vclock?.advance(d) ?? 0,
+      ms,
+    );
+  const loop = (async () => {
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Animation.enable").catch(() => {});
+    let last = Date.now();
+    let rate = 1;
+    while (!stopping) {
+      try {
+        const out = sink.p;
+        if (!out) {
+          const now = Date.now();
+          await advance(Math.min(100, now - last));
+          last = now;
+          await realSleep(16);
+          continue;
+        }
+        const t = Date.now();
+        vclock.now = await advance(frameMs);
+        const shot = await page.screenshot({ type: "jpeg", quality: 92 });
+        const ok = out.stdin?.write(shot);
+        if (!ok) await new Promise((r) => out.stdin?.once("drain", r));
+        frames++;
+        if (frames % (fps * 5) === 0)
+          console.log(`  · ${(frames / fps).toFixed(0)} s of video`);
+        // CSS transitions run on wall time: slow them to one frame per step.
+        const next = Math.min(1, Math.max(0.01, frameMs / (Date.now() - t)));
+        if (Math.abs(next - rate) / rate > 0.15) {
+          rate = next;
+          await cdp
+            .send("Animation.setPlaybackRate", { playbackRate: rate })
+            .catch(() => {});
+        }
+      } catch (err) {
+        if (stopping || page.isClosed()) break;
+        console.warn(`  ~ frame: ${String(err).split("\n")[0]}`);
+        await realSleep(50);
+      }
+    }
+  })();
+  return {
+    /** Start writing frames to an MP4 (needs ffmpeg on PATH). */
+    async record(mp4: string) {
+      file = mp4;
+      sink.p = spawn(
+        "ffmpeg",
+        [
+          ...["-y", "-loglevel", "error", "-f", "image2pipe"],
+          ...["-framerate", String(fps), "-c:v", "mjpeg", "-i", "-"],
+          ...["-c:v", "libx264", "-preset", "medium", "-crf", "18"],
+          ...["-pix_fmt", "yuv420p", "-movflags", "+faststart", mp4],
+        ],
+        { stdio: ["pipe", "ignore", "inherit"] },
+      );
+      vclock.now = await advance(0);
+      vclock.on = true;
+    },
+    async stop() {
+      stopping = true;
+      await loop;
+      vclock.on = false;
+      const p = sink.p;
+      if (p) {
+        await new Promise((r) => {
+          p.on("close", r);
+          p.stdin?.end();
+        });
+      }
+      return { frames, file };
+    },
+  };
 }
 
 // ---- main -----------------------------------------------------------------
@@ -430,6 +568,26 @@ async function main() {
         ? { recordVideo: { dir: rawDir, size: { width, height } } }
         : {}),
     });
+    if (capture === "frames")
+      await context.addInitScript({
+        content: `var __name = (f) => f; (${installVirtualClock.toString()})();`,
+      });
+    if (opt["ask-fixture"]) {
+      const replies = JSON.parse(
+        readFileSync(opt["ask-fixture"], "utf8"),
+      ) as Record<string, unknown>;
+      await context.route("**/api/ask", async (route) => {
+        const req = route.request();
+        const q =
+          req.method() === "POST"
+            ? (req.postDataJSON() as { question?: string } | null)?.question
+            : undefined;
+        const reply = q ? replies[q.trim()] : undefined;
+        if (reply === undefined) return route.continue();
+        await realSleep(1200); // about the live round trip
+        await route.fulfill({ json: reply });
+      });
+    }
     // Passed as source text with a __name shim: tsx (esbuild) adds __name()
     // calls to functions, and that helper does not exist in the page.
     await context.addInitScript({
@@ -437,6 +595,7 @@ async function main() {
     });
     const page = await context.newPage();
     const pageStart = Date.now();
+    const pump = capture === "frames" ? startPump(page) : null;
     Object.assign(ctx, {
       page,
       base,
@@ -473,7 +632,8 @@ async function main() {
       );
     }
 
-    c.t0 = Date.now();
+    if (pump) await pump.record(path.join(outDir, `demo-${stamp}.mp4`));
+    c.t0 = clockNow();
     const trim = (c.t0 - pageStart) / 1000;
     for (const shot of selected) {
       console.log(`▶ ${shot.id}: ${shot.title}`);
@@ -486,10 +646,25 @@ async function main() {
     }
     await sleep(scaled(800));
 
+    const duration = (clockNow() - c.t0) / 1000;
+    if (pump) {
+      const name = `demo-${stamp}${ok ? "" : "-FAILED"}`;
+      const done = await pump.stop();
+      const mp4 = path.join(outDir, `${name}.mp4`);
+      if (!ok) renameSync(done.file, mp4);
+      console.log(`\nVideo: ${mp4} (${done.frames} frames at ${fps} fps)`);
+      writeFileSync(
+        path.join(outDir, `${name}.markers.json`),
+        `${JSON.stringify({ size: `${width}x${height}`, duration, markers: c.markers }, null, 2)}\n`,
+      );
+      writeFileSync(
+        path.join(outDir, `${name}.chapters.txt`),
+        `${c.markers.map((m) => `${fmt(m.at)} ${m.label}`).join("\n")}\n`,
+      );
+    }
     const video = page.video();
     await context.close();
     context = null;
-    const duration = (Date.now() - c.t0) / 1000;
     const markers = c.markers;
     if (capture === "playwright" && video) {
       const name = `demo-${stamp}${ok ? "" : "-FAILED"}`;

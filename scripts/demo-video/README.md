@@ -43,22 +43,48 @@ other running app, `--no-build` reuses the last build, `--dev` uses
 - If the Playwright capture stutters, the OS-recorder path above is the
   fallback. It gives the smoothest result because it records real frames.
 
+## Slow or no GPU: frame mode
+
+```sh
+npm run demo:video -- --capture frames --size 1600x900 \
+  --ask-fixture scripts/demo-video/ask-live.json
+```
+
+`--capture frames` puts a virtual clock in the page (`vclock.ts`):
+`performance.now`, `Date.now`, timers and `requestAnimationFrame` only move
+when the recorder advances them, by exactly one frame (`--fps`, default 30).
+After each frame it takes a screenshot and pipes it to ffmpeg. So the video
+is smooth even where WebGL renders at 1–2 fps (a cloud container with
+software rendering). It is slower than real time: about 1–2 s per frame at
+1600×900 in a 4-core container, so a 3-minute video takes 1–2 hours. CSS
+transitions run on the browser clock; the recorder slows the document
+timeline to match, which is close but not exact. Audio is not recorded.
+
+`--ask-fixture` answers `POST /api/ask` for the listed questions from a JSON
+file. `ask-live.json` holds one reply that the live site
+(`carbonforge-flash`) gave on 2026-11-25 for "How was cloth made from
+bark?". Use it only where the app has no AI key (the container). Say in the
+video notes that the answer is a recorded live reply. Questions that are not
+in the file go to the app as usual.
+
 ## Shots
 
 ```sh
 npm run demo:video -- --list
 ```
 
-| Shot        | What it shows                                          |
-| ----------- | ------------------------------------------------------ |
-| `island`    | Island, slow orbit, pick the open location, owl flight |
-| `scene`     | Roof-lift entry into the house                         |
-| `artifact`  | Focus the cloth, turn it, open each hotspot            |
-| `reveal`    | "How do we know?" card                                 |
-| `activity`  | Weave activity                                         |
-| `journal`   | Heritage Journal with the earned stamps                |
-| `outro`     | Back out to the island                                 |
-| `timelapse` | Season timelapse (off by default: `--with timelapse`)  |
+| Shot        | What it shows                                           |
+| ----------- | ------------------------------------------------------- |
+| `island`    | Island, slow orbit, pick the lake house, owl flight     |
+| `scene`     | Roof-lift entry into the lake house                     |
+| `artifact`  | Inner bark fibers: turn it, hotspots, "How do we know?" |
+| `ask`       | Ask the owl a question; answer with cited claims        |
+| `build`     | Herring coast: Build the herring yard (two steps)       |
+| `games`     | Erina's games: Out of Place panel, then the Slope       |
+| `seasons`   | Season timelapse on the island                          |
+| `journal`   | Heritage Journal with the earned stamps                 |
+
+The order follows [docs/DEMO-SCRIPT.md](../../docs/DEMO-SCRIPT.md).
 
 Examples:
 
@@ -114,6 +140,8 @@ it, `waitForEvent` waits `fallbackMs` and `emit` steps fail. See
 | `dsl.ts`     | Step types and builders, no Playwright import                |
 | `record.ts`  | CLI: app server, browser, step runner, ffmpeg                |
 | `overlay.ts` | In-page cursor, click ripple, captions, countdown, event log |
+| `vclock.ts`  | Virtual page clock for `--capture frames`                    |
+| `ask-live.json` | One recorded live Ask reply for `--ask-fixture`           |
 
 ## Limits
 
@@ -122,5 +150,5 @@ it, `waitForEvent` waits `fallbackMs` and `emit` steps fail. See
   against the 3D parts.
 - Playwright records at about 25 fps internally; the MP4 is resampled to a
   constant 30 fps. For true 60 fps use the `--capture none` path.
-- The `activity` shot clicks every cell of the HTML weave stub. Update it
-  when the D2 weave lands.
+- Frame mode tested in the Linux cloud container on 2026-11-25 against the
+  3D parts (software WebGL).

@@ -1,0 +1,17 @@
+{
+  "How was cloth made from bark?": {
+    "mode": "live",
+    "known": true,
+    "text": "Cloth was made by weaving fibers from the inner bark of trees. In Ainu, this bark-fiber cloth and the clothes made from it are called attus.",
+    "citations": [
+      { "knowledgeId": "bark-to-cloth", "claimId": "bark-fiber" },
+      { "knowledgeId": "bark-to-cloth", "claimId": "term-attus" }
+    ],
+    "action": {
+      "kind": "artifact",
+      "locationId": "lake-house",
+      "artifactId": "fiber"
+    },
+    "notice": "AI summary (carbonforge-flash) of the cited claims. Research preview."
+  }
+}
