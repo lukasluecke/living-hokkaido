@@ -1,8 +1,8 @@
 // Renderer, lights, the player's figure and the chase camera.
 import * as THREE from "three";
-import { pointAt, type Quat, type Vec3 } from "../core/path";
+import { frameAt, pointAt, type Quat, type Vec3 } from "../core/path";
 import type { Track } from "../core/track";
-import { PLAYER } from "../physics/world";
+import { obstaclePose, PLAYER } from "../physics/world";
 import { PALETTE } from "../style/palette";
 import { buildStreet } from "../world/street";
 
@@ -62,8 +62,68 @@ export function createView(
   sc.far = 60;
   key.shadow.bias = -0.0005;
   scene.add(key, key.target);
+  // Gas-lamp light from both sides of the street, so the facades on either
+  // side read (the key light alone left one side nearly black).
+  const sideL = new THREE.DirectionalLight(PALETTE.lamp, 0.9);
+  const sideR = new THREE.DirectionalLight(PALETTE.window, 0.7);
+  scene.add(sideL, sideL.target, sideR, sideR.target);
 
   scene.add(buildStreet(track));
+
+  // A soft halo around every gas lamp.
+  const haloTex = (() => {
+    const c = document.createElement("canvas");
+    c.width = c.height = 64;
+    const g = c.getContext("2d");
+    if (g) {
+      const r = g.createRadialGradient(32, 32, 2, 32, 32, 32);
+      r.addColorStop(0, "rgba(255,214,150,0.9)");
+      r.addColorStop(0.35, "rgba(255,194,119,0.35)");
+      r.addColorStop(1, "rgba(255,194,119,0)");
+      g.fillStyle = r;
+      g.fillRect(0, 0, 64, 64);
+    }
+    return new THREE.CanvasTexture(c);
+  })();
+  const haloMat = new THREE.SpriteMaterial({
+    map: haloTex,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    transparent: true,
+  });
+  for (const o of track.obstacles) {
+    if (o.kind !== "lamp-post") continue;
+    const { pos } = obstaclePose(track, o);
+    const halo = new THREE.Sprite(haloMat);
+    halo.position.set(pos[0], pos[1] + o.h / 2 + 0.25, pos[2]);
+    halo.scale.setScalar(2.4);
+    scene.add(halo);
+  }
+
+  // Falling snow around the camera (none with reduced motion).
+  const FLAKES = reducedMotion ? 0 : 1400;
+  const BOX = { x: 14, y: 9, z: 22 } as const;
+  const flakePos = new Float32Array(FLAKES * 3);
+  for (let i = 0; i < FLAKES; i++) {
+    flakePos[i * 3] = (Math.random() * 2 - 1) * BOX.x;
+    flakePos[i * 3 + 1] = Math.random() * BOX.y * 2 - BOX.y;
+    flakePos[i * 3 + 2] = (Math.random() * 2 - 1) * BOX.z;
+  }
+  const flakeGeo = new THREE.BufferGeometry();
+  flakeGeo.setAttribute("position", new THREE.BufferAttribute(flakePos, 3));
+  const flakes = new THREE.Points(
+    flakeGeo,
+    new THREE.PointsMaterial({
+      color: PALETTE.snow,
+      size: 0.07,
+      transparent: true,
+      opacity: 0.85,
+      depthWrite: false,
+    }),
+  );
+  flakes.frustumCulled = false;
+  if (FLAKES) scene.add(flakes);
+  let snowT = 0;
 
   // The player: a small figure in a red coat and blue scarf. Same capsule
   // as the physics body; the ragdoll replaces it in M4.
@@ -155,6 +215,33 @@ export function createView(
       }
       key.position.set(p.x - 5, p.y + 24, p.z + 4);
       key.target.position.copy(p);
+      const fr = frameAt(track.path, pose.s).right;
+      sideL.position.set(p.x - fr[0] * 12, p.y + 6, p.z - fr[2] * 12);
+      sideL.target.position.copy(p);
+      sideR.position.set(p.x + fr[0] * 12, p.y + 6, p.z + fr[2] * 12);
+      sideR.target.position.copy(p);
+      if (FLAKES) {
+        // Flakes fall and drift; each wraps around the camera's box.
+        snowT += dt;
+        const c = camera.position;
+        const a = flakeGeo.attributes.position as THREE.BufferAttribute;
+        const arr = a.array as Float32Array;
+        const wrap = (v: number, centre: number, half: number) =>
+          v - centre > half
+            ? v - half * 2
+            : v - centre < -half
+              ? v + half * 2
+              : v;
+        for (let i = 0; i < FLAKES; i++) {
+          const j = i * 3;
+          arr[j + 1] -= dt * (0.9 + (i % 7) * 0.12);
+          arr[j] += Math.sin(snowT * 0.8 + i) * dt * 0.3;
+          arr[j] = wrap(arr[j]!, c.x, BOX.x);
+          arr[j + 1] = wrap(arr[j + 1]!, c.y, BOX.y);
+          arr[j + 2] = wrap(arr[j + 2]!, c.z, BOX.z);
+        }
+        a.needsUpdate = true;
+      }
       renderer.render(scene, camera);
     },
     canvas: renderer.domElement,

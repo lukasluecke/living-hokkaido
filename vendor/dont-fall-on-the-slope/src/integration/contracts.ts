@@ -47,6 +47,8 @@ export type SlopeProps = {
   /** Exhibit ids this visitor noticed before (the host's journal keeps
    *  them; the game keeps no storage). */
   seen?: string[];
+  /** Start with the sounds off (the player can turn them on, M). */
+  muted?: boolean;
   /** Dev only: start this many metres down the street (the page reads
    *  ?at=N). Hosts leave it out. */
   startAt?: number;

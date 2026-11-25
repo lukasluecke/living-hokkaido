@@ -165,9 +165,9 @@ here unless the user asks.
     `scene` enum in `contract-proposal.ts` and to `SCENE_ART`.
   - **Scale rule:** people and Nuri are about 140 px tall. Buildings must be clearly taller
     (two storeys about 190–200 px), or the scene reads as a toy town.
-- **M7 Shareable clips (mostly done 2026-11-26):** Save clip replays the reveal for 10 s and
+- **M7 Shareable clips (done 2026-11-26):** Save clip replays the reveal for 10 s and
   records a vertical 9:16 MP4/WebM with the history card; Web Share on phones, download
-  elsewhere. Still to do: PNG history card.
+  elsewhere. Save card (I) saves the same layout as a still 9:16 PNG.
 - **M8 Online multiplayer:** authoritative server reusing `src/core`, rooms and join codes,
   hidden info (seekers never receive hider positions), reconnects.
 

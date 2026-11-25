@@ -185,11 +185,34 @@ export function createHud(host: HTMLElement, touch: boolean) {
   live.setAttribute("aria-live", "polite");
   live.setAttribute("role", "status");
 
-  root.append(meter, toast, card, pad);
+  // Sound on/off (M), top right.
+  const mute = el("button", {
+    position: "absolute",
+    top: "12px",
+    right: "16px",
+    minWidth: "44px",
+    minHeight: "44px",
+    padding: "6px 12px",
+    borderRadius: "10px",
+    border: `2px solid ${css("cream", 0.5)}`,
+    background: css("ink", 0.55),
+    color: css("cream"),
+    font: `700 14px ${font}`,
+    pointerEvents: "auto",
+    cursor: "pointer",
+  });
+  mute.type = "button";
+
+  root.append(meter, toast, card, pad, mute);
   host.append(root, live);
 
   return {
-    buttons: { left, brace, right, action: button },
+    buttons: { left, brace, right, action: button, mute },
+    setMuted(m: boolean) {
+      mute.textContent = m ? "Sound off" : "Sound on";
+      mute.setAttribute("aria-pressed", String(!m));
+      mute.setAttribute("aria-label", m ? "Sound off (M)" : "Sound on (M)");
+    },
     setMeter(metres: number, best: number, found?: [number, number]) {
       const parts = [`${metres} m`];
       if (best > 0) parts.push(`best ${best} m`);

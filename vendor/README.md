@@ -69,6 +69,13 @@ the diff):
    `integration/contracts.ts`). The game now emits `activity.complete` at
    the end of every run (with `found`), not only once. The standalone page
    has placeholder exhibits (`?seen=all`).
+9. Don't Fall on the Slope, Erina's open M5/M3 tasks, one commit: falling
+   snow, side lights and lamp halos (`render/view.ts`), WebAudio sounds
+   with a mute button and M key (`audio/sfx.ts`, vendor-only
+   `SlopeProps.muted`), close calls on the stats line (`core/style.ts`).
+10. Out of Place, Erina's open M7 task, one commit: Save card (I) saves
+   the reveal history card as a 9:16 PNG (`cardImage` in `game/clip.ts`);
+   long facts shrink to fit above the honesty footer.
 
 ## Pull new upstream changes
 

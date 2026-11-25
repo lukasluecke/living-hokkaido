@@ -19,6 +19,7 @@ import {
 } from "../core/round";
 import {
   type ClipLayout,
+  cardImage,
   clipSupport,
   deliverClip,
   startVerticalClip,
@@ -512,23 +513,33 @@ export class GameScene extends Phaser.Scene {
     });
     const how = makeButton(
       this,
-      -128,
+      -158,
       CARD.h / 2 - 44,
-      250,
+      204,
       54,
       "How do we know?",
       () => this.openSources(),
-      21,
+      19,
+    );
+    const still = makeButton(
+      this,
+      27,
+      CARD.h / 2 - 44,
+      150,
+      54,
+      "Save card",
+      () => void this.saveCard(),
+      19,
     );
     const clip = makeButton(
       this,
-      136,
+      186,
       CARD.h / 2 - 44,
-      230,
+      152,
       54,
       "Save clip ●",
       () => void this.saveClip(),
-      21,
+      19,
     );
     this.card.add([
       this.cardBox,
@@ -539,6 +550,7 @@ export class GameScene extends Phaser.Scene {
       this.factLabelText,
       this.factText,
       how.root,
+      still.root,
       clip.root,
     ]);
 
@@ -651,6 +663,11 @@ export class GameScene extends Phaser.Scene {
         ev.key.toLowerCase() === "c"
       ) {
         void this.saveClip();
+      } else if (
+        (phase === "reveal" || phase === "roundOver") &&
+        ev.key.toLowerCase() === "i"
+      ) {
+        void this.saveCard();
       } else if (
         (phase === "reveal" || phase === "roundOver") &&
         ev.key.toLowerCase() === "s"
@@ -1250,7 +1267,7 @@ export class GameScene extends Phaser.Scene {
     );
     this.layoutFact(r.factLabel, r.fact);
     this.cfg.announce(
-      `${r.title} ${r.stats} ${found ? `${r.giveaway} ` : ""}${r.factLabel}: ${r.fact} Press Enter to continue, S for sources, C to save a clip.`,
+      `${r.title} ${r.stats} ${found ? `${r.giveaway} ` : ""}${r.factLabel}: ${r.fact} Press Enter to continue, S for sources, I to save the card as a picture, C to save a clip.`,
     );
     this.playRevealSequence(false);
 
@@ -1492,6 +1509,47 @@ export class GameScene extends Phaser.Scene {
     this.cfg.announce(text);
   }
 
+  /** Title, the giveaway, the fact and the honesty labels for clip and card. */
+  private clipLayout(info: RevealInfo): ClipLayout {
+    return {
+      title: info.found ? "FOUND!" : "Master of Disguise!",
+      subtitle: this.cfg.activity.title,
+      lines: [
+        ...(info.found
+          ? [{ label: "What gave me away", text: info.giveaway }]
+          : []),
+        { label: info.factLabel, text: info.fact },
+      ],
+      footer: `${this.honestyLabels()} · Sources in the game`,
+    };
+  }
+
+  /**
+   * Save card: a still 9:16 PNG of the hider (as the reveal shows them now)
+   * with the same text as the clip. Works in browsers that can't record video.
+   */
+  private async saveCard() {
+    const info = this.revealInfo;
+    if (this.recording || !info || !this.revealCardShown) return;
+    const k = this.game.canvas.width / WORLD_W;
+    const size = 540;
+    const blob = await cardImage(
+      this.game.canvas,
+      {
+        x: (REVEAL_SCREEN_X - size / 2) * k,
+        y: (WORLD_H / 2 - size / 2) * k,
+        size: size * k,
+      },
+      this.clipLayout(info),
+    );
+    if (!blob) {
+      this.toast("This browser can’t save the card.");
+      return;
+    }
+    const how = await deliverClip(blob, "png");
+    this.toast(how === "shared" ? "Card shared!" : "Card saved (PNG, 9:16)");
+  }
+
   /**
    * Save clip: replays the reveal moment for 10 seconds (zoom, sting, pose) and
    * records it as a vertical 9:16 video with the history card underneath.
@@ -1505,18 +1563,7 @@ export class GameScene extends Phaser.Scene {
       return;
     }
     this.recording = true;
-    const a = this.cfg.activity;
-    const layout: ClipLayout = {
-      title: info.found ? "FOUND!" : "Master of Disguise!",
-      subtitle: a.title,
-      lines: [
-        ...(info.found
-          ? [{ label: "What gave me away", text: info.giveaway }]
-          : []),
-        { label: info.factLabel, text: info.fact },
-      ],
-      footer: `${this.honestyLabels()} · Sources in the game`,
-    };
+    const layout = this.clipLayout(info);
     const k = this.game.canvas.width / WORLD_W;
     const size = 540;
     const rec = startVerticalClip({
