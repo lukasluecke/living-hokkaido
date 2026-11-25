@@ -359,6 +359,7 @@
   /* Protocol (墨) */
   .protocol { border-top: 3px double var(--ink); color: var(--ink-soft); align-items: center; }
   .protocol .seal { flex: none; }
+  .protocol .ptext { flex: 1; min-width: 0; line-height: 1.5; }
 </style>
 </head>
 <body>
@@ -651,8 +652,8 @@ function showRecord(list, { envelopes, about }) {
   Env.renderRecord($("sKnown"), list, { onCorrect: (o) => { setTab("record"); form?.correct(o); } });
   const unknown = list.filter((o) => o.kind === "absence").length;
   $("sCount").textContent = t("count")(list.length, unknown);
-  $("sProtocol").innerHTML = `<span class="seal" data-layer="protocol">掟</span><span></span>`;
-  $("sProtocol").querySelector("span").textContent = t("protocol");
+  $("sProtocol").innerHTML = `<span class="seal" data-layer="protocol">掟</span><span class="ptext"></span>`;
+  $("sProtocol").querySelector(".ptext").textContent = t("protocol");
 }
 // Form layer: the badge on the view, and "How this view was made" behind it.
 function showFormBadge(form, notes = []) {
