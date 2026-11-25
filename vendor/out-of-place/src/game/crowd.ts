@@ -118,6 +118,19 @@ export class Crowd {
       .setDepth(p[1]);
   }
 
+  /**
+   * See-through while a hider paints: the workers walk on, faded, so they do
+   * not get in the way of the brush or the eyedropper.
+   */
+  setFaded(scene: Phaser.Scene, faded: boolean) {
+    const alpha = faded ? 0.18 : 1;
+    for (const m of this.movers) {
+      scene.tweens.killTweensOf(m.img);
+      if (this.still) m.img.setAlpha(alpha);
+      else scene.tweens.add({ targets: m.img, alpha, duration: 300 });
+    }
+  }
+
   setVisible(v: boolean) {
     for (const m of this.movers) m.img.setVisible(v);
   }

@@ -212,6 +212,13 @@ export function retrieve(
     return n === 0 ? 0 : Math.log(1 + all.length / n);
   };
   const focused = pack.artifacts.find((a) => a.id === req.context.artifactId);
+  // Claims on the objects in the room the visitor stands in.
+  const scene = pack.scenes.find((x) => x.id === req.context.sceneId);
+  const inRoom = new Set(
+    pack.artifacts
+      .filter((a) => scene?.placements.some((p) => p.artifactId === a.id))
+      .flatMap((a) => a.claimIds.map((c) => `${a.knowledgeId}/${c}`)),
+  );
   const scored = all
     .map((d) => {
       let score = 0;
@@ -231,6 +238,7 @@ export function retrieve(
       score *= 1 + hits / q.length;
       // A small nudge for claims about the object in the visitor's hands.
       if (score > 0 && focused?.claimIds.includes(d.ref.claimId)) score += 0.3;
+      if (inRoom.has(`${d.ref.knowledgeId}/${d.ref.claimId}`)) score *= 1.5;
       return { d, score };
     })
     .filter((x) => x.score >= 1.5)
@@ -269,7 +277,7 @@ export function scriptedAnswer(
   const place = locationFor(pack, req.question, req.context);
   if (found.length === 0) return unknownAnswer("scripted", notice, place);
   const top = found[0]?.score ?? 0;
-  const picked = found.filter((c) => c.score >= top * 0.6).slice(0, 2);
+  const picked = found.filter((c) => c.score >= top * 0.75).slice(0, 2);
   return {
     mode: "scripted",
     known: true,

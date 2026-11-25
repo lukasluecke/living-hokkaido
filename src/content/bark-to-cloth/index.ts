@@ -58,15 +58,76 @@ export const barkToClothRaw = {
   guide,
   memories,
   timelines: [houseTimeline],
-  // "Ask the owl" example questions. Questions only; answers come from claims.
+  // "Ask the owl" example questions, by where the visitor is. Questions
+  // only; answers come from cited claims (tests/ask.test.ts checks that each
+  // one finds a claim in its place).
   ask: {
     suggestions: [
-      "How do you soften bark?",
       "What is attus?",
-      "Why is the pattern not mirrored?",
-      "Are these clothes worn today?",
-      "How did houses change over time?",
+      "How did Ainu people get their food?",
+      "How did Ainu houses change?",
+      "What is a kamuy?",
     ],
+    byLocation: {
+      "lake-house": [
+        "How do you soften bark?",
+        "What happened around the hearth?",
+        "Why is the pattern not mirrored?",
+      ],
+      "listening-grove": [
+        "What is a sakehe?",
+        "Do Ainu greetings differ by region?",
+        "Why is the fish owl respected?",
+      ],
+      "makers-clearing": [
+        "What is a loom called?",
+        "How is the thread made?",
+        "Who was seen as a full adult?",
+      ],
+      "memory-cabin": [
+        "Are these clothes worn today?",
+        "When was the Ainu Association founded?",
+        "What is Upopoy?",
+      ],
+      "herring-coast": [
+        "What did Ainu people catch in the sea?",
+        "What was the catch made into?",
+        "Why was salmon fishing banned?",
+      ],
+      "survey-forest": [
+        "Why was the land cut into plots?",
+        "Who guided the survey?",
+        "What wild plants did people gather?",
+      ],
+      "animal-hills": [
+        "How does a set bow work?",
+        "Which animals were hunted?",
+        "Is every animal a kamuy?",
+      ],
+      "coal-mountain": [
+        "When did coal mining begin?",
+        "What work was done in the winter woods?",
+      ],
+    },
+    byArtifact: {
+      fiber: ["When is bark peeled?", "How do you soften bark?"],
+      cloth: ["How is the thread made?", "Is this a real weaving technique?"],
+      garment: [
+        "Why is the pattern not mirrored?",
+        "How are the patterns made?",
+        "Are these clothes worn today?",
+      ],
+      herring: [
+        "What was the catch made into?",
+        "Which fish stand for Hokkaido seafood?",
+      ],
+      "survey-stake": ["Why straight plots?", "Who guided the survey?"],
+      "set-bow": ["How does a set bow work?", "How was a bear used?"],
+      coal: [
+        "How big was coal mining in Hokkaido?",
+        "When did coal mining begin?",
+      ],
+    },
   },
 };
 

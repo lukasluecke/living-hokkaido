@@ -192,12 +192,15 @@ export function startGame(
       scale = SLOWMO.scale;
     }
     if (state.phase !== "ready") {
-      acc += real * scale;
+      // Slow motion takes smaller steps at the same rate, not fewer steps:
+      // skipping steps would show the same pose for several frames (judder).
+      const dt = STEP * scale;
+      acc += real;
       while (acc >= STEP) {
         acc -= STEP;
         const want = input.controls();
-        lean = easeLean(lean, want.lean, STEP);
-        const hit = physics.step({ ...want, lean }, STEP);
+        lean = easeLean(lean, want.lean, dt);
+        const hit = physics.step({ ...want, lean }, dt);
         if (state.phase === "sliding") {
           dispatch({ type: "progress", distance: physics.distance() });
           const here = physics.local();

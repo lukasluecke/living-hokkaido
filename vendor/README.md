@@ -50,6 +50,14 @@ the diff):
    `SlopeProps.finds`) listed with their claims on the end card; snow
    piles slow you down instead of a crash (`SOFT` in `physics/world.ts`);
    lean eases in (`easeLean`).
+5. Out of Place, Lukas's feedback, one commit: poses are stand, sit, kneel,
+   lie (`core/round.ts` `POSES` / `POSE_HITBOX`, `game/nuri.ts`); an
+   eyedropper loupe; workers fade while a hider paints (`Crowd.setFaded`);
+   2× canvas on big or hi-DPI screens (`style/res.ts`, cameras zoom by
+   `RES`, text `resolution`); the reveal zoom does not snap to pixels.
+6. Don't Fall on the Slope, one commit: slow motion takes smaller steps
+   (no judder); the HUD card is centred without `translate(-50%)` (sharp
+   text).
 
 ## Pull new upstream changes
 

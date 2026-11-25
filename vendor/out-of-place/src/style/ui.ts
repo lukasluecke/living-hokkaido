@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { css, PALETTE, type PaletteKey } from "./palette";
+import { RES } from "./res";
 
 export const SERIF = 'Georgia, "Hiragino Mincho ProN", serif';
 export const OUTLINE = 4;
@@ -50,6 +51,7 @@ export function makeText(
     color: css(color),
     stroke: css("outline"),
     strokeThickness: Math.max(4, Math.round(size / 9)),
+    resolution: RES,
     ...opts,
   });
 }
