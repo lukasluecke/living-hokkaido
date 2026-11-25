@@ -9,6 +9,7 @@ import {
   localizePack,
   translate,
   translator,
+  untranslated,
 } from "@/i18n/core";
 import { route } from "@/shell/route";
 import { initialState } from "@/shell/state";
@@ -78,17 +79,11 @@ test("i18n: no Japanese entry is empty or still English", () => {
 });
 
 test("i18n: report content strings without a Japanese draft", () => {
-  const dict = dictionary("ja");
-  const all = new Set(strings(pack));
-  const used = Object.keys(dict).filter((k) => all.has(k)).length;
-  const left = strings(ja).filter(
-    (s) => all.has(s) && /[a-z] [a-z]/i.test(s) && !(s in dict),
-  );
   // Information only: other teams change English text; it shows in English
   // until the dictionary catches up.
-  console.log(
-    `i18n: ${used} content strings in Japanese; ${new Set(left).size} still English`,
-  );
+  const left = untranslated(pack, "ja");
+  console.log(`i18n: ${left.length} content strings still English`);
+  for (const s of left.slice(0, 20)) console.log(`  ${s.slice(0, 100)}`);
 });
 
 test("i18n: route labels follow the locale", () => {
