@@ -39,3 +39,32 @@ test("quiz score drops with wrong tries", () => {
   assert.equal(quizScore(1, 3), 0.5);
   assert.equal(quizScore(2, 3), 0);
 });
+
+import {
+  mapFinished,
+  mapScore,
+  startMap,
+  stepMap,
+} from "@/parts/activities/play/mapLogic";
+
+test("map explore opens each spot once; match needs the held word", () => {
+  let e = startMap();
+  e = stepMap(e, "explore", { type: "open", spotId: "a" });
+  e = stepMap(e, "explore", { type: "open", spotId: "a" });
+  assert.deepEqual(e.done, ["a"]);
+  assert.equal(mapFinished(e, 2), false);
+  e = stepMap(e, "explore", { type: "open", spotId: "b" });
+  assert.equal(mapFinished(e, 2), true);
+
+  let m = startMap();
+  m = stepMap(m, "match", { type: "place", spotId: "a" }); // nothing held
+  assert.equal(m.misses, 0);
+  m = stepMap(m, "match", { type: "hold", spotId: "a" });
+  m = stepMap(m, "match", { type: "place", spotId: "b" });
+  assert.equal(m.misses, 1);
+  assert.equal(m.held, "a");
+  m = stepMap(m, "match", { type: "place", spotId: "a" });
+  assert.deepEqual(m.done, ["a"]);
+  assert.equal(m.held, null);
+  assert.equal(mapScore(m, 2), 2 / 3);
+});

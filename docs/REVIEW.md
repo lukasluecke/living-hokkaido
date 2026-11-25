@@ -167,3 +167,6 @@ read on site, no URL. Locators name the Q number and the photo id.
 | Owl story and sakehe | `owl-kamuy`, `sakehe`, `owl-sakehe`, `telling-varies` | Ritual and oral-literature content, included in full (Lukas). Ask about crediting Suteno Orita and the museum; no recording is used |
 | Ukouk syllables, tonkori tune and tab | `ukouk-words`, `tonkori-tune` | Recordings belong to the preservation societies and to Ume Nishihira / Tomita Tomoko; the app plays only synthetic tones |
 | Canoe as a kamuy | `canoe-kamuy` | Ritual context, included in full |
+| Map `map-greetings` (Listening grove) | `greet-*` | Spot positions on the sketch map are our guesses for each named region |
+| Map `map-cise-plan` (Lake house) | `cise-plan`, `cise-size` | The sketch plan and spot positions are our guesses after the Kayano plan (photo 7810); check against the photo. The window of the kamuy seat is shown (ritual context, included in full) |
+
