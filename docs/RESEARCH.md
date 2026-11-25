@@ -38,10 +38,22 @@ cleared (`rights: unknown`); we only paraphrase short facts.
   (2008 Diet resolution, 2019 Act); Highlighting Japan, Dec 2020 (Upopoy
   opened July 2020, recreated cise).
 
+- Hokkaido Museum exhibit panels at the restored house (theme 2; panels
+  住まい, 家屋の移り変わり, 家の中をよく見てみよう, 技術を受け継ぐ), photographed
+  by Lukas on 2026-11-25 and transcribed in the private project files, not
+  in Git: flat-ground houses common by about the 13th century; Kuril and
+  Sakhalin pit dwellings as winter homes until the 19th century; regional
+  wall and roof materials; Meiji-era pressure to move to Japanese-style
+  houses, Sunazawa Kura's recollection, gradual change (1934 Biratori
+  photo), Moritake Takeichi's 1937 poem; today's houses rebuilt as cultural
+  facilities, skills passed to younger people; 2015 repair; what stands
+  inside the house (entry, hearth, rack, upper seat).
+
 Left out on purpose: the outdoor altar (nusa) and the window on the far side
-of the hearth (both described as sacred), bear ceremony items, and any
-statement that chise were replaced by Japanese-style houses (no source found
-in this pass). Open: an Ainu cultural reviewer for the whole entry; a better
+of the hearth (both described as sacred), bear ceremony items, and the bear-cub cage. The
+museum panel now supports that people were urged to move to Japanese-style
+houses and that the change was gradual (`panel-unhygienic`,
+`panel-gradual`). Open: an Ainu cultural reviewer for the whole entry; a better
 source for the storehouse; regional variation beyond Sakhalin.
 
 ## Event documents recovered

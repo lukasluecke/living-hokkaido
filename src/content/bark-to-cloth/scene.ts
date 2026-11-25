@@ -1,5 +1,6 @@
-// Lake house interior. Positions and views come from labs/detail-scene
-// (src/room/Artifacts.tsx, src/App.tsx). Scene space, metres.
+// Lake house interior. Views come from labs/detail-scene; the layout
+// follows the Hokkaido Museum panels on its restored house (see
+// src/parts/detail-scene/room/House.tsx). Scene space, metres.
 import type { DetailSceneInput } from "@/contracts";
 
 export const lakeHouse: DetailSceneInput = {
@@ -19,23 +20,26 @@ export const lakeHouse: DetailSceneInput = {
   placements: [
     {
       artifactId: "fiber",
-      position: [-2.3, 0.4, -2.1],
+      // On a low work platform in the entry area, where bark was kept
+      // (claim panel-entry, house-over-time).
+      position: [-2.8, 0.4, -2.1],
       rotationY: 0.25,
-      focusView: { eye: [-1.25, 1.62, -0.3], target: [-2.3, 0.5, -2.1] },
+      focusView: { eye: [-1.75, 1.62, -0.3], target: [-2.8, 0.5, -2.1] },
       key: 1,
     },
     {
       artifactId: "cloth",
       position: [2.3, 0, -1.55],
       rotationY: -0.55,
-      focusView: { eye: [-0.02, 1.55, 1.15], target: [2.3, 0.8, -1.55] },
+      focusView: { eye: [1.3, 1.35, 0.6], target: [2.3, 0.8, -1.55] },
       key: 2,
     },
     {
       artifactId: "garment",
-      position: [0.95, 0, -2.15],
+      position: [-1.0, 0, -2.15],
       rotationY: 0,
-      focusView: { eye: [2.1, 1.6, 0.4], target: [0.95, 0.95, -2.15] },
+      // Eyes stay clear of the rack over the hearth.
+      focusView: { eye: [-1.75, 1.6, 0.1], target: [-1.0, 0.95, -2.15] },
       key: 3,
     },
   ],

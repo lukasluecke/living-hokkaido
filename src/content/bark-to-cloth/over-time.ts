@@ -1,6 +1,7 @@
 // "Over time": how the house and its surroundings changed, in five eras.
 // Research preview. Every era cites claims below; every claim cites a public
-// page with a section or paragraph locator. Checked 2026-11-25 (JST).
+// page or a Hokkaido Museum exhibit panel with a locator. Checked 2026-11-25
+// (JST).
 // Claims are short paraphrases, not quotations. Do not add claims without a
 // source and locator (docs/RESEARCH.md). Sacred places and objects (for
 // example the altar outside the house or the window on the far side of the
@@ -21,6 +22,17 @@ const web = (
   rights: "unknown",
   consent: "pending",
   attribution,
+  placeholder: false,
+});
+
+/** A Hokkaido Museum exhibit panel, read on site (no public URL). */
+const panel = (id: string, title: string, section: string): Source => ({
+  id,
+  title: `Hokkaido Museum exhibit panel: ${title}`,
+  kind: "museum",
+  rights: "unknown",
+  consent: "pending",
+  attribution: `Hokkaido Museum, permanent exhibition, ${section} (The Traditional Culture and Ways of Life of the Ainu). Panel photographed 2026-11-25.`,
   placeholder: false,
 });
 
@@ -93,6 +105,30 @@ const sources: Source[] = [
     "Government of Japan, Public Relations Office",
     "document",
   ),
+  // Hokkaido Museum exhibit panels at the restored house (permanent
+  // exhibition, theme 2). Photographed by Lukas at the museum on 2026-11-25
+  // and read as data. The photos and the full panel text stay out of Git
+  // (museum rights); claims below are short paraphrases with locators.
+  panel(
+    "hm-panel-dwelling",
+    "住まい (Dwelling)",
+    "Theme 2 伝統を学ぶ, panel 4",
+  ),
+  panel(
+    "hm-panel-house-change",
+    "家屋の移り変わり (How houses changed)",
+    "Theme 2 伝統を学ぶ, panel 4",
+  ),
+  panel(
+    "hm-panel-inside",
+    "家の中をよく見てみよう (Look closely inside the house)",
+    "Theme 2 伝統を学ぶ, restored house",
+  ),
+  panel(
+    "hm-panel-skills",
+    "技術を受け継ぐ (Passing on the skills)",
+    "Theme 2 伝統を学ぶ, restored house",
+  ),
   {
     id: "living-hokkaido-policy",
     title: "Living Hokkaido · editorial policy and asset notes",
@@ -156,6 +192,16 @@ export const houseOverTime: KnowledgeEntry = {
       ],
     ),
     c(
+      "panel-flat-ground",
+      "In the late Satsumon period, the people from whom today's Ainu descend began to use houses on flat ground as well as pit dwellings. By about the 13th century, flat-ground houses are thought to have become common in Hokkaido.",
+      ["hm-panel-dwelling", "Main text, sentences 1–2"],
+    ),
+    c(
+      "panel-kuril-sakhalin",
+      "On the Kuril Islands and Sakhalin, pit dwellings were used mainly as winter homes until the 19th century.",
+      ["hm-panel-dwelling", "Main text, sentence 3"],
+    ),
+    c(
       "flat-why",
       "People are believed to have moved to the new houses for better living conditions. The new houses were similar to houses on Honshu, with a hearth in the centre.",
       ["jta-pit-to-cise", "English text, paragraph 2"],
@@ -180,6 +226,31 @@ export const houseOverTime: KnowledgeEntry = {
       "hearth-warm",
       "The hearth coals were never allowed to go cold. Over time the fire warmed the earth, and the reed walls and roof kept the house warm in winter.",
       ["hm-guide", "§ An Old Ainu Home Restored, Dwelling paragraph"],
+    ),
+    c(
+      "panel-regional-materials",
+      "House building differed by region. On the Pacific side (Iburi and Hidaka), walls and roofs were made of kaya or yoshi grass and reed. On the Sea of Japan side, from near Otaru to Ishikari, people used sasa (bamboo grass). In Kushiro and Nemuro in the east, there are records of bark in the early 19th century.",
+      ["hm-panel-dwelling", "Second text block, paragraph 1"],
+    ),
+    c(
+      "panel-entry",
+      "Between the house door and the room door, people kept cattail (for mats), ohyo bark (for clothing cloth), and a mortar and pestle to pound grain.",
+      ["hm-panel-inside", "Photo 1 caption (entry area)"],
+    ),
+    c(
+      "panel-hearth",
+      "The family usually spent their time around the hearth. A pot hung over it, and around it were things for weaving, sewing, wood carving, cooking and meals.",
+      ["hm-panel-inside", "Photo 2 caption (hearth)"],
+    ),
+    c(
+      "panel-smoked-fish",
+      "Fish such as salmon and cod were hung high above the hearth. The smoke made them into food that kept.",
+      ["hm-panel-inside", "Photo 3 caption (rack and roof frame)"],
+    ),
+    c(
+      "panel-treasures",
+      "Lacquerware used in ceremonies and other important treasures were kept along the wall opposite the entrance. This place was respected as the upper seat, and mats with patterns were used on its wall.",
+      ["hm-panel-inside", "Photo 4 caption (upper seat)"],
     ),
     c(
       "kotan-river",
@@ -225,6 +296,26 @@ export const houseOverTime: KnowledgeEntry = {
       ["jta-19th-century", "English text, paragraph 3"],
     ),
     c(
+      "panel-unhygienic",
+      "Traditional Ainu houses were at times called 'unhygienic', and people were urged to 'improve' them or to move to Japanese-style houses.",
+      ["hm-panel-house-change", "Column 1, paragraph 1"],
+    ),
+    c(
+      "panel-sunazawa",
+      "Kura Sunazawa (1897–1990), born in Asahikawa, remembered the Japanese-style house that was provided as small, cold and hard to live in. Wind and snow came in, and in winter many people in the village became ill and died.",
+      ["hm-panel-house-change", "Columns 1–2 (her recollection, paraphrased)"],
+    ),
+    c(
+      "panel-gradual",
+      "Houses did not change all at once. A 1934 photo from today's Biratori shows houses with board walls and with glass windows: people took in new things, and life changed little by little.",
+      ["hm-panel-house-change", "Column 3"],
+    ),
+    c(
+      "panel-moritake",
+      "In 1937, Takeichi Moritake (1902–1976), born and raised in Shiraoi, published the poem 'Jūka' (The house). It shows anger that traditional houses were mocked, and a strong wish to leave a good house for children and grandchildren.",
+      ["hm-panel-house-change", "Column 4 (poem and commentary, paraphrased)"],
+    ),
+    c(
       "roads",
       "A road between Sapporo and Hakodate opened in 1873, and the first railway was built in 1882.",
       ["hokkaido-digest", "§ Transport"],
@@ -251,6 +342,21 @@ export const houseOverTime: KnowledgeEntry = {
       "restored-house",
       "The Hokkaido Museum shows a restored former house, rebuilt under the guidance of Yaichiro Hama (1916–91) of Shiraoi.",
       ["hm-guide", "§ An Old Ainu Home Restored"],
+    ),
+    c(
+      "panel-homes-today",
+      "Today, the everyday homes of Ainu people are the same as those of other people in Japan.",
+      ["hm-panel-skills", "Paragraph 1, sentence 1"],
+    ),
+    c(
+      "panel-rebuilt",
+      "Traditional houses are still built as places that welcome visitors, in Shiraoi, Asahikawa and Biratori, and as museum exhibits. In such places, people who had lived in traditional houses passed the building skills on to younger people.",
+      ["hm-panel-skills", "Paragraph 1, sentences 2–3"],
+    ),
+    c(
+      "panel-2015-repair",
+      "The house in the Hokkaido Museum was restored under the guidance of Yaichiro Hama (1916–91), born and raised in Shiraoi. When the museum reopened in 2015, young Ainu people from Shiraoi repaired it.",
+      ["hm-panel-skills", "Paragraph 2"],
     ),
     c(
       "living-culture",
@@ -293,12 +399,19 @@ export const houseTimeline: TimelineInput = {
     {
       id: "flat-ground",
       label: "Flat ground",
-      period: "13th–14th century",
-      year: 1250,
+      period: "Late Satsumon – about 13th century",
+      year: 1200,
       title: "Out of the pit, onto flat ground",
       summary:
-        "Houses on flat ground replaced pit dwellings, and an open fireplace replaced the cooking stove. Iron pots spread. Satsumon culture changed into Ainu culture. Some families in colder areas kept pit dwellings for winter.",
-      claimIds: ["flat-shift", "iron-pots", "flat-why", "sakhalin"],
+        "From late Satsumon times, people also built houses on flat ground, and by about the 13th century these were common in Hokkaido. An open fireplace replaced the cooking stove and iron pots spread. On the Kuril Islands and Sakhalin, pit dwellings stayed in use as winter homes until the 19th century.",
+      claimIds: [
+        "panel-flat-ground",
+        "panel-kuril-sakhalin",
+        "flat-shift",
+        "iron-pots",
+        "flat-why",
+        "sakhalin",
+      ],
       stage: { house: "flat-ground", land: "forest-river" },
     },
     {
@@ -308,11 +421,16 @@ export const houseTimeline: TimelineInput = {
       year: 1700,
       title: "The cise in its village",
       summary:
-        "The cise was built of wood, grasses and bark around an open hearth that never went cold. Kotan stood near rivers or the sea, with a raised storehouse beside the house.",
+        "The cise was built of wood, grasses and bark around an open hearth that never went cold. Walls and roofs used the grass, bamboo grass or bark of each region. Fish smoked above the hearth, treasures stood at the upper seat, and bark, cattail and a mortar waited by the door. Kotan stood near rivers or the sea, with a raised storehouse beside the house.",
       claimIds: [
         "cise-materials",
+        "panel-regional-materials",
         "cise-hearth",
         "hearth-warm",
+        "panel-hearth",
+        "panel-smoked-fish",
+        "panel-treasures",
+        "panel-entry",
         "kotan-river",
         "storehouse",
         "kuca",
@@ -322,18 +440,22 @@ export const houseTimeline: TimelineInput = {
     },
     {
       id: "meiji",
-      label: "Meiji era",
-      period: "1869 – early 1900s",
+      label: "Meiji era and after",
+      period: "1869 – 1930s",
       year: 1869,
       title: "Forest becomes farmland",
       summary:
-        "Ezo became Hokkaido. Farmer-soldiers cleared forest for fields and roads came. Ainu lost hunting and fishing grounds and ancestral land, and the 1899 Act pushed farming and left many poor.",
+        "Ezo became Hokkaido. Farmer-soldiers cleared forest for fields and roads came. Ainu lost hunting and fishing grounds and ancestral land, and the 1899 Act pushed farming and left many poor. Traditional houses were called 'unhygienic' and people were urged to move to Japanese-style houses, which could be cold and harmful. Houses changed little by little, with board walls and glass windows.",
       claimIds: [
         "hokkaido-1869",
         "tondenhei",
         "land-loss",
         "act-1899",
         "roads",
+        "panel-unhygienic",
+        "panel-sunazawa",
+        "panel-gradual",
+        "panel-moritake",
       ],
       stage: { house: "thatched", land: "cleared-farmland", storehouse: true },
     },
@@ -344,12 +466,15 @@ export const houseTimeline: TimelineInput = {
       year: 1946,
       title: "Rights, recognition and rebuilt houses",
       summary:
-        "Ainu campaigned for their rights, and Japan now recognizes the Ainu as an indigenous people. Cise are rebuilt in museums and parks such as Upopoy, while crafts and oral traditions continue.",
+        "Ainu campaigned for their rights, and Japan now recognizes the Ainu as an indigenous people. Everyday homes are like any other in Japan. Cise are rebuilt as cultural places and museum exhibits, such as at Upopoy, and the building skills pass to younger people, while crafts and oral traditions continue.",
       claimIds: [
         "rights-movement",
         "recognition",
+        "panel-homes-today",
+        "panel-rebuilt",
         "upopoy",
         "restored-house",
+        "panel-2015-repair",
         "living-culture",
         "not-frozen",
       ],

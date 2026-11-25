@@ -2,6 +2,7 @@ import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import {
+  bandMatTexture,
   matTexture,
   reedTexture,
   rng,
@@ -9,18 +10,32 @@ import {
   woodTexture,
 } from "./textures";
 
-// An illustrative lake-house workshop interior. Original geometry, MIT.
-// It is NOT a reconstruction of a specific Ainu house (see PROJECT.md).
+// An illustrative lake-house interior in the toon look. Original geometry,
+// MIT. It is NOT a reconstruction of a specific Ainu house (see PROJECT.md).
+// The museum photos of the Hokkaido Museum's restored house were a visual
+// reference only; no photo or texture from them is used.
 
 export const ROOM = { w: 7.2, d: 5.2, h: 2.2, peak: 4.3 } as const;
 const HW = ROOM.w / 2;
 const HD = ROOM.d / 2;
 
-type Box = {
-  p: [number, number, number];
-  s: [number, number, number];
-  r?: [number, number, number];
-};
+// Layout (scene space, +Z toward the camera). After the Hokkaido Museum
+// panels on its restored house (claims in src/content/bark-to-cloth/
+// over-time.ts): entry area with bark, cattail and a mortar by the door
+// (`panel-entry`), a long hearth in the centre with a pot on a hook
+// (`panel-hearth`, `cise-hearth`), fish smoked on a rack above it
+// (`panel-smoked-fish`), and lacquerware at the upper seat, on the wall
+// opposite the entrance, with patterned mats (`panel-treasures`). The
+// window that the panel names on that wall is NOT drawn (sacred; it needs
+// an Ainu cultural reviewer). Shapes stay generic toy shapes, not copies
+// of museum objects.
+/** Door in the south wall (x range), inside the entry area. */
+const DOOR = { x0: -3.05, x1: -2.15, h: 1.65 } as const;
+/** Entry area: earth floor west of this x. */
+export const ENTRY_X = -2.05;
+
+type V3 = [number, number, number];
+type Box = { p: V3; s: V3; r?: V3 };
 
 function Boxes({
   items,
@@ -47,6 +62,56 @@ function Boxes({
   );
 }
 
+/** A round pole from a to b. */
+export type Pole = { a: V3; b: V3; r: number };
+const UP = new THREE.Vector3(0, 1, 0);
+function poleTransform(p: Pole) {
+  const a = new THREE.Vector3(...p.a);
+  const b = new THREE.Vector3(...p.b);
+  const d = b.clone().sub(a);
+  const q = new THREE.Quaternion().setFromUnitVectors(
+    UP,
+    d.clone().normalize(),
+  );
+  return {
+    pos: a.add(b).multiplyScalar(0.5),
+    quat: q,
+    len: d.length(),
+  };
+}
+export function Poles({
+  items,
+  material,
+  sides = 7,
+}: {
+  items: Pole[];
+  material: THREE.Material;
+  sides?: number;
+}) {
+  const t = useMemo(() => items.map(poleTransform), [items]);
+  return (
+    <>
+      {t.map((x, i) => (
+        <mesh
+          key={i}
+          position={x.pos}
+          quaternion={x.quat}
+          material={material}
+          castShadow
+          receiveShadow
+        >
+          <cylinderGeometry
+            args={[items[i].r, items[i].r * 1.08, x.len, sides]}
+          />
+        </mesh>
+      ))}
+    </>
+  );
+}
+
+const std = (color: string, roughness = 0.9, metalness = 0) =>
+  new THREE.MeshStandardMaterial({ color, roughness, metalness });
+
 export function Walls() {
   const wall = useMemo(
     () =>
@@ -64,20 +129,22 @@ export function Walls() {
       }),
     [],
   );
-  const wood = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({ map: woodTexture(), roughness: 0.8 }),
-    [],
-  );
+  const pole = useMemo(() => std("#b99466", 0.8), []);
+  const rope = useMemo(() => std("#6e5434", 1), []);
   const t = 0.18;
   const h = ROOM.h;
-  // East wall has a window gap between z -0.6..0.6, y 0.9..1.6.
+  // East wall has a plain side window between z -0.6..0.6, y 0.9..1.6.
   const win = { z0: -0.6, z1: 0.6, y0: 0.9, y1: 1.6 };
+  const southL = DOOR.x0 + HW;
+  const southR = HW - DOOR.x1;
   const walls: Box[] = [
     { p: [0, h / 2, -HD], s: [ROOM.w, h, t] }, // north
-    { p: [-1.9, h / 2, HD], s: [ROOM.w / 2 - 0.4 + 0.3, h, t] }, // south left of door
-    { p: [2.1, h / 2, HD], s: [ROOM.w / 2 - 0.6 + 0.1, h, t] }, // south right of door
-    { p: [0.15, h - 0.3, HD], s: [1.1, 0.6, t] }, // above door
+    { p: [-HW + southL / 2, h / 2, HD], s: [southL, h, t] }, // south, west of door
+    { p: [HW - southR / 2, h / 2, HD], s: [southR, h, t] }, // south, east of door
+    {
+      p: [(DOOR.x0 + DOOR.x1) / 2, (h + DOOR.h) / 2, HD],
+      s: [DOOR.x1 - DOOR.x0, h - DOOR.h, t],
+    }, // above door
     { p: [-HW, h / 2, 0], s: [t, h, ROOM.d] }, // west
     // east, around window
     { p: [HW, h / 2, (-HD + win.z0) / 2], s: [t, h, win.z0 + HD] },
@@ -85,30 +152,68 @@ export function Walls() {
     { p: [HW, win.y0 / 2, 0], s: [t, win.y0, win.z1 - win.z0] },
     { p: [HW, (h + win.y1) / 2, 0], s: [t, h - win.y1, win.z1 - win.z0] },
   ];
-  const posts: Box[] = [];
-  for (const x of [-HW, -HW / 2, 0, HW / 2, HW]) {
-    for (const z of [-HD, HD])
-      posts.push({ p: [x, h / 2, z], s: [0.22, h + 0.1, 0.22] });
-  }
-  for (const z of [-HD / 2, HD / 2]) {
-    posts.push({ p: [-HW, h / 2, z], s: [0.22, h + 0.1, 0.22] });
-    posts.push({ p: [HW, h / 2, z], s: [0.22, h + 0.1, 0.22] });
-  }
-  // Wall plates on top of the walls.
-  const plates: Box[] = [
-    { p: [0, h, -HD], s: [ROOM.w + 0.3, 0.16, 0.26] },
-    { p: [0, h, HD], s: [ROOM.w + 0.3, 0.16, 0.26] },
-    { p: [-HW, h, 0], s: [0.26, 0.16, ROOM.d + 0.3] },
-    { p: [HW, h, 0], s: [0.26, 0.16, ROOM.d + 0.3] },
+  const { poles, ties } = useMemo(() => {
+    const poles: Pole[] = [];
+    const ties: Box[] = [];
+    const i = 0.12; // inside offset from the wall centre line
+    // Round posts at corners and along the walls.
+    const postsX = [-HW, -HW / 2, 0, HW / 2, HW];
+    for (const x of postsX)
+      for (const z of [-HD, HD])
+        poles.push({ a: [x, 0, z], b: [x, h + 0.05, z], r: 0.1 });
+    for (const z of [-HD / 2, HD / 2])
+      for (const x of [-HW, HW])
+        poles.push({ a: [x, 0, z], b: [x, h + 0.05, z], r: 0.1 });
+    // Door posts.
+    for (const x of [DOOR.x0, DOOR.x1])
+      poles.push({ a: [x, 0, HD - i], b: [x, DOOR.h, HD - i], r: 0.06 });
+    // Horizontal poles tied across the reed walls, inside.
+    for (const y of [0.55, 1.15, 1.75]) {
+      poles.push({ a: [-HW, y, -HD + i], b: [HW, y, -HD + i], r: 0.035 });
+      poles.push({ a: [-HW, y, HD - i], b: [DOOR.x0, y, HD - i], r: 0.035 });
+      if (y > DOOR.h)
+        poles.push({ a: [DOOR.x0, y, HD - i], b: [HW, y, HD - i], r: 0.035 });
+      else
+        poles.push({ a: [DOOR.x1, y, HD - i], b: [HW, y, HD - i], r: 0.035 });
+      poles.push({ a: [-HW + i, y, -HD], b: [-HW + i, y, HD], r: 0.035 });
+      if (y < win.y0 || y > win.y1)
+        poles.push({ a: [HW - i, y, -HD], b: [HW - i, y, HD], r: 0.035 });
+      else {
+        poles.push({ a: [HW - i, y, -HD], b: [HW - i, y, win.z0], r: 0.035 });
+        poles.push({ a: [HW - i, y, win.z1], b: [HW - i, y, HD], r: 0.035 });
+      }
+      // Rope ties where the poles cross the posts.
+      for (const x of postsX)
+        for (const z of [-HD + i, HD - i])
+          ties.push({ p: [x, y, z], s: [0.24, 0.07, 0.09] });
+      for (const z of [-HD / 2, HD / 2])
+        for (const x of [-HW + i, HW - i])
+          ties.push({ p: [x, y, z], s: [0.09, 0.07, 0.24] });
+    }
+    // Wall plates on top of the walls.
+    poles.push({ a: [-HW - 0.15, h, -HD], b: [HW + 0.15, h, -HD], r: 0.09 });
+    poles.push({ a: [-HW - 0.15, h, HD], b: [HW + 0.15, h, HD], r: 0.09 });
+    poles.push({ a: [-HW, h, -HD - 0.15], b: [-HW, h, HD + 0.15], r: 0.09 });
+    poles.push({ a: [HW, h, -HD - 0.15], b: [HW, h, HD + 0.15], r: 0.09 });
     // Window frame.
-    { p: [HW - 0.02, win.y0, 0], s: [0.26, 0.06, 1.3] },
-    { p: [HW - 0.02, win.y1, 0], s: [0.26, 0.06, 1.3] },
-  ];
+    poles.push({
+      a: [HW - 0.1, win.y0, -0.65],
+      b: [HW - 0.1, win.y0, 0.65],
+      r: 0.04,
+    });
+    poles.push({
+      a: [HW - 0.1, win.y1, -0.65],
+      b: [HW - 0.1, win.y1, 0.65],
+      r: 0.04,
+    });
+    return { poles, ties };
+  }, [h]);
   return (
     <group name="walls">
       <Boxes items={walls.slice(0, 1)} material={wall} />
       <Boxes items={walls.slice(1)} material={wallShort} />
-      <Boxes items={[...posts, ...plates]} material={wood} />
+      <Poles items={poles} material={pole} />
+      <Boxes items={ties} material={rope} />
     </group>
   );
 }
@@ -117,15 +222,25 @@ export function Floor() {
   const mat = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        map: matTexture([5, 3.5]),
+        map: matTexture([3, 3]),
         roughness: 1,
       }),
     [],
   );
-  const earth = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: "#5d4632", roughness: 1 }),
-    [],
-  );
+  const earth = useMemo(() => std("#6b5a4c", 1), []);
+  const sill = useMemo(() => std("#a88458", 0.8), []);
+  // Mats on the living floor; bare earth in the entry area and in a strip
+  // around the hearth (hearth: x -0.95..0.95, z -0.27..0.67).
+  const e = ENTRY_X + 0.08;
+  const mats: { p: V3; s: [number, number] }[] = [
+    { p: [(e - 1.05) / 2, 0.012, 0], s: [-1.05 - e, ROOM.d - 0.3] },
+    {
+      p: [(1.05 + HW - 0.15) / 2, 0.012, 0],
+      s: [HW - 0.15 - 1.05, ROOM.d - 0.3],
+    },
+    { p: [0, 0.012, -1.42], s: [2.1, 2.1] },
+    { p: [0, 0.012, 1.6], s: [2.1, 1.7] },
+  ];
   return (
     <group name="floor">
       <mesh
@@ -136,22 +251,414 @@ export function Floor() {
       >
         <planeGeometry args={[ROOM.w, ROOM.d]} />
       </mesh>
-      {/* Mats leave a strip of earth floor around the hearth. */}
-      {[
-        { p: [-2.25, 0.012, 0], s: [2.6, ROOM.d - 0.4] },
-        { p: [2.25, 0.012, 0], s: [2.6, ROOM.d - 0.4] },
-        { p: [0, 0.012, -1.75], s: [1.9, 1.3] },
-      ].map((m, i) => (
+      {mats.map((m, i) => (
         <mesh
           key={i}
           rotation={[-Math.PI / 2, 0, 0]}
-          position={m.p as [number, number, number]}
+          position={m.p}
           material={mat}
           receiveShadow
         >
-          <planeGeometry args={m.s as [number, number]} />
+          <planeGeometry args={m.s} />
         </mesh>
       ))}
+      {/* Log sill between the entry area and the matted floor. */}
+      <Poles
+        items={[
+          {
+            a: [ENTRY_X, 0.06, -HD + 0.1],
+            b: [ENTRY_X, 0.06, HD - 0.1],
+            r: 0.07,
+          },
+        ]}
+        material={sill}
+      />
+    </group>
+  );
+}
+
+/** Two-level pole rack over the hearth, hung from two tie beams. Fish hang
+ * from it to smoke (`panel-smoked-fish`); the pot hangs on a hook pole
+ * (`panel-hearth`). */
+function Rack() {
+  const wood = useMemo(() => std("#c49e6c", 0.8), []);
+  const fish = useMemo(() => std("#7a5132", 0.7), []);
+  const cord = useMemo(() => std("#5a4430", 1), []);
+  const pot = useMemo(() => std("#2b2724", 0.6, 0.35), []);
+  const z0 = -0.3;
+  const z1 = 0.7;
+  const zc = (z0 + z1) / 2;
+  const y1 = 1.95; // upper rack
+  const y0 = 1.5; // lower rack
+  const poles = useMemo(() => {
+    // Hung from the roof frame (lifted away in the home view).
+    const out: Pole[] = [];
+    for (const z of [z0, z1]) {
+      out.push({ a: [-1.1, y1, z], b: [1.1, y1, z], r: 0.04 });
+      out.push({ a: [-0.85, y0, z], b: [0.85, y0, z], r: 0.035 });
+      for (const x of [-0.95, 0.95])
+        out.push({ a: [x, y1, z], b: [x, ROOM.h + 0.5, z], r: 0.02 });
+      for (const x of [-0.8, 0.8])
+        out.push({ a: [x, y0, z], b: [x, y1, z], r: 0.022 });
+    }
+    // Slats on the upper rack.
+    for (let x = -0.9; x <= 0.91; x += 0.225)
+      out.push({
+        a: [x, y1 + 0.04, z0 - 0.1],
+        b: [x, y1 + 0.04, z1 + 0.1],
+        r: 0.014,
+      });
+    // Lower frame ends and the cross bar for the pot hook.
+    for (const x of [-0.8, 0, 0.8])
+      out.push({ a: [x, y0, z0], b: [x, y0, z1], r: 0.03 });
+    // Pot hook pole.
+    out.push({ a: [0, y0, zc], b: [0, 0.78, zc], r: 0.022 });
+    return out;
+  }, [zc]);
+  const fishes = useMemo(() => {
+    const r = rng(14);
+    const out: { p: V3; ry: number; s: number }[] = [];
+    for (const x of [-0.65, -0.4, 0.4, 0.65])
+      for (const z of [0.0, 0.42])
+        if (r() > 0.2)
+          out.push({
+            p: [x, y1 - 0.32, z],
+            ry: r() * 0.6,
+            s: 0.85 + r() * 0.3,
+          });
+    return out;
+  }, []);
+  return (
+    <group name="rack">
+      <Poles items={poles} material={wood} />
+      {fishes.map((f, i) => (
+        <group key={i} position={f.p} rotation={[0, f.ry, 0]} scale={f.s}>
+          {/* Body hangs head down; tail up at the cord. */}
+          <mesh material={fish} scale={[0.35, 1, 0.75]} castShadow>
+            <sphereGeometry args={[0.13, 10, 8]} />
+          </mesh>
+          <mesh material={fish} position={[0, 0.16, 0]}>
+            <coneGeometry args={[0.06, 0.1, 6]} />
+          </mesh>
+          <mesh material={cord} position={[0, 0.25, 0]}>
+            <cylinderGeometry args={[0.006, 0.006, 0.12, 4]} />
+          </mesh>
+        </group>
+      ))}
+      {/* Hook, bail and iron pot over the fire. */}
+      <mesh
+        material={pot}
+        position={[0, 0.76, zc]}
+        rotation={[0, Math.PI / 2, 0]}
+      >
+        <torusGeometry args={[0.04, 0.008, 6, 12, Math.PI * 1.4]} />
+      </mesh>
+      <mesh material={pot} position={[0, 0.52, zc]}>
+        <torusGeometry args={[0.2, 0.008, 6, 20, Math.PI]} />
+      </mesh>
+      <mesh material={pot} position={[0, 0.52, zc]} castShadow>
+        <sphereGeometry
+          args={[0.2, 18, 10, 0, Math.PI * 2, Math.PI * 0.5, Math.PI * 0.42]}
+        />
+      </mesh>
+    </group>
+  );
+}
+
+/** Things by the door (`panel-entry`): cattail for mats, bark for cloth,
+ * a mortar and pestle, plus rope and firewood. */
+function EntryArea() {
+  const wood = useMemo(() => std("#b88a58", 0.85), []);
+  const split = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        map: woodTexture(),
+        color: "#e6c9a0",
+        roughness: 0.85,
+      }),
+    [],
+  );
+  const rope = useMemo(() => std("#a78a5c", 1), []);
+  const bark = useMemo(() => std("#d1b07a", 1), []);
+  const cattail = useMemo(() => std("#a59a62", 1), []);
+  const mortar = useMemo(() => {
+    const pts = [
+      [0.21, 0],
+      [0.22, 0.06],
+      [0.15, 0.24],
+      [0.2, 0.5],
+      [0.27, 0.66],
+      [0.21, 0.67],
+      [0.1, 0.46],
+      [0, 0.44],
+    ].map(([x, y]) => new THREE.Vector2(x, y));
+    return new THREE.LatheGeometry(pts, 14);
+  }, []);
+  const r = useMemo(() => rng(21), []);
+  const strips = useMemo(
+    () =>
+      Array.from({ length: 14 }, (_, i) => ({
+        p: [-HW + 0.16, 1.3 - r() * 0.15, -1.15 + i * 0.035] as V3,
+        h: 0.7 + r() * 0.35,
+        rx: (r() - 0.5) * 0.15,
+      })),
+    [r],
+  );
+  const logs = useMemo(
+    () =>
+      Array.from({ length: 6 }, (_, i) => ({
+        p: [-HW + 0.28 + r() * 0.06, 0.42, -0.35 + i * 0.13] as V3,
+        r: [0, r() * 0.5, -0.18 - r() * 0.08] as V3,
+      })),
+    [r],
+  );
+  return (
+    <group name="entry">
+      <mesh
+        geometry={mortar}
+        material={wood}
+        position={[-2.75, 0, 0.85]}
+        castShadow
+      />
+      <Poles
+        items={[{ a: [-2.72, 0.5, 0.85], b: [-3.2, 1.55, 0.6], r: 0.04 }]}
+        material={wood}
+      />
+      {/* Hanging bark strips. */}
+      {strips.map((s, i) => (
+        <mesh
+          key={i}
+          material={bark}
+          position={[s.p[0], s.p[1] - s.h / 2 + 0.45, s.p[2]]}
+          rotation={[s.rx, 0, 0]}
+        >
+          <boxGeometry args={[0.008, s.h, 0.03]} />
+        </mesh>
+      ))}
+      {/* Rope coils on the wall. */}
+      {[-1.7, -1.5].map((z, i) => (
+        <mesh
+          key={z}
+          material={rope}
+          position={[-HW + 0.17, 1.42 - i * 0.08, z]}
+          rotation={[0, Math.PI / 2, 0]}
+          scale={[1, 1.7, 1]}
+        >
+          <torusGeometry args={[0.1, 0.03, 6, 14]} />
+        </mesh>
+      ))}
+      {/* Cattail bundle, tied, leaning on the wall. */}
+      <group position={[-HW + 0.3, 0, 1.15]} rotation={[0.08, 0, -0.08]}>
+        <mesh material={cattail} position={[0, 0.8, 0]} castShadow>
+          <cylinderGeometry args={[0.09, 0.12, 1.6, 9]} />
+        </mesh>
+        {[0.45, 1.15].map((y) => (
+          <mesh key={y} material={rope} position={[0, y, 0]}>
+            <torusGeometry args={[0.115, 0.015, 5, 12]} />
+          </mesh>
+        ))}
+      </group>
+      {/* Split firewood stood against the wall. */}
+      {logs.map((l, i) => (
+        <mesh key={i} material={split} position={l.p} rotation={l.r} castShadow>
+          <boxGeometry args={[0.11, 0.85, 0.1]} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+/** Upper seat on the wall opposite the entrance: lacquerware and treasures
+ * on a low platform, mats with plain bands (`panel-treasures`). */
+function UpperSeat() {
+  const band = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        map: bandMatTexture([1, 1]),
+        roughness: 1,
+      }),
+    [],
+  );
+  const band2 = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        map: bandMatTexture([3, 1]),
+        roughness: 1,
+      }),
+    [],
+  );
+  const base = useMemo(() => std("#9c7a4c", 1), []);
+  const black = useMemo(() => std("#241a16", 0.35, 0.1), []);
+  const red = useMemo(() => std("#8a2e20", 0.4, 0.05), []);
+  const gold = useMemo(() => std("#c49a46", 0.35, 0.6), []);
+  const x0 = 0.2;
+  const x1 = 1.78;
+  const zb = -HD + 0.12;
+  const ht = 0.3;
+  const zf = zb + 0.62;
+  const zm = (zb + zf) / 2;
+  const cx = (x0 + x1) / 2;
+  const w = x1 - x0;
+  type Ware = { p: V3; kind: "tub" | "bowl" | "box" | "jar"; s?: number };
+  const wares: Ware[] = [
+    { p: [0.45, ht, zm], kind: "tub" },
+    { p: [0.92, ht, zm], kind: "bowl" },
+    { p: [1.38, ht, zm - 0.04], kind: "tub", s: 1.15 },
+    { p: [1.62, ht, zm + 0.16], kind: "jar" },
+    { p: [0.2 + 0.14, ht, zm + 0.2], kind: "box" },
+  ];
+  return (
+    <group name="upper-seat">
+      {/* Low platform along the north wall. */}
+      <mesh
+        material={base}
+        position={[cx, ht / 2, zm]}
+        castShadow
+        receiveShadow
+      >
+        <boxGeometry args={[w, ht, zf - zb]} />
+      </mesh>
+      {/* Banded mats: on the wall, on the platform, over its edge and on
+          the floor in front. */}
+      <mesh material={band2} position={[cx, ht + 0.55, zb + 0.005]}>
+        <planeGeometry args={[w, 1.1]} />
+      </mesh>
+      {[x0 + 0.02, x0 + 0.52, x0 + 1.02].map((x) => (
+        <group key={x}>
+          <mesh
+            material={band}
+            position={[x + 0.26, ht + 0.004, zf - 0.22]}
+            rotation={[-Math.PI / 2, 0, 0]}
+          >
+            <planeGeometry args={[0.5, 0.44]} />
+          </mesh>
+          <mesh material={band} position={[x + 0.26, ht - 0.13, zf + 0.004]}>
+            <planeGeometry args={[0.5, 0.26]} />
+          </mesh>
+        </group>
+      ))}
+      <mesh
+        material={band2}
+        position={[cx, 0.016, zf + 0.3]}
+        rotation={[-Math.PI / 2, 0, 0]}
+      >
+        <planeGeometry args={[w, 0.6]} />
+      </mesh>
+      {wares.map((it, i) => (
+        <group key={i} position={it.p} scale={it.s ?? 1}>
+          {it.kind === "tub" && (
+            <>
+              {[-0.11, 0.11].map((x) =>
+                [-0.09, 0.09].map((z) => (
+                  <mesh
+                    key={`${x}${z}`}
+                    material={black}
+                    position={[x, 0.06, z]}
+                  >
+                    <boxGeometry args={[0.03, 0.12, 0.03]} />
+                  </mesh>
+                )),
+              )}
+              <mesh material={black} position={[0, 0.27, 0]} castShadow>
+                <cylinderGeometry args={[0.16, 0.16, 0.3, 14]} />
+              </mesh>
+              {[0.17, 0.27, 0.37].map((y) => (
+                <mesh
+                  key={y}
+                  material={y === 0.27 ? gold : red}
+                  position={[0, y, 0]}
+                >
+                  <torusGeometry args={[0.163, 0.008, 4, 18]} />
+                </mesh>
+              ))}
+            </>
+          )}
+          {it.kind === "bowl" && (
+            <>
+              <mesh material={black} position={[0, 0.08, 0]}>
+                <cylinderGeometry args={[0.08, 0.11, 0.16, 12]} />
+              </mesh>
+              <mesh material={black} position={[0, 0.3, 0]} castShadow>
+                <sphereGeometry
+                  args={[
+                    0.2,
+                    16,
+                    8,
+                    0,
+                    Math.PI * 2,
+                    Math.PI * 0.5,
+                    Math.PI * 0.5,
+                  ]}
+                />
+              </mesh>
+              <mesh
+                material={gold}
+                position={[0, 0.295, 0]}
+                rotation={[Math.PI / 2, 0, 0]}
+              >
+                <torusGeometry args={[0.198, 0.01, 4, 20]} />
+              </mesh>
+            </>
+          )}
+          {it.kind === "jar" && (
+            <>
+              <mesh material={black} position={[0, 0.12, 0]} castShadow>
+                <cylinderGeometry args={[0.09, 0.09, 0.24, 12]} />
+              </mesh>
+              <mesh material={red} position={[0, 0.25, 0]}>
+                <cylinderGeometry args={[0.095, 0.095, 0.03, 12]} />
+              </mesh>
+            </>
+          )}
+          {it.kind === "box" && (
+            <mesh material={red} position={[0, 0.1, 0]} castShadow>
+              <boxGeometry args={[0.24, 0.2, 0.2]} />
+            </mesh>
+          )}
+        </group>
+      ))}
+      {/* A lidded lacquer container on the floor in front. */}
+      <mesh material={black} position={[-0.05, 0.22, -2.05]} castShadow>
+        <cylinderGeometry args={[0.2, 0.2, 0.44, 16]} />
+      </mesh>
+      <mesh material={black} position={[-0.05, 0.46, -2.05]}>
+        <cylinderGeometry args={[0.215, 0.215, 0.05, 16]} />
+      </mesh>
+    </group>
+  );
+}
+
+/** Things around the hearth (`panel-hearth`): bowls and a board. */
+function HearthSide() {
+  const red = useMemo(() => std("#8a2e20", 0.4), []);
+  const board = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        map: woodTexture(),
+        color: "#e3c69a",
+        roughness: 0.8,
+      }),
+    [],
+  );
+  return (
+    <group name="hearth-side">
+      {[
+        [-0.55, 0.95],
+        [-0.3, 1.02],
+      ].map(([x, z]) => (
+        <mesh key={x} material={red} position={[x, 0.07, z]}>
+          <sphereGeometry
+            args={[0.08, 12, 6, 0, Math.PI * 2, Math.PI * 0.5, Math.PI * 0.5]}
+          />
+        </mesh>
+      ))}
+      <mesh
+        material={board}
+        position={[0.55, 0.03, 0.98]}
+        rotation={[0, 0.2, 0]}
+      >
+        <boxGeometry args={[0.45, 0.04, 0.22]} />
+      </mesh>
     </group>
   );
 }
@@ -162,110 +669,27 @@ function Furniture() {
       new THREE.MeshStandardMaterial({ map: woodTexture(), roughness: 0.75 }),
     [],
   );
-  const dark = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: "#3e2a1b", roughness: 0.8 }),
-    [],
-  );
-  const rope = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: "#a88b5e", roughness: 1 }),
-    [],
-  );
-  const pot = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
-        color: "#3a332c",
-        roughness: 0.85,
-        metalness: 0.1,
-      }),
-    [],
-  );
-  // Baskets in a few fibre tones, so the room is not one brown.
-  const baskets3 = useMemo(
-    () =>
-      ["#9a7a48", "#b89a62", "#7d6a4a"].map(
-        (color) => new THREE.MeshStandardMaterial({ color, roughness: 1 }),
-      ),
-    [],
-  );
-  const r = useMemo(() => rng(5), []);
-  // Low platform along the north wall, shelves along the west wall.
-  const items: Box[] = [
-    { p: [-2.3, 0.2, -2.15], s: [2.4, 0.4, 0.75] },
-    { p: [-3.3, 0.9, -0.6], s: [0.5, 0.06, 1.8] },
-    { p: [-3.3, 1.45, -0.6], s: [0.5, 0.06, 1.8] },
-    // Hanging rack above the hearth.
-    { p: [0, 1.85, 0.2], s: [1.6, 0.06, 0.06] },
-    { p: [0, 1.85, -0.3], s: [1.6, 0.06, 0.06] },
-    { p: [0, 1.85, 0.7], s: [1.6, 0.06, 0.06] },
-    { p: [-0.75, 1.85, 0.2], s: [0.06, 0.06, 1.1] },
-    { p: [0.75, 1.85, 0.2], s: [0.06, 0.06, 1.1] },
-  ];
-  const ropes: Box[] = [
-    { p: [-0.75, 2.6, -0.3], s: [0.02, 1.5, 0.02] },
-    { p: [0.75, 2.6, -0.3], s: [0.02, 1.5, 0.02] },
-    { p: [-0.75, 2.6, 0.7], s: [0.02, 1.5, 0.02] },
-    { p: [0.75, 2.6, 0.7], s: [0.02, 1.5, 0.02] },
-  ];
-  const baskets = Array.from({ length: 5 }, (_, i) => ({
-    p: [
-      -3.3,
-      0.93 + (i > 2 ? 0.55 : 0) + 0.12,
-      -1.3 + (i % 3) * 0.6 + r() * 0.1,
-    ] as [number, number, number],
-    rad: 0.14 + r() * 0.06,
-  }));
+  // Low work platform in the entry corner for the bark fiber.
+  const items: Box[] = [{ p: [-2.82, 0.2, -2.15], s: [1.3, 0.4, 0.75] }];
   return (
     <group name="furniture">
       <Boxes items={items} material={wood} />
-      <Boxes items={ropes} material={rope} />
-      {baskets.map((b, i) => (
-        <mesh
-          key={i}
-          position={b.p}
-          material={baskets3[i % 3]}
-          castShadow
-          receiveShadow
-        >
-          <cylinderGeometry args={[b.rad, b.rad * 0.8, 0.24, 10]} />
-        </mesh>
-      ))}
-      {/* Pot hung over the hearth. */}
-      <mesh position={[0, 1.3, 0.2]} material={pot} castShadow>
-        <sphereGeometry
-          args={[0.19, 16, 12, 0, Math.PI * 2, Math.PI * 0.25, Math.PI * 0.75]}
-        />
-      </mesh>
-      <mesh position={[0, 1.6, 0.2]} material={rope}>
-        <cylinderGeometry args={[0.012, 0.012, 0.5, 4]} />
-      </mesh>
-      {/* Firewood stack in the corner. */}
-      {Array.from({ length: 9 }, (_, i) => (
-        <mesh
-          key={`log${i}`}
-          position={[
-            2.9 - (i % 3) * 0.02,
-            0.09 + Math.floor(i / 3) * 0.15,
-            1.6 + (i % 3) * 0.16,
-          ]}
-          rotation={[0, 0, Math.PI / 2]}
-          material={dark}
-          castShadow
-          receiveShadow
-        >
-          <cylinderGeometry args={[0.075, 0.075, 0.9, 7]} />
-        </mesh>
-      ))}
+      <Rack />
+      <EntryArea />
+      <UpperSeat />
+      <HearthSide />
     </group>
   );
 }
 
-/** Gable roof. Its group is exposed so the director can lift it. */
+/** Hip roof of thatch on a pole frame. Its group is exposed so the director
+ * can lift it. */
 export function Roof({ lift }: { lift: { current: number } }) {
   const ref = useRef<THREE.Group>(null);
   const thatch = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        map: thatchTexture([4, 2]),
+        map: thatchTexture([1, 1]),
         roughness: 1,
         side: THREE.DoubleSide,
         transparent: true,
@@ -275,24 +699,97 @@ export function Roof({ lift }: { lift: { current: number } }) {
   const wood = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        map: woodTexture(),
+        color: "#a8845a",
         roughness: 0.8,
         transparent: true,
       }),
     [],
   );
   const rise = ROOM.peak - ROOM.h;
-  const span = HD + 0.6;
-  const slope = Math.hypot(span, rise);
-  const angle = Math.atan2(rise, span);
-  const gable = useMemo(() => {
-    const s = new THREE.Shape();
-    s.moveTo(-HD, 0);
-    s.lineTo(HD, 0);
-    s.lineTo(0, rise);
-    s.closePath();
-    return new THREE.ShapeGeometry(s);
-  }, [rise]);
+  const o = 0.55; // eave overhang
+  const ex = HW + o;
+  const ez = HD + o;
+  const rx = ex - ez; // ridge half length (45° hips)
+  const { shell, edge, poles } = useMemo(() => {
+    // Eave corners (y = 0 in roof space) and ridge ends.
+    const A: V3 = [-ex, 0, ez];
+    const B: V3 = [ex, 0, ez];
+    const C: V3 = [ex, 0, -ez];
+    const D: V3 = [-ex, 0, -ez];
+    const R0: V3 = [-rx, rise, 0];
+    const R1: V3 = [rx, rise, 0];
+    const tris: V3[] = [
+      A,
+      B,
+      R1,
+      A,
+      R1,
+      R0, // south
+      C,
+      D,
+      R0,
+      C,
+      R0,
+      R1, // north
+      B,
+      C,
+      R1, // east
+      D,
+      A,
+      R0, // west
+    ];
+    const pos: number[] = [];
+    const uv: number[] = [];
+    tris.forEach((p, i) => {
+      pos.push(...p);
+      // South/north faces map u to x, east/west to z; v follows the height.
+      const along = i < 12 ? p[0] : p[2];
+      uv.push(along * 0.45, p[1] * 0.75);
+    });
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+    g.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2));
+    g.computeVertexNormals();
+    // Thick thatch edge along the eaves.
+    const edge: Box[] = [
+      { p: [0, 0.05, ez], s: [2 * ex + 0.1, 0.26, 0.3] },
+      { p: [0, 0.05, -ez], s: [2 * ex + 0.1, 0.26, 0.3] },
+      { p: [ex, 0.05, 0], s: [0.3, 0.26, 2 * ez] },
+      { p: [-ex, 0.05, 0], s: [0.3, 0.26, 2 * ez] },
+    ];
+    const poles: Pole[] = [
+      { a: R0, b: R1, r: 0.09 },
+      { a: A, b: R0, r: 0.07 },
+      { a: D, b: R0, r: 0.07 },
+      { a: B, b: R1, r: 0.07 },
+      { a: C, b: R1, r: 0.07 },
+    ];
+    // Rafters under the long faces and the hip ends.
+    for (let x = -rx; x <= rx + 0.01; x += rx / 2)
+      for (const z of [ez, -ez])
+        poles.push({ a: [x, 0, z * 0.98], b: [x, rise - 0.05, 0], r: 0.045 });
+    for (const sx of [-1, 1])
+      poles.push({
+        a: [sx * ex * 0.98, 0, 0],
+        b: [sx * rx, rise - 0.05, 0],
+        r: 0.045,
+      });
+    // Purlins: rings of poles round the slope at two heights.
+    for (const k of [0.33, 0.66]) {
+      const px = ex - (ex - rx) * k;
+      const pz = ez * (1 - k);
+      const y = rise * k - 0.06;
+      const corners: V3[] = [
+        [-px, y, pz],
+        [px, y, pz],
+        [px, y, -pz],
+        [-px, y, -pz],
+      ];
+      for (let i = 0; i < 4; i++)
+        poles.push({ a: corners[i], b: corners[(i + 1) % 4], r: 0.03 });
+    }
+    return { shell: g, edge, poles };
+  }, [ex, ez, rx, rise]);
 
   useFrame(() => {
     if (!ref.current) return;
@@ -308,63 +805,28 @@ export function Roof({ lift }: { lift: { current: number } }) {
 
   return (
     <group ref={ref} name="roof">
-      <group position={[0, ROOM.h, 0]}>
-        {[1, -1].map((side) => (
-          <group key={side}>
-            {[0, 1, 2].map((layer) => (
-              <mesh
-                key={layer}
-                material={thatch}
-                position={[
-                  0,
-                  rise / 2 + 0.08 + layer * 0.07,
-                  (side * span) / 2,
-                ]}
-                rotation={[side * angle, 0, 0]}
-                castShadow
-                receiveShadow
-              >
-                <boxGeometry
-                  args={[
-                    ROOM.w + 1.2 - layer * 0.15,
-                    0.12,
-                    slope - layer * 0.25,
-                  ]}
-                />
-              </mesh>
-            ))}
-          </group>
-        ))}
-        {/* Ridge and rafters seen from inside. */}
-        <mesh
-          position={[0, rise + 0.1, 0]}
-          rotation={[0, 0, Math.PI / 2]}
-          material={wood}
-          castShadow
-        >
-          <cylinderGeometry args={[0.1, 0.1, ROOM.w + 1.3, 8]} />
-        </mesh>
-        {[-HW + 0.3, -HW / 2, 0, HW / 2, HW - 0.3].map((x) =>
-          [1, -1].map((side) => (
-            <mesh
-              key={`${x}${side}`}
-              position={[x, rise / 2, (side * HD) / 2]}
-              rotation={[side * Math.atan2(rise, HD), 0, 0]}
-              material={wood}
-            >
-              <boxGeometry args={[0.1, 0.1, Math.hypot(HD, rise)]} />
-            </mesh>
-          )),
-        )}
-        {[-HW, HW].map((x) => (
+      <group position={[0, ROOM.h + 0.05, 0]}>
+        {[0, 0.09].map((y) => (
           <mesh
-            key={x}
-            geometry={gable}
+            key={y}
+            geometry={shell}
             material={thatch}
-            position={[x, 0, 0]}
-            rotation={[0, Math.PI / 2, 0]}
+            position={[0, y, 0]}
+            castShadow
+            receiveShadow
           />
         ))}
+        <Boxes items={edge} material={thatch} />
+        {/* Ridge bundle. */}
+        <mesh
+          position={[0, rise + 0.12, 0]}
+          rotation={[0, 0, Math.PI / 2]}
+          material={thatch}
+          castShadow
+        >
+          <cylinderGeometry args={[0.2, 0.2, 2 * rx + 0.6, 10]} />
+        </mesh>
+        <Poles items={poles} material={wood} />
       </group>
     </group>
   );

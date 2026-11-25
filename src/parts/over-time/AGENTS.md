@@ -2,8 +2,9 @@
 
 "Over time" scrub: one place shown in a few dated eras. The first timeline
 shows how the house and its land changed: pit dwellings (Satsumon culture),
-flat-ground houses (13th–14th century), cise and kotan, Meiji-era land
-clearing, and rebuilt cise today. Route for now: `/over-time`
+flat-ground houses (late Satsumon to about the 13th century), cise and
+kotan, Meiji-era land clearing and pressure to move to Japanese-style
+houses, and rebuilt cise today. Route for now: `/over-time`
 (`src/app/over-time`, a small host; the shell does not mount it yet).
 
 - Component: `TimelinePart` (`index.tsx`). Props: `TimelinePartProps`
@@ -73,5 +74,9 @@ clearing, and rebuilt cise today. Route for now: `/over-time`
 
 - 2026-11-25: new part instead of a lab, so it builds and type-checks with
   `npm run check` and can be mounted by the shell without porting.
+- 2026-11-25: Hokkaido Museum panels (photos by Lukas) added as sources
+  `hm-panel-*`. Flat-ground era follows the panel ("by about the 13th
+  century"); Meiji era extended to the 1930s ("Meiji era and after") for
+  the gradual change of houses. Drafts, listed in docs/REVIEW.md.
 - 2026-11-25: ink outline moved to `src/parts/shared/InkEdges.ts` (island
   re-exports it), so both parts share one effect.
