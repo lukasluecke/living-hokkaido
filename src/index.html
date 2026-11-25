@@ -431,6 +431,7 @@ function buildMarkers() {
     el.innerHTML = `<span class="dot"></span><span class="name"></span>`;
     el.querySelector(".name").textContent = nameOf(c);
     el.dataset.active = String(active === h.character);
+    el.addEventListener("click", (e) => { e.stopPropagation(); openSheet(h.character); });
     root.appendChild(el); markerEls.set(h.character, { el, local: new THREE.Vector3(...h.position) });
   }
 }
@@ -482,6 +483,7 @@ function openSheet(id, { keepChat = false } = {}) {
   chip(t("faction")[c.faction] || c.faction?.replace(/-/g, " ") || "—");
   chip(c.perspective ? Env.label(c.perspective) : "—");
   chip(t("status")[c.status] || t("status").draft, c.status === "curator-reviewed" ? "" : "draft");
+  if (LANG === "ja" && CHAR_JA[id]) chip(t("machine"));
   if (c.voice?.routes_through) chip(t("speaksThrough")(characters[c.voice.routes_through] ? nameOf(characters[c.voice.routes_through]) : "interpreter"));
   const dec = (LANG === "ja" && CHAR_JA[id]?.declines?.length ? CHAR_JA[id].declines : c.declines) || [];
   $("sDeclinesWrap").hidden = !dec.length; $("sDeclines").textContent = dec.join(" · ");
