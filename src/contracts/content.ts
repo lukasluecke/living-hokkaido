@@ -2,7 +2,12 @@
 // One pack per story. Parts receive it read-only. validateContentPack()
 // checks every cross-reference; run it in tests and in every lab.
 import { z } from "zod";
-import { activitySchema } from "./activity";
+import {
+  type ActivityDefinition,
+  activitySchema,
+  type MediaRef,
+  type Term,
+} from "./activity";
 import { artifactSchema } from "./artifact";
 import { guideLineSchema } from "./guide";
 import { journalStateSchema, stampSchema, type JournalState } from "./journal";
@@ -35,6 +40,90 @@ function dupes(kind: string, ids: string[], out: string[]) {
   for (const id of ids) {
     if (seen.has(id)) out.push(`Duplicate ${kind} id "${id}"`);
     seen.add(id);
+  }
+}
+
+function checkMedia(
+  m: MediaRef,
+  k: KnowledgeEntry,
+  where: string,
+  errors: string[],
+) {
+  if (m.kind !== "recording") return;
+  const s = k.sources.find((x) => x.id === m.sourceId);
+  if (!s) return void errors.push(`${where}: unknown source "${m.sourceId}"`);
+  if (s.kind !== "audio")
+    errors.push(`${where}: source "${s.id}" is not an audio source`);
+  if (s.rights !== "approved" || s.consent !== "granted")
+    errors.push(
+      `${where}: recording "${s.id}" needs approved rights and consent`,
+    );
+  if (s.placeholder)
+    errors.push(`${where}: recording "${s.id}" is a placeholder`);
+}
+
+const allReviewed = (r: Term["review"]) =>
+  r.spelling && r.region && r.meaning && r.pronunciation && r.consent;
+
+/**
+ * Rules for story / words / trace that a schema alone cannot check.
+ * Words: a real term (standIn false) needs an approved entry, all five review
+ * checks and a consented recording; the device voice never reads it; Ainu is
+ * "ain", never a Japanese variety; a stand-in never claims the target lang.
+ */
+function checkActivityKind(
+  a: ActivityDefinition,
+  k: KnowledgeEntry,
+  errors: string[],
+) {
+  const at = `activity ${a.id}`;
+  const cited = new Set(a.claimIds);
+  if (a.kind === "story") {
+    checkMedia(a.narrator.voice, k, `${at} narrator`, errors);
+    const chapters = new Set(a.chapters.map((c) => c.id));
+    for (const ch of a.chapters) {
+      for (const l of ch.lines)
+        if (l.role === "fact")
+          for (const c of l.claimIds)
+            if (!cited.has(c))
+              errors.push(`${at}: line ${l.id} cites "${c}", not in claimIds`);
+      for (const choice of ch.pause?.choices ?? []) {
+        const act = choice.action;
+        if (act.to === "chapter" && !chapters.has(act.chapterId))
+          errors.push(
+            `${at}: choice ${choice.id}: unknown chapter "${act.chapterId}"`,
+          );
+        if (act.to === "reveal" && !cited.has(act.claimId))
+          errors.push(
+            `${at}: choice ${choice.id}: claim "${act.claimId}" not in claimIds`,
+          );
+      }
+    }
+  }
+  if (a.kind === "words") {
+    for (const t of a.terms) {
+      const where = `${at} term ${t.id}`;
+      if (!cited.has(t.claimId))
+        errors.push(`${where}: claim "${t.claimId}" not in claimIds`);
+      checkMedia(t.audio, k, where, errors);
+      if (a.lang === "ain" && t.lang.toLowerCase().startsWith("ja"))
+        errors.push(
+          `${where}: Ainu is not a Japanese dialect (lang ${t.lang})`,
+        );
+      if (a.standIn) {
+        if (t.lang === a.lang)
+          errors.push(
+            `${where}: a stand-in term must not claim lang ${a.lang}`,
+          );
+        continue;
+      }
+      if (k.presentation !== "approved")
+        errors.push(`${where}: real terms need an approved entry`);
+      if (!allReviewed(t.review))
+        errors.push(`${where}: real terms need all five review checks`);
+      if (t.audio.kind === "device-voice-placeholder")
+        errors.push(`${where}: device voice must not read a real term`);
+    }
   }
 }
 
@@ -141,6 +230,12 @@ export function validateContentPack(input: unknown): string[] {
         errors.push(`activity ${a.id}: claim "${c}" not in ${a.knowledgeId}`);
     if (a.artifactId && !artifacts.has(a.artifactId))
       errors.push(`activity ${a.id}: unknown artifact "${a.artifactId}"`);
+    const k = knowledge.get(a.knowledgeId);
+    if (k) checkActivityKind(a, k, errors);
+    if (a.kind === "words")
+      for (const t of a.terms)
+        if (!artifacts.has(t.artifactId))
+          errors.push(`activity ${a.id}: unknown artifact "${t.artifactId}"`);
   }
   for (const s of p.stamps) {
     const u = s.unlock;

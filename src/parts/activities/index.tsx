@@ -10,7 +10,14 @@ import { Sequence } from "./Sequence";
 import { themeVars } from "./theme";
 import { Weave } from "./Weave";
 
-const KIND_LABEL = { quiz: "Quiz", weave: "Hands-on", sequence: "Order" };
+const KIND_LABEL: Record<ActivityPartProps["activity"]["kind"], string> = {
+  quiz: "Quiz",
+  weave: "Hands-on",
+  sequence: "Order",
+  story: "Story",
+  words: "Words",
+  trace: "Follow the thread",
+};
 
 export function ActivityPart({
   activity,

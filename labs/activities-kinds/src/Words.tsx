@@ -1,9 +1,9 @@
 // Words kind: listen, say it aloud, match word to object. In this lab the
 // terms are English stand-ins. No Ainu word is shown until a qualified person
 // has checked spelling, region, meaning and pronunciation and a consenting
-// speaker's recording exists (docs/RESEARCH.md, contract-proposal.ts).
+// speaker's recording exists (docs/RESEARCH.md, validateContentPack).
 import { useMemo, useState } from "react";
-import type { Term } from "../contract-proposal";
+import type { Term } from "@/contracts";
 import { ObjectIcon } from "./icons";
 import { Cite, complete, deviceVoice, type KindProps, PreviewBanner } from "./shared";
 

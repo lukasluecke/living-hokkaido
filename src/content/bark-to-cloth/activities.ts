@@ -1,6 +1,7 @@
 // Activities. The three quizzes come from src/data/story.ts unchanged.
 import type { ActivityInput } from "@/contracts";
 import { activities as seed } from "@/data/story";
+import { activityKinds } from "./activity-kinds";
 
 const artifactFor: Record<string, string> = {
   material: "fiber",
@@ -37,4 +38,5 @@ export const activities: ActivityInput[] = [
       "The museum describes cloth woven from inner bark fibers. Your rows are a simple illustration.",
     illustrative: true,
   },
+  ...activityKinds,
 ];
