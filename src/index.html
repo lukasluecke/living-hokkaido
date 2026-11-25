@@ -59,7 +59,10 @@
   .marker[data-active="true"] .dot { outline: 2px solid #fff; outline-offset: 3px; }
   .marker.hidden { display: none; }
   @keyframes pulse { 50% { transform: scale(1.12); } }
-  @media (max-width: 560px) { .marker .name { display: none; } .marker[data-active="true"] .name { display: block; } }
+  /* Figures sit close together, so names show only on hover, focus or selection. */
+  .marker .name { display: none; }
+  .marker:hover, .marker:focus-visible, .marker[data-active="true"] { z-index: 1; }
+  .marker:hover .name, .marker:focus-visible .name, .marker[data-active="true"] .name { display: block; }
 
   /* Character sheet: side panel on PC, bottom sheet on phone */
   .sheet { position: fixed; z-index: 6; background: var(--panel-solid); border: 1px solid var(--line);
