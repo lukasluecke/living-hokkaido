@@ -67,7 +67,7 @@ the shell (`nav.back`); the game does not handle Esc.
 - Proposed (additive): activity kind `hide-seek`, in `contract-proposal.ts`.
   Fields: `scene` (`otaru-herring-warehouse` or `sapporo-street`), `prompt` (frame text only), `captionClaimIds`,
   `accurateClaimIds`, `anachronismClaimIds`, `completion`, `durations`
-  (default 10/60/90/20 s), `wrongTapPenalty` (default 10 s), `players`,
+  (default 10/80/90/20 s), `wrongTapPenalty` (default 10 s), `players`,
   `illustrative` (default true). A refine checks every referenced claim is in
   `claimIds`. Also needs `"hide-seek": "Game"` in `KIND_LABEL` and a test in
   `tests/contracts.test.ts`.
