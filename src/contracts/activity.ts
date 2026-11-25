@@ -113,7 +113,26 @@ export const storyLineSchema = z.discriminatedUnion("role", [
     role: z.literal("frame"),
     text: z.string().min(1),
   }),
+  /**
+   * The story's refrain (sakehe) comes back here. Shows `refrain` of the
+   * activity; the device voice never reads it.
+   */
+  z.object({
+    id: idSchema,
+    role: z.literal("refrain"),
+  }),
 ]);
+
+/** A refrain taken from a named teller's performance, as the source writes it. */
+export const storyRefrainSchema = z.object({
+  text: z.string().min(1),
+  romanised: z.string().optional(),
+  /** BCP 47 tag, e.g. "ain". */
+  lang: z.string().min(2),
+  /** Who it belongs to, e.g. the teller and the source. */
+  credit: z.string().min(1),
+  claimId: idSchema,
+});
 
 export const storyChoiceSchema = z.object({
   id: idSchema,
@@ -150,6 +169,8 @@ export const storyActivitySchema = z.object({
       }),
     )
     .min(1),
+  /** Optional refrain, shown by "refrain" lines. */
+  refrain: storyRefrainSchema.optional(),
   /** Shown at the end. Must only restate claims. */
   completion: z.string().min(1),
 });
