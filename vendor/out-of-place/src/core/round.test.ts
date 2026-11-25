@@ -63,9 +63,9 @@ describe("disguise", () => {
       s,
       { type: "skipPhase" },
       { type: "moveHider", x: 120, y: 300 },
-      { type: "setPose", pose: "crouching" },
+      { type: "setPose", pose: "sitting" },
     );
-    expect(s.hider).toMatchObject({ x: 120, y: 300, pose: "crouching" });
+    expect(s.hider).toMatchObject({ x: 120, y: 300, pose: "sitting" });
   });
 });
 
@@ -123,9 +123,14 @@ describe("seek rules", () => {
 
   it("hit boxes depend on pose", () => {
     const standing = { x: 0, y: 0, pose: "standing" as const, found: false };
-    const crouching = { ...standing, pose: "crouching" as const };
+    const sitting = { ...standing, pose: "sitting" as const };
+    const lying = { ...standing, pose: "lying" as const };
     expect(hitTest(standing, 0, -130)).toBe(true);
-    expect(hitTest(crouching, 0, -130)).toBe(false);
+    expect(hitTest(sitting, 0, -130)).toBe(false);
+    // Lying is low and wide: a tap beside the feet hits, one at head height misses.
+    expect(hitTest(lying, 70, -20)).toBe(true);
+    expect(hitTest(lying, 0, -100)).toBe(false);
+    expect(hitTest(standing, 70, -20)).toBe(false);
     expect(hitTest(standing, 0, 5)).toBe(true); // forgiveness below the feet
   });
 
