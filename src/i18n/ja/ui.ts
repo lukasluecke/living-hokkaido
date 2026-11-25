@@ -192,6 +192,11 @@ export const jaUi: Record<string, string> = {
   "{n} objects": "{n}点の品",
   "{n} open": "{n}か所 開いている",
   "{n} soon": "{n}か所 準備中",
+  "Loading the page…": "ページを読み込んでいます…",
+  "Loading the island’s models…": "島のモデルを読み込んでいます…",
+  "Building the island…": "島をつくっています…",
+  Ready: "準備ができました",
+  "Loading the island": "島を読み込んでいます",
   // Activity kinds: build the scene, story, words, trace, map, board,
   // canon, pluck, weave, the game stage
   " (seen in the diorama)": "（ジオラマで見えるもの）",

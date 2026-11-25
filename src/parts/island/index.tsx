@@ -16,6 +16,7 @@ import {
   placeKinds,
 } from "./Guide";
 import c from "./Island.module.css";
+import { FirstFrame, LoadScreen } from "./LoadScreen";
 import { World } from "./World";
 
 export function IslandPart(props: IslandPartProps) {
@@ -23,6 +24,7 @@ export function IslandPart(props: IslandPartProps) {
   const pins = useRef(new Map<string, HTMLElement>());
   const t = useT();
   const q = useQuality(SCALE.maxDpr);
+  const [drawn, setDrawn] = useState(false);
   if (!prefs.webgl) return <IslandList {...props} />;
   const select = (l: Location) => {
     if (l.status === "open" && view === "island")
@@ -50,6 +52,7 @@ export function IslandPart(props: IslandPartProps) {
             fx
             extraFx={q.extraFx}
           />
+          <FirstFrame onDrawn={() => setDrawn(true)} />
         </Suspense>
         <QualityGovernor />
       </Canvas>
@@ -73,6 +76,7 @@ export function IslandPart(props: IslandPartProps) {
         ))}
       </div>
       {view === "island" && <PlaceTray {...props} onSelect={select} />}
+      <LoadScreen drawn={drawn} />
     </div>
   );
 }
