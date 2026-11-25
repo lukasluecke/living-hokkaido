@@ -45,6 +45,20 @@ AR button on phones (AR needs the site served over HTTPS).
 Open `http://localhost:8081/src/?edit=1`, pick a figure, tap where it stands,
 then **Copy JSON** and paste it into `src/hotspots.json`.
 
+## Deploy (team demo)
+
+The site runs as a small Node server (`server.mjs`, `npm start`) behind one shared
+password (`APP_PASSWORD`, any user name). Museum assets are not in this repository:
+they live in a private S3-compatible bucket (`BUCKET`, `ENDPOINT`, `REGION`,
+`ACCESS_KEY_ID`, `SECRET_ACCESS_KEY`) and the server streams them to signed-in users
+only. Search engines and AI crawlers are told to stay out.
+
+```powershell
+npm run upload-assets              # needs OMUSHA_URL, APP_PASSWORD, UPLOAD_TOKEN (.env.deploy)
+npm run upload-assets -- --list    # what is in the bucket
+npm run upload-assets -- --delete-all   # take every museum asset down
+```
+
 ## Layout
 
 ```
