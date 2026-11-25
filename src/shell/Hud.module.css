@@ -277,22 +277,36 @@ li:not([data-status="now"]) .stationLabel {
 
 /* Phone: no brand. */
 @media (max-width: 700px) {
-  .hud {
-    grid-template-columns: auto 1fr auto;
-  }
   .title {
     display: none;
   }
+  /* The rail keeps its own column so the tools (language, stamps, menu)
+     never sit on top of its last station. */
+  .hud {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px;
+  }
   .rail {
-    grid-column: 1 / 3;
+    grid-column: 1;
     justify-self: start;
+    max-width: 100%;
     padding: 5px 10px 4px;
   }
   .seg {
-    width: 14px;
+    width: 4px;
   }
   .station {
-    min-width: 28px;
+    min-width: 26px;
+  }
+  .tools {
+    gap: 6px;
+  }
+  .round {
+    width: 36px;
+  }
+  .lang {
+    min-width: 36px;
+    padding: 0;
   }
   li:not([data-status="now"]) .stationLabel {
     position: absolute;
@@ -329,4 +343,16 @@ li:not([data-status="now"]) .stationLabel {
   font-weight: 700;
   text-shadow: none;
   vertical-align: middle;
+}
+
+/* Very narrow phones: the current station shows its icon only. */
+@media (max-width: 340px) {
+  li[data-status="now"] .stationLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
 }
