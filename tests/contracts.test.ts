@@ -2,12 +2,15 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   EMPTY_JOURNAL,
+  eraAt,
+  eraWeights,
   type ExperienceEvent,
   experienceEventSchema,
   resolveClaim,
   sanitizeJournal,
   seasonAt,
   seasonWeights,
+  termReviewed,
   validateContentPack,
 } from "@/contracts";
 import { barkToClothPack, barkToClothRaw } from "@/content/bark-to-cloth";
@@ -178,21 +181,23 @@ test("pack has story, words and trace activities", () => {
     assert.ok(kinds.includes(k), k);
 });
 
-test("real terms need an approved entry, five checks and a recording", () => {
+test("unreviewed real terms are drafts; device voice never reads them", () => {
   let p = clone();
-  realTerms(p, {});
-  let e = validateContentPack(p);
-  assert.ok(e.some((x) => x.includes("approved entry")));
-  assert.ok(e.some((x) => x.includes("five review checks")));
-  p = clone();
-  realTerms(p, { review: allChecks });
-  e = validateContentPack(p);
-  assert.ok(e.some((x) => x.includes("device voice")));
+  realTerms(p, { audio: { kind: "none" } });
+  assert.deepEqual(validateContentPack(p), []);
+  const w = kindOf(barkToClothRaw as Raw, "words");
+  assert.ok(
+    w.terms.every((t) => !termReviewed(t.review)),
+    "seed terms are drafts",
+  );
   p = clone();
   realTerms(p, {
     review: allChecks,
-    audio: { kind: "recording", sourceId: "hdm" },
+    audio: { kind: "device-voice-placeholder" },
   });
+  assert.ok(validateContentPack(p).some((x) => x.includes("device voice")));
+  p = clone();
+  realTerms(p, { audio: { kind: "recording", sourceId: "hdm" } });
   assert.ok(
     validateContentPack(p).some((x) => x.includes("not an audio source")),
   );
@@ -206,7 +211,7 @@ test("Ainu is never tagged as a Japanese variety; stand-ins stay stand-ins", () 
   );
   p = clone();
   const w = kindOf(p, "words");
-  w.terms = w.terms.map((t) => ({ ...t, lang: "ain" }));
+  w.standIn = true;
   assert.ok(validateContentPack(p).some((x) => x.includes("stand-in")));
 });
 
@@ -220,4 +225,81 @@ test("story fact lines and choices cite the activity's claims", () => {
   const line = kindOf(q, "story").chapters[0].lines[1];
   if (line.role === "fact") line.claimIds = [];
   assert.notDeepEqual(validateContentPack(q), []);
+});
+
+test("timeline: eras cite claims in their knowledge entry", () => {
+  const t = pack.timelines[0];
+  assert.ok(t, "pack has a timeline");
+  assert.ok(t.eras.length >= 2);
+  for (const e of t.eras)
+    for (const c of e.claimIds)
+      assert.ok(resolveClaim(pack, t.knowledgeId, c), `${e.id} → ${c}`);
+  const p = clone();
+  p.timelines[0].eras[1].claimIds.push("invented-claim");
+  assert.ok(
+    validateContentPack(p).some(
+      (e) => e.includes("invented-claim") && e.includes("timeline"),
+    ),
+  );
+});
+
+test("timeline: eras must be in time order; packs without timelines parse", () => {
+  const p = clone();
+  p.timelines[0].eras[2].year = 100;
+  assert.ok(validateContentPack(p).some((e) => e.includes("time order")));
+  const { timelines: _drop, ...old } = clone();
+  assert.deepEqual(validateContentPack(old), []);
+});
+
+test("timeline: withdrawn knowledge hides the timeline", () => {
+  const p = clone();
+  const k = p.knowledge.findIndex((x) => x.id === "house-over-time");
+  p.knowledge[k] = { ...p.knowledge[k], presentation: "withdrawn" };
+  assert.ok(
+    validateContentPack(p).some(
+      (e) => e.includes("timeline") && e.includes("withdrawn"),
+    ),
+  );
+});
+
+test("timeline: era weights blend neighbours and sum to 1", () => {
+  assert.deepEqual(eraWeights(5, 0), [1, 0, 0, 0, 0]);
+  const w = eraWeights(5, 2.25);
+  assert.ok(Math.abs(w[2] - 0.75) < 1e-9 && Math.abs(w[3] - 0.25) < 1e-9);
+  assert.deepEqual(eraWeights(3, 9), [0, 0, 1]);
+  assert.equal(eraAt(5, 2.6), 3);
+  assert.equal(eraAt(5, -1), 0);
+});
+
+test("timeline events parse", () => {
+  for (const e of [
+    { type: "timeline.open", timelineId: "house-over-time" },
+    { type: "timeline.era", timelineId: "house-over-time", eraId: "meiji" },
+    { type: "timeline.close", timelineId: "house-over-time" },
+  ])
+    assert.ok(experienceEventSchema.safeParse(e).success, e.type);
+});
+
+test("timeline overlay opens, returns from a reveal and closes", () => {
+  const prefs = { reducedMotion: true, webgl: false };
+  const tl = pack.timelines[0];
+  assert.ok(tl, "pack has a timeline");
+  let s = initialState(prefs);
+  s = reduce(pack, s, { type: "timeline.open", timelineId: "nope" });
+  assert.equal(s.overlay, null, "unknown timeline does not open");
+  s = reduce(pack, s, { type: "timeline.open", timelineId: tl.id });
+  assert.equal(s.overlay, "timeline");
+  s = reduce(pack, s, {
+    type: "reveal.open",
+    knowledgeId: tl.knowledgeId,
+    claimId: tl.claimIds[0],
+  });
+  assert.equal(s.overlay, "reveal");
+  // The part unmounts under the reveal; that must not close the timeline.
+  s = reduce(pack, s, { type: "timeline.close", timelineId: tl.id });
+  s = reduce(pack, s, { type: "reveal.close" });
+  assert.equal(s.overlay, "timeline");
+  s = reduce(pack, s, { type: "nav.back" });
+  assert.equal(s.overlay, null);
+  assert.equal(s.timelineId, null);
 });

@@ -1,6 +1,7 @@
 # Parts, boundaries and integration
 
-The visitor experience is split into **six parts**. Each teammate (and each
+The visitor experience is split into **six parts** (plus `over-time`, a
+seventh part that the shell does not mount yet). Each teammate (and each
 teammate's coding agent) can experiment with any part on its own. Results come
 back together through **shared contracts**, not through shared code.
 
@@ -43,6 +44,7 @@ back together through **shared contracts**, not through shared code.
 | activities | `src/parts/activities` | (none yet) | One renderer per activity kind: quiz, weave (D2), sequence | `activity.complete`, `activity.close` |
 | journal | `src/parts/journal` | (none yet) | E1 stamp book from `JournalState` | `journal.close` |
 | reveal | `src/parts/reveal` | (none yet) | F2 card turn: source → claim → human review | `reveal.close` |
+| over-time | `src/parts/over-time` | (none; route `/over-time`) | Time scrub: the house and its land through five eras, each era with cited claims | `timeline.open`, `timeline.era`, `timeline.close`, `reveal.open` |
 
 The owl is drawn by the island part. Its words are content (`guide` in the
 pack) and the shell shows them, so every part can trigger a line by event.

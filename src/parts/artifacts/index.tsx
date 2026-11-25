@@ -2,9 +2,10 @@
 // Artifact viewer part: HTML fallback stub for the card and hotspots.
 // Replace with the C2 turn viewer (port from labs/artifacts).
 import { useEffect } from "react";
-import type { ArtifactViewerProps } from "@/contracts";
+import { type ArtifactViewerProps, memoriesForArtifact } from "@/contracts";
 import { PresentationBadge, RepresentationBadge } from "../shared/Badges";
 import s from "../shared/Fallback.module.css";
+import { Memories } from "./Memories";
 import { Viewer3D } from "./Viewer3D";
 
 export function ArtifactViewer({
@@ -13,11 +14,13 @@ export function ArtifactViewer({
   read,
   emit,
   prefs,
+  content,
 }: ArtifactViewerProps) {
   useEffect(() => {
     emit({ type: "artifact.inspected", artifactId: artifact.id });
   }, [artifact.id, emit]);
   const summary = claims[artifact.summaryClaimId];
+  const memories = memoriesForArtifact(content.memories, artifact.id);
   return (
     <article className={s.panel} aria-label={artifact.title}>
       <h2>{artifact.title}</h2>
@@ -50,6 +53,7 @@ export function ArtifactViewer({
           </li>
         ))}
       </ul>
+      <Memories memories={memories} />
       <div className={s.row}>
         {artifact.activityIds.map((id) => (
           <button

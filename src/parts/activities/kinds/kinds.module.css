@@ -547,3 +547,18 @@
     grid-template-columns: 1fr;
   }
 }
+.root :global(.draft) {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 8px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--lh-paper-edge);
+  font:
+    500 11px / 1.4 ui-rounded,
+    system-ui,
+    sans-serif;
+  color: var(--lh-ink-soft);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}

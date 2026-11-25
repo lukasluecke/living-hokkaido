@@ -29,7 +29,9 @@ journal stamp appears after completion.
   or button). Pure state in `logic.ts`, tested in `tests/activities.test.ts`.
   Colours from tokens via `theme.ts`; backdrop follows the season blend.
 - 2026-11-25: `story`, `words`, `trace` ported from `labs/activities-kinds`
-  into `kinds/` (one CSS module, `.root` scope). `words` shows English
-  stand-ins until a language reviewer and consented recordings exist; story
-  voice = captions + labelled device-voice placeholder (Lukas: assumptions
-  for the prototype, verification later).
+  into `kinds/` (one CSS module, `.root` scope). Story voice = captions +
+  device voice.
+- 2026-11-25: Lukas: unlock everything now, review later. `words` shows the
+  cited Ainu words (attus, isitaykini) with a small "Draft" chip; no review
+  gate in the UI. The device voice never reads Ainu; Listen waits for a
+  recording. Every draft item is listed in docs/REVIEW.md.

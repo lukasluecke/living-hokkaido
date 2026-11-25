@@ -115,3 +115,10 @@ and zod; the content pack is included. No fps numbers (container only).
 4. Should story choices also let the visitor pick the next object in the
    room (emit `artifact.focus`)? That needs the shell to allow it from the
    activity view.
+
+## Update 2026-11-25: unlocked
+Lukas: show everything now, review later. In the app, `words` shows the
+cited Ainu words attus and isitaykini with a small "Draft" chip (no gate).
+The lab copy of `Words.tsx` is older; the app version in
+`src/parts/activities/kinds/` is current. The review list is docs/REVIEW.md.
+Shots: `shots/unlock-words.jpg`, `shots/unlock-match.jpg`.

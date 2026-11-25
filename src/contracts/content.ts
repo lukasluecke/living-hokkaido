@@ -16,7 +16,9 @@ import {
   type KnowledgeEntry,
   type ResolvedClaim,
 } from "./knowledge";
+import { voiceMemorySchema } from "./memory";
 import { detailSceneSchema } from "./scene";
+import { timelineSchema } from "./timeline";
 import { islandSchema } from "./world";
 
 export const CONTRACT_VERSION = 1;
@@ -31,6 +33,10 @@ export const contentPackSchema = z.object({
   activities: z.array(activitySchema),
   stamps: z.array(stampSchema),
   guide: z.array(guideLineSchema),
+  /** Curator voice memories about artifacts (additive, default none). */
+  memories: z.array(voiceMemorySchema).default([]),
+  /** "Over time" timelines (additive; old packs parse with none). */
+  timelines: z.array(timelineSchema).default([]),
 });
 export type ContentPack = z.infer<typeof contentPackSchema>;
 export type ContentPackInput = z.input<typeof contentPackSchema>;
@@ -62,14 +68,16 @@ function checkMedia(
     errors.push(`${where}: recording "${s.id}" is a placeholder`);
 }
 
-const allReviewed = (r: Term["review"]) =>
+/** True when a qualified reviewer has done all five checks for a term. */
+export const termReviewed = (r: Term["review"]) =>
   r.spelling && r.region && r.meaning && r.pronunciation && r.consent;
 
 /**
  * Rules for story / words / trace that a schema alone cannot check.
- * Words: a real term (standIn false) needs an approved entry, all five review
- * checks and a consented recording; the device voice never reads it; Ainu is
- * "ain", never a Japanese variety; a stand-in never claims the target lang.
+ * Words: a real term (standIn false) cites a claim; until its five review
+ * checks are done it shows as a draft (see docs/REVIEW.md). The device voice
+ * never reads it; Ainu is "ain", never a Japanese variety; a stand-in never
+ * claims the target lang.
  */
 function checkActivityKind(
   a: ActivityDefinition,
@@ -117,10 +125,6 @@ function checkActivityKind(
           );
         continue;
       }
-      if (k.presentation !== "approved")
-        errors.push(`${where}: real terms need an approved entry`);
-      if (!allReviewed(t.review))
-        errors.push(`${where}: real terms need all five review checks`);
       if (t.audio.kind === "device-voice-placeholder")
         errors.push(`${where}: device voice must not read a real term`);
     }
@@ -252,9 +256,60 @@ export function validateContentPack(input: unknown): string[] {
         need(activityIds.has(id), `activity "${id}"`);
     for (const c of s.claimIds) need(allClaims.has(c), `claim "${c}"`);
   }
+  dupes(
+    "timeline",
+    p.timelines.map((t) => t.id),
+    errors,
+  );
+  for (const t of p.timelines) {
+    visible(t.knowledgeId, `timeline ${t.id}`);
+    if (t.locationId && !locationIds.has(t.locationId))
+      errors.push(`timeline ${t.id}: unknown location "${t.locationId}"`);
+    const claims = claimsOf(t.knowledgeId);
+    for (const c of t.claimIds)
+      if (!claims.has(c))
+        errors.push(`timeline ${t.id}: claim "${c}" not in ${t.knowledgeId}`);
+    dupes(
+      `timeline ${t.id} era`,
+      t.eras.map((e) => e.id),
+      errors,
+    );
+    for (const e of t.eras)
+      for (const c of e.claimIds)
+        if (!claims.has(c))
+          errors.push(
+            `timeline ${t.id} era ${e.id}: claim "${c}" not in ${t.knowledgeId}`,
+          );
+  }
   for (const g of p.guide)
     for (const c of g.claimIds)
       if (!allClaims.has(c)) errors.push(`guide ${g.id}: unknown claim "${c}"`);
+  dupes(
+    "memory",
+    p.memories.map((m) => m.id),
+    errors,
+  );
+  for (const m of p.memories) {
+    const at = `memory ${m.id}`;
+    const art = artifacts.get(m.artifactId);
+    if (!art) errors.push(`${at}: unknown artifact "${m.artifactId}"`);
+    else if (art.knowledgeId !== m.knowledgeId)
+      errors.push(`${at}: knowledge must match artifact ${art.id}`);
+    visible(m.knowledgeId, at);
+    const k = knowledge.get(m.knowledgeId);
+    const s = k?.sources.find((x) => x.id === m.sourceId);
+    if (k && !s) errors.push(`${at}: unknown source "${m.sourceId}"`);
+    if (s && s.kind !== "audio")
+      errors.push(`${at}: source "${s.id}" is not an audio source`);
+    if (s && m.consent.recording === "granted" && s.consent === "withdrawn")
+      errors.push(`${at}: source "${s.id}" consent is withdrawn`);
+    if (
+      m.audio.kind === "file" &&
+      s &&
+      (s.rights !== "approved" || s.placeholder)
+    )
+      errors.push(`${at}: recording needs an approved, non-placeholder source`);
+  }
   return errors;
 }
 

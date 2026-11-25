@@ -21,6 +21,7 @@ import { Hud } from "./Hud";
 import { record } from "./progress";
 import { parts } from "./registry";
 import s from "./Shell.module.css";
+import { SidePanel } from "./SidePanel";
 import { initialState, reduce } from "./state";
 
 function detectPrefs() {
@@ -135,6 +136,11 @@ export function Shell({ pack }: { pack: ContentPack }) {
   useEffect(() => {
     const onKey = (ev: KeyboardEvent) => {
       if (ev.key === "Escape") emit({ type: "nav.back" });
+      // Arrows step objects only when nothing else has focus (the 3D
+      // viewer and sliders use arrows themselves).
+      const free = ev.target === document.body;
+      if (free && (ev.key === "ArrowLeft" || ev.key === "ArrowRight"))
+        stepRef.current?.(ev.key === "ArrowLeft" ? -1 : 1);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -149,6 +155,16 @@ export function Shell({ pack }: { pack: ContentPack }) {
     pack.artifacts.find((a) => a.id === state.artifactId) ?? null;
   const activity =
     pack.activities.find((a) => a.id === state.activityId) ?? null;
+  // Previous / next object in the order the scene places them.
+  const placed = scene ? scene.placements.map((p) => p.artifactId) : [];
+  const step = (d: number) => {
+    if (!artifact || placed.length < 2) return;
+    const i = placed.indexOf(artifact.id);
+    const next = placed[(i + d + placed.length) % placed.length];
+    if (next) emit({ type: "artifact.focus", artifactId: next });
+  };
+  const stepRef = useRef<((d: number) => void) | null>(null);
+  stepRef.current = state.view === "focus" && !state.overlay ? step : null;
   const {
     island: Island,
     "detail-scene": Scene,
@@ -156,7 +172,17 @@ export function Shell({ pack }: { pack: ContentPack }) {
     activities: Activity,
     journal: Journal,
     reveal: Reveal,
+    "over-time": OverTime,
   } = parts;
+  // "Over time" is offered inside a location that has a timeline.
+  const localTimeline =
+    state.view === "scene" || state.view === "focus"
+      ? (pack.timelines.find((t) => t.locationId === state.locationId) ?? null)
+      : null;
+  const openTimeline =
+    state.overlay === "timeline"
+      ? (pack.timelines.find((t) => t.id === state.timelineId) ?? null)
+      : null;
 
   const stage =
     state.view === "island" || state.view === "travel" ? (
@@ -185,6 +211,12 @@ export function Shell({ pack }: { pack: ContentPack }) {
         stamps={journal.stamps.length}
         total={pack.stamps.length}
         sound={sound}
+        onOverTime={
+          localTimeline
+            ? () =>
+                emit({ type: "timeline.open", timelineId: localTimeline.id })
+            : undefined
+        }
       />
       {guideLine && (
         <p
@@ -201,25 +233,71 @@ export function Shell({ pack }: { pack: ContentPack }) {
       {toast && <output className={s.toast}>New stamp: {toast}</output>}
       <aside className={s.side}>
         {artifact && state.view === "focus" && (
-          <Viewer
-            {...ctx}
-            artifact={artifact}
-            claims={claimsFor(pack, artifact.knowledgeId, artifact.claimIds)}
-            read={journal.hotspotsRead
-              .filter((k) => k.startsWith(`${artifact.id}/`))
-              .map((k) => k.slice(artifact.id.length + 1))}
-          />
+          <SidePanel
+            key="card"
+            title={artifact.label}
+            closeLabel="Close (put it back)"
+            onClose={() => emit({ type: "artifact.blur" })}
+            index={placed.indexOf(artifact.id)}
+            total={placed.length}
+            onPrev={placed.length > 1 ? () => step(-1) : undefined}
+            onNext={placed.length > 1 ? () => step(1) : undefined}
+          >
+            <Viewer
+              {...ctx}
+              artifact={artifact}
+              claims={claimsFor(pack, artifact.knowledgeId, artifact.claimIds)}
+              read={journal.hotspotsRead
+                .filter((k) => k.startsWith(`${artifact.id}/`))
+                .map((k) => k.slice(artifact.id.length + 1))}
+            />
+          </SidePanel>
         )}
         {activity && state.view === "activity" && (
-          <Activity
-            {...ctx}
-            activity={activity}
-            claims={claimsFor(pack, activity.knowledgeId, activity.claimIds)}
-          />
+          <SidePanel
+            key="activity"
+            header={false}
+            title={activity.title}
+            closeLabel="Close activity"
+            onClose={() =>
+              emit({ type: "activity.close", activityId: activity.id })
+            }
+          >
+            <Activity
+              {...ctx}
+              activity={activity}
+              claims={claimsFor(pack, activity.knowledgeId, activity.claimIds)}
+            />
+          </SidePanel>
         )}
       </aside>
-      {state.overlay && (
-        <div className={s.overlay}>
+      {openTimeline && (
+        <div className={s.timeline}>
+          <OverTime
+            {...ctx}
+            timeline={openTimeline}
+            claims={claimsFor(pack, openTimeline.knowledgeId, [
+              ...openTimeline.claimIds,
+              ...openTimeline.eras.flatMap((e) => e.claimIds),
+            ])}
+          />
+          <button
+            type="button"
+            className={s.timelineClose}
+            onClick={() => emit({ type: "nav.back" })}
+          >
+            Close
+          </button>
+        </div>
+      )}
+      {state.overlay && state.overlay !== "timeline" && (
+        <div
+          className={s.overlay}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) emit({ type: "nav.back" });
+          }}
+          role="presentation"
+        >
           {state.overlay === "journal" && (
             <Journal {...ctx} journal={journal} />
           )}

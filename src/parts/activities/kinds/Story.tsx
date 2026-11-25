@@ -148,10 +148,10 @@ export function Story({
             <p className="credit">{a.narrator.credit}</p>
             <p className="voice-label">
               {voice.kind === "recording"
-                ? "Recorded voice · consent on file"
+                ? "Recorded voice"
                 : voiceOn && canVoice
-                  ? "Device voice · placeholder, not a consented recording"
-                  : "Captions only · no recording yet"}
+                  ? "Device voice"
+                  : "Captions"}
             </p>
           </div>
           <nav aria-label="Chapters">
@@ -274,7 +274,7 @@ export function Story({
                 disabled={!canVoice}
                 onChange={(e) => setVoiceOn(e.target.checked)}
               />
-              Device voice (placeholder)
+              Device voice
             </label>
             <label className="toggle">
               <input

@@ -14,7 +14,7 @@ export type View =
   /** An activity is open. */
   | "activity";
 
-export type Overlay = "journal" | "reveal" | null;
+export type Overlay = "journal" | "reveal" | "timeline" | null;
 
 export type Prefs = {
   /** prefers-reduced-motion: cut cameras, no timelapse autoplay. */
@@ -32,6 +32,8 @@ export type ExperienceState = {
   activityId: ActivityId | null;
   /** Reveal target, when overlay is "reveal". */
   reveal: { knowledgeId: string; claimId?: string; artifactId?: string } | null;
+  /** Open "Over time" timeline (overlay "timeline", or under a reveal). */
+  timelineId?: string | null;
   season: SeasonState;
   prefs: Prefs;
 };

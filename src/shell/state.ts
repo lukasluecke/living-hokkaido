@@ -70,10 +70,25 @@ export function reduce(
         activityId: null,
       };
     case "journal.open":
-      return { ...s, overlay: "journal" };
+      return { ...s, overlay: "journal", timelineId: null };
     case "journal.close":
-    case "reveal.close":
       return { ...s, overlay: null, reveal: null };
+    case "reveal.close":
+      // A reveal opened from the timeline returns to it.
+      return {
+        ...s,
+        overlay: s.timelineId ? "timeline" : null,
+        reveal: null,
+      };
+    case "timeline.open":
+      if (!pack.timelines.some((t) => t.id === e.timelineId)) return s;
+      if (s.overlay === "reveal") return s;
+      return { ...s, overlay: "timeline", timelineId: e.timelineId };
+    case "timeline.era":
+    case "timeline.close":
+      // The part emits close on unmount (also under a reveal); the shell
+      // closes the timeline with nav.back.
+      return s;
     case "reveal.open":
       return {
         ...s,
@@ -89,7 +104,10 @@ export function reduce(
     case "season.play":
       return { ...s, season: { ...s.season, playing: e.playing } };
     case "nav.back":
-      if (s.overlay) return { ...s, overlay: null, reveal: null };
+      if (s.overlay === "reveal" && s.timelineId)
+        return { ...s, overlay: "timeline", reveal: null };
+      if (s.overlay)
+        return { ...s, overlay: null, reveal: null, timelineId: null };
       if (s.view === "activity")
         return {
           ...s,

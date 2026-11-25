@@ -89,9 +89,13 @@
   right: 16px;
   width: min(420px, calc(100% - 32px));
   max-height: calc(100% - 140px);
-  overflow: auto;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 12px;
+  z-index: 2;
+}
+.side:empty {
+  display: none;
 }
 .overlay {
   position: absolute;
@@ -117,4 +121,30 @@
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
   }
+}
+/* "Over time" timeline: full stage above the scene, below reveal/journal. */
+.timeline {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: #1f2d46;
+}
+.timelineClose {
+  position: absolute;
+  top: calc(10px + env(safe-area-inset-top, 0px));
+  right: 12px;
+  z-index: 5;
+  font: inherit;
+  font-size: 14px;
+  border: 0;
+  border-radius: 999px;
+  padding: 7px 14px;
+  background: #fbf4e6;
+  color: #2b2118;
+  box-shadow: 0 4px 16px rgb(43 33 24 / 22%);
+  cursor: pointer;
+}
+.timelineClose:focus-visible {
+  outline: 2px solid #e8c27a;
+  outline-offset: 2px;
 }

@@ -5,7 +5,7 @@ import s from "./Fallback.module.css";
 export function PresentationBadge({ value }: { value: Presentation }) {
   if (value === "approved") return <span className={s.badge}>Reviewed</span>;
   if (value === "research-preview")
-    return <span className={s.badge}>Research preview · review pending</span>;
+    return <span className={s.badge}>Draft</span>;
   return null;
 }
 

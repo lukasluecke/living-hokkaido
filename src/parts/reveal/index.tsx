@@ -244,10 +244,7 @@ function Back({
                 <time dateTime={review.reviewedAt}>{review.reviewedAt}</time>.
               </p>
             ) : (
-              <p>
-                Research preview. Cultural and editorial review is pending. No
-                reviewer has approved this yet.
-              </p>
+              <p>Draft. The review pass comes later.</p>
             )}
           </div>
         </li>

@@ -15,13 +15,15 @@ Two layers:
 | `world.ts` | `Island`, `Location` | open locations need a `sceneId`; positions in island space; `placeholder` flag |
 | `scene.ts` | `DetailScene`, `ArtifactPlacement` | views `outside` + `home`; `roofNode`; placements with `focusView` and key |
 | `artifact.ts` | `Artifact`, `ModelAsset`, `Hotspot` | summary + hotspots cite linked claims; scans need approved rights + consent; withdrawn assets rejected |
-| `activity.ts` | `ActivityDefinition` (quiz / weave / sequence / story / words / trace), `MediaRef`, `ActivityResult` | grounded in ≥ 1 claim; weave is `illustrative` by default; story fact lines cite claims; real `words` terms need an approved entry, five review checks and a consented recording (else `standIn`); recordings are consented `audio` sources |
+| `activity.ts` | `ActivityDefinition` (quiz / weave / sequence / story / words / trace), `MediaRef`, `ActivityResult` | grounded in ≥ 1 claim; weave is `illustrative` by default; story fact lines cite claims; `words` terms cite a claim and show as drafts until their five review checks are done (docs/REVIEW.md); the device voice never reads a real term; recordings are consented `audio` sources |
 | `journal.ts` | `Stamp`, `UnlockRule`, `JournalState` | progress holds only pack ids; storage key `lh-journal-v2` |
 | `season.ts` | `SeasonState`, `seasonWeights`, `seasonAt` | one value 0–4; shell owns the clock |
+| `memory.ts` | `VoiceMemory`, `MemoryTranslation`, `memoriesForArtifact`, `pickTranslation` | original audio stays playable; translations need translation consent; `cloned` voice needs voice-clone consent; translations are `machine` until `checkedBy`; Ainu content is flagged by `needsReview` (draft, prototype gate open); `placeholder` samples skip speaker consent but never use a cloned voice; withdrawn consent hides it; source must be an `audio` source |
 | `guide.ts` | `GuideLine` | owl navigates; facts need `claimIds` |
 | `events.ts` | `ExperienceEvent`, `createEventBus` | parts communicate only by events |
 | `experience.ts` | `ExperienceState`, `View`, `Prefs` | written only by `src/shell/state.ts` |
-| `parts.ts` | props per part (`IslandPartProps` …) | a part takes exactly these props |
+| `timeline.ts` | `Timeline`, `TimelineEra`, `eraWeights`, `eraAt` | eras in time order; every era cites ≥ 1 claim of the timeline's knowledge entry; `stage` only picks illustrative shapes |
+| `parts.ts` | props per part (`IslandPartProps` …, `TimelinePartProps`) | a part takes exactly these props |
 | `content.ts` | `ContentPack`, `validateContentPack`, `resolveClaim`, `sanitizeJournal` | every cross-reference checked; `CONTRACT_VERSION` |
 
 ## Changing contracts
@@ -34,6 +36,8 @@ Two layers:
 
 | Version | Change |
 |---|---|
+| 1 (additive) | `ContentPack.memories` (default `[]`) and `memory.ts`: curator voice memories with consent and labelled translations. |
+| 1 (additive) | `timelines` in the content pack (default `[]`), `timeline.ts`, events `timeline.open` / `timeline.era` / `timeline.close`, `TimelinePartProps` (src/parts/over-time). |
 | 1 (additive) | Activity kinds `story`, `words`, `trace` and `MediaRef` (labs/activities-kinds). |
 | 1 | First experience contracts (this file). Artifact id `loom` in the objects lab unified to `cloth`. Places from the island lab replaced by purpose-built `Location`s (no lon/lat). |
 
