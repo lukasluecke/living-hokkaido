@@ -52,6 +52,10 @@ Output: recordings/demo-<time>.mp4 (needs ffmpeg; else .webm) + markers.
   --ask-fixture <f>   Answer POST /api/ask from a JSON file of recorded
                       replies ({"<question>": <reply>}); other questions
                       go to the app as usual
+  --state-out <file>  Save cookies and localStorage (the journal) at the end
+  --state-in <file>   Start with a saved state: record a long flow in parts
+                      (--shots a,b --state-out s.json, then --shots c,d
+                      --state-in s.json) and join the MP4s with ffmpeg
   --out <dir>         Output folder (default recordings)
   --list              List the shots and exit
 `;
@@ -76,6 +80,8 @@ const { values: opt } = parseArgs({
     out: { type: "string", default: "recordings" },
     fps: { type: "string", default: "30" },
     "ask-fixture": { type: "string" },
+    "state-in": { type: "string" },
+    "state-out": { type: "string" },
     list: { type: "boolean", default: false },
     help: { type: "boolean", short: "h", default: false },
   },
@@ -321,10 +327,12 @@ async function runStep(c: Ctx, s: Step): Promise<void> {
         (el, p) => el.contains(document.elementFromPoint(p.x, p.y)),
         { x, y },
       );
-      if (hit) await page.mouse.click(x, y);
+      if (hit && !(s.do === "click" && s.synthetic))
+        await page.mouse.click(x, y);
       // Frame mode: 3D labels move every frame, so Playwright never sees
       // them "stable"; send the click to the element itself.
-      else if (capture === "frames") await loc.dispatchEvent("click");
+      else if (capture === "frames" || (s.do === "click" && s.synthetic))
+        await loc.dispatchEvent("click");
       else await loc.click({ timeout: 3000 });
       return;
     }
@@ -564,10 +572,20 @@ async function main() {
       viewport: { width, height },
       deviceScaleFactor: 1,
       reducedMotion: opt["reduced-motion"] ? "reduce" : "no-preference",
+      ...(opt["state-in"] ? { storageState: opt["state-in"] } : {}),
       ...(capture === "playwright"
         ? { recordVideo: { dir: rawDir, size: { width, height } } }
         : {}),
     });
+    // Playwright and frame captures have no sound. Web Audio can also crash
+    // a headless browser without an audio device (seen in a Linux
+    // container at the slope game), so the page gets no AudioContext.
+    if (capture !== "none" || opt.rehearse)
+      await context.addInitScript({
+        content:
+          "Object.defineProperty(window, 'AudioContext', { value: undefined });" +
+          "Object.defineProperty(window, 'webkitAudioContext', { value: undefined });",
+      });
     if (capture === "frames")
       await context.addInitScript({
         content: `var __name = (f) => f; (${installVirtualClock.toString()})();`,
@@ -662,6 +680,8 @@ async function main() {
         `${c.markers.map((m) => `${fmt(m.at)} ${m.label}`).join("\n")}\n`,
       );
     }
+    if (opt["state-out"])
+      await context.storageState({ path: opt["state-out"] });
     const video = page.video();
     await context.close();
     context = null;

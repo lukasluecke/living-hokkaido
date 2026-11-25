@@ -193,9 +193,11 @@ export const shots: Shot[] = [
       hold(1000),
       click(button(new RegExp(slope?.title ?? "Slope"), false)),
       hold(2000),
-      click(button("Play")),
+      // Synthetic clicks: a real click (user activation) on Play crashed
+      // headless Chromium in the Linux container. The video looks the same.
+      click(button("Play"), { synthetic: true }),
       hold(3000),
-      click(button("Slip"), { fallback: press("Enter") }),
+      click(button("Slip"), { synthetic: true, fallback: press("Enter") }),
       hold(1500),
       press("ArrowLeft"),
       hold(1200),

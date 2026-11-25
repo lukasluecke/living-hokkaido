@@ -31,6 +31,8 @@ export type Step = Common &
         moveMs?: number;
         /** Rest on the target before the click (default 150 ms). */
         pauseMs?: number;
+        /** Send the click to the element (no real mouse, no user activation). */
+        synthetic?: boolean;
         timeoutMs?: number;
       }
     | { do: "hover"; target: Target; moveMs?: number; timeoutMs?: number }
@@ -92,6 +94,7 @@ export const click = (
     moveMs?: number;
     pauseMs?: number;
     timeoutMs?: number;
+    synthetic?: boolean;
   } = {},
 ): Step => ({
   do: "click",
