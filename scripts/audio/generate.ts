@@ -86,9 +86,8 @@ class Biquad {
 
 /** Smooth random curve in [0, 1] with a new knot every `period` s. */
 function smoothRandom(r: Rand, seconds: number, period: number) {
-  const knots = Array.from(
-    { length: Math.ceil(seconds / period) + 2 },
-    () => r(),
+  const knots = Array.from({ length: Math.ceil(seconds / period) + 2 }, () =>
+    r(),
   );
   return (t: number) => {
     const p = t / period;
@@ -266,7 +265,14 @@ const recipes: Record<string, Recipe> = {
           const notes = 2 + Math.floor(r() * 4);
           const base = 2600 + r() * 1400;
           for (let k = 0; k < notes; k++)
-            chirp(t + k * (0.09 + r() * 0.05), 0.06, base, base + 900, amp, pan);
+            chirp(
+              t + k * (0.09 + r() * 0.05),
+              0.06,
+              base,
+              base + 900,
+              amp,
+              pan,
+            );
         } else if (kind < 0.7) {
           // Falling whistle, twice.
           const base = 2200 + r() * 800;
@@ -316,7 +322,10 @@ const recipes: Record<string, Recipe> = {
           t += every * (0.95 + r() * 0.1);
         }
       }
-      return [loopFold(reverb(L, 0.2), LOOP, XF), loopFold(reverb(R, 0.2), LOOP, XF)];
+      return [
+        loopFold(reverb(L, 0.2), LOOP, XF),
+        loopFold(reverb(R, 0.2), LOOP, XF),
+      ];
     },
   },
   "ambient/island-leaves": {
@@ -447,7 +456,11 @@ const recipes: Record<string, Recipe> = {
       const r = rng(96);
       let out = buffer(0.5);
       for (let k = 0; k < 5; k++)
-        out = mixAt(out, swish(0.08 + r() * 0.06, 1500, 3500 + r() * 1500, 97 + k), 0.04 + k * 0.07 + r() * 0.03);
+        out = mixAt(
+          out,
+          swish(0.08 + r() * 0.06, 1500, 3500 + r() * 1500, 97 + k),
+          0.04 + k * 0.07 + r() * 0.03,
+        );
       return out;
     },
   },
@@ -500,7 +513,12 @@ const recipes: Record<string, Recipe> = {
     kind: "ui",
     rmsDb: -24,
     peakDb: -5,
-    make: () => reverb(mixAt(swish(0.9, 400, 1800, 107), bell([1318.5, 1975.5], 1.2), 0.25), 0.3, 1.2),
+    make: () =>
+      reverb(
+        mixAt(swish(0.9, 400, 1800, 107), bell([1318.5, 1975.5], 1.2), 0.25),
+        0.3,
+        1.2,
+      ),
   },
   "ui/owl-hoot": {
     kind: "ui",
@@ -515,11 +533,16 @@ const recipes: Record<string, Recipe> = {
         const n0 = Math.round(start * SR);
         for (let i = 0; i < dur * SR; i++) {
           const x = i / (dur * SR);
-          const freq = f * (1.04 - 0.08 * x) * (1 + 0.01 * Math.sin(TAU * 6 * x * dur));
+          const freq =
+            f * (1.04 - 0.08 * x) * (1 + 0.01 * Math.sin(TAU * 6 * x * dur));
           ph += (TAU * freq) / SR;
-          const a = Math.sin(Math.PI * Math.min(1, x * 1.6)) ** 0.8 * (1 - x) ** 0.4;
+          const a =
+            Math.sin(Math.PI * Math.min(1, x * 1.6)) ** 0.8 * (1 - x) ** 0.4;
           out[n0 + i] +=
-            (Math.sin(ph) + 0.12 * Math.sin(2 * ph) + breath.run(r() * 2 - 1) * 0.25) * a;
+            (Math.sin(ph) +
+              0.12 * Math.sin(2 * ph) +
+              breath.run(r() * 2 - 1) * 0.25) *
+            a;
         }
       };
       hoot(0.02, 0.28, 360);
@@ -535,7 +558,11 @@ const recipes: Record<string, Recipe> = {
       let out = buffer(0.9);
       for (let k = 0; k < 4; k++) {
         const flap = swish(0.14, 300, 900, 110 + k);
-        out = mixAt(out, flap.map((v) => v * (1 - k * 0.2)), k * 0.16);
+        out = mixAt(
+          out,
+          flap.map((v) => v * (1 - k * 0.2)),
+          k * 0.16,
+        );
       }
       return out;
     },
@@ -544,7 +571,8 @@ const recipes: Record<string, Recipe> = {
     kind: "ui",
     rmsDb: -22,
     peakDb: -4,
-    make: () => mixAt(reverb(swish(1, 200, 900, 115), 0.3), knock(220, 0.5), 0.85),
+    make: () =>
+      mixAt(reverb(swish(1, 200, 900, 115), 0.3), knock(220, 0.5), 0.85),
   },
 };
 
@@ -601,7 +629,7 @@ function bell(freqs: number[], dur: number) {
     const t = n / SR;
     let s = 0;
     freqs.forEach((f, i) => {
-      s += Math.sin(TAU * f * t) * env(t, 0.002, dur / (3 + i * 2)) / (1 + i);
+      s += (Math.sin(TAU * f * t) * env(t, 0.002, dur / (3 + i * 2))) / (1 + i);
     });
     out[n] = s;
   }
@@ -629,7 +657,10 @@ function normalise(chs: Float32Array[], rmsDb: number, peakDb: number) {
       count++;
     }
   const rms = Math.sqrt(sum / count) || 1e-9;
-  const g = Math.min(10 ** (rmsDb / 20) / rms, 10 ** (peakDb / 20) / (peak || 1e-9));
+  const g = Math.min(
+    10 ** (rmsDb / 20) / rms,
+    10 ** (peakDb / 20) / (peak || 1e-9),
+  );
   for (const c of chs) for (let i = 0; i < c.length; i++) c[i] *= g;
 }
 
@@ -678,7 +709,14 @@ function main() {
     mkdirSync(join(dest, ".."), { recursive: true });
     const q = recipe.kind === "ambient" ? ["3", "96k"] : ["4", "128k"];
     const ff = ["-hide_banner", "-loglevel", "error", "-y", "-i", src];
-    execFileSync("ffmpeg", [...ff, "-c:a", "libvorbis", "-q:a", q[0], `${dest}.ogg`]);
+    execFileSync("ffmpeg", [
+      ...ff,
+      "-c:a",
+      "libvorbis",
+      "-q:a",
+      q[0],
+      `${dest}.ogg`,
+    ]);
     execFileSync("ffmpeg", [...ff, "-c:a", "aac", "-b:a", q[1], `${dest}.m4a`]);
     console.log(`made ${name}`);
   }

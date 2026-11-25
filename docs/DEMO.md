@@ -15,3 +15,7 @@ Three-minute contingency: 25s problem, 45s capture/review, 80s visitor/journal, 
 Writeup: architecture diagram, schema/evidence graph, review/withdrawal invariants, actual tests and build results, measured asset performance, honest live/mock integration table, limitations and MIT run instructions. Include model training only if actually done. Four scoring dimensions get concrete evidence, not technology name-dropping.
 
 Submission checklist: correct public repository, root MIT LICENSE, README reproducible run, no secrets/personal data/unauthorized assets; verify categories and sponsor tags before Nov 26 14:00 JST; video/writeup/deck/pitch and Submitted status by 14:30 JST. Ask for written duration confirmation. No upload or portal submission is performed by this bootstrap.
+
+## Backup video
+
+`npm run demo:video -- --headed` drives the `/shell` flow and records a 1920×1080 MP4 in `recordings/`. Edit the shot list in `scripts/demo-video/steps.ts`. See [scripts/demo-video/README.md](../scripts/demo-video/README.md).
