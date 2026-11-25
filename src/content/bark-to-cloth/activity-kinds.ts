@@ -2,8 +2,7 @@
 // Every "fact" line restates a bark-to-cloth claim; "frame" lines only guide.
 // The words activity uses English stand-ins: no Ainu word is shown until a
 // qualified reviewer and a consenting speaker's recording exist
-// (docs/RESEARCH.md). Not linked from the scene until the activities part
-// has renderers for these kinds.
+// (docs/RESEARCH.md). Renderers: src/parts/activities/kinds.
 import type { ActivityInput } from "@/contracts";
 
 const story = {
