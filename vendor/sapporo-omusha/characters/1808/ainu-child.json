@@ -1,0 +1,35 @@
+{
+  "$schema": "../schema/character.schema.json",
+  "id": "ainu-child",
+  "name": {
+    "en": "Sakhalin Ainu child",
+    "ja": "樺太アイヌの子ども"
+  },
+  "variant": {
+    "en": "brown robe",
+    "ja": "茶色の着物"
+  },
+  "role": "Child present at the ceremony",
+  "faction": "sakhalin-ainu",
+  "perspective": "ainu-oral-tradition",
+  "status": "draft",
+  "summary": "TODO: one or two sourced sentences.",
+  "appearance": "As shown in the 3D model, not yet checked against the museum figure: short dark hair, a plain brown robe, seated cross-legged with hands held in front.",
+  "knows": [],
+  "does_not_know": [
+    "Anything after 1808"
+  ],
+  "declines": [
+    "Ainu religious belief beyond cited sources",
+    "The child's personal feelings about the ceremony"
+  ],
+  "voice": {
+    "register": "Measured; answers only from sources",
+    "routes_through": "interpreter"
+  },
+  "model": {
+    "src": "../assets/figures/figure-boy-brown-robe/model-web.glb",
+    "label": "AI reconstruction generated with Hyper3D Rodin on hyper3d.ai. The reference image it was made from is not recorded here."
+  },
+  "sources": []
+}

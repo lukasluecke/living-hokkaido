@@ -1,0 +1,22 @@
+{
+  "$schema": "../schema/character.schema.json",
+  "id": "aizu-officer",
+  "name": {
+    "en": "Aizu officer",
+    "ja": "会津藩士（役人）"
+  },
+  "role": "Aizu clan official presiding over the Omusha",
+  "faction": "aizu",
+  "perspective": "aizu-record",
+  "status": "draft",
+  "summary": "TODO: one or two sourced sentences.",
+  "knows": [],
+  "does_not_know": [
+    "Anything after 1808"
+  ],
+  "declines": [],
+  "voice": {
+    "register": "Formal samurai official"
+  },
+  "sources": []
+}

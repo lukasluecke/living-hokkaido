@@ -1,0 +1,23 @@
+{
+  "name": "sapporo-omusha",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "turnarounds": "node tools/turnarounds.mjs",
+    "web-model": "node tools/web-model.mjs",
+    "upload-assets": "node tools/upload-assets.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "3.1177.0"
+  },
+  "devDependencies": {
+    "@gltf-transform/cli": "4.5.1",
+    "@gltf-transform/core": "4.5.1"
+  }
+}

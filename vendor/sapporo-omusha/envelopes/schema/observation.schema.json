@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/xjets/sapporo-omusha/envelopes/schema/observation.schema.json",
+  "title": "Observation",
+  "description": "The atomic record of The Envelope. Who said what, about what, when, from what source, with what evidence and what standing. Observations are only ever added: a correction is a new observation that supersedes an older one, and the older one stays in the history.",
+  "type": "object",
+  "required": ["id", "envelopes", "kind", "stratum", "claim", "source", "evidence", "standing", "author", "createdAt"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^obs-[a-z0-9-]+$" },
+    "envelopes": { "type": "array", "minItems": 1, "items": { "type": "string" }, "description": "Every envelope this observation is evidence for. One observation can serve several levels at once." },
+    "about": { "type": "array", "items": { "type": "string" }, "description": "Actors or things inside the envelope (character ids, 'elders', 'diorama')." },
+    "kind": { "enum": ["event", "contact", "meaning", "making", "use", "appearance", "provenance", "absence"] },
+    "stratum": { "enum": ["depicted-1808", "made-1971", "observed", "present-2026"], "description": "Time stratum: what is depicted, when it was made, later observations, the present." },
+    "claim": { "type": "string", "description": "The statement, in plain words. For an absence: what is unknown." },
+    "absence": {
+      "type": "object",
+      "description": "Required when kind is 'absence': why it is unknown.",
+      "required": ["cause"],
+      "properties": {
+        "cause": { "enum": ["never-collected", "destroyed", "suppressed", "restricted", "lost"] },
+        "note": { "type": "string" }
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": ["type", "ref"],
+      "properties": {
+        "type": { "enum": ["document", "label", "testimony", "photo", "scan", "painting", "inference", "project-note"] },
+        "ref": { "type": "string", "description": "Citation, file or record. Never invented." },
+        "quote": { "type": "string", "description": "Short attributed quotation, if any." }
+      }
+    },
+    "evidence": { "enum": ["contemporary-document", "later-account", "physical-trace", "inference", "none"], "description": "Axis 1: how well the claim is supported." },
+    "standing": {
+      "type": "object",
+      "description": "Axis 2: whose knowledge it is to speak to. Never merged with evidence. Defined per envelope.",
+      "required": ["role"],
+      "properties": {
+        "role": { "enum": ["witness", "maker", "descendant", "community-authority", "scholar", "curator", "contributor", "passerby"] },
+        "grantedBy": { "type": "string", "description": "Who recognised this standing; empty when self-declared." }
+      }
+    },
+    "perspective": { "enum": ["aizu-record", "matsumae-account", "ainu-oral-tradition", "modern-scholarship", "museum", "project"] },
+    "protocol": {
+      "type": "object",
+      "properties": {
+        "audience": { "enum": ["public", "team", "family", "community"], "default": "public" },
+        "tkLabels": { "type": "array", "items": { "type": "string" }, "description": "Local Contexts Traditional Knowledge Labels, once set with community bodies." }
+      }
+    },
+    "status": { "enum": ["unverified", "verified"], "default": "unverified" },
+    "author": { "type": "string" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "supersedes": { "type": "string", "description": "id of the observation this one corrects or replaces." },
+    "note": { "type": "string" }
+  },
+  "allOf": [{ "if": { "properties": { "kind": { "const": "absence" } } }, "then": { "required": ["absence"] } }]
+}
