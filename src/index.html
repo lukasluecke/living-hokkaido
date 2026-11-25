@@ -215,6 +215,7 @@
   <h3>Place hotspots</h3>
   <p>Pick a figure, then tap the scene where it stands.</p>
   <div id="edList"></div>
+  <button id="edView" style="width:100%;margin-bottom:8px">Use this view as the start view</button>
   <div class="row"><button id="edCopy" style="flex:1">Copy JSON</button><button id="edSave" style="flex:1">Download</button></div>
 </aside>
 
@@ -253,6 +254,7 @@ const $ = (id) => document.getElementById(id);
 // ---------- Data
 const characters = {};
 let hotspots = []; // [{ character, position: [x,y,z] }] in splat-local coordinates
+let startView = null; // { position: [x,y,z], target: [x,y,z] } in splat-local coordinates
 async function loadData() {
   try { CHARACTER_IDS = (await (await fetch("../characters/1808/index.json")).json()).characters; }
   catch { CHARACTER_IDS = []; }
@@ -260,8 +262,10 @@ async function loadData() {
     try { characters[id] = await (await fetch(`../characters/1808/${id}.json`)).json(); }
     catch { characters[id] = { id, name: { en: id }, role: "", faction: "", status: "draft" }; }
   }));
-  try { hotspots = (await (await fetch("hotspots.json", { cache: "no-store" })).json()).hotspots || []; }
-  catch { hotspots = []; }
+  try {
+    const h = await (await fetch("hotspots.json", { cache: "no-store" })).json();
+    hotspots = h.hotspots || []; startView = h.view || null;
+  } catch { hotspots = []; }
 }
 
 // ---------- Three / Spark
@@ -311,8 +315,13 @@ function frameScene() {
   const dist = (radius / Math.sin(Math.min(fov, fov * camera.aspect) / 2)) * 0.75;
   camera.position.copy(center).addScaledVector(new THREE.Vector3(0, 0.35, 1).normalize(), dist);
   camera.near = Math.max(dist / 1000, 0.001); camera.far = dist * 100; camera.updateProjectionMatrix();
-  controls.target.copy(center); controls.minDistance = dist * 0.02; controls.maxDistance = dist * 10; controls.update();
-  home = { position: camera.position.clone(), target: center.clone() };
+  controls.target.copy(center);
+  if (startView) {
+    camera.position.copy(mesh.localToWorld(new THREE.Vector3(...startView.position)));
+    controls.target.copy(mesh.localToWorld(new THREE.Vector3(...startView.target)));
+  }
+  controls.minDistance = dist * 0.02; controls.maxDistance = dist * 10; controls.update();
+  home = { position: camera.position.clone(), target: controls.target.clone() };
 }
 
 async function loadSplat(opts, label) {
@@ -493,7 +502,14 @@ function placeHotspot(x, y) {
   toast(`Placed ${characters[editing].name.en}`);
   buildMarkers(); renderEditor();
 }
-const exportJson = () => JSON.stringify({ note: "Positions are in splat-local coordinates. Place them with ?edit=1, then paste the exported JSON here.", hotspots }, null, 2) + "\n";
+const exportJson = () => JSON.stringify({ note: "Positions are in splat-local coordinates. Place them with ?edit=1, then paste the exported JSON here.", ...(startView && { view: startView }), hotspots }, null, 2) + "\n";
+$("edView").addEventListener("click", () => {
+  if (!mesh) return;
+  const local = (v) => mesh.worldToLocal(v.clone()).toArray().map((n) => +n.toFixed(4));
+  startView = { position: local(camera.position), target: local(controls.target) };
+  home = { position: camera.position.clone(), target: controls.target.clone() };
+  toast("Start view set. Copy JSON to save it with the markers.");
+});
 $("edCopy").addEventListener("click", async () => {
   try { await navigator.clipboard.writeText(exportJson()); toast("Copied. Paste it into src/hotspots.json"); }
   catch { toast("Clipboard blocked; use Download"); }

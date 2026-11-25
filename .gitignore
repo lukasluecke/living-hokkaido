@@ -18,3 +18,8 @@ node_modules/
 .DS_Store
 Thumbs.db
 
+
+# Splat exports, wherever they land
+*.sog
+*.spz
+*.splat
