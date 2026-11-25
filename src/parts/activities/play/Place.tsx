@@ -5,6 +5,7 @@
 // ring) and, for people, picks a pose from the pose sheet (buttons or keys
 // 1–4). Facts only come from the step's claims and `why`.
 import {
+  type CSSProperties,
   type PointerEvent as RPointerEvent,
   useEffect,
   useRef,
@@ -29,6 +30,7 @@ export function PlaceActivity({
   const sent = useRef(false);
   const ghostRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
+  const caseRef = useRef<HTMLDivElement>(null);
   const drag = useRef<{ x: number; y: number; moved: boolean } | null>(null);
   const step = a.steps[st.step];
   const fig = step.figure;
@@ -110,6 +112,23 @@ export function PlaceActivity({
     if (r !== null) act({ type: "ring", index: r });
   };
 
+  // Gentle look-around: the pointer turns the case a little and shifts near
+  // figures more than the backdrop (CSS vars, no re-render).
+  const look = (e: RPointerEvent<HTMLDivElement>) => {
+    const c = caseRef.current;
+    if (!c || prefs.reducedMotion) return;
+    const b = c.getBoundingClientRect();
+    const px = ((e.clientX - b.left) / b.width) * 2 - 1;
+    const py = ((e.clientY - b.top) / b.height) * 2 - 1;
+    c.style.setProperty("--px", px.toFixed(3));
+    c.style.setProperty("--py", py.toFixed(3));
+  };
+  const lookHome = () => {
+    caseRef.current?.style.setProperty("--px", "0");
+    caseRef.current?.style.setProperty("--py", "0");
+  };
+  const air = airFor(a.stage, st.season === "winter");
+
   const figureArt = (pose: PlacePose) =>
     fig?.thing ? (
       <ThingArt thing={fig.thing} />
@@ -142,42 +161,61 @@ export function PlaceActivity({
         ))}
       </ol>
 
-      <div className="stage">
-        <StageArt stage={a.stage} winter={st.season === "winter"} />
-        {st.placed.map((pl, i) => {
-          const f = a.steps[pl.step].figure;
-          const now = i === st.placed.length - 1 && !done && !st.finished;
-          return (
-            <div
-              key={a.steps[pl.step].id}
-              className={`placed ${people ? "" : "thing"} ${now ? "now" : ""}`}
-              style={{ left: `${pl.x * 100}%`, top: `${pl.y * 100}%` }}
-              role="img"
-              aria-label={f?.label}
-            >
-              {f?.thing ? (
-                <ThingArt thing={f.thing} />
-              ) : (
-                <Person pose={pl.pose} colour={f?.colour} hat={f?.hat} />
-              )}
+      <div
+        className="case"
+        ref={caseRef}
+        onPointerMove={look}
+        onPointerLeave={lookHome}
+      >
+        <div className="stage">
+          <StageArt stage={a.stage} winter={st.season === "winter"} />
+          {st.placed.map((pl, i) => {
+            const f = a.steps[pl.step].figure;
+            const now = i === st.placed.length - 1 && !done && !st.finished;
+            return (
+              <div
+                key={a.steps[pl.step].id}
+                className={`placed ${people ? "" : "thing"} ${now ? "now" : ""}`}
+                style={depth(pl.x, pl.y, 0)}
+                role="img"
+                aria-label={f?.label}
+              >
+                {f?.thing ? (
+                  <ThingArt thing={f.thing} />
+                ) : (
+                  <Person pose={pl.pose} colour={f?.colour} hat={f?.hat} />
+                )}
+              </div>
+            );
+          })}
+          {st.phase === "place" &&
+            step.options.map((o, k) => (
+              <button
+                // biome-ignore lint/suspicious/noArrayIndexKey: rings are positional
+                key={k}
+                type="button"
+                data-ring={k}
+                className={`ring ${people ? "" : "thing"} ${st.wrong === k ? "bad" : ""} ${over === k ? "over" : ""}`}
+                style={depth(o.x, o.y, 200)}
+                aria-label={`Put ${fig?.label ?? "it"} at ring ${k + 1}`}
+                onClick={() => act({ type: "ring", index: k })}
+              >
+                <span className="q">{k + 1}</span>
+              </button>
+            ))}
+          {air && !prefs.reducedMotion && (
+            <div className={`air ${air}`} aria-hidden="true">
+              {Array.from({ length: AIR_COUNT[air] }, (_, i) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: fixed decoration
+                <i key={i} style={{ "--i": i } as CSSProperties} />
+              ))}
             </div>
-          );
-        })}
-        {st.phase === "place" &&
-          step.options.map((o, k) => (
-            <button
-              // biome-ignore lint/suspicious/noArrayIndexKey: rings are positional
-              key={k}
-              type="button"
-              data-ring={k}
-              className={`ring ${people ? "" : "thing"} ${st.wrong === k ? "bad" : ""} ${over === k ? "over" : ""}`}
-              style={{ left: `${o.x * 100}%`, top: `${o.y * 100}%` }}
-              aria-label={`Put ${fig?.label ?? "it"} at ring ${k + 1}`}
-              onClick={() => act({ type: "ring", index: k })}
-            >
-              <span className="q">{k + 1}</span>
-            </button>
-          ))}
+          )}
+          <div className="light" aria-hidden="true" />
+        </div>
+        <div className="plinth" aria-hidden="true">
+          <span>{a.title}</span>
+        </div>
       </div>
 
       {people && (
@@ -326,4 +364,28 @@ export function PlaceActivity({
       </div>
     </div>
   );
+}
+
+/** Position, depth (further back = smaller) and stacking for one spot. */
+function depth(x: number, y: number, z: number): CSSProperties {
+  return {
+    left: `${x * 100}%`,
+    top: `${y * 100}%`,
+    zIndex: z + Math.round(y * 100),
+    "--d": y.toFixed(3),
+  } as CSSProperties;
+}
+
+type Air = "leaf" | "snow" | "smoke" | "mist";
+const AIR_COUNT: Record<Air, number> = { leaf: 9, snow: 26, smoke: 6, mist: 3 };
+
+/** Light moving air per stage: decoration only, off with reduced motion. */
+function airFor(
+  stage: "survey-camp" | "herring-yard" | "cise" | "mine-forest",
+  winter: boolean,
+): Air | null {
+  if (stage === "cise") return "smoke";
+  if (stage === "herring-yard") return "mist";
+  if (stage === "mine-forest") return winter ? "snow" : null;
+  return "leaf";
 }
