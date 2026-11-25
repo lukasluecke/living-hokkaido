@@ -64,7 +64,10 @@ function PlaceTray({
   content,
   onSelect,
 }: IslandPartProps & { onSelect: (l: Location) => void }) {
-  const locations = content.island.locations;
+  // Open places first, then the closed ones, each in pack order.
+  const locations = [...content.island.locations].sort(
+    (a, b) => Number(b.status === "open") - Number(a.status === "open"),
+  );
   const open = locations.filter((l) => l.status === "open").length;
   return (
     <nav className={c.tray} aria-label="Places on the island">
