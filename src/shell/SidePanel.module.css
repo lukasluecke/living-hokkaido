@@ -12,6 +12,10 @@
   transition: transform 180ms ease-out;
   animation: rise 200ms ease-out;
 }
+/* Focus moves to the panel on open; the controls inside show the ring. */
+.panel:focus {
+  outline: none;
+}
 @keyframes rise {
   from {
     opacity: 0;

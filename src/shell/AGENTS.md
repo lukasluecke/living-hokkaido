@@ -23,3 +23,4 @@ which component renders each part (`registry.ts`). Route: `/shell`.
   ask with the page and every other part with `next/dynamic`;
   `preloadParts()` fetches them about 1.5 s after the shell mounts (idle).
   First-load JS 727 → 603 KB gzip.
+- 2026-11-26: keyboard and focus (accessibility pass). Overlays (journal, reveal, timeline) are modal: stage, HUD and side slot get `inert`, focus moves to the first control inside (unless the part already focused one) and returns to the opener on close. `SidePanel` takes focus when it opens and gives it back to the opener when it closes; arrow keys still step objects while the panel itself has focus (`data-arrow-steps`). With `header={false}` the panel has no name, so the activity section is the only named region.
