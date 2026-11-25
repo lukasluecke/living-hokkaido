@@ -1,12 +1,14 @@
 // Island layout. A focused, purpose-built diorama, NOT a geographic map.
 // Positions are design placeholders in island units (see src/contracts/space.ts).
+// Tighter layout (Lukas, 2026-11-26): every x/z is 0.75 of the first layout,
+// to match LAYOUT in src/parts/island/world/island.ts.
 import type { LocationInput } from "@/contracts";
 
-export const owlHome: [number, number, number] = [-6, 0, 8];
+export const owlHome: [number, number, number] = [-4.5, 0, 6];
 
 export const overview = {
-  eye: [0, 42, 46] as [number, number, number],
-  target: [0, 0, 0] as [number, number, number],
+  eye: [0, 33, 36] as [number, number, number],
+  target: [0, 0, -0.5] as [number, number, number],
 };
 
 export const locations: LocationInput[] = [
@@ -15,8 +17,8 @@ export const locations: LocationInput[] = [
     title: "Lake house",
     teaser: "From bark to cloth",
     status: "open",
-    anchor: [4, 0, 2],
-    arrivalView: { eye: [8, 6, 9], target: [4, 0.6, 2] },
+    anchor: [3, 0, 1.5],
+    arrivalView: { eye: [6, 6, 6.75], target: [3, 0.6, 1.5] },
     sceneId: "lake-house",
     knowledgeIds: ["bark-to-cloth", "hokkaido-museum"],
     building: "house",
@@ -27,8 +29,8 @@ export const locations: LocationInput[] = [
     title: "Listening grove",
     teaser: "The owl’s story and words for things",
     status: "open",
-    anchor: [-9, 0, -6],
-    arrivalView: { eye: [-5, 6, 1], target: [-9, 0.6, -6] },
+    anchor: [-6.75, 0, -4.5],
+    arrivalView: { eye: [-3.75, 6, 0.75], target: [-6.75, 0.6, -4.5] },
     sceneId: "listening-grove",
     knowledgeIds: ["bark-to-cloth", "hokkaido-museum"],
     building: "grove",
@@ -39,8 +41,8 @@ export const locations: LocationInput[] = [
     title: "Makers’ clearing",
     teaser: "Weave a few rows at the workbench",
     status: "open",
-    anchor: [11, 0, -8],
-    arrivalView: { eye: [7, 6, -1], target: [11, 0.6, -8] },
+    anchor: [8.25, 0, -6],
+    arrivalView: { eye: [5.25, 6, -0.75], target: [8.25, 0.6, -6] },
     sceneId: "makers-clearing",
     knowledgeIds: ["bark-to-cloth", "hokkaido-museum"],
     building: "workshop",
@@ -51,8 +53,8 @@ export const locations: LocationInput[] = [
     title: "Memory cabin",
     teaser: "Curator memories and the house over time",
     status: "open",
-    anchor: [-3, 0, 12],
-    arrivalView: { eye: [1, 6, 19], target: [-3, 0.6, 12] },
+    anchor: [-2.25, 0, 9],
+    arrivalView: { eye: [0.75, 6, 14.25], target: [-2.25, 0.6, 9] },
     sceneId: "memory-cabin",
     knowledgeIds: ["bark-to-cloth", "house-over-time", "hokkaido-museum"],
     building: "cabin",
@@ -68,8 +70,8 @@ export const locations: LocationInput[] = [
     title: "Herring coast",
     teaser: "Living off the sea",
     status: "open",
-    arrivalView: { eye: [16, 6, 17], target: [12, 0.8, 11.2] },
-    anchor: [12, 0, 11.2],
+    arrivalView: { eye: [12, 6, 12.75], target: [9, 0.8, 8.4] },
+    anchor: [9, 0, 8.4],
     knowledgeIds: ["land-and-sea"],
     building: "area-coast",
     placeholder: true,
@@ -80,8 +82,8 @@ export const locations: LocationInput[] = [
     title: "Survey forest",
     teaser: "Forest plants and the 1890 land survey",
     status: "open",
-    arrivalView: { eye: [-12, 6, 5], target: [-16, 1.4, -1] },
-    anchor: [-16, 0, -1],
+    arrivalView: { eye: [-9, 6, 3.75], target: [-12, 1.4, -0.75] },
+    anchor: [-12, 0, -0.75],
     knowledgeIds: ["land-and-sea"],
     building: "area-forest",
     placeholder: true,
@@ -92,8 +94,8 @@ export const locations: LocationInput[] = [
     title: "Animal hills",
     teaser: "Deer and bears in the hills",
     status: "open",
-    arrivalView: { eye: [22, 6, 6], target: [19, 1.2, 0] },
-    anchor: [19, 0, 0],
+    arrivalView: { eye: [16.5, 6, 4.5], target: [14.25, 1.2, 0] },
+    anchor: [14.25, 0, 0],
     knowledgeIds: ["land-and-sea"],
     building: "area-hills",
     placeholder: true,
@@ -104,8 +106,8 @@ export const locations: LocationInput[] = [
     title: "Coal mountain",
     teaser: "Coal mining and winter logging",
     status: "open",
-    arrivalView: { eye: [-1, 7, -6], target: [-5, 2.8, -12.6] },
-    anchor: [-5, 0, -12.6],
+    arrivalView: { eye: [-0.75, 7, -4.5], target: [-3.75, 2.8, -9.45] },
+    anchor: [-3.75, 0, -9.45],
     knowledgeIds: ["land-and-sea"],
     building: "area-mountains",
     placeholder: true,
