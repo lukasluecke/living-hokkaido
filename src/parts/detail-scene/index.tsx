@@ -20,6 +20,15 @@ function useKeys({ scene, emit }: DetailScenePartProps) {
   }, [scene, emit]);
 }
 
+/** Bar prefix per activity kind. */
+const VERB: Record<string, string> = {
+  quiz: "Reflect",
+  story: "Listen",
+  words: "Learn",
+  trace: "Trace",
+  weave: "Make",
+};
+
 export function DetailScenePart(props: DetailScenePartProps) {
   const { scene, artifacts, focusedArtifactId, emit, prefs } = props;
   const overlay = useRef<HTMLDivElement>(null);
@@ -97,7 +106,15 @@ export function DetailScenePart(props: DetailScenePartProps) {
         ))}
         {scene.activityIds
           .map((id) => props.content.activities.find((a) => a.id === id))
-          .filter((a) => a && !a.artifactId)
+          // Activities of a placed object start from its card; the rest here.
+          .filter(
+            (a) =>
+              a &&
+              !(
+                a.artifactId &&
+                scene.placements.some((pl) => pl.artifactId === a.artifactId)
+              ),
+          )
           .map((a) =>
             a ? (
               <button
@@ -107,7 +124,7 @@ export function DetailScenePart(props: DetailScenePartProps) {
                   emit({ type: "activity.start", activityId: a.id })
                 }
               >
-                Reflect: {a.title}
+                {VERB[a.kind] ?? "Try"}: {a.title}
               </button>
             ) : null,
           )}

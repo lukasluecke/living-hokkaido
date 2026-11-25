@@ -47,7 +47,7 @@ function Boxes({
   );
 }
 
-function Walls() {
+export function Walls() {
   const wall = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
@@ -113,7 +113,7 @@ function Walls() {
   );
 }
 
-function Floor() {
+export function Floor() {
   const mat = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
@@ -370,7 +370,7 @@ export function Roof({ lift }: { lift: { current: number } }) {
   );
 }
 
-function Outside() {
+export function Outside() {
   const snow = useMemo(
     () => new THREE.MeshStandardMaterial({ color: "#e9eef2", roughness: 0.9 }),
     [],

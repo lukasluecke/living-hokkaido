@@ -39,6 +39,9 @@ test("views map to zones", () => {
   assert.equal(zoneForView(m, "travel"), "island");
   assert.equal(zoneForView(m, "scene"), "interior");
   assert.equal(zoneForView(m, "activity"), "interior");
+  assert.equal(zoneForView(m, "scene", "lake-house"), "interior");
+  assert.equal(zoneForView(m, "focus", "listening-grove"), "grove");
+  assert.equal(zoneForView(m, "island", "listening-grove"), "island");
 });
 
 test("ambient mix follows the season", () => {

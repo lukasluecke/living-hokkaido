@@ -11,10 +11,18 @@ import type { ResolvedManifest } from "./types";
 
 export type View = ExperienceState["view"];
 
-export function zoneForView(m: ResolvedManifest, view: View): string | null {
-  for (const [id, z] of Object.entries(m.zones))
-    if (z.views.includes(view)) return id;
-  return null;
+export function zoneForView(
+  m: ResolvedManifest,
+  view: View,
+  sceneId: string | null = null,
+): string | null {
+  const zones = Object.entries(m.zones).filter(([, z]) =>
+    z.views.includes(view),
+  );
+  const own = sceneId
+    ? zones.find(([, z]) => z.scenes.includes(sceneId))
+    : undefined;
+  return (own ?? zones.find(([, z]) => z.scenes.length === 0))?.[0] ?? null;
 }
 
 /**

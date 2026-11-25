@@ -32,15 +32,15 @@ export type Soundscape = {
 };
 
 export function useSoundscape(
-  state: Pick<ExperienceState, "view" | "overlay" | "season">,
+  state: Pick<ExperienceState, "view" | "overlay" | "season" | "sceneId">,
 ): Soundscape {
   useEffect(() => getSoundEngine()?.attach(), []);
 
-  const { view, overlay } = state;
+  const { view, overlay, sceneId } = state;
   const season = state.season.value;
   useEffect(() => {
-    getSoundEngine()?.setScene({ view, overlay, season });
-  }, [view, overlay, season]);
+    getSoundEngine()?.setScene({ view, overlay, season, sceneId });
+  }, [view, overlay, season, sceneId]);
 
   const muted = useSyncExternalStore(
     (fn) => getSoundEngine()?.subscribe(fn) ?? (() => {}),

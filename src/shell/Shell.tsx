@@ -177,7 +177,11 @@ export function Shell({ pack }: { pack: ContentPack }) {
   // "Over time" is offered inside a location that has a timeline.
   const localTimeline =
     state.view === "scene" || state.view === "focus"
-      ? (pack.timelines.find((t) => t.locationId === state.locationId) ?? null)
+      ? (pack.timelines.find(
+          (t) =>
+            scene?.timelineIds.includes(t.id) ||
+            t.locationId === state.locationId,
+        ) ?? null)
       : null;
   const openTimeline =
     state.overlay === "timeline"

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  loadContentPack,
   EMPTY_JOURNAL,
   eraAt,
   eraWeights,
@@ -78,7 +79,16 @@ test("visitor flow through the shell state machine", () => {
   const prefs = { reducedMotion: true, webgl: false };
   const run = (events: ExperienceEvent[]) =>
     events.reduce((s, e) => reduce(pack, s, e), initialState(prefs));
-  const closed = run([{ type: "location.select", locationId: "memory-cabin" }]);
+  const shut = clone();
+  const cabin = shut.island.locations.findIndex((l) => l.id === "memory-cabin");
+  shut.island.locations[cabin] = {
+    ...shut.island.locations[cabin],
+    status: "soon",
+  };
+  const closed = reduce(loadContentPack(shut), initialState(prefs), {
+    type: "location.select",
+    locationId: "memory-cabin",
+  });
   assert.equal(closed.view, "island", "closed locations do not open");
   const s = run([
     { type: "location.select", locationId: "lake-house" },
@@ -248,6 +258,7 @@ test("timeline: eras must be in time order; packs without timelines parse", () =
   p.timelines[0].eras[2].year = 100;
   assert.ok(validateContentPack(p).some((e) => e.includes("time order")));
   const { timelines: _drop, ...old } = clone();
+  old.scenes = old.scenes.map(({ timelineIds: _t, ...s }) => s);
   assert.deepEqual(validateContentPack(old), []);
 });
 
@@ -302,4 +313,24 @@ test("timeline overlay opens, returns from a reveal and closes", () => {
   s = reduce(pack, s, { type: "nav.back" });
   assert.equal(s.overlay, null);
   assert.equal(s.timelineId, null);
+});
+
+test("every place is open, with its own scene, setting and timelines", () => {
+  for (const l of barkToClothPack.island.locations) {
+    assert.equal(l.status, "open", l.id);
+    const s = barkToClothPack.scenes.find((x) => x.id === l.sceneId);
+    assert.ok(s, l.id);
+    assert.equal(s.locationId, l.id);
+  }
+  const cabin = barkToClothPack.scenes.find((s) => s.id === "memory-cabin");
+  assert.deepEqual(cabin?.timelineIds, ["house-over-time"]);
+  assert.equal(
+    barkToClothPack.scenes.find((s) => s.id === "lake-house")?.setting,
+    "house",
+  );
+  const bad = clone();
+  bad.scenes[3] = { ...bad.scenes[3], timelineIds: ["nope"] } as never;
+  assert.ok(
+    validateContentPack(bad).some((e) => e.includes('unknown timeline "nope"')),
+  );
 });
