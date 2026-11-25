@@ -8,6 +8,9 @@ import s from "../shared/Fallback.module.css";
 import { Room } from "./Room";
 import attn from "../shared/Attention.module.css";
 import c from "./Scene.module.css";
+import t from "./Tray.module.css";
+import { groupActivities, kindCaption } from "../shared/activityGroups";
+import { roomActivities, Tray } from "./Tray";
 
 function useKeys({ scene, emit }: DetailScenePartProps) {
   useEffect(() => {
@@ -19,93 +22,6 @@ function useKeys({ scene, emit }: DetailScenePartProps) {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [scene, emit]);
-}
-
-/** Bar prefix per activity kind. */
-const VERB: Record<string, string> = {
-  quiz: "Reflect",
-  story: "Listen",
-  words: "Learn",
-  trace: "Trace",
-  weave: "Weave",
-  sequence: "Put in order",
-  board: "Play",
-  canon: "Sing along",
-  pluck: "Pluck",
-  map: "Explore",
-};
-
-/** Up to two activities show in the bar; more go in one "Activities" menu. */
-function ActivityMenu({
-  activities,
-  onStart,
-}: {
-  activities: { id: string; kind: string; title: string }[];
-  onStart: (id: string) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const root = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!open) return;
-    const off = (e: PointerEvent) => {
-      if (!root.current?.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("pointerdown", off);
-    root.current?.querySelector<HTMLButtonElement>("[role=menuitem]")?.focus();
-    return () => document.removeEventListener("pointerdown", off);
-  }, [open]);
-  const item = (a: { id: string; kind: string; title: string }) =>
-    `${VERB[a.kind] ?? "Try"}: ${a.title}`;
-  if (activities.length <= 2)
-    return (
-      <>
-        {activities.map((a) => (
-          <button key={a.id} type="button" onClick={() => onStart(a.id)}>
-            {item(a)}
-          </button>
-        ))}
-      </>
-    );
-  return (
-    <div
-      ref={root}
-      className={c.menuRoot}
-      onKeyDown={(e) => {
-        if (e.key === "Escape" && open) {
-          // Close the menu only; do not leave the scene.
-          e.stopPropagation();
-          setOpen(false);
-          root.current?.querySelector<HTMLButtonElement>("button")?.focus();
-        }
-      }}
-    >
-      <button
-        type="button"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-      >
-        Activities ({activities.length}) {open ? "▾" : "▴"}
-      </button>
-      {open && (
-        <div className={c.menu} role="menu" aria-label="Activities">
-          {activities.map((a) => (
-            <button
-              key={a.id}
-              type="button"
-              role="menuitem"
-              onClick={() => {
-                setOpen(false);
-                onStart(a.id);
-              }}
-            >
-              {item(a)}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
 }
 
 export function DetailScenePart(props: DetailScenePartProps) {
@@ -203,49 +119,7 @@ export function DetailScenePart(props: DetailScenePartProps) {
           </span>
         )}
       </div>
-      <nav
-        className={c.bar}
-        aria-label={`Objects in ${scene.title}`}
-        data-focused={focusedArtifactId ? "" : undefined}
-      >
-        {scene.placements.map((p) => (
-          <button
-            key={p.artifactId}
-            type="button"
-            aria-pressed={p.artifactId === focusedArtifactId}
-            onClick={() =>
-              emit(
-                p.artifactId === focusedArtifactId
-                  ? { type: "artifact.blur" }
-                  : { type: "artifact.focus", artifactId: p.artifactId },
-              )
-            }
-          >
-            {p.key ? `${p.key} · ` : ""}
-            {label(p.artifactId)}
-          </button>
-        ))}
-        <ActivityMenu
-          activities={scene.activityIds
-            .map((id) => props.content.activities.find((a) => a.id === id))
-            // Activities of a placed object start from its card; the rest here.
-            .filter(
-              (a): a is NonNullable<typeof a> =>
-                !!a &&
-                !(
-                  a.artifactId &&
-                  scene.placements.some((pl) => pl.artifactId === a.artifactId)
-                ),
-            )}
-          onStart={(id) => emit({ type: "activity.start", activityId: id })}
-        />
-        <button
-          type="button"
-          onClick={() => emit({ type: "scene.exit", sceneId: scene.id })}
-        >
-          Back to the island
-        </button>
-      </nav>
+      <Tray {...props} label={label} activities={roomActivities(props)} />
     </div>
   );
 }
@@ -281,21 +155,29 @@ function SceneList({
           </button>
         ))}
       </div>
-      <div className={s.row}>
-        {scene.activityIds.map((id) => {
-          const a = content.activities.find((x) => x.id === id);
-          return (
-            <button
-              key={id}
-              type="button"
-              className={s.button}
-              onClick={() => emit({ type: "activity.start", activityId: id })}
-            >
-              {a?.title ?? id}
-            </button>
-          );
-        })}
-      </div>
+      {groupActivities(
+        scene.activityIds
+          .map((id) => content.activities.find((x) => x.id === id))
+          .filter((a) => a !== undefined),
+      ).map((g) => (
+        <section key={g.id} aria-label={g.label}>
+          <h3 className={t.cap}>{g.label}</h3>
+          <div className={s.row}>
+            {g.items.map((a) => (
+              <button
+                key={a.id}
+                type="button"
+                className={s.button}
+                onClick={() =>
+                  emit({ type: "activity.start", activityId: a.id })
+                }
+              >
+                {kindCaption(a.kind)}: {a.title}
+              </button>
+            ))}
+          </div>
+        </section>
+      ))}
       <button
         type="button"
         className={s.button}

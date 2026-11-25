@@ -239,7 +239,7 @@
    object sheet; the open box is a bottom sheet above everything else. */
 @media (max-width: 700px) {
   .trigger {
-    bottom: calc(132px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(124px + env(safe-area-inset-bottom, 0px));
   }
   .trigger[data-sheet] {
     display: none;

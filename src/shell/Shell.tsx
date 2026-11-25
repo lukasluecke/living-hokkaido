@@ -230,6 +230,7 @@ export function Shell({ pack }: { pack: ContentPack }) {
           scene.placements.some((p) => p.artifactId === a.id),
         )}
         focusedArtifactId={state.artifactId}
+        inspectedArtifactIds={journal.inspected}
       />
     ) : null;
 
