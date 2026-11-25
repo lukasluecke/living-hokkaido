@@ -82,9 +82,63 @@
     .sheet { left: 0; right: 0; top: auto; bottom: 0; width: auto; max-height: 62dvh;
       border-radius: 16px 16px 0 0; transform: translateY(105%); padding-bottom: env(safe-area-inset-bottom); }
   }
-  .sheet header { display: flex; align-items: flex-start; gap: 10px; padding: 16px 16px 10px; border-bottom: 1px solid var(--line); }
-  .sheet header .who { flex: 1; min-width: 0; }
-  .sheet h2 { margin: 0; font-size: 17px; }
+  .sheet header { display: flex; align-items: flex-start; gap: 10px; padding: 14px 16px 12px; border-bottom: 1px solid var(--line);
+    background: linear-gradient(180deg, rgba(224,179,90,.07), transparent); }
+  .sheet header .who { flex: 1; min-width: 0; display: grid; gap: 3px; }
+  .sheet h2 { margin: 0; font: 600 19px/1.3 "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", Georgia, "Times New Roman", serif; letter-spacing: .01em; }
+  .sheet header .crumb { font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; }
+
+  /* Form layer: the view and its reality basis */
+  :root { --recorded: #7fd1a7; --interpreted: #e0b35a; --symbolic: #b9a2ff; }
+  .hero { display: grid; gap: 8px; }
+  .figure3d { position: relative; }
+  .basis-btn { position: absolute; left: 8px; bottom: 8px; height: auto; padding: 4px 8px 4px 6px; border-radius: 10px;
+    background: rgba(12,14,18,.78); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); gap: 6px; }
+  .basis-btn .more { color: var(--muted); font-size: 12px; }
+  .basis-btn[aria-expanded="true"] { border-color: var(--line); color: var(--text); }
+  .basis { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text); white-space: nowrap; }
+  .basis .ficon { width: 18px; height: 18px; color: var(--bc); }
+  .basis .bk { color: var(--muted); }
+  .basis .bb { color: var(--bc); font-weight: 600; }
+  .basis .meter { display: inline-flex; gap: 2px; }
+  .basis .meter i { width: 5px; height: 10px; border-radius: 2px; background: rgba(255,255,255,.15); }
+  .basis .meter i.on { background: var(--bc); }
+  .basis-recorded { --bc: var(--recorded); } .basis-interpreted { --bc: var(--interpreted); } .basis-symbolic { --bc: var(--symbolic); }
+  .formpanel, .scene-forms { display: grid; gap: 10px; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: rgba(255,255,255,.02); }
+  .formpanel[hidden] { display: none; }
+  .frow { display: grid; gap: 3px; }
+  .frow + .frow { border-top: 1px dashed var(--line); padding-top: 8px; }
+  .fhead { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .fmade { font-size: 11px; color: var(--muted); }
+  .flabel { font-size: 13px; font-weight: 600; }
+  .fnote { font-size: 12px; color: var(--text); opacity: .85; }
+  .funseen { font-size: 12px; color: var(--warn); }
+  .sheet[data-mode="figure"] .scene-only { display: none !important; }
+
+  /* Actor */
+  .ident { display: grid; gap: 6px; }
+  .ident .role { font-size: 14px; line-height: 1.5; }
+  .ident .declines { font-size: 12px; color: var(--muted); } .ident .declines .k { display: inline; margin-right: 6px; }
+
+  /* Voice and record as tabs */
+  .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 12px; background: rgba(255,255,255,.04); border: 1px solid var(--line); }
+  .tabs button { border: 0; background: transparent; height: 34px; border-radius: 9px; gap: 6px; color: var(--muted); font-size: 13px; }
+  .tabs button svg { width: 16px; height: 16px; }
+  .tabs button[aria-selected="true"] { background: var(--panel-solid); color: var(--text); box-shadow: 0 1px 0 rgba(255,255,255,.06), 0 2px 8px rgba(0,0,0,.35); }
+  .tabs .count { font-size: 11px; color: var(--muted); }
+  .sheet[data-mode="figure"][data-tab="talk"] .panel[data-panel="record"],
+  .sheet[data-mode="figure"][data-tab="record"] .panel[data-panel="talk"] { display: none; }
+
+  /* Record as a timeline of strata */
+  #sKnown { display: grid; gap: 8px; }
+  .stratum-h { position: relative; padding-left: 18px; color: var(--accent) !important; font-weight: 600; }
+  .stratum-h::before { content: ""; position: absolute; left: 3px; top: 50%; width: 8px; height: 8px; margin-top: -4px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px rgba(224,179,90,.2); }
+  #sKnown .obs { margin-left: 7px; border-left: 2px solid rgba(224,179,90,.25); border-radius: 0 10px 10px 0; }
+  #sKnown .obs.absence { border-left-color: color-mix(in srgb, var(--warn) 60%, transparent); }
+
+  /* Protocol */
+  .protocol { display: flex; gap: 8px; align-items: flex-start; font-size: 11px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; }
+  .protocol svg { width: 14px; height: 14px; flex: none; margin-top: 1px; }
   .sheet .ja { color: var(--muted); font-size: 13px; }
   .sheet .body { padding: 12px 16px 16px; overflow-y: auto; display: grid; gap: 12px; }
   .chip { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
@@ -218,22 +272,37 @@
 
 <aside class="sheet" id="sheet" aria-live="polite">
   <header>
-    <div class="who"><h2 id="sName"></h2><div class="ja" id="sJa"></div></div>
+    <div class="who"><div class="crumb" id="sCrumb"></div><h2 id="sName"></h2><div class="ja" id="sJa"></div></div>
     <button id="sClose" title="Close" data-i18n-title="close">✕</button>
   </header>
   <div class="body">
-    <div class="figure3d fig-only" id="sModelWrap" hidden>
-      <model-viewer id="sModel" camera-controls auto-rotate auto-rotate-delay="1500" rotation-per-second="20deg"
-        touch-action="pan-y" interaction-prompt="none" shadow-intensity="0.7" exposure="1.05" alt="">
-      </model-viewer>
-      <div class="note" id="sModelLabel"></div>
-      <button class="print" id="sStl" title="Shape only (STL has no colour). Team use only: not for sharing." data-i18n="stl" data-i18n-title="stlTitle">Download for 3D printing (STL)</button>
-    </div>
-    <div class="crumb" id="sCrumb"></div>
-    <div class="chips fig-only" id="sChips"></div>
-    <div class="fig-only"><div class="k" data-i18n="role">Role</div><div id="sRole"></div></div>
-    <div id="sDeclinesWrap" class="fig-only" hidden><div class="k" data-i18n="declines">Will not speculate on</div><div id="sDeclines"></div></div>
-    <section class="chat fig-only" id="sChat">
+    <!-- Form: how this figure or scene can be seen, and how directly that view records it -->
+    <section class="hero">
+      <div class="figure3d fig-only" id="sModelWrap" hidden>
+        <model-viewer id="sModel" camera-controls auto-rotate auto-rotate-delay="1500" rotation-per-second="20deg"
+          touch-action="pan-y" interaction-prompt="none" shadow-intensity="0.7" exposure="1.05" alt="">
+        </model-viewer>
+        <button type="button" class="basis-btn" id="sBasisBtn" aria-expanded="false" aria-controls="sFormPanel"></button>
+      </div>
+      <div class="scene-forms scene-only" id="sSceneForms"></div>
+      <div class="formpanel" id="sFormPanel" hidden>
+        <div class="k" id="sFormH"></div>
+        <div id="sForms"></div>
+        <button class="print" id="sStl" title="Shape only (STL has no colour). Team use only: not for sharing." data-i18n="stl" data-i18n-title="stlTitle">Download for 3D printing (STL)</button>
+      </div>
+    </section>
+    <!-- Actor: who this is -->
+    <section class="ident fig-only">
+      <div class="chips" id="sChips"></div>
+      <div class="role" id="sRole"></div>
+      <div class="declines" id="sDeclinesWrap" hidden><span class="k" data-i18n="declines">Will not speculate on</span><span id="sDeclines"></span></div>
+    </section>
+    <!-- Voice and the record -->
+    <nav class="tabs fig-only" role="tablist">
+      <button type="button" role="tab" id="tabTalk" data-tab="talk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v11H9l-5 4z"/></svg><span data-i18n="tabTalk">Talk</span></button>
+      <button type="button" role="tab" id="tabRecord" data-tab="record"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l3 3v15H6z"/><path d="M9 10h6M9 14h6M9 18h4"/></svg><span data-i18n="tabRecord">Record</span><span class="count" id="sCount"></span></button>
+    </nav>
+    <section class="chat fig-only panel" data-panel="talk" id="sChat">
       <div class="known-h" id="sTalkH">Talk <span>· answers only from the record below</span></div>
       <div class="row2 voicebar"><span class="chip" id="sVoiceCredit" hidden title="Synthetic voices: not recordings of any person" data-i18n-title="creditTitle">Voices by ElevenLabs · synthetic</span>
         <button type="button" class="link" id="sAuto" hidden aria-pressed="true">🔊 Voice on</button></div>
@@ -244,14 +313,16 @@
         <input id="sQ" maxlength="500" placeholder="Ask this figure something…" autocomplete="off">
         <button class="primary" id="sSend">Ask</button>
       </form>
+      <div class="notice" id="sNotice">This voice is a synthetic interpretation built from historical sources. It is not a historical record and does not speak for any person or community.</div>
     </section>
-    <div class="notice fig-only" id="sNotice">This voice is a synthetic interpretation built from historical sources. It is not a historical record and does not speak for any person or community.</div>
-    <div class="known">
+    <section class="known panel" data-panel="record">
       <div class="known-h" data-i18n-html="knownH">What is known <span>· and what is not</span></div>
       <div class="legend" data-i18n-html="legend">Every entry shows two separate scores: <b>evidence</b> (how well it is supported) and <b>standing</b> (whose knowledge it is). Nothing is overwritten; corrections keep the history.</div>
       <div id="sKnown"></div>
-    </div>
-    <div id="sForm"></div>
+      <div id="sForm"></div>
+    </section>
+    <!-- Protocol: who may see what -->
+    <footer class="protocol" id="sProtocol"></footer>
   </div>
 </aside>
 
@@ -451,9 +522,33 @@ function updateMarkers() {
 // ---------- Character sheet
 // The record for a figure or for the whole scene, plus the add/correct form.
 function showRecord(list, { envelopes, about }) {
-  const form = Env.renderForm($("sForm"), { envelopes, about, onSaved: () => (active ? openSheet(active) : openScene()) });
-  Env.renderRecord($("sKnown"), list, { onCorrect: (o) => form?.correct(o) });
+  const form = Env.renderForm($("sForm"), { envelopes, about, onSaved: () => (active ? openSheet(active, { keepChat: true }) : openScene()) });
+  Env.renderRecord($("sKnown"), list, { onCorrect: (o) => { setTab("record"); form?.correct(o); } });
+  const unknown = list.filter((o) => o.kind === "absence").length;
+  $("sCount").textContent = t("count")(list.length, unknown);
+  $("sProtocol").innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span></span>`;
+  $("sProtocol").querySelector("span").textContent = t("protocol");
 }
+// Form layer: the badge on the view, and "How this view was made" behind it.
+function showFormBadge(form, notes = []) {
+  const btn = $("sBasisBtn"), panel = $("sFormPanel");
+  btn.hidden = !form; panel.hidden = true; btn.setAttribute("aria-expanded", "false");
+  if (!form) return;
+  btn.replaceChildren(Env.basisBadge(form), Object.assign(document.createElement("span"), { className: "more", textContent: "ⓘ" }));
+  btn.title = Env.formStrings().how;
+  $("sFormH").textContent = Env.formStrings().how;
+  Env.renderForms($("sForms"), form, { notes });
+}
+$("sBasisBtn").addEventListener("click", () => {
+  const open = $("sFormPanel").hidden;
+  $("sFormPanel").hidden = !open; $("sBasisBtn").setAttribute("aria-expanded", String(open));
+  if (open) $("sFormPanel").scrollIntoView({ behavior: "smooth", block: "nearest" });
+});
+function setTab(tab) {
+  $("sheet").dataset.tab = tab;
+  for (const b of document.querySelectorAll(".tabs [role=tab]")) b.setAttribute("aria-selected", String(b.dataset.tab === tab));
+}
+for (const b of document.querySelectorAll(".tabs [role=tab]")) b.addEventListener("click", () => setTab(b.dataset.tab));
 function openScene() {
   active = null;
   for (const [, m] of markerEls) m.el.dataset.active = "false";
@@ -467,6 +562,13 @@ function openScene() {
   // except per-figure appearance notes (those live on each figure's card).
   const ids = [SCENE_ENVELOPE, env?.depicts, env?.parent].filter(Boolean);
   showRecord(Env.inEnvelopes(ids).filter((o) => o.kind !== "appearance"), { envelopes: [SCENE_ENVELOPE], about: [] });
+  // Form layer for the scene: the splat (a record of the 1971 diorama), and the 1808 scene's own forms.
+  const box = $("sSceneForms"); box.innerHTML = "";
+  for (const f of [...Env.formsOf(SCENE_ENVELOPE), ...Env.formsOf(env?.depicts)]) {
+    const d = document.createElement("div"); Env.renderForms(d, f, { notes: [] }); box.append(...d.childNodes);
+  }
+  box.hidden = !box.childNodes.length;
+  $("sFormPanel").hidden = true;
   $("sheet").classList.add("open");
 }
 $("about").addEventListener("click", openScene);
@@ -476,6 +578,7 @@ function openSheet(id, { keepChat = false } = {}) {
   active = id;
   for (const [cid, m] of markerEls) m.el.dataset.active = String(cid === id);
   $("sheet").dataset.mode = "figure";
+  if (!keepChat || !$("sheet").dataset.tab) setTab("talk");
   $("sCrumb").textContent = Env.breadcrumb(SCENE_ENVELOPE);
   $("sName").textContent = nameOf(c); $("sJa").textContent = otherNameOf(c);
   $("sRole").textContent = sheetText(c, "role") || "—";
@@ -496,7 +599,7 @@ function openSheet(id, { keepChat = false } = {}) {
     if (mv.getAttribute("src") !== c.model.src) mv.setAttribute("src", c.model.src);
     mv.setAttribute("alt", `${t("modelAlt")(nameOf(c))}${sheetText(c, "appearance") ? "：" + sheetText(c, "appearance") : ""}`);
     mv.cameraOrbit = "0deg 80deg auto";
-    $("sModelLabel").textContent = sheetText(c, "modelLabel") || "";
+    showFormBadge(Env.formsOf(id).find((f) => f.src === c.model.src) || Env.formsOf(id).find((f) => f.src), Env.formNotes(id));
     $("sStl").dataset.src = c.model.src; $("sStl").dataset.name = id;
   } else {
     mv.removeAttribute("src");
@@ -535,6 +638,8 @@ const I18N = {
     faction: { aizu: "Aizu clan", shogunate: "shogunate", "wajin-interpreter": "Wajin interpreter", "sakhalin-ainu": "Sakhalin Ainu" },
     status: { "curator-reviewed": "curator reviewed", sourced: "sourced, not yet reviewed", draft: "draft, not yet sourced" },
     speaksThrough: (n) => `speaks through the ${n.toLowerCase()}`, modelAlt: (n) => `3D model of the ${n}`,
+    tabTalk: "Talk", tabRecord: "Record", count: (n, u) => `${n}${u ? ` · ${u} unknown` : ""}`,
+    protocol: "Protocol: shown to the project team. Access rules are to be set with the Hokkaido Museum's Ainu Culture Research Center and community bodies.",
   },
   ja: {
     suggAinu: ["ここでは何が行われていますか？", "この儀式はあなたにとって何を意味しましたか？", "何を着ていますか？", "なぜ顔が見えないのですか？"],
@@ -564,6 +669,8 @@ const I18N = {
     status: { "curator-reviewed": "学芸員確認済み", sourced: "出典あり・未確認", draft: "下書き・出典未確認" },
     speaksThrough: (n) => `${n}を介して話す`, modelAlt: (n) => `${n}の3Dモデル`,
     machine: "機械翻訳",
+    tabTalk: "話す", tabRecord: "記録", count: (n, u) => `${n}件${u ? ` · 不明${u}` : ""}`,
+    protocol: "公開範囲：プロジェクトチームのみ。閲覧の決まりは、北海道博物館アイヌ民族文化研究センターおよび関係する団体と定める予定。",
   },
 };
 // Name and sheet text in the current language. Japanese sheet text is a machine translation.

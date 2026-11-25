@@ -66,19 +66,97 @@ const SELECTS = {
   audience: ['public', 'team', 'family', 'community'],
 };
 
-export const state = { envelopes: [], all: [], supersededBy: new Map(), canWrite: false };
+export const state = { envelopes: [], forms: [], all: [], supersededBy: new Map(), canWrite: false };
+
+// ---- Form layer: how a thing can be seen, and how directly it records it.
+const BASIS = {
+  recorded: { level: 3, en: ['Recorded', 'Captured from the object itself'], ja: ['実写', '対象そのものから撮影・計測したもの'] },
+  interpreted: { level: 2, en: ['Interpreted', 'Made by a person from looking or from sources'], ja: ['解釈', '人が観察や資料をもとに制作したもの'] },
+  symbolic: { level: 1, en: ['Symbolic', 'Generated: it stands for the figure, but is not a record of it'], ja: ['象徴', '生成物：人物を表すが、記録ではない'] },
+};
+const KIND = {
+  splat: ['Gaussian splat', 'ガウシアンスプラット'], scan: ['3D scan', '3Dスキャン'], photo: ['Photograph', '写真'],
+  'photo-series': ['Photographs', '連続写真'], video: ['Video', '動画'], painting: ['Painting', '絵画'], drawing: ['Drawing', '素描'],
+  diorama: ['Diorama', 'ジオラマ'], reconstruction: ['AI reconstruction', 'AIによる再構成'],
+};
+const COVERAGE = { 'all-sides': ['all sides', '全方向'], partial: ['partly', '一部'], 'one-view': ['one side only', '一方向のみ'] };
+const FORM_T = {
+  en: { how: 'How this view was made', madeFrom: 'Made from', unseen: 'Never captured', held: 'Held as a source, not shown (rights not yet cleared)', notes: 'Notes on this reproduction', scale: 'Reality basis', by: 'by' },
+  ja: { how: 'この表示のつくり', madeFrom: 'もとにした資料', unseen: '撮影されていない部分', held: '資料として保管・非公開（権利確認前）', notes: 'この複製についての記録', scale: '実在性の根拠', by: '撮影・制作：' },
+};
+const ICON = {
+  splat: '<path d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4"/><circle cx="12" cy="12" r="1.6"/><circle cx="8.5" cy="10" r="1"/><circle cx="15.5" cy="10" r="1"/><circle cx="9.5" cy="15" r="1"/><circle cx="14.5" cy="15" r="1"/>',
+  scan: '<path d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4"/><path d="M12 7l4.5 2.5v5L12 17l-4.5-2.5v-5z"/>',
+  photo: '<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+  'photo-series': '<rect x="7" y="8" width="13" height="11" rx="1.5"/><path d="M4 16V6a1 1 0 0 1 1-1h11"/><circle cx="13.5" cy="13.5" r="2.6"/>',
+  video: '<rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/>',
+  painting: '<rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M3 16l5-5 4 4 3-3 6 6"/><circle cx="15.5" cy="8.5" r="1.5"/>',
+  drawing: '<path d="M4 20l4-1L19 8l-3-3L5 16z"/><path d="M14 7l3 3"/>',
+  diorama: '<path d="M3 18h18M5 18v-6l7-5 7 5v6"/><path d="M10 18v-4h4v4"/>',
+  reconstruction: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.7 1.8 1.8.7-1.8.7L19 20l-.7-1.8-1.8-.7 1.8-.7z"/>',
+};
+const pick = (pair) => (Array.isArray(pair) ? pair[LANG === 'ja' ? 1 : 0] : pair?.[LANG] || pair?.en || '');
+export const icon = (kind) => `<svg class="ficon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true">${ICON[kind] || ICON.photo}</svg>`;
+export const formsOf = (id) => state.forms.filter((f) => f.of === id);
+export const formById = (id) => state.forms.find((f) => f.id === id);
+// Provenance in the present stratum describes our own reproductions (the Form layer), not the
+// figure or the scene, so it is shown with the form instead of in the visitor's record.
+export const isFormNote = (o) => o.kind === 'provenance' && o.stratum === 'present-2026';
+
+// A compact badge: icon, kind and basis, with a three-step reality meter.
+export function basisBadge(f) {
+  const b = BASIS[f.basis] || BASIS.symbolic;
+  const n = document.createElement('span');
+  n.className = `basis basis-${f.basis}`;
+  n.title = pick([b.en[1], b.ja[1]]);
+  n.innerHTML = `${icon(f.kind)}<span class="bk"></span><span class="bb"></span><span class="meter" aria-hidden="true">${[1, 2, 3].map((i) => `<i class="${i <= b.level ? 'on' : ''}"></i>`).join('')}</span>`;
+  n.querySelector('.bk').textContent = pick(KIND[f.kind]);
+  n.querySelector('.bb').textContent = pick([b.en[0], b.ja[0]]);
+  return n;
+}
+
+// "How this view was made": the shown form, what it was made from, and notes on the reproduction.
+export function renderForms(container, shown, { notes = [] } = {}) {
+  const t = FORM_T[LANG];
+  container.innerHTML = '';
+  const chain = [];
+  for (let f = shown; f; f = f.derivedFrom?.length ? formById(f.derivedFrom[0]) : null) chain.push(f);
+  for (const [i, f] of chain.entries()) {
+    const row = el('div', 'frow');
+    const head = el('div', 'fhead');
+    if (i > 0) head.append(el('span', 'fmade', `${t.madeFrom} ↓`));
+    head.append(basisBadge(f));
+    row.append(head);
+    if (pick(f.label) !== pick(KIND[f.kind])) row.append(el('div', 'flabel', pick(f.label)));
+    const b = BASIS[f.basis];
+    row.append(el('div', 'src', pick([b.en[1], b.ja[1]])));
+    const cap = [f.captured?.date, f.captured?.by && `${t.by} ${f.captured.by}`, f.coverage && pick(COVERAGE[f.coverage])].filter(Boolean).join(' · ');
+    if (cap) row.append(el('div', 'src', cap));
+    if (f.captured?.method) row.append(el('div', 'fnote', pick(f.captured.method)));
+    if (f.unseen) row.append(el('div', 'funseen', `${t.unseen}: ${pick(f.unseen)}`));
+    if (f.published === false) row.append(el('div', 'src', t.held));
+    container.append(row);
+  }
+  if (notes.length) {
+    container.append(el('div', 'k', t.notes));
+    for (const o of notes) container.append(el('div', 'fnote', `${txt(o, 'claim')} (${o.createdAt?.slice(0, 10) || o.source?.ref || ''})`));
+  }
+}
+export const formStrings = () => FORM_T[LANG];
 
 export async function loadEnvelope() {
   try {
     const [e, o] = await Promise.all([fetch('/api/envelopes'), fetch(`/api/observations${LANG === 'ja' ? '?lang=ja' : ''}`, { cache: 'no-store' })]);
     if (!e.ok || !o.ok) throw new Error('no api');
-    state.envelopes = (await e.json()).envelopes;
+    const env = await e.json();
+    state.envelopes = env.envelopes; state.forms = env.forms || [];
     state.all = await o.json();
     state.canWrite = true;
   } catch {
     // Static hosting (serve.ps1): read the seed files directly, read-only.
     try {
       state.envelopes = (await (await fetch('../envelopes/index.json')).json()).envelopes;
+      try { state.forms = (await (await fetch('../envelopes/forms.json')).json()).forms; } catch { state.forms = []; }
       state.all = (await (await fetch('../envelopes/observations.jsonl')).text()).split('\n').filter(Boolean).map((l) => JSON.parse(l));
       if (LANG === 'ja') {
         const ja = (await (await fetch('../envelopes/ja.json')).json()).observations || {};
@@ -98,8 +176,9 @@ function history(o) {
   return chain;
 }
 export const envelopeById = (id) => state.envelopes.find((e) => e.id === id);
-export function about(id) { return current(state.all.filter((o) => o.about?.includes(id))); }
-export function inEnvelopes(ids) { return current(state.all.filter((o) => o.envelopes.some((e) => ids.includes(e)))); }
+export function about(id) { return current(state.all.filter((o) => o.about?.includes(id) && !isFormNote(o))); }
+export function formNotes(id) { return current(state.all.filter((o) => o.about?.includes(id) && isFormNote(o))); }
+export function inEnvelopes(ids) { return current(state.all.filter((o) => o.envelopes.some((e) => ids.includes(e)) && !isFormNote(o))); }
 export const claimOf = (o) => txt(o, 'claim');
 export const sourceOf = (o) => txt(o, 'sourceRef') || o.source?.type || '';
 

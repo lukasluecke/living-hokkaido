@@ -1,4 +1,4 @@
-﻿# Omusha 1808: talk to the diorama
+# Omusha 1808: talk to the diorama
 
 A phone web app that opens a Gaussian splat of the 1808 Omusha diorama in the
 Hokkaido Museum (北海道博物館) and lets you tap figures to meet them. The scene is an
@@ -31,6 +31,7 @@ museum diorama.
 
 - **Envelopes nest** ([envelopes/index.json](envelopes/index.json)): Hokkaido Museum ›
   Omusha diorama (made 1971), which *depicts* Kushun Kotan in 1808.
+- **Forms** are the ways a thing can be seen ([schema](envelopes/schema/form.schema.json), [data](envelopes/forms.json)), each with a **reality basis**: *recorded* (captured from the object: photographs, scans, the splat), *interpreted* (made by a person: paintings, the 1971 diorama itself) or *symbolic* (generated: the AI reconstructions stand for a figure but do not record it). The basis badge sits on every view, and the chain behind it shows what each form was made from and what was never captured.
 - **Observations** are the atomic record ([schema](envelopes/schema/observation.schema.json),
   [seed](envelopes/observations.jsonl)). Each states who said what, about what, in which
   time stratum (1808 depicted · 1971 made · observed · 2026), from what source.

@@ -371,7 +371,10 @@ const sendJson = (res, status, data) => { res.writeHead(status, { 'content-type'
 
 async function handleApi(req, res, pathname) {
   if (pathname === '/api/envelopes' && req.method === 'GET') {
-    return sendJson(res, 200, JSON.parse(fs.readFileSync(path.join(ROOT, 'envelopes', 'index.json'), 'utf8')));
+    const index = JSON.parse(fs.readFileSync(path.join(ROOT, 'envelopes', 'index.json'), 'utf8'));
+    let forms = [];
+    try { forms = JSON.parse(fs.readFileSync(path.join(ROOT, 'envelopes', 'forms.json'), 'utf8')).forms; } catch { /* no forms yet */ }
+    return sendJson(res, 200, { ...index, forms });
   }
   if (pathname === '/api/observations' && req.method === 'GET') {
     const list = (await allObservations()).filter(visible);

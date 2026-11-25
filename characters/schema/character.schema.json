@@ -42,7 +42,7 @@
       "required": ["src", "label"],
       "properties": {
         "src": { "type": "string", "description": "GLB for the close-up view, relative to src/index.html." },
-        "label": { "type": "string", "description": "How the model was made and what is invented; always shown with it." }
+        "label": { "type": "string", "description": "Developer note on how the model was made. The app shows the matching Form instead (envelopes/forms.json): its kind, reality basis and what was never captured." }
       }
     },
     "hotspot": {
