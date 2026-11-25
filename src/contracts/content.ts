@@ -9,6 +9,7 @@ import {
   type Term,
 } from "./activity";
 import { artifactSchema } from "./artifact";
+import { askContentSchema } from "./ask";
 import { guideLineSchema } from "./guide";
 import { journalStateSchema, stampSchema, type JournalState } from "./journal";
 import {
@@ -37,6 +38,8 @@ export const contentPackSchema = z.object({
   memories: z.array(voiceMemorySchema).default([]),
   /** "Over time" timelines (additive; old packs parse with none). */
   timelines: z.array(timelineSchema).default([]),
+  /** "Ask the owl" box: example questions (additive; default none). */
+  ask: askContentSchema.default({ suggestions: [] }),
 });
 export type ContentPack = z.infer<typeof contentPackSchema>;
 export type ContentPackInput = z.input<typeof contentPackSchema>;

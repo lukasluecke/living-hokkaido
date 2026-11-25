@@ -37,6 +37,7 @@ Two layers:
 | Version | Change |
 |---|---|
 | 1 (additive) | Activity kinds `canon` (voices, `offset`, `beats`, `structureClaimId`, `lyrics` default `[]`) and `pluck` (strings with gauge and hands, `stringsClaimId`, optional `tune`). Sound is synthetic and illustrative. |
+| 1 (additive) | `ask.ts`: `AskRequest`, `AskAnswer`, `AskAction`; `ContentPack.ask.suggestions` (default `[]`); `AskPartProps` (src/parts/ask, docs/ASK.md). |
 | 1 (additive) | Activity kind `board` (game `stick-grid`, `rulesClaimId`, opponent `owl` by default or `two-players`). |
 | 1 (additive) | Story line role `refrain` and optional `StoryActivity.refrain` (text, romanised, lang, credit, claim). The device voice never reads a refrain. |
 | 1 (additive) | Activity kind `map` (figure `hokkaido` or `cise-plan`, mode `explore` or `match`, spots with word, gloss, region and claim; `placeholder` default `true`). |

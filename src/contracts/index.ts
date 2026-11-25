@@ -2,6 +2,7 @@
 // Import from "@/contracts" only. See src/contracts/AGENTS.md before editing.
 export * from "./activity";
 export * from "./artifact";
+export * from "./ask";
 export * from "./content";
 export * from "./events";
 export * from "./experience";

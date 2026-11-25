@@ -44,6 +44,7 @@ back together through **shared contracts**, not through shared code.
 | activities | `src/parts/activities` | (none yet) | One renderer per activity kind: quiz, weave (D2), sequence | `activity.complete`, `activity.close` |
 | journal | `src/parts/journal` | (none yet) | E1 stamp book from `JournalState` | `journal.close` |
 | reveal | `src/parts/reveal` | (none yet) | F2 card turn: source → claim → human review | `reveal.close` |
+| ask | `src/parts/ask` | (none) | "Ask the owl" box: answers only from cited claims, "How do we know?", navigation offers ([ASK.md](ASK.md)) | `location.select`, `artifact.focus`, `timeline.open`, `reveal.open` |
 | over-time | `src/parts/over-time` | (none; route `/over-time`) | Time scrub: the house and its land through five eras, each era with cited claims | `timeline.open`, `timeline.era`, `timeline.close`, `reveal.open` |
 
 The owl is drawn by the island part. Its words are content (`guide` in the

@@ -31,6 +31,16 @@ export const barkToClothRaw = {
   guide,
   memories,
   timelines: [houseTimeline],
+  // "Ask the owl" example questions. Questions only; answers come from claims.
+  ask: {
+    suggestions: [
+      "How do you soften bark?",
+      "What is attus?",
+      "Why is the pattern not mirrored?",
+      "Are these clothes worn today?",
+      "How did houses change over time?",
+    ],
+  },
 };
 
 /** Parsed with defaults applied. Throws if any reference is broken. */
