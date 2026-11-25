@@ -35,3 +35,7 @@ journal stamp appears after completion.
   cited Ainu words (attus, isitaykini) with a small "Draft" chip; no review
   gate in the UI. The device voice never reads Ainu; Listen waits for a
   recording. Every draft item is listed in docs/REVIEW.md.
+- 2026-11-25: Kinds from the Hokkaido Museum visit live in `play/` (one CSS
+  module, `.root` scope, pure state in `play/*Logic.ts`). `map`: stylised
+  figure (sketch Hokkaido map or cise plan) with spot buttons; explore opens
+  every spot, match puts each word on its spot.

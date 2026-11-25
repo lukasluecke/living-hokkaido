@@ -113,7 +113,26 @@ export const storyLineSchema = z.discriminatedUnion("role", [
     role: z.literal("frame"),
     text: z.string().min(1),
   }),
+  /**
+   * The story's refrain (sakehe) comes back here. Shows `refrain` of the
+   * activity; the device voice never reads it.
+   */
+  z.object({
+    id: idSchema,
+    role: z.literal("refrain"),
+  }),
 ]);
+
+/** A refrain taken from a named teller's performance, as the source writes it. */
+export const storyRefrainSchema = z.object({
+  text: z.string().min(1),
+  romanised: z.string().optional(),
+  /** BCP 47 tag, e.g. "ain". */
+  lang: z.string().min(2),
+  /** Who it belongs to, e.g. the teller and the source. */
+  credit: z.string().min(1),
+  claimId: idSchema,
+});
 
 export const storyChoiceSchema = z.object({
   id: idSchema,
@@ -150,6 +169,8 @@ export const storyActivitySchema = z.object({
       }),
     )
     .min(1),
+  /** Optional refrain, shown by "refrain" lines. */
+  refrain: storyRefrainSchema.optional(),
   /** Shown at the end. Must only restate claims. */
   completion: z.string().min(1),
 });
@@ -211,6 +232,46 @@ export const traceActivitySchema = z.object({
   completion: z.string().min(1),
 });
 
+// ---------------------------------------------------------------- map
+
+/**
+ * Places on a stylised figure (a sketch map of Hokkaido or a house plan).
+ * "explore": open every spot to see its word. "match": pick a word and
+ * put it on its spot. Figures are drawn by the renderer and are sketches,
+ * not survey maps; spot positions are design guesses unless a claim backs
+ * them, so `placeholder` defaults to true.
+ */
+export const mapSpotSchema = z.object({
+  id: idSchema,
+  /** Position on the figure, 0..1 from the left and from the top. */
+  x: z.number().min(0).max(1),
+  y: z.number().min(0).max(1),
+  /** The word as written by the source (e.g. katakana). */
+  text: z.string().min(1),
+  /** A Latin spelling, if any. */
+  romanised: z.string().optional(),
+  /** BCP 47 tag. Ainu is "ain", never "ja-*". */
+  lang: z.string().min(2),
+  /** What the word means or names, in the visitor's language. */
+  gloss: z.string().min(1),
+  /** Where it is used (region / dialect), shown with the word. */
+  region: z.string().optional(),
+  claimId: idSchema,
+});
+export type MapSpot = z.infer<typeof mapSpotSchema>;
+
+export const mapActivitySchema = z.object({
+  ...base,
+  kind: z.literal("map"),
+  figure: z.enum(["hokkaido", "cise-plan"]),
+  mode: z.enum(["explore", "match"]),
+  prompt: z.string().min(1),
+  /** Shown when every spot is open or matched. Must only restate claims. */
+  completion: z.string().min(1),
+  spots: z.array(mapSpotSchema).min(2).max(16),
+  placeholder: z.boolean().default(true),
+});
+
 export const activitySchema = z.discriminatedUnion("kind", [
   quizActivitySchema,
   weaveActivitySchema,
@@ -218,6 +279,7 @@ export const activitySchema = z.discriminatedUnion("kind", [
   storyActivitySchema,
   wordsActivitySchema,
   traceActivitySchema,
+  mapActivitySchema,
 ]);
 export type ActivityDefinition = z.infer<typeof activitySchema>;
 export type ActivityInput = z.input<typeof activitySchema>;

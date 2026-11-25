@@ -92,7 +92,16 @@ function checkActivityKind(
   if (a.kind === "story") {
     checkMedia(a.narrator.voice, k, `${at} narrator`, errors);
     const chapters = new Set(a.chapters.map((c) => c.id));
+    if (a.refrain && !cited.has(a.refrain.claimId))
+      errors.push(
+        `${at}: refrain claim "${a.refrain.claimId}" not in claimIds`,
+      );
+    if (a.refrain?.lang.toLowerCase().startsWith("ja"))
+      errors.push(`${at}: a refrain in Ainu is "ain", not a Japanese dialect`);
     for (const ch of a.chapters) {
+      for (const l of ch.lines)
+        if (l.role === "refrain" && !a.refrain)
+          errors.push(`${at}: line ${l.id} is a refrain, but none is set`);
       for (const l of ch.lines)
         if (l.role === "fact")
           for (const c of l.claimIds)
@@ -110,6 +119,18 @@ function checkActivityKind(
           );
       }
     }
+  }
+  if (a.kind === "map") {
+    dupes(
+      `${at} spot`,
+      a.spots.map((x) => x.id),
+      errors,
+    );
+    for (const spot of a.spots)
+      if (!cited.has(spot.claimId))
+        errors.push(
+          `${at} spot ${spot.id}: claim "${spot.claimId}" not in claimIds`,
+        );
   }
   if (a.kind === "words") {
     for (const t of a.terms) {

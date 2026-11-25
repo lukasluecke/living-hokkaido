@@ -138,7 +138,7 @@ export const shots: Shot[] = [
     title: "Weave activity",
     steps: [
       mark("Activity"),
-      click(button("Try the activity"), { optional: true }),
+      click(button(/^Weave: /, false), { optional: true }),
       hold(1500),
       ...weaveAll(weaveId),
       hold(3000),

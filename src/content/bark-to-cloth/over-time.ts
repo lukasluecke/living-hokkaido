@@ -129,6 +129,18 @@ const sources: Source[] = [
     "技術を受け継ぐ (Passing on the skills)",
     "Theme 2 伝統を学ぶ, restored house",
   ),
+  // Theme 2 "today" wall and the population panel (photos 7812–7814,
+  // 7765), added 2026-11-25.
+  panel(
+    "hm-panel-today",
+    "あたりまえの社会に向けて and the postwar wall (Toward an ordinary society)",
+    "Theme 2, today section (photos 7812–7814)",
+  ),
+  panel(
+    "hm-panel-population",
+    "Population panel (audio guide 06)",
+    "Theme 2, today section (photo 7765)",
+  ),
   {
     id: "living-hokkaido-policy",
     title: "Living Hokkaido · editorial policy and asset notes",
@@ -363,6 +375,53 @@ export const houseOverTime: KnowledgeEntry = {
       "Today, crafts, rituals and oral traditions carry Ainu history and culture forward.",
       ["jta-19th-century", "English text, paragraph 3"],
     ),
+    // Postwar and today (Hokkaido Museum, theme 2 today wall)
+    c(
+      "panel-association-1946",
+      "After the war, Ainu people worked to rebuild their lives and kept calling for an end to discrimination. In March 1946 people from many places met in Shizunai (now Shin-hidaka) and founded the Hokkaido Ainu Association.",
+      ["hm-panel-today", "日本の敗戦から…, paragraph (photo 7814)"],
+    ),
+    c(
+      "panel-postwar-unheard",
+      "But most of their demands were not met: as Japan recovered and grew, ethnic minorities were not seen as actors in society.",
+      ["hm-panel-today", "日本の敗戦から…, last sentence (photo 7814)"],
+    ),
+    c(
+      "panel-tourism",
+      "From the Meiji era, Ainu life became an object of 'visits' driven by interest in 'life as of old' and 'strange customs'. People who worked in tourism kept working on how to tell about themselves correctly.",
+      ["hm-panel-today", "自分たちのことを伝える, paragraph (photo 7813)"],
+    ),
+    c(
+      "panel-tourism-1961",
+      "In 1961 a cable car company at Noboribetsu Onsen moved a traditional Ainu house to the mountain top and ran it as a place to visit.",
+      ["hm-panel-today", "自分たちのことを伝える, photo caption (photo 7813)"],
+    ),
+    c(
+      "panel-reclaiming",
+      "From the late 1960s, Ainu people began to look again at their own culture and history: learning the language and culture in their own way, so that they are not only 'the past', and asking for a history that also values the people who lived here first.",
+      [
+        "hm-panel-today",
+        "あたりまえの社会に向けて, sentences 1–2 (photo 7812)",
+      ],
+    ),
+    c(
+      "panel-ordinary-society",
+      "Work continues toward an 'ordinary' society, in which people of many ethnic origins live as equals.",
+      [
+        "hm-panel-today",
+        "あたりまえの社会に向けて, last sentence (photo 7812)",
+      ],
+    ),
+    c(
+      "panel-population",
+      "The Ainu population today is said to be tens of thousands or more. Most live in Hokkaido, but many have moved to Tokyo, Osaka and other places for work, study or marriage.",
+      ["hm-panel-population", "Panel text, sentences 1–2 (photo 7765)"],
+    ),
+    c(
+      "panel-live-together",
+      "There are no villages today where only Ainu people live. Ainu people live side by side with other people in Japan.",
+      ["hm-panel-population", "Panel text, sentences 3–5 (photo 7765)"],
+    ),
     // Editorial notes (our own policy, not museum facts)
     c(
       "not-frozen",
@@ -466,10 +525,15 @@ export const houseTimeline: TimelineInput = {
       year: 1946,
       title: "Rights, recognition and rebuilt houses",
       summary:
-        "Ainu campaigned for their rights, and Japan now recognizes the Ainu as an indigenous people. Everyday homes are like any other in Japan. Cise are rebuilt as cultural places and museum exhibits, such as at Upopoy, and the building skills pass to younger people, while crafts and oral traditions continue.",
+        "Ainu campaigned for their rights, from the Hokkaido Ainu Association of 1946 to the work for an 'ordinary' society of equals, and Japan now recognizes the Ainu as an indigenous people. Tens of thousands of Ainu people live across Hokkaido and Japan, side by side with their neighbours, and everyday homes are like any other in Japan. Cise are rebuilt as cultural places and museum exhibits, such as at Upopoy, and the building skills pass to younger people, while crafts and oral traditions continue.",
       claimIds: [
         "rights-movement",
+        "panel-association-1946",
+        "panel-reclaiming",
+        "panel-ordinary-society",
         "recognition",
+        "panel-population",
+        "panel-live-together",
         "panel-homes-today",
         "panel-rebuilt",
         "upopoy",

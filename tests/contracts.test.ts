@@ -334,3 +334,28 @@ test("every place is open, with its own scene, setting and timelines", () => {
     validateContentPack(bad).some((e) => e.includes('unknown timeline "nope"')),
   );
 });
+
+test("map activities: spots cite the activity's claims; placeholder defaults on", () => {
+  const m = pack.activities.find((a) => a.kind === "map");
+  assert.ok(m && m.kind === "map" && m.placeholder);
+  const p = clone();
+  const raw = kindOf(p, "map");
+  raw.spots[0].claimId = "bark-fiber";
+  assert.ok(validateContentPack(p).some((e) => e.includes("not in claimIds")));
+  const q = clone();
+  const dup = kindOf(q, "map");
+  dup.spots[1].id = dup.spots[0].id;
+  assert.ok(validateContentPack(q).some((e) => e.includes("Duplicate")));
+});
+
+test("story refrain lines need a refrain that cites a claim", () => {
+  const owl = pack.activities.find((a) => a.id === "story-owl");
+  assert.ok(owl && owl.kind === "story" && owl.refrain?.lang === "ain");
+  const p = clone();
+  const raw = p.activities.find((a) => a.id === "story-owl");
+  assert.ok(raw && raw.kind === "story");
+  raw.refrain = undefined;
+  assert.ok(
+    validateContentPack(p).some((e) => e.includes("is a refrain, but none")),
+  );
+});

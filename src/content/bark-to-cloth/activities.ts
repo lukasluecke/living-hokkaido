@@ -2,6 +2,7 @@
 import type { ActivityInput } from "@/contracts";
 import { activities as seed } from "@/data/story";
 import { activityKinds } from "./activity-kinds";
+import { museumActivities, museumMaps, owlStory } from "./museum-activities";
 
 const artifactFor: Record<string, string> = {
   material: "fiber",
@@ -92,4 +93,7 @@ export const activities: ActivityInput[] = [
       "The museum records these six steps from Fujitani Rumiko of Nibutani, who learned the method from her mother.",
   },
   ...activityKinds,
+  ...museumActivities,
+  ...museumMaps,
+  owlStory,
 ];

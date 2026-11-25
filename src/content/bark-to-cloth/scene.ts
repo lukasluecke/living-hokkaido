@@ -51,6 +51,9 @@ export const lakeHouse: DetailSceneInput = {
     "story-bark-to-cloth",
     "words-objects",
     "trace-sources",
+    "map-cise-plan",
+    "quiz-canoe",
+    "quiz-garden",
   ],
 };
 
@@ -80,7 +83,13 @@ export const listeningGrove: DetailSceneInput = {
       key: 1,
     },
   ],
-  activityIds: ["story-bark-to-cloth", "words-objects"],
+  activityIds: [
+    "story-owl",
+    "map-greetings",
+    "story-bark-to-cloth",
+    "words-objects",
+    "quiz-small-kana",
+  ],
 };
 
 /** Makers' clearing: the loom and the weaving activity at a workbench. */
@@ -112,7 +121,7 @@ export const makersClearing: DetailSceneInput = {
       key: 2,
     },
   ],
-  activityIds: ["weave-rows", "material"],
+  activityIds: ["weave-rows", "material", "quiz-full-adult"],
 };
 
 /** Memory cabin: the curator memory card and the "Over time" slider. */
@@ -144,6 +153,12 @@ export const memoryCabin: DetailSceneInput = {
       key: 2,
     },
   ],
-  activityIds: ["variation", "care", "trace-sources"],
+  activityIds: [
+    "variation",
+    "care",
+    "trace-sources",
+    "quiz-ainu-today",
+    "sequence-postwar",
+  ],
   timelineIds: ["house-over-time"],
 };

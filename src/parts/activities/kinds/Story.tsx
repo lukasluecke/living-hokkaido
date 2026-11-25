@@ -32,10 +32,18 @@ export function Story({
 
   const chapter = a.chapters[pos.ch];
   const line = chapter?.lines[pos.line];
-  const words = useMemo(() => line?.text.split(" ") ?? [], [line]);
+  const refrain = line?.role === "refrain" ? a.refrain : undefined;
+  const lineText = line
+    ? line.role === "refrain"
+      ? (a.refrain?.text ?? "")
+      : line.text
+    : "";
+  const words = useMemo(() => lineText.split(" "), [lineText]);
   const voice = a.narrator.voice;
-  const canVoice =
+  const canVoiceStory =
     voice.kind === "device-voice-placeholder" && deviceVoice.available();
+  // The device voice never reads the refrain (it is not English).
+  const canVoice = canVoiceStory && line?.role !== "refrain";
 
   const finish = useCallback(() => {
     setPlaying(false);
@@ -81,7 +89,7 @@ export function Story({
       starts.push(i);
       i += w.length + 1;
     }
-    deviceVoice.speak(line.text, {
+    deviceVoice.speak(lineText, {
       word: (c) =>
         setWord(
           Math.max(
@@ -92,7 +100,17 @@ export function Story({
       end: () => setTimeout(advance, LINE_GAP_MS),
     });
     return () => deviceVoice.stop();
-  }, [playing, atPause, done, voiceOn, canVoice, line, words, advance]);
+  }, [
+    playing,
+    atPause,
+    done,
+    voiceOn,
+    canVoice,
+    line,
+    lineText,
+    words,
+    advance,
+  ]);
 
   // Space = play/pause.
   useEffect(() => {
@@ -149,7 +167,7 @@ export function Story({
             <p className="voice-label">
               {voice.kind === "recording"
                 ? "Recorded voice"
-                : voiceOn && canVoice
+                : voiceOn && canVoiceStory
                   ? "Device voice"
                   : "Captions"}
             </p>
@@ -181,7 +199,11 @@ export function Story({
 
           {!done && line && (
             <div className="caption-box">
-              <p className="caption" aria-live="polite">
+              <p
+                className={`caption ${refrain ? "refrain" : ""}`}
+                aria-live="polite"
+                lang={refrain?.lang}
+              >
                 {words.map((w, i) => (
                   <span
                     // biome-ignore lint/suspicious/noArrayIndexKey: words of one fixed line
@@ -198,7 +220,22 @@ export function Story({
                   </span>
                 ))}
               </p>
-              {line.role === "fact" ? (
+              {refrain ? (
+                <div className="refrain-note">
+                  {refrain.romanised && (
+                    <p className="refrain-roman" lang={refrain.lang}>
+                      {refrain.romanised}
+                    </p>
+                  )}
+                  <p className="frame-note">
+                    Refrain · {refrain.credit} · not read by the device voice
+                  </p>
+                  <Cite
+                    claim={claims[refrain.claimId]}
+                    onReveal={() => reveal(refrain.claimId)}
+                  />
+                </div>
+              ) : line.role === "fact" ? (
                 line.claimIds.map((id) => (
                   <Cite
                     key={id}
@@ -267,11 +304,11 @@ export function Story({
             >
               Next line
             </button>
-            <label className={`toggle ${canVoice ? "" : "off"}`}>
+            <label className={`toggle ${canVoiceStory ? "" : "off"}`}>
               <input
                 type="checkbox"
-                checked={voiceOn && canVoice}
-                disabled={!canVoice}
+                checked={voiceOn && canVoiceStory}
+                disabled={!canVoiceStory}
                 onChange={(e) => setVoiceOn(e.target.checked)}
               />
               Device voice
@@ -291,7 +328,11 @@ export function Story({
               {a.chapters.flatMap((c) =>
                 c.lines.map((l) => (
                   <li key={l.id}>
-                    {l.text}
+                    {l.role === "refrain" ? (
+                      <i lang={a.refrain?.lang}>{a.refrain?.text}</i>
+                    ) : (
+                      l.text
+                    )}
                     {l.role === "fact" && (
                       <small> [{l.claimIds.join(", ")}]</small>
                     )}
