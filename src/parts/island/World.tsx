@@ -23,7 +23,8 @@ import {
   Weather,
 } from "./world/Environment";
 import { buildField, type Field } from "./world/field";
-import { FLOWER_FIELD, RIVER } from "./world/island";
+import { AREAS, FLOWER_FIELD, RIVER } from "./world/island";
+import { Areas } from "./world/Areas";
 import { Owl, type OwlApi } from "./world/Owl";
 import { anchorPos, PinTracker, PlaceMarker } from "./world/Places";
 import { Terrain } from "./world/Terrain";
@@ -50,6 +51,7 @@ export function World(props: WorldProps) {
     out.push(
       { x: island.owlHome[0], z: island.owlHome[2], r: 0.7 },
       { ...FLOWER_FIELD, r: 2.0 },
+      ...AREAS.map((a) => ({ x: a.x, z: a.z, r: a.r })),
     );
     for (const l of locations) {
       if (!l.arrivalView) continue;
@@ -105,6 +107,7 @@ export function World(props: WorldProps) {
       <DriftIce field={field} />
       <Trees field={field} count={9000} clearings={clearings} scale={2} />
       <FlowerField field={field} x={FLOWER_FIELD.x} z={FLOWER_FIELD.z} />
+      <Areas field={field} still={prefs.reducedMotion} />
       {!prefs.reducedMotion && <Weather />}
       {locations.map((l) => (
         <PlaceMarker
