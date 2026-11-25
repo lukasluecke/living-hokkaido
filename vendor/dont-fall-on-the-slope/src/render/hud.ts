@@ -52,12 +52,17 @@ export function createHud(host: HTMLElement, touch: boolean) {
     fontVariantNumeric: "tabular-nums",
   });
 
+  // Centred with margin auto, not translate(-50%): a half-pixel translate
+  // makes the browser draw the card's text blurry.
   const card = el("div", {
     position: "absolute",
-    left: "50%",
-    top: "50%",
-    transform: "translate(-50%, -50%)",
-    width: "min(420px, calc(100% - 32px))",
+    inset: "0",
+    margin: "auto",
+    height: "fit-content",
+    maxHeight: "calc(100% - 32px)",
+    overflowY: "auto",
+    boxSizing: "border-box",
+    width: "min(460px, calc(100% - 32px))",
     padding: "18px 20px",
     borderRadius: "16px",
     background: css("cream"),
@@ -116,8 +121,10 @@ export function createHud(host: HTMLElement, touch: boolean) {
   const toast = el("div", {
     position: "absolute",
     top: "56px",
-    left: "50%",
-    transform: "translateX(-50%)",
+    left: "0",
+    right: "0",
+    margin: "0 auto",
+    width: "fit-content",
     padding: "8px 16px",
     borderRadius: "12px",
     background: css("cream"),
