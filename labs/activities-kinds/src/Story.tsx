@@ -18,6 +18,10 @@ export function Story({ activity: a, claims, prefs, emit }: KindProps<"story">) 
   const [voiceOn, setVoiceOn] = useState(false);
   const [transcript, setTranscript] = useState(false);
   const finished = useRef(false);
+  // The shell may pass a new emit on every render (season clock); keep the
+  // latest one in a ref so the caption timer is not reset by re-renders.
+  const emitRef = useRef(emit);
+  emitRef.current = emit;
 
   const chapter = a.chapters[pos.ch];
   const line = chapter?.lines[pos.line];
@@ -31,9 +35,9 @@ export function Story({ activity: a, claims, prefs, emit }: KindProps<"story">) 
     setDone(true);
     if (!finished.current) {
       finished.current = true;
-      complete(emit, a.id, 1);
+      complete(emitRef.current, a.id, 1);
     }
-  }, [a.id, emit]);
+  }, [a.id]);
 
   /** Move to the next line, or the pause, or the next chapter. */
   const advance = useCallback(() => {

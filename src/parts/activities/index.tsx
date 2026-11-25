@@ -6,6 +6,9 @@ import { seasonWeights } from "@/contracts";
 import { PresentationBadge } from "../shared/Badges";
 import s from "./Activities.module.css";
 import { Quiz } from "./Quiz";
+import { Story } from "./kinds/Story";
+import { Trace } from "./kinds/Trace";
+import { Words } from "./kinds/Words";
 import { Sequence } from "./Sequence";
 import { themeVars } from "./theme";
 import { Weave } from "./Weave";
@@ -77,6 +80,15 @@ export function ActivityPart({
       )}
       {activity.kind === "sequence" && (
         <Sequence a={activity} claims={claims} emit={emit} />
+      )}
+      {activity.kind === "story" && (
+        <Story activity={activity} claims={claims} prefs={prefs} emit={emit} />
+      )}
+      {activity.kind === "words" && (
+        <Words activity={activity} claims={claims} prefs={prefs} emit={emit} />
+      )}
+      {activity.kind === "trace" && (
+        <Trace activity={activity} claims={claims} prefs={prefs} emit={emit} />
       )}
       <div className={s.foot}>
         <button type="button" className={s.secondary} onClick={close}>

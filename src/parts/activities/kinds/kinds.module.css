@@ -1,0 +1,549 @@
+/* Story, words and trace renderers (ported from labs/activities-kinds).
+   Scoped under .root; inner class names stay plain for an easy port.
+   Colours come from the panel variables set in ../theme.ts. */
+.root {
+  font-size: 15px;
+}
+.root * {
+  box-sizing: border-box;
+}
+.root :global(.tabs) button {
+  border: 1px solid #ffffff33;
+  background: #ffffff14;
+  color: var(--lh-paper);
+  border-radius: 999px;
+  padding: 7px 14px;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.root p {
+  line-height: 1.5;
+}
+.root button:focus-visible,
+.root input:focus-visible {
+  outline: 3px solid var(--lh-gold-deep);
+  outline-offset: 2px;
+}
+.root :global(.banner) {
+  display: inline-block;
+  margin: 0 0 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #f4e3bd;
+  color: #6a4a12;
+  font-size: 14px;
+  font-weight: 600;
+}
+.root :global(.banner):global(.gate) {
+  display: block;
+  border-radius: 10px;
+  background: #e7eef4;
+  color: #23364d;
+  font-weight: 500;
+}
+.root :global(.btn) {
+  border: 2px solid var(--lh-paper-edge);
+  background: #fff8ea;
+  color: var(--lh-ink);
+  border-radius: 10px;
+  padding: 8px 14px;
+  font: inherit;
+  font-size: 15px;
+  cursor: pointer;
+}
+.root :global(.btn):hover:not(:disabled) {
+  border-color: var(--lh-gold);
+}
+.root :global(.btn):global(.primary) {
+  background: var(--lh-gold);
+  border-color: var(--lh-gold-deep);
+  font-weight: 600;
+  min-width: 96px;
+}
+.root :global(.btn):disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.root :global(.row) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.root :global(.cite) {
+  display: inline-flex;
+  gap: 6px;
+  align-items: baseline;
+  margin: 6px 6px 0 0;
+  border: 1px dashed var(--lh-gold-deep);
+  background: transparent;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--lh-ink-soft);
+  cursor: pointer;
+  text-align: left;
+}
+.root :global(.cite):hover {
+  background: #f6e8c8;
+}
+.root :global(.voice-label),
+.root :global(.credit),
+.root :global(.frame-note) {
+  font-size: 14px;
+  color: var(--lh-ink-soft);
+  margin: 4px 0;
+}
+.root :global(.toggle) {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 14px;
+  color: var(--lh-ink-soft);
+}
+.root :global(.toggle):global(.off) {
+  opacity: 0.55;
+}
+.root /* story */
+:global(.story) {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 28px;
+}
+.root :global(.story-side) {
+  border-right: 2px dotted var(--lh-paper-edge);
+  padding-right: 20px;
+}
+.root :global(.narrator) {
+  text-align: center;
+}
+.root :global(.owl-body) {
+  transform-origin: 60px 100px;
+}
+.root :global(.owl-speaking) :global(.owl-body) {
+  animation: bob 1.2s ease-in-out infinite;
+}
+.root :global(.owl-speaking) :global(.owl-beak) {
+  animation: beak 0.34s steps(2) infinite;
+  transform-origin: 60px 58px;
+}
+.root :global(.owl-eyes) {
+  animation: blink 5s infinite;
+  transform-origin: 60px 48px;
+}
+.root :global(.still) :global(.owl-body),
+.root :global(.still) :global(.owl-beak),
+.root :global(.still) :global(.owl-eyes) {
+  animation: none !important;
+}
+@keyframes bob {
+  50% {
+    transform: translateY(-3px) rotate(-1.5deg);
+  }
+}
+@keyframes beak {
+  50% {
+    transform: scaleY(0.75);
+  }
+}
+@keyframes blink {
+  0%,
+  96%,
+  100% {
+    transform: scaleY(1);
+  }
+  98% {
+    transform: scaleY(0.1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .root :global(.owl-body),
+  .root :global(.owl-beak),
+  .root :global(.owl-eyes) {
+    animation: none !important;
+  }
+}
+.root :global(.chapters) {
+  list-style: none;
+  padding: 0;
+  margin: 18px 0 0;
+  display: grid;
+  gap: 6px;
+}
+.root :global(.chapters) button {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 15px;
+  color: var(--lh-ink-soft);
+  cursor: pointer;
+}
+.root :global(.chapters) button:global(.on) {
+  background: #f3e2bb;
+  color: var(--lh-ink);
+  font-weight: 600;
+}
+.root :global(.chapters) button:global(.seen) :global(.num) {
+  background: var(--lh-gold);
+}
+.root :global(.num) {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--lh-paper-edge);
+  font-size: 13px;
+  margin-right: 6px;
+}
+.root :global(.chapter-label) {
+  color: var(--lh-ink-soft);
+  font-size: 14px;
+  margin: 0 0 12px;
+}
+.root :global(.caption-box) {
+  min-height: 150px;
+  background: #fffaf0;
+  border: 2px solid var(--lh-paper-edge);
+  border-radius: 14px;
+  padding: 18px 20px;
+}
+.root :global(.caption) {
+  font:
+    500 24px / 1.45 ui-serif,
+    "Hiragino Mincho ProN",
+    Georgia,
+    serif;
+  margin: 0 0 8px;
+}
+.root :global(.w) {
+  color: #a8987f;
+  transition: color 0.15s;
+}
+.root :global(.w):global(.past) {
+  color: var(--lh-ink);
+}
+.root :global(.w):global(.now) {
+  color: var(--lh-ink);
+  background: linear-gradient(transparent 62%, var(--lh-gold) 62%);
+}
+.root :global(.pause) {
+  margin-top: 14px;
+  background: #f6ecd6;
+  border-radius: 14px;
+  padding: 14px 18px;
+  border-left: 5px solid var(--lh-gold);
+}
+.root :global(.pause) p {
+  margin: 0 0 10px;
+  font-weight: 600;
+}
+.root :global(.controls) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-top: 16px;
+}
+.root :global(.transcript) {
+  margin-top: 14px;
+  font-size: 15px;
+  color: var(--lh-ink-soft);
+}
+.root :global(.transcript) small {
+  color: var(--lh-gold-deep);
+}
+.root /* words */
+:global(.tabs) {
+  display: flex;
+  gap: 6px;
+  margin: 10px 0 16px;
+}
+.root :global(.tabs) button {
+  color: var(--lh-ink);
+  border-color: var(--lh-paper-edge);
+  background: #fff8ea;
+}
+.root :global(.tabs) button:global(.on) {
+  background: var(--lh-gold);
+  border-color: var(--lh-gold-deep);
+  font-weight: 600;
+}
+.root :global(.term-grid) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+.root :global(.term-card) {
+  background: #fffaf0;
+  border: 2px solid var(--lh-paper-edge);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+.root :global(.term) {
+  font:
+    600 28px ui-serif,
+    "Hiragino Mincho ProN",
+    Georgia,
+    serif;
+  margin: 4px 0 0;
+}
+.root :global(.gloss) {
+  margin: 0 0 10px;
+  color: var(--lh-ink-soft);
+  font-size: 15px;
+}
+.root :global(.locked) {
+  margin-top: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #efe6d4;
+  font-size: 14px;
+}
+.root :global(.locked) p {
+  margin: 0 0 4px;
+}
+.root :global(.checks) {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 8px;
+  color: var(--lh-ink-soft);
+}
+.root :global(.checks) li:global(.ok) {
+  color: #3c6b2f;
+}
+.root :global(.match) {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 22px;
+  align-items: start;
+}
+.root :global(.match-col) {
+  display: grid;
+  gap: 10px;
+}
+.root :global(.chip) {
+  font:
+    600 20px ui-serif,
+    "Hiragino Mincho ProN",
+    Georgia,
+    serif;
+  padding: 12px;
+  border-radius: 12px;
+  border: 2px solid var(--lh-paper-edge);
+  background: #fff8ea;
+  cursor: pointer;
+  color: var(--lh-ink);
+}
+.root :global(.chip):global(.picked) {
+  border-color: var(--lh-gold-deep);
+  box-shadow: 0 0 0 4px #e8c27a88;
+}
+.root :global(.chip):global(.done) {
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+.root :global(.match-objects) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+.root :global(.object) {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 14px;
+  border-radius: 14px;
+  border: 2px dashed var(--lh-paper-edge);
+  background: #fffaf0;
+  font:
+    600 18px ui-serif,
+    "Hiragino Mincho ProN",
+    Georgia,
+    serif;
+  color: var(--lh-ink);
+  cursor: pointer;
+}
+.root :global(.object):disabled {
+  cursor: default;
+}
+.root :global(.object):global(.done) {
+  border-style: solid;
+  border-color: #8fb06a;
+  background: #eef4e4;
+}
+.root :global(.feedback) {
+  grid-column: 1 / -1;
+  min-height: 1.5em;
+  color: var(--lh-ink-soft);
+}
+.root /* trace */
+:global(.trace-board) {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  margin-top: 12px;
+}
+.root :global(.threads) {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+.root :global(.threads) path {
+  fill: none;
+  stroke: #c99a3b;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 2 6;
+}
+.root :global(.trace-col) {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+.root :global(.claim),
+.root :global(.source) {
+  display: grid;
+  gap: 4px;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 2px solid var(--lh-paper-edge);
+  background: #fffaf0;
+  font: inherit;
+  color: var(--lh-ink);
+  cursor: pointer;
+}
+.root :global(.claim) span {
+  font:
+    500 17px ui-serif,
+    "Hiragino Mincho ProN",
+    Georgia,
+    serif;
+}
+.root :global(.claim) small,
+.root :global(.source) small {
+  color: var(--lh-ink-soft);
+  font-size: 14px;
+}
+.root :global(.claim):global(.picked) {
+  border-color: var(--lh-gold-deep);
+  box-shadow: 0 0 0 4px #e8c27a88;
+}
+.root :global(.claim):global(.done) {
+  background: #eef4e4;
+  border-color: #8fb06a;
+  cursor: default;
+}
+.root :global(.source):disabled {
+  cursor: default;
+}
+.root :global(.source):not(:disabled):hover {
+  border-color: var(--lh-gold);
+}
+.root :global(.review-strip) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  font-size: 14px;
+}
+.root :global(.review-strip) span {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #efe6d4;
+}
+.root :global(.review-strip) :global(.pending) {
+  background: #f4e3bd;
+  color: #6a4a12;
+  font-weight: 600;
+}
+@media (max-width: 720px) {
+  .root :global(.story),
+  .root :global(.match) {
+    grid-template-columns: 1fr;
+  }
+  .root :global(.story-side) {
+    border-right: 0;
+    padding-right: 0;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .root :global(.chapters) {
+    margin: 0;
+  }
+  .root :global(.trace-board) {
+    gap: 28px;
+  }
+  .root :global(.caption) {
+    font-size: 20px;
+  }
+}
+/* Panel fit: the activity panel is narrow, so layout follows the container. */
+.root {
+  container-type: inline-size;
+}
+.root :global(.story) {
+  grid-template-columns: 140px 1fr;
+  gap: 18px;
+}
+.root :global(.story-side) {
+  padding-right: 14px;
+}
+.root :global(.caption) {
+  font-size: 21px;
+}
+.root :global(.trace-board) {
+  gap: 44px;
+}
+.root :global(.match) {
+  grid-template-columns: 150px 1fr;
+  gap: 16px;
+}
+.root :global(.term-grid) {
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+}
+@container (max-width: 560px) {
+  .root :global(.story),
+  .root :global(.match) {
+    grid-template-columns: 1fr;
+  }
+  .root :global(.story-side) {
+    border-right: 0;
+    padding-right: 0;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .root :global(.chapters) {
+    margin: 0;
+    flex: 1;
+  }
+  .root :global(.narrator) {
+    flex: none;
+    width: 120px;
+  }
+  .root :global(.trace-board) {
+    gap: 20px;
+  }
+  .root :global(.caption) {
+    font-size: 19px;
+  }
+  .root :global(.checks) {
+    grid-template-columns: 1fr;
+  }
+}
