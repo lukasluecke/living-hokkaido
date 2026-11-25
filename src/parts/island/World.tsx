@@ -91,6 +91,12 @@ export function World(props: WorldProps) {
     arrivedFor.current = loc.id;
     emit({ type: "owl.arrived", locationId: loc.id });
   };
+  // Hover on a place's area lights its pin, like hover on the pin itself.
+  const hoverPlace = (l: Location, on: boolean) => {
+    const live = on && l.status === "open" && view === "island";
+    props.pins.current?.get(l.id)?.toggleAttribute("data-hover", live);
+    document.body.style.cursor = live ? "pointer" : "";
+  };
   const owl = useRef<OwlApi>(null);
   const ink = useMemo(() => new InkEdgesEffect(), []);
   return (
@@ -117,6 +123,7 @@ export function World(props: WorldProps) {
           roofOpen={false}
           active={locationId === l.id}
           onSelect={() => props.onSelect(l)}
+          onHover={(on) => hoverPlace(l, on)}
         />
       ))}
       <PinTracker field={field} locations={locations} pins={props.pins} />

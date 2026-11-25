@@ -6,6 +6,7 @@ import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import { type Group, Vector3 } from "three";
 import type { Field } from "./field";
+import { AREAS } from "./island";
 
 export function anchorPos(
   field: Field,
@@ -259,22 +260,53 @@ function Building({
   );
 }
 
+/** Extra reach around a place's footprint for hover and click (du). */
+const HIT_BUFFER = 0.5;
+
+/** Radius of a place's pick area: the building pad, or the themed area. */
+export function hitRadius(loc: Location): number {
+  if (loc.building.startsWith("area-")) {
+    const a = AREAS.find((x) => `area-${x.id}` === loc.building);
+    if (a) return a.r + HIT_BUFFER;
+  }
+  return ISLAND.padRadius + HIT_BUFFER;
+}
+
+/** Invisible cylinder over the whole place, so hover and click work on the
+ *  area (and its props) and not only on the label or one mesh. */
+function HitArea({ r }: { r: number }) {
+  return (
+    <mesh position={[0, 1, 0]}>
+      <cylinderGeometry args={[r, r, 2.4, 20]} />
+      <meshBasicMaterial
+        transparent
+        opacity={0}
+        depthWrite={false}
+        colorWrite={false}
+      />
+    </mesh>
+  );
+}
+
 export function PlaceMarker({
   field,
   loc,
   roofOpen,
   active,
   onSelect,
+  onHover,
 }: {
   field: Field;
   loc: Location;
   roofOpen: boolean;
   active: boolean;
   onSelect: () => void;
+  /** true while the pointer is over the place's pick area. */
+  onHover: (on: boolean) => void;
 }) {
   const live = loc.status === "open";
-  // Themed areas draw their own scene (Areas.tsx); no building here.
-  if (loc.building.startsWith("area-")) return null;
+  // Themed areas draw their own scene (Areas.tsx); only the pick area here.
+  const area = loc.building.startsWith("area-");
   return (
     <group
       position={anchorPos(field, loc)}
@@ -282,8 +314,16 @@ export function PlaceMarker({
         e.stopPropagation();
         onSelect();
       }}
+      onPointerOver={(e) => {
+        e.stopPropagation();
+        onHover(true);
+      }}
+      onPointerOut={() => onHover(false)}
     >
-      <Building kind={loc.building} open={roofOpen} live={live || active} />
+      {!area && (
+        <Building kind={loc.building} open={roofOpen} live={live || active} />
+      )}
+      <HitArea r={hitRadius(loc)} />
     </group>
   );
 }
