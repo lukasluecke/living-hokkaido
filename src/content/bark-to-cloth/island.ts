@@ -60,14 +60,15 @@ export const locations: LocationInput[] = [
   },
   // Themed areas after Hokkaido Museum dioramas (theme 2 and theme 4). The
   // island draws each scene itself (src/parts/island/world/Areas.tsx); the
-  // anchor must match AREAS there. Closed for now; each has a small outdoor scene (area-scenes.ts) ready to open. Claims:
+  // anchor must match AREAS there. Open (Lukas, 2026-11-26): each has a small outdoor scene (area-scenes.ts). Claims:
   // knowledge "land-and-sea".
   {
     id: "herring-coast",
     sceneId: "herring-coast",
     title: "Herring coast",
     teaser: "Living off the sea",
-    status: "soon",
+    status: "open",
+    arrivalView: { eye: [16, 6, 17], target: [12, 0.8, 11.2] },
     anchor: [12, 0, 11.2],
     knowledgeIds: ["land-and-sea"],
     building: "area-coast",
@@ -78,7 +79,8 @@ export const locations: LocationInput[] = [
     sceneId: "survey-forest",
     title: "Survey forest",
     teaser: "Forest plants and the 1890 land survey",
-    status: "soon",
+    status: "open",
+    arrivalView: { eye: [-12, 6, 5], target: [-16, 1.4, -1] },
     anchor: [-16, 0, -1],
     knowledgeIds: ["land-and-sea"],
     building: "area-forest",
@@ -89,7 +91,8 @@ export const locations: LocationInput[] = [
     sceneId: "animal-hills",
     title: "Animal hills",
     teaser: "Deer and bears in the hills",
-    status: "soon",
+    status: "open",
+    arrivalView: { eye: [22, 6, 6], target: [19, 1.2, 0] },
     anchor: [19, 0, 0],
     knowledgeIds: ["land-and-sea"],
     building: "area-hills",
@@ -100,7 +103,8 @@ export const locations: LocationInput[] = [
     sceneId: "coal-mountain",
     title: "Coal mountain",
     teaser: "Coal mining and winter logging",
-    status: "soon",
+    status: "open",
+    arrivalView: { eye: [-1, 7, -6], target: [-5, 2.8, -12.6] },
     anchor: [-5, 0, -12.6],
     knowledgeIds: ["land-and-sea"],
     building: "area-mountains",
