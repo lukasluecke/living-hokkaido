@@ -11,6 +11,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { Readable } from 'node:stream';
+import { talkPrompt } from './talk-prompt.mjs';
 
 try { process.loadEnvFile(); } catch { /* no .env */ }
 
@@ -162,6 +163,77 @@ function validateNew(body, existing) {
   return { errors, o };
 }
 
+// ---- Talk: a figure answers only from the observations that pass the protocol gate.
+// Behaviour follows training/SPEC.md: period voice, nothing after 1808, each claim labelled
+// documented or inferred with its perspective, gaps answered as gaps, no invented Ainu belief.
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-flash-latest';
+const CHAR_DIR = path.join(ROOT, 'characters', '1808');
+const TALK_PER_MINUTE = 30;
+let talkWindow = { start: 0, count: 0 };
+
+function currentVisible(all) {
+  const superseded = new Set(all.filter((o) => o.supersedes).map((o) => o.supersedes));
+  return all.filter((o) => visible(o) && !superseded.has(o.id));
+}
+
+const TALK_SCHEMA = {
+  type: 'OBJECT',
+  properties: {
+    answer: { type: 'STRING' },
+    cites: { type: 'ARRAY', items: { type: 'STRING' } },
+    grounding: { type: 'STRING', enum: ['documented', 'inferred', 'unknown', 'declined'] },
+  },
+  required: ['answer', 'cites', 'grounding'],
+};
+
+async function talk(body) {
+  if (!GEMINI_API_KEY) return { status: 503, data: { error: 'Talk is not set up on this server yet (GEMINI_API_KEY is missing).' } };
+  const now = Date.now();
+  if (now - talkWindow.start > 60000) talkWindow = { start: now, count: 0 };
+  if (++talkWindow.count > TALK_PER_MINUTE) return { status: 429, data: { error: 'Too many questions this minute. Try again shortly.' } };
+
+  const id = typeof body.figure === 'string' && /^[a-z0-9-]+$/.test(body.figure) ? body.figure : '';
+  const question = typeof body.question === 'string' ? body.question.trim().slice(0, 500) : '';
+  if (!id || !question) return { status: 400, data: { error: 'Send a figure and a question.' } };
+  const index = JSON.parse(fs.readFileSync(path.join(CHAR_DIR, 'index.json'), 'utf8')).characters;
+  if (!index.includes(id)) return { status: 404, data: { error: 'Unknown figure.' } };
+  const characters = Object.fromEntries(index.map((c) => [c, JSON.parse(fs.readFileSync(path.join(CHAR_DIR, `${c}.json`), 'utf8'))]));
+  const observations = currentVisible(await allObservations());
+  const history = (Array.isArray(body.history) ? body.history : []).slice(-6)
+    .filter((t) => (t.role === 'user' || t.role === 'model') && typeof t.text === 'string')
+    .map((t) => ({ role: t.role, parts: [{ text: t.text.slice(0, 1500) }] }));
+
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
+    body: JSON.stringify({
+      systemInstruction: { parts: [{ text: talkPrompt(characters[id], observations, characters) }] },
+      contents: [...history, { role: 'user', parts: [{ text: question }] }],
+      generationConfig: { temperature: 0.3, responseMimeType: 'application/json', responseSchema: TALK_SCHEMA },
+    }),
+    signal: AbortSignal.timeout(45000),
+  });
+  if (!res.ok) {
+    console.error('gemini', res.status, (await res.text()).slice(0, 300));
+    return { status: 502, data: { error: 'The figure could not answer just now.' } };
+  }
+  const out = await res.json();
+  const text = out.candidates?.[0]?.content?.parts?.map((p) => p.text || '').join('') || '';
+  let parsed;
+  try { parsed = JSON.parse(text); } catch { return { status: 502, data: { error: 'The figure could not answer just now.' } }; }
+  const known = new Set(observations.map((o) => o.id));
+  return {
+    status: 200,
+    data: {
+      answer: String(parsed.answer || '').slice(0, 2000),
+      cites: [...new Set((parsed.cites || []).filter((c) => known.has(c)))],
+      grounding: ['documented', 'inferred', 'unknown', 'declined'].includes(parsed.grounding) ? parsed.grounding : 'inferred',
+      model: GEMINI_MODEL,
+    },
+  };
+}
+
 let appendQueue = Promise.resolve();
 async function readJson(req, limit = 20000) {
   let size = 0; const chunks = [];
@@ -191,6 +263,12 @@ async function handleApi(req, res, pathname) {
     });
     appendQueue = result.catch(() => {});
     const { status, data } = await result;
+    return sendJson(res, status, data);
+  }
+  if (pathname === '/api/talk' && req.method === 'POST') {
+    let body;
+    try { body = await readJson(req, 20000); } catch (err) { return sendJson(res, err.status || 400, { error: 'Send JSON' }); }
+    const { status, data } = await talk(body);
     return sendJson(res, status, data);
   }
   return sendJson(res, 404, { error: 'Not found' });
