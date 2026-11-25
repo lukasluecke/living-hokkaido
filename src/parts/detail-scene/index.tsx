@@ -53,6 +53,7 @@ export function DetailScenePart(props: DetailScenePartProps) {
   if (!prefs.webgl) return <SceneList {...props} />;
   const label = (id: string) => artifacts.find((a) => a.id === id)?.label ?? id;
   const hoveredAt = scene.placements.find((p) => p.artifactId === hovered);
+  const markers = ready && !focusedArtifactId;
   return (
     <div className={c.stage}>
       <Canvas
@@ -85,15 +86,14 @@ export function DetailScenePart(props: DetailScenePartProps) {
         </Suspense>
       </Canvas>
       <div ref={overlay} className={c.overlay} aria-hidden>
-        {ready &&
-          !focusedArtifactId &&
+        {markers &&
           scene.placements.map((p) => (
             <button
               key={p.artifactId}
               type="button"
               tabIndex={-1}
               className={c.marker}
-              data-hint={hint || undefined}
+              data-hint={hint || hovered === p.artifactId || undefined}
               data-x={p.focusView.target[0]}
               data-y={p.focusView.target[1] + 0.85}
               data-z={p.focusView.target[2]}
@@ -108,16 +108,20 @@ export function DetailScenePart(props: DetailScenePartProps) {
               <span className={c.markerLabel}>{label(p.artifactId)}</span>
             </button>
           ))}
-        {hoveredAt && hoveredAt.artifactId !== focusedArtifactId && (
-          <span
-            className={c.label}
-            data-x={hoveredAt.position[0]}
-            data-y={hoveredAt.position[1] + 1.8}
-            data-z={hoveredAt.position[2]}
-          >
-            {label(hoveredAt.artifactId)}
-          </span>
-        )}
+        {/* One label per object: while the tap markers show, a hovered
+            object lights its own marker label instead of a second label. */}
+        {!markers &&
+          hoveredAt &&
+          hoveredAt.artifactId !== focusedArtifactId && (
+            <span
+              className={c.label}
+              data-x={hoveredAt.position[0]}
+              data-y={hoveredAt.position[1] + 1.8}
+              data-z={hoveredAt.position[2]}
+            >
+              {label(hoveredAt.artifactId)}
+            </span>
+          )}
       </div>
       <Tray {...props} label={label} activities={roomActivities(props)} />
     </div>
