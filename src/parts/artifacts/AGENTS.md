@@ -8,6 +8,8 @@ The C2 pick-up-and-turn viewer for one artifact: model, info card, hotspots,
 - Reads: `artifact.model` (`source` glb or procedural builder, `nodes`,
   `representation`), `display` (`restRotation`, `inspectScale`,
   `pitchLimit`), `hotspots[]`, `summaryClaimId`, `activityIds`.
+- Also reads `content.memories` (via `memoriesForArtifact`) for the
+  curator memories block (`Memories.tsx`). No new events.
 - Emits: `artifact.inspected` (once per open), `hotspot.open`,
   `reveal.open`, `activity.start`, `artifact.blur`.
 
@@ -40,3 +42,4 @@ Turn with mouse, touch and arrow keys; every hotspot reachable by keyboard;
 
 * 2026-11-25: viewer ported as `Viewer3D.tsx` (toon + ink hull, PresentationControls turn, projected hotspots with back-face fade) inside the card. Objects are shown alone on a neutral backdrop, not in the room.
 * 2026-11-25: code models stay until real models exist (Lukas). A GLB replaces one by setting `model.source` to `{ kind: "glb", url }` in the pack; the viewer and the room both load it (`src/parts/shared/Glb.tsx`). Toon is used on the island and in the room too.
+* 2026-11-25: curator voice memories on the card (`Memories.tsx`): original first, then the visitor-language translation with its labels (machine/checked, cloned/stock voice). `/contribute` reuses `MemoryCard` for the preview. See docs/VOICE-MEMORIES.md.

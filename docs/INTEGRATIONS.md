@@ -4,7 +4,7 @@ The product is the priority. No sponsor is required for the demo or architecture
 
 | Candidate | Natural role | Current state | Fallback / stop rule |
 |---|---|---|---|
-| ElevenLabs | Consented synthetic narration or optional assisted interview | No API call; device speech is separately labeled | Transcript + guided text prompts; no cloned or supposedly authentic voice |
+| ElevenLabs | Consented synthetic narration or optional assisted interview; curator voice memories (speech-to-text, dubbing into visitor languages with a consented voice clone) | Voice memories: server adapter written against the official docs, not yet called live (no key). Mock is the default. See [VOICE-MEMORIES.md](VOICE-MEMORIES.md) | Curator-typed transcript, original audio only, translation marked "Mock, not translated"; no clone without recorded consent; never for Ainu content without review |
 | Adaption Labs | Improve source extraction or source-grounded activity generation | Typed CulturalAI contract; deterministic mock | Manual review and template activity. Partner deck describes Adaptive Data and AutoScientist/custom models; verify actual API/product fit before committing |
 | OrcaRouter | Optional external-model routing/guardrails | Unavailable; external processing denied | Local mock; never claim firewall protection is active |
 | Hyper3D Rodin | Original non-sensitive scene props | No-op/null | Original primitives/GLB; never manufacture “museum scans” |
