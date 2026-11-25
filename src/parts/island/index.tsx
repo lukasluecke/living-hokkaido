@@ -2,10 +2,11 @@
 // Island part. 3D island from labs/island when WebGL works; the HTML list
 // below is the keyboard / no-WebGL path and the stub "flight".
 import { Canvas } from "@react-three/fiber";
-import { Suspense, useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { type IslandPartProps, type Location, SCALE } from "@/contracts";
 import s from "../shared/Fallback.module.css";
 import attn from "../shared/Attention.module.css";
+import { ActivitySheet, kindSummary, placeActivities } from "./Guide";
 import c from "./Island.module.css";
 import { World } from "./World";
 
@@ -59,43 +60,84 @@ export function IslandPart(props: IslandPartProps) {
   );
 }
 
-/** Field-label tray: every place as a card. Same action as its pin. */
+/** Field-label tray: every place as a card (same action as its pin), with
+ *  what you can do there, and a sheet that lists every activity. */
 function PlaceTray({
   content,
   onSelect,
 }: IslandPartProps & { onSelect: (l: Location) => void }) {
+  const [sheet, setSheet] = useState(false);
+  const opener = useRef<HTMLButtonElement>(null);
   // Open places first, then the closed ones, each in pack order.
   const locations = [...content.island.locations].sort(
     (a, b) => Number(b.status === "open") - Number(a.status === "open"),
   );
   const open = locations.filter((l) => l.status === "open").length;
+  const closeSheet = () => {
+    setSheet(false);
+    opener.current?.focus();
+  };
   return (
-    <nav className={c.tray} aria-label="Places on the island">
-      <div className={c.trayHead}>
-        <span className={c.cap}>Places on the island</span>
-        <span className={c.count}>
-          {open} open · {locations.length - open} soon
-        </span>
-      </div>
-      <ul className={c.cards}>
-        {locations.map((l) => (
-          <li key={l.id}>
-            <button
-              type="button"
-              className={c.card}
-              aria-disabled={l.status !== "open"}
-              data-open={l.status === "open" || undefined}
-              onClick={() => onSelect(l)}
-            >
-              <span className={c.cardTitle}>{l.title}</span>
-              <span className={c.state}>
-                {l.status === "open" ? "Open" : "Soon"}
-              </span>
-            </button>
-          </li>
-        ))}
-      </ul>
-    </nav>
+    <>
+      {sheet && (
+        <ActivitySheet
+          content={content}
+          onSelect={onSelect}
+          onClose={closeSheet}
+        />
+      )}
+      <nav className={c.tray} aria-label="Places on the island">
+        <div className={c.trayHead}>
+          <span className={c.cap}>Places on the island</span>
+          <span className={c.count}>
+            {open} open
+            {locations.length > open
+              ? ` · ${locations.length - open} soon`
+              : ""}
+          </span>
+          <button
+            ref={opener}
+            type="button"
+            className={c.allActs}
+            aria-expanded={sheet}
+            onClick={() => (sheet ? closeSheet() : setSheet(true))}
+          >
+            All activities
+          </button>
+        </div>
+        <ul className={c.cards}>
+          {locations.map((l) => {
+            const acts = placeActivities(content, l.id);
+            return (
+              <li key={l.id}>
+                <button
+                  type="button"
+                  className={c.card}
+                  aria-disabled={l.status !== "open"}
+                  data-open={l.status === "open" || undefined}
+                  onClick={() => onSelect(l)}
+                >
+                  <span className={c.cardTitle}>{l.title}</span>
+                  {l.status === "open" && acts.length > 0 ? (
+                    <span className={c.cardActs}>
+                      <span className={c.state}>
+                        {acts.length}{" "}
+                        {acts.length === 1 ? "activity" : "activities"}
+                      </span>
+                      <span className={c.kinds}>{kindSummary(acts)}</span>
+                    </span>
+                  ) : (
+                    <span className={c.state}>
+                      {l.status === "open" ? "Open" : "Soon"}
+                    </span>
+                  )}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+    </>
   );
 }
 

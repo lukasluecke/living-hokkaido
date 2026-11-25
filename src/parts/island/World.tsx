@@ -15,15 +15,9 @@ import { type Color, MathUtils, Vector3 } from "three";
 import { season as seasonTokens } from "@/design/tokens";
 import { mix4, U } from "./world/season";
 import type { CameraView, IslandPartProps, Location } from "@/contracts";
-import {
-  DriftIce,
-  FlowerField,
-  Sea,
-  SeasonDriver,
-  Weather,
-} from "./world/Environment";
+import { Sea, SeasonDriver } from "./world/Environment";
 import { buildField, type Field } from "./world/field";
-import { AREAS, FLOWER_FIELD, RIVER } from "./world/island";
+import { AREAS, RIVER } from "./world/island";
 import { Areas } from "./world/Areas";
 import { Owl, type OwlApi } from "./world/Owl";
 import { anchorPos, PinTracker, PlaceMarker } from "./world/Places";
@@ -46,11 +40,10 @@ export function World(props: WorldProps) {
     const out: Clearing[] = locations.map((l) => ({
       x: l.anchor[0],
       z: l.anchor[2],
-      r: 1.9,
+      r: 2.8,
     }));
     out.push(
       { x: island.owlHome[0], z: island.owlHome[2], r: 0.7 },
-      { ...FLOWER_FIELD, r: 2.0 },
       ...AREAS.map((a) => ({ x: a.x, z: a.z, r: a.r })),
     );
     for (const l of locations) {
@@ -91,6 +84,12 @@ export function World(props: WorldProps) {
     arrivedFor.current = loc.id;
     emit({ type: "owl.arrived", locationId: loc.id });
   };
+  // Hover on a place's area lights its pin, like hover on the pin itself.
+  const hoverPlace = (l: Location, on: boolean) => {
+    const live = on && l.status === "open" && view === "island";
+    props.pins.current?.get(l.id)?.toggleAttribute("data-hover", live);
+    document.body.style.cursor = live ? "pointer" : "";
+  };
   const owl = useRef<OwlApi>(null);
   const ink = useMemo(() => new InkEdgesEffect(), []);
   return (
@@ -104,11 +103,8 @@ export function World(props: WorldProps) {
       <Sea field={field} />
       <Lake />
       <River field={field} />
-      <DriftIce field={field} />
-      <Trees field={field} count={9000} clearings={clearings} scale={2} />
-      <FlowerField field={field} x={FLOWER_FIELD.x} z={FLOWER_FIELD.z} />
+      <Trees field={field} count={2600} clearings={clearings} scale={2} />
       <Areas field={field} still={prefs.reducedMotion} />
-      {!prefs.reducedMotion && <Weather />}
       {locations.map((l) => (
         <PlaceMarker
           key={l.id}
@@ -117,6 +113,7 @@ export function World(props: WorldProps) {
           roofOpen={false}
           active={locationId === l.id}
           onSelect={() => props.onSelect(l)}
+          onHover={(on) => hoverPlace(l, on)}
         />
       ))}
       <PinTracker field={field} locations={locations} pins={props.pins} />
