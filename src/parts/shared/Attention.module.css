@@ -1,0 +1,44 @@
+/* "Tap me" attention for touch screens (no hover). One place to restyle:
+   change the variables or the keyframes here, every part follows.
+   - .pulse: a soft ring that grows and fades around any element.
+   - Respects prefers-reduced-motion and [data-still] (prefs.reducedMotion):
+     the ring stays, without motion. */
+.pulse {
+  --lh-attn: #e8c27a;
+  --lh-attn-soft: rgb(232 194 122 / 0%);
+  --lh-attn-period: 2.4s;
+  animation: lh-pulse var(--lh-attn-period) ease-out infinite;
+}
+@keyframes lh-pulse {
+  0% {
+    box-shadow:
+      0 0 0 0 var(--lh-attn),
+      0 3px 10px rgb(31 45 70 / 30%);
+  }
+  70%,
+  100% {
+    box-shadow:
+      0 0 0 12px var(--lh-attn-soft),
+      0 3px 10px rgb(31 45 70 / 30%);
+  }
+}
+.pulse[data-still] {
+  animation: none;
+  box-shadow:
+    0 0 0 3px var(--lh-attn),
+    0 3px 10px rgb(31 45 70 / 30%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .pulse {
+    animation: none;
+    box-shadow:
+      0 0 0 3px var(--lh-attn),
+      0 3px 10px rgb(31 45 70 / 30%);
+  }
+}
+/* Only where there is no hover (phones, tablets). */
+@media (hover: hover) {
+  .touchOnly {
+    animation: none;
+  }
+}
