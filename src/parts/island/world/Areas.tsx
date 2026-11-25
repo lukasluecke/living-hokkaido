@@ -24,8 +24,10 @@ import {
   Vector3,
 } from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
+import { snowCap } from "../../shared/snowCap";
 import type { Field } from "./field";
 import { AREAS, type Area } from "./island";
+import { U } from "./season";
 
 type V3 = [number, number, number];
 type PartOpts = {
@@ -287,6 +289,11 @@ function coast(k: Kit) {
   for (const dz of [1.2, 1.6, 2.0])
     for (const dx of [-0.02, 0.32])
       k.cyl(0.02, 0.02, 0.3, C.woodDark, [dx, 0.0, dz], { on: "sea" });
+  // Straw mats under the trays, and a worker carrying a basket up from the
+  // jetty (sea-diorama-tasks).
+  k.box([1.3, 0.012, 0.62], "#c9b07a", [0, 0.035, 0.39]);
+  figure(k, [0.3, 0.04, 0.85]);
+  k.box([0.08, 0.07, 0.06], C.pack, [0.3, 0.21, 0.81]);
   // Workers.
   figure(k, [-0.3, 0.04, 0.05]);
   figure(k, [0.2, 0.04, 0.6], C.indigo, C.shirt);
@@ -391,6 +398,16 @@ function forest(k: Kit) {
     r: [0, 0.5, Math.PI / 2],
   });
   figure(k, [1.1, 0, -0.15], C.indigo, C.shirt);
+  // Surveying at a tripod on the line (survey-tasks).
+  for (const a of [0, 2.1, 4.2])
+    k.box(
+      [0.012, 0.2, 0.012],
+      C.woodDark,
+      [-1.5 + Math.cos(a) * 0.03, 0.1, 0.22 + Math.sin(a) * 0.03],
+      { r: [Math.sin(a) * 0.3, 0, -Math.cos(a) * 0.3] },
+    );
+  k.box([0.05, 0.025, 0.025], C.rail, [-1.5, 0.21, 0.22]);
+  figure(k, [-1.62, 0, 0.3]);
 }
 
 // ------------------------------------------------------------------ hills
@@ -413,6 +430,15 @@ function hills(k: Kit) {
     [0.26, 0.09, 0.9],
   );
   k.box([0.012, 0.05, 0.012], "#c8b89a", [0.27, 0.13, 0.9]);
+  // Raccoon dog and a hazel grouse (hunt-animals).
+  k.box([0.1, 0.05, 0.05], "#6b5a48", [-0.3, 0.05, -0.45], { r: [0, 0.6, 0] });
+  k.blob(0.03, "#6b5a48", [-0.25, 0.08, -0.49]);
+  k.blob(0.035, "#8a6a4a", [0.1, 0.04, -0.6], undefined, 0.8);
+  // The set bow on the animal path: two stakes and the bow.
+  k.box([0.6, 0.006, 0.08], "#9b8466", [-0.1, 0.004, 0.05], { r: [0, 0.4, 0] });
+  for (const dx of [-0.08, 0.08])
+    k.box([0.012, 0.06, 0.012], C.wood, [-0.1 + dx, 0.03, 0.15]);
+  k.box([0.17, 0.008, 0.008], C.woodDark, [-0.1, 0.055, 0.15]);
 }
 
 // ------------------------------------------------------------------ mountains
@@ -462,6 +488,18 @@ function mountains(k: Kit) {
       r: [0, 0, Math.PI / 2],
     });
   horse(k, [1.45, 0, 0.85], 0, false);
+  // A miner drilling at the adit, and a stack of logs (mine-diorama-tasks,
+  // winter-logging).
+  figure(k, [-0.12, 0, -0.28], C.shirt, C.indigo);
+  k.box([0.1, 0.025, 0.025], C.rail, [-0.12, 0.13, -0.34]);
+  for (const [dy, dz] of [
+    [0.04, -0.05],
+    [0.04, 0.05],
+    [0.12, 0],
+  ])
+    k.cyl(0.04, 0.04, 0.45, C.plank, [1.35, dy, 0.35 + dz], {
+      r: [0, 0, Math.PI / 2],
+    });
 }
 
 const BUILD: Record<Area["id"], (k: Kit) => void> = {
@@ -472,14 +510,19 @@ const BUILD: Record<Area["id"], (k: Kit) => void> = {
 };
 
 export function Areas({ field, still }: { field: Field; still: boolean }) {
+  // Top faces turn white in winter (same season weights as the terrain).
+  const snow = useMemo(() => ({ value: 0 }), []);
   const mat = useMemo(
     () =>
-      new MeshStandardMaterial({
-        vertexColors: true,
-        flatShading: true,
-        roughness: 0.9,
-      }),
-    [],
+      snowCap(
+        new MeshStandardMaterial({
+          vertexColors: true,
+          flatShading: true,
+          roughness: 0.9,
+        }),
+        snow,
+      ),
+    [snow],
   );
   const geos = useMemo(
     () =>
@@ -499,6 +542,7 @@ export function Areas({ field, still }: { field: Field; still: boolean }) {
   }, [field]);
   const boatRef = useRef<Mesh>(null);
   useFrame(({ clock }) => {
+    snow.value = U.uW.value.w;
     if (!boatRef.current || still) return;
     const t = clock.elapsedTime;
     boatRef.current.position.y = Math.sin(t * 1.3) * 0.025;
