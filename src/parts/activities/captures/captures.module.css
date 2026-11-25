@@ -1,0 +1,110 @@
+/* splat-look: the stage reuses games.module.css (stage, bar, area); this
+   adds the side panel with the spot list and the open spot's claims. On
+   narrow screens the panel sits under the capture. */
+.body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr minmax(260px, 340px);
+}
+.view {
+  position: relative;
+  min-height: 0;
+  background: #14110e;
+}
+.side {
+  overflow: auto;
+  padding: 12px 14px 20px;
+  background: var(--lh-paper);
+  color: var(--lh-ink);
+}
+.side h3 {
+  margin: 12px 0 6px;
+  font-size: 14px;
+}
+.spots {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+.spot {
+  width: 100%;
+  min-height: 40px;
+  text-align: left;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1.5px solid var(--lh-ink);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.spot[aria-pressed="true"] {
+  background: var(--lh-gold);
+}
+.spot:focus-visible,
+.unlock input:focus-visible,
+.unlock button:focus-visible {
+  outline: 3px solid var(--lh-gold);
+  outline-offset: 2px;
+}
+.seen {
+  opacity: 0.7;
+}
+.card {
+  margin: 4px 0 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 2px solid var(--lh-ink);
+}
+.card p {
+  margin: 0 0 6px;
+  color: var(--lh-ink);
+}
+.gap {
+  font-style: italic;
+}
+.status {
+  position: absolute;
+  inset: auto 12px 12px 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--lh-paper);
+  color: var(--lh-ink);
+}
+.unlock {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+.unlock form {
+  max-width: 360px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--lh-paper);
+  color: var(--lh-ink);
+  display: grid;
+  gap: 8px;
+}
+.unlock input,
+.unlock button {
+  min-height: 44px;
+  font: inherit;
+  border-radius: 8px;
+  border: 2px solid var(--lh-ink);
+  padding: 0 10px;
+}
+@media (max-width: 760px) {
+  .body {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(45dvh, 1fr) auto;
+  }
+  .side {
+    max-height: 45dvh;
+  }
+}

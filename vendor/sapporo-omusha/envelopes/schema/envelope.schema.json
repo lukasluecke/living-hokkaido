@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/xjets/sapporo-omusha/envelopes/schema/envelope.schema.json",
+  "title": "Envelopes",
+  "description": "A bounded thing that holds memory: a keepsake, a room, a village, a diorama. Envelopes nest (parent), and one envelope can depict another.",
+  "type": "object",
+  "required": ["envelopes"],
+  "properties": {
+    "envelopes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "scale"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "object", "required": ["en"], "properties": { "en": { "type": "string" }, "ja": { "type": "string" } } },
+          "scale": { "enum": ["keepsake", "room", "building", "neighborhood", "village", "diorama", "institution", "place", "feature"], "description": "feature: a part of a larger envelope, such as a building or group of figures within a diorama" },
+          "parent": { "type": "string", "description": "The envelope this one sits inside." },
+          "depicts": { "type": "string", "description": "An envelope this one represents (a diorama depicts a place and time)." },
+          "strata": { "type": "array", "items": { "type": "string" } },
+          "form": { "type": "object", "description": "Form layer: splat, models, photos.", "additionalProperties": { "type": "string" } },
+          "protocol": { "type": "object", "properties": { "defaultAudience": { "enum": ["public", "team", "family", "community"] }, "note": { "type": "string" } } }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,253 @@
+// Gather: the input side of the Envelope. An interviewer records what an older resident knows about
+// a place or thing; the transcript is split into draft observations across the layers, the next
+// question is chosen from what the record still lacks, and nothing is saved until the interviewer
+// has reviewed it. Stored apart from the Omusha demo record, append-only (bucket: gather/…, or
+// data/gather/ locally). Audio is transcribed and not kept.
+import fs from 'node:fs';
+import path from 'node:path';
+import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
+
+export const GATHER_ENUMS = {
+  scale: ['keepsake', 'room', 'building', 'neighborhood', 'village', 'place', 'institution'],
+  kind: ['event', 'use', 'making', 'meaning', 'inheritance', 'contact', 'appearance', 'absence'],
+  stratum: ['made', 'lived', 'observed', 'present'],
+  evidence: ['contemporary-document', 'later-account', 'physical-trace', 'inference', 'none'],
+  role: ['witness', 'maker', 'descendant', 'community-authority', 'scholar', 'curator', 'contributor', 'passerby'],
+  cause: ['never-collected', 'destroyed', 'suppressed', 'restricted', 'lost'],
+  audience: ['family', 'community', 'team', 'public'],
+  formKind: ['splat', 'photo', 'scan', 'reconstruction'],
+};
+// How directly each kind of upload records the thing (Form layer, reality basis).
+const BASIS = { splat: 'recorded', photo: 'recorded', scan: 'recorded', reconstruction: 'symbolic' };
+const FILE_EXT = { splat: /\.(sog|spz|ply|splat|ksplat)$/i, photo: /\.(jpe?g|png|webp)$/i, scan: /\.(glb|obj|stl|ply)$/i, reconstruction: /\.(glb|obj|stl)$/i };
+const MAX_UPLOAD = 300 * 1024 * 1024;
+
+export function createGather({ ROOT, s3, sendJson, readJson, mimeOf }) {
+  const LOCAL = path.join(ROOT, 'data', 'gather');
+  const KEYS = { envelopes: 'gather/envelopes.jsonl', observations: 'gather/observations.jsonl', forms: 'gather/forms.jsonl' };
+  const localPath = (key) => path.join(LOCAL, ...key.split('/').slice(1));
+  const s = (v, max = 2000) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
+  const newId = (p) => `${p}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+
+  async function readText(key) {
+    if (!s3) { const f = localPath(key); return fs.existsSync(f) ? fs.readFileSync(f, 'utf8') : ''; }
+    try { return await (await s3.client.send(new s3.GetObjectCommand({ Bucket: s3.bucket, Key: key }))).Body.transformToString(); }
+    catch (err) { if (err?.$metadata?.httpStatusCode === 404 || err?.name === 'NoSuchKey') return ''; throw err; }
+  }
+  async function writeText(key, text) {
+    if (!s3) { const f = localPath(key); fs.mkdirSync(path.dirname(f), { recursive: true }); return fs.writeFileSync(f, text); }
+    await s3.client.send(new s3.PutObjectCommand({ Bucket: s3.bucket, Key: key, Body: text, ContentType: 'application/x-ndjson' }));
+  }
+  const rows = async (key) => (await readText(key)).split('\n').filter((l) => l.trim()).map((l) => JSON.parse(l));
+  // Appends are serialised so two interviewers cannot overwrite each other's lines.
+  let queue = Promise.resolve();
+  function append(key, items) {
+    const run = queue.then(async () => writeText(key, (await readText(key)) + items.map((i) => JSON.stringify(i)).join('\n') + '\n'));
+    queue = run.catch(() => {});
+    return run;
+  }
+
+  // ---- What the record still lacks, layer by layer (drives the next question)
+  function missing(observations, forms) {
+    const current = observations.filter((o) => !observations.some((x) => x.supersedes === o.id));
+    const kinds = new Set(current.map((o) => o.kind)), strata = new Set(current.map((o) => o.stratum));
+    const out = [];
+    if (!forms.length) out.push('form: no photograph, scan or splat yet (ask whether there are photographs, or whether it may be photographed)');
+    for (const st of ['made', 'lived', 'present']) if (!strata.has(st)) out.push(`time: nothing yet about ${{ made: 'how or when it was made or began', lived: 'the time it was in use', present: 'how it is now' }[st]}`);
+    if (!current.some((o) => o.actors?.length)) out.push('actors: no people named yet (who made it, used it, looked after it)');
+    for (const k of ['making', 'use', 'meaning', 'inheritance']) if (!kinds.has(k)) out.push(`observation types: nothing yet on ${{ making: 'how it was made', use: 'how it was used day to day', meaning: 'what it meant to people', inheritance: 'how it was passed on' }[k]}`);
+    if (!kinds.has('absence')) out.push('absence: nothing recorded yet about what is no longer known, was never asked, or was lost');
+    return { list: out, current };
+  }
+
+  // ---- Interview step: transcript -> draft observations + the next question
+  const INTERVIEW_RULES = [
+    'You help a volunteer interviewer record what an older resident of a Hokkaido town knows about one place or thing (an "envelope"). From the transcript of what the speaker just said, you do two jobs.',
+    '',
+    'JOB 1: observations. Split what the speaker said into separate observations.',
+    '- Only what the speaker said. Never add facts, dates, names or explanations of your own. If you are not sure they said it, leave it out.',
+    '- claim: one plain sentence in the session language, third person, close to their words.',
+    '- quote: the speaker\'s own words for it, copied from the transcript, short.',
+    '- kind: event (something that happened), use (how it was used), making (how it was made or built), meaning (what it meant to someone), inheritance (how it was passed on), contact (meeting between groups or outsiders), appearance (what it looks like), absence (see below).',
+    '- stratum: made (when the thing was made, built or began), lived (the time it was in use, the time being remembered), observed (what people have said or done about it since), present (how it is now).',
+    '- when: the time in the speaker\'s own words, copied, eight words at most ("around 1965", "when I was a child", "every winter"). Empty string if they gave none.',
+    '- evidence: later-account for something remembered and told now; physical-trace when they point to something that can still be seen on the thing; contemporary-document when they refer to a letter, photograph or record made at the time; inference when they are guessing ("I think", "probably"); none for absences.',
+    '- role: the speaker\'s standing for THIS claim: witness (saw or lived it), maker, descendant (heard it in the family), community-authority, contributor (hearsay or general knowledge), passerby.',
+    '- actors: the people in it, named as the speaker named them ("my grandmother", "Sato the carpenter").',
+    '- Absence: when the speaker says they do not know, nobody asked, it was lost or thrown away, it was not talked about, or it is not for outsiders, make an observation with kind absence and absenceCause: never-collected (nobody asked or recorded), destroyed, suppressed (people were made to stop), restricted (should not be shared widely), lost (the last person who knew is gone). absenceNote: their reason, in their words.',
+    '- restricted: true when the speaker asks that something not be shared or be kept in the family.',
+    '',
+    'JOB 2: the next question, to be asked aloud.',
+    '- In the session language, warm and plain, at most two short sentences. Open, not yes/no. Never leading, never suggesting an answer.',
+    '- Choose from MISSING (what the record lacks), but follow the speaker\'s thread when they have just opened something worth following.',
+    '- Do not press on painful subjects. If the speaker sounded tired or upset, offer to stop or change subject instead.',
+    '- layer: which layer the question serves. why: one short line for the interviewer, in the session language.',
+    'If the transcript is empty, return no observations and a gentle opening question about the envelope.',
+  ].join('\n');
+  const DRAFT_SCHEMA = {
+    type: 'OBJECT',
+    properties: {
+      observations: { type: 'ARRAY', items: { type: 'OBJECT', properties: {
+        claim: { type: 'STRING' }, quote: { type: 'STRING' }, kind: { type: 'STRING', enum: GATHER_ENUMS.kind },
+        stratum: { type: 'STRING', enum: GATHER_ENUMS.stratum }, when: { type: 'STRING' },
+        evidence: { type: 'STRING', enum: GATHER_ENUMS.evidence }, role: { type: 'STRING', enum: GATHER_ENUMS.role },
+        actors: { type: 'ARRAY', items: { type: 'STRING' } },
+        absenceCause: { type: 'STRING', enum: GATHER_ENUMS.cause }, absenceNote: { type: 'STRING' }, restricted: { type: 'BOOLEAN' },
+      }, required: ['claim', 'quote', 'kind', 'stratum', 'evidence', 'role'], propertyOrdering: ['quote', 'claim', 'kind', 'stratum', 'when', 'evidence', 'role', 'actors', 'absenceCause', 'absenceNote', 'restricted'] } },
+      next: { type: 'OBJECT', properties: {
+        question: { type: 'STRING' }, why: { type: 'STRING' },
+        layer: { type: 'STRING', enum: ['form', 'time', 'actors', 'types', 'evidence', 'absence', 'protocol'] },
+      }, required: ['question', 'layer', 'why'] },
+    },
+    required: ['observations', 'next'],
+  };
+  async function interview(body) {
+    const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+    if (!key) return { status: 503, data: { error: 'The interviewer assistant is not set up on this server (GEMINI_API_KEY is missing).' } };
+    const envelope = (await rows(KEYS.envelopes)).find((e) => e.id === body.envelope);
+    if (!envelope) return { status: 404, data: { error: 'Unknown envelope.' } };
+    const lang = body.lang === 'ja' ? 'ja' : 'en';
+    const observations = (await rows(KEYS.observations)).filter((o) => o.envelope === envelope.id);
+    const forms = (await rows(KEYS.forms)).filter((f) => f.envelope === envelope.id);
+    const { list, current } = missing(observations, forms);
+    const input = {
+      sessionLanguage: lang === 'ja' ? 'Japanese' : 'English',
+      envelope: { name: envelope.name, scale: envelope.scale, place: envelope.place },
+      speaker: { name: s(body.speaker?.name, 80) || 'the speaker', relation: s(body.speaker?.role, 40) },
+      alreadyRecorded: current.slice(-40).map((o) => o.claim),
+      MISSING: list,
+      lastQuestionAsked: s(body.lastQuestion, 400),
+      transcript: s(body.transcript, 12000),
+    };
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${process.env.GATHER_MODEL || process.env.GEMINI_MODEL || 'gemini-3.5-flash'}:generateContent`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: INTERVIEW_RULES }] },
+        contents: [{ role: 'user', parts: [{ text: JSON.stringify(input) }] }],
+        generationConfig: { temperature: 0.4, maxOutputTokens: 4000, responseMimeType: 'application/json', responseSchema: DRAFT_SCHEMA, thinkingConfig: { thinkingLevel: process.env.GATHER_THINKING || 'minimal' } },
+      }),
+      signal: AbortSignal.timeout(60000),
+    });
+    if (!res.ok) { console.error('gather gemini', res.status, (await res.text()).slice(0, 300)); return { status: 502, data: { error: 'The assistant could not read that just now. Your transcript is still here.' } }; }
+    const out = await res.json();
+    let parsed;
+    try { parsed = JSON.parse(out.candidates?.[0]?.content?.parts?.map((p) => p.text || '').join('') || ''); }
+    catch { return { status: 502, data: { error: 'The assistant could not read that just now. Your transcript is still here.' } }; }
+    // Guard against runaway fields: a time phrase is short, a claim is a sentence or two.
+    const tidy = (parsed.observations || []).filter((o) => o.claim && o.claim.length < 600).map((o) => ({ ...o, when: (o.when || '').length > 80 ? '' : (o.when || ''), quote: (o.quote || '').slice(0, 600) }));
+    return { status: 200, data: { observations: tidy, next: parsed.next, missing: list } };
+  }
+
+  function cleanObservation(o, session, existing) {
+    const errors = [];
+    const out = {
+      id: newId('gobs'), envelope: session.envelope, kind: s(o.kind, 40), stratum: s(o.stratum, 40), when: s(o.when, 120),
+      claim: s(o.claim), quote: s(o.quote, 600), evidence: s(o.evidence, 40),
+      standing: { role: s(o.role, 40), grantedBy: s(session.grantedBy, 200) },
+      actors: Array.isArray(o.actors) ? o.actors.map((a) => s(a, 120)).filter(Boolean).slice(0, 12) : [],
+      speaker: s(session.speaker, 120) || 'Anonymous',
+      protocol: { audience: s(o.audience, 20) || s(session.audience, 20) || 'family' },
+      source: { type: 'testimony', ref: `Interview with ${s(session.speaker, 120) || 'an anonymous speaker'}, ${new Date().toISOString().slice(0, 10)}, recorded by ${s(session.interviewer, 120)}` },
+      author: s(session.interviewer, 120), lang: session.lang === 'ja' ? 'ja' : 'en', status: 'unverified', createdAt: new Date().toISOString(),
+    };
+    if (!out.claim) errors.push('claim');
+    for (const [f, list] of [['kind', GATHER_ENUMS.kind], ['stratum', GATHER_ENUMS.stratum], ['evidence', GATHER_ENUMS.evidence]]) if (!list.includes(out[f])) errors.push(f);
+    if (!GATHER_ENUMS.role.includes(out.standing.role)) errors.push('standing');
+    if (!GATHER_ENUMS.audience.includes(out.protocol.audience)) errors.push('audience');
+    if (out.kind === 'absence') {
+      out.absence = { cause: s(o.absenceCause, 40), note: s(o.absenceNote, 500) };
+      if (!GATHER_ENUMS.cause.includes(out.absence.cause)) errors.push('absence cause');
+    }
+    if (o.supersedes) { out.supersedes = s(o.supersedes, 80); if (!existing.some((e) => e.id === out.supersedes)) errors.push('supersedes'); }
+    return { errors, out };
+  }
+
+  async function sendFile(res, key) {
+    const headers = { 'content-type': mimeOf(key), 'cache-control': 'private, max-age=3600' };
+    if (!s3) {
+      const f = localPath(key);
+      if (!f.startsWith(LOCAL + path.sep) || !fs.existsSync(f)) { res.writeHead(404); return res.end(); }
+      res.writeHead(200, { ...headers, 'content-length': fs.statSync(f).size });
+      return fs.createReadStream(f).pipe(res);
+    }
+    try {
+      const out = await s3.client.send(new s3.GetObjectCommand({ Bucket: s3.bucket, Key: key }));
+      res.writeHead(200, { ...headers, ...(out.ContentLength != null && { 'content-length': out.ContentLength }) });
+      Readable.fromWeb(out.Body.transformToWebStream()).pipe(res);
+    } catch { res.writeHead(404); res.end(); }
+  }
+
+  async function upload(req, res, q) {
+    const envelope = (await rows(KEYS.envelopes)).find((e) => e.id === q.get('envelope'));
+    const kind = q.get('kind');
+    const name = path.basename(s(q.get('name'), 120)).replace(/[^\w.\-]+/g, '_');
+    const length = Number(req.headers['content-length']);
+    if (!envelope) return sendJson(res, 404, { error: 'Unknown envelope.' });
+    if (!GATHER_ENUMS.formKind.includes(kind) || !FILE_EXT[kind].test(name)) return sendJson(res, 400, { error: 'That file type does not fit this kind of upload.' });
+    if (!length) return sendJson(res, 411, { error: 'Missing file size.' });
+    if (length > MAX_UPLOAD) return sendJson(res, 413, { error: 'File too large (300 MB at most).' });
+    const key = `gather/files/${envelope.id}/${Date.now().toString(36)}-${name}`;
+    if (s3) await s3.client.send(new s3.PutObjectCommand({ Bucket: s3.bucket, Key: key, Body: req, ContentLength: length, ContentType: mimeOf(name) }));
+    else { const f = localPath(key); fs.mkdirSync(path.dirname(f), { recursive: true }); await pipeline(req, fs.createWriteStream(f)); }
+    const form = {
+      id: newId('gform'), envelope: envelope.id, kind, basis: BASIS[kind], file: key.slice('gather/files/'.length), name, size: length,
+      caption: s(q.get('caption'), 300), captured: { date: s(q.get('date'), 40), by: s(q.get('by'), 120) },
+      protocol: { audience: GATHER_ENUMS.audience.includes(q.get('audience')) ? q.get('audience') : envelope.audience || 'family' },
+      createdAt: new Date().toISOString(),
+    };
+    await append(KEYS.forms, [form]);
+    return sendJson(res, 201, form);
+  }
+
+  async function handle(req, res, pathname) {
+    const q = new URL(req.url, 'http://x').searchParams;
+    const route = pathname.slice('/api/gather/'.length);
+    if (route === 'enums' && req.method === 'GET') return sendJson(res, 200, { ...GATHER_ENUMS, basis: BASIS });
+    if (route === 'envelopes' && req.method === 'GET') return sendJson(res, 200, await rows(KEYS.envelopes));
+    if (route === 'envelopes' && req.method === 'POST') {
+      const b = await readJson(req);
+      const env = { id: newId('env'), name: s(b.name, 160), scale: s(b.scale, 40), place: s(b.place, 160), parent: s(b.parent, 80), note: s(b.note, 600),
+        audience: GATHER_ENUMS.audience.includes(b.audience) ? b.audience : 'family', createdBy: s(b.createdBy, 120), createdAt: new Date().toISOString() };
+      if (!env.name || !GATHER_ENUMS.scale.includes(env.scale)) return sendJson(res, 400, { error: 'An envelope needs a name and a scale.' });
+      if (!env.parent) delete env.parent;
+      await append(KEYS.envelopes, [env]);
+      return sendJson(res, 201, env);
+    }
+    if (route === 'envelope' && req.method === 'GET') {
+      const id = q.get('id');
+      const envelope = (await rows(KEYS.envelopes)).find((e) => e.id === id);
+      if (!envelope) return sendJson(res, 404, { error: 'Unknown envelope.' });
+      const observations = (await rows(KEYS.observations)).filter((o) => o.envelope === id);
+      const forms = (await rows(KEYS.forms)).filter((f) => f.envelope === id);
+      return sendJson(res, 200, { envelope, observations, forms, missing: missing(observations, forms).list });
+    }
+    if (route === 'interview' && req.method === 'POST') {
+      const { status, data } = await interview(await readJson(req, 40000));
+      return sendJson(res, status, data);
+    }
+    if (route === 'observations' && req.method === 'POST') {
+      const b = await readJson(req, 200000);
+      const session = b.session || {};
+      if (!(await rows(KEYS.envelopes)).some((e) => e.id === session.envelope)) return sendJson(res, 404, { error: 'Unknown envelope.' });
+      if (session.consent !== true) return sendJson(res, 400, { error: 'Record the speaker\'s consent before saving.' });
+      if (!s(session.interviewer, 120)) return sendJson(res, 400, { error: 'Add your own name as the interviewer.' });
+      const existing = await rows(KEYS.observations);
+      const cleaned = (Array.isArray(b.items) ? b.items : []).slice(0, 60).map((o) => cleanObservation(o, session, existing));
+      const bad = cleaned.find((c) => c.errors.length);
+      if (!cleaned.length) return sendJson(res, 400, { error: 'Nothing to save.' });
+      if (bad) return sendJson(res, 400, { error: `Check: ${bad.errors.join(', ')} ("${bad.out.claim.slice(0, 40)}…")` });
+      await append(KEYS.observations, cleaned.map((c) => c.out));
+      return sendJson(res, 201, { saved: cleaned.length });
+    }
+    if (route === 'upload' && req.method === 'PUT') return upload(req, res, q);
+    if (route.startsWith('file/') && req.method === 'GET') {
+      const rel = route.slice(5);
+      if (!/^env-[a-z0-9-]+\/[\w.\-]+$/.test(rel)) { res.writeHead(400); return res.end(); }
+      return sendFile(res, `gather/files/${rel}`);
+    }
+    return sendJson(res, 404, { error: 'Not found' });
+  }
+  return { handle };
+}

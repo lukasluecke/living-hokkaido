@@ -1,0 +1,507 @@
+﻿<!doctype html>
+<html lang="en" translate="no" class="notranslate">
+<head>
+<meta charset="utf-8">
+<meta name="google" content="notranslate">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#efe4cc">
+<title>The Envelope · Gather</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;700;800&display=swap">
+<style>
+  :root {
+    --paper: #efe4cc; --paper-2: #e5d6b6; --paper-3: #f7efdc; --ink: #221c16; --soft: #5d5246; --line: rgba(34,28,22,.25);
+    --l-form: #2c4f7c; --l-time: #a8741f; --l-actors: #8f4527; --l-types: #4b7a46; --l-evidence: #634a88;
+    --l-absence: #7a7168; --l-protocol: #221c16; --l-voice: #b5322f; --recorded: #3f7a4a; --symbolic: #6b55a0;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; color: var(--ink); background: var(--paper-2); font: 15px/1.55 system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Noto Sans JP", sans-serif; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 16px 16px 80px; display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+  h1, h2, .mincho { font-family: "Shippori Mincho B1", "Hiragino Mincho ProN", "Yu Mincho", Georgia, serif; }
+  header.top { display: flex; align-items: flex-start; gap: 12px; }
+  header.top h1 { margin: 0; font-size: 24px; font-weight: 800; line-height: 1.25; }
+  header.top p { margin: 2px 0 0; color: var(--soft); font-size: 13px; }
+  header.top .sp { flex: 1; min-width: 0; }
+  .card { background: var(--paper); border: 2.5px solid var(--ink); border-radius: 4px; padding: 16px;
+    box-shadow: inset 0 0 0 4px var(--paper), inset 0 0 0 5px var(--ink), 5px 6px 0 rgba(0,0,0,.35); display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr); }
+  .card > h2 { margin: 0; font-size: 17px; display: flex; align-items: center; gap: 8px; color: var(--lc, var(--ink)); }
+  .card > h2::after { content: ""; flex: 1; border-top: 2px solid currentColor; opacity: .5; }
+  .card > h2 small { font: 12px system-ui, sans-serif; color: var(--soft); }
+  .seal { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 2px; color: var(--paper-3); background: var(--lc, var(--ink));
+    font: 800 14px/1 "Shippori Mincho B1", serif; flex: none; }
+  [data-layer=form] { --lc: var(--l-form); } [data-layer=time] { --lc: var(--l-time); } [data-layer=actors] { --lc: var(--l-actors); }
+  [data-layer=types] { --lc: var(--l-types); } [data-layer=evidence] { --lc: var(--l-evidence); } [data-layer=absence] { --lc: var(--l-absence); }
+  [data-layer=protocol] { --lc: var(--l-protocol); } [data-layer=voice] { --lc: var(--l-voice); }
+  button, .btn { font: inherit; font-size: 14px; cursor: pointer; color: var(--ink); background: var(--paper-3); border: 2px solid var(--ink); border-radius: 3px;
+    padding: 7px 12px; box-shadow: 2px 2px 0 var(--ink); display: inline-flex; align-items: center; gap: 6px; min-height: 38px; }
+  button:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--ink); }
+  button:disabled { opacity: .45; cursor: default; }
+  button.primary { background: var(--l-voice); color: var(--paper-3); font-weight: 700; }
+  button.quiet { box-shadow: none; border-width: 1.5px; min-height: 30px; padding: 3px 9px; font-size: 13px; }
+  button.link { all: unset; cursor: pointer; color: var(--l-form); text-decoration: underline; font-size: 13px; }
+  input, select, textarea { font: inherit; font-size: 15px; color: var(--ink); background: #fbf6ea; border: 1.5px solid var(--ink); border-radius: 3px; padding: 7px 9px; width: 100%; min-width: 0; }
+  textarea { resize: vertical; line-height: 1.6; }
+  label.f { display: grid; gap: 3px; font-size: 12px; color: var(--soft); min-width: 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .muted { color: var(--soft); font-size: 13px; }
+  .check { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; } .check input { width: 20px; height: 20px; flex: none; margin-top: 2px; }
+  .hidden { display: none !important; }
+  button.lang { padding: 4px 8px; } .flag { width: 30px; height: 20px; border-radius: 2px; display: none; box-shadow: 0 0 0 1px rgba(0,0,0,.4); } .flag.on { display: block; }
+
+  /* Layer coverage */
+  .cover { display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: 6px; }
+  .cover div { border: 1.5px solid var(--lc); border-radius: 3px; padding: 6px; display: grid; gap: 2px; justify-items: center; text-align: center; font-size: 11px; color: var(--soft); background: var(--paper-3); }
+  .cover div.empty { border-style: dashed; opacity: .6; } .cover div.empty .seal { background: transparent; color: var(--lc); box-shadow: inset 0 0 0 1.5px var(--lc); }
+  .cover b { font-size: 12px; color: var(--lc); }
+
+  /* Voice loop */
+  .ask { border: 2px solid var(--l-voice); border-left-width: 6px; border-radius: 3px; background: var(--paper-3); padding: 10px 12px; display: grid; gap: 6px; }
+  .ask .q { font: 700 18px/1.5 "Shippori Mincho B1", serif; }
+  .mic { width: 76px; height: 76px; border-radius: 50%; justify-content: center; font-size: 30px; background: var(--paper-3); }
+  .mic[aria-pressed=true] { background: var(--l-voice); color: #fff; animation: pulse 1.2s infinite; }
+  @keyframes pulse { 50% { box-shadow: 0 0 0 10px rgba(181,50,47,.2); } }
+  .draft, .obs { border: 1.5px solid var(--ink); border-left: 5px solid var(--l-time); border-radius: 0 3px 3px 0; background: var(--paper-3); padding: 10px; display: grid; gap: 8px; grid-template-columns: minmax(0, 1fr); }
+  .draft.off { opacity: .45; } .draft.absence, .obs.absence { border-left-color: var(--l-absence); background: repeating-linear-gradient(-45deg, rgba(122,113,104,.12) 0 2px, transparent 2px 7px), var(--paper-3); }
+  .quote { font-size: 13px; color: var(--soft); border-left: 2px solid var(--line); padding-left: 8px; font-style: italic; overflow-wrap: anywhere; }
+  .chips { display: flex; gap: 5px; flex-wrap: wrap; } .chip { font-size: 11px; padding: 1px 7px; border-radius: 2px; border: 1.5px solid var(--c, var(--soft)); color: var(--c, var(--soft)); background: var(--paper-3); }
+  .chip.solid { background: var(--c); color: var(--paper-3); }
+  .stratum { font: 700 13px "Shippori Mincho B1", serif; color: var(--l-time); letter-spacing: .05em; margin-top: 4px; }
+
+  /* Form uploads */
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+  .tile { border: 2px dashed var(--l-form); border-radius: 3px; background: rgba(44,79,124,.05); padding: 12px; display: grid; gap: 6px; cursor: pointer; }
+  .tile b { color: var(--l-form); } .tile input { display: none; } .tile small { color: var(--soft); font-size: 12px; }
+  .basis { font-size: 11px; font-weight: 700; } .basis.recorded { color: var(--recorded); } .basis.symbolic { color: var(--symbolic); }
+  .forms { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+  .formitem { border: 1.5px solid var(--ink); border-radius: 3px; background: var(--paper-3); padding: 6px; font-size: 12px; display: grid; gap: 4px; overflow-wrap: anywhere; }
+  .formitem img { width: 100%; height: 96px; object-fit: cover; border-radius: 2px; }
+  .toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--ink); color: var(--paper-3); padding: 8px 14px; border-radius: 3px; font-size: 14px; display: none; z-index: 9; max-width: calc(100vw - 32px); }
+  .toast.on { display: block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="sp"><h1 data-t="title">The Envelope · Gather</h1><p data-t="subtitle">Record what someone knows about a place or a thing, one observation at a time.</p></div>
+    <button id="lang" class="lang" aria-label="Language / 言語">
+      <svg class="flag" data-l="en" viewBox="0 0 60 30"><clipPath id="s"><path d="M0,0v30h60V0z"/></clipPath><clipPath id="q"><path d="M30,15h30v15zv15H0zH0V0zV0h30z"/></clipPath><g clip-path="url(#s)"><path d="M0,0v30h60V0z" fill="#012169"/><path d="M0,0L60,30M60,0L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0L60,30M60,0L0,30" clip-path="url(#q)" stroke="#C8102E" stroke-width="4"/><path d="M30,0v30M0,15h60" stroke="#fff" stroke-width="10"/><path d="M30,0v30M0,15h60" stroke="#C8102E" stroke-width="6"/></g></svg>
+      <svg class="flag" data-l="ja" viewBox="0 0 30 20"><rect width="30" height="20" fill="#fff"/><circle cx="15" cy="10" r="6" fill="#BC002D"/></svg>
+    </button>
+  </header>
+
+  <!-- 1. Envelope -->
+  <section class="card">
+    <h2><span class="seal">一</span><span data-t="hEnvelope">The envelope</span><small data-t="hEnvelopeSub">the place or thing that holds the memory</small></h2>
+    <div class="row"><select id="envSelect" style="flex:1;min-width:200px"></select><button id="envNewBtn" data-t="newEnvelope">New envelope</button></div>
+    <form id="envForm" class="hidden" style="display:grid;gap:10px">
+      <div class="grid">
+        <label class="f"><span data-t="fName">Name</span><input id="eName" required data-ph="phName"></label>
+        <label class="f"><span data-t="fScale">What it is</span><select id="eScale"></select></label>
+        <label class="f"><span data-t="fPlace">Town or place</span><input id="ePlace" data-ph="phPlace"></label>
+        <label class="f"><span data-t="fParent">Sits inside (optional)</span><select id="eParent"></select></label>
+        <label class="f"><span data-t="fAudience">Who may see it, by default</span><select id="eAudience"></select></label>
+      </div>
+      <div class="row"><button class="primary" data-t="create">Create</button><button type="button" id="envCancel" data-t="cancel">Cancel</button></div>
+    </form>
+    <div id="crumb" class="muted"></div>
+    <div class="cover" id="cover"></div>
+  </section>
+
+  <div id="work" class="hidden" style="display:grid;gap:16px;grid-template-columns:minmax(0,1fr)">
+  <!-- 2. Session: actors, standing, protocol -->
+  <section class="card" data-layer="actors">
+    <h2><span class="seal">人</span><span data-t="hSession">Who is speaking</span></h2>
+    <div class="grid">
+      <label class="f"><span data-t="fInterviewer">Your name (interviewer)</span><input id="sInterviewer"></label>
+      <label class="f"><span data-t="fSpeaker">Speaker's name (or leave blank)</span><input id="sSpeaker"></label>
+      <label class="f"><span data-t="fRole">Their relation to it</span><select id="sRole"></select></label>
+      <label class="f"><span data-t="fGranted">Standing recognised by (optional)</span><input id="sGranted" data-ph="phGranted"></label>
+      <label class="f"><span data-t="fSessionAudience">Who may see what they say</span><select id="sAudience"></select></label>
+    </div>
+    <label class="check"><input type="checkbox" id="sConsent"><span data-t="consent">The speaker has agreed to be recorded, to the audience chosen above, and knows they can ask for anything to be left out.</span></label>
+    <div class="muted" data-t="privacy">Audio is sent to ElevenLabs for transcription and is not kept. Text is sent to Gemini to sort it into observations. Nothing is saved until you press Save.</div>
+  </section>
+
+  <!-- 3. Voice loop -->
+  <section class="card" data-layer="voice">
+    <h2><span class="seal">声</span><span data-t="hTalk">Listen and ask</span></h2>
+    <div class="ask" id="askBox">
+      <div class="muted" data-t="askNext">Ask next</div>
+      <div class="q" id="askQ" data-t="askEmpty">Press “Suggest a question” to begin, or just start recording.</div>
+      <div class="muted" id="askWhy"></div>
+      <div class="row"><button id="askPlay" class="quiet" disabled>🔊 <span data-t="playQ">Ask aloud</span></button><button id="askNew" class="quiet" data-t="suggest">Suggest a question</button>
+        <label class="check" style="font-size:13px"><input type="checkbox" id="askAuto" checked style="width:16px;height:16px"><span data-t="autoAsk">ask aloud automatically</span></label></div>
+    </div>
+    <div class="row" style="align-items:center">
+      <button class="mic" id="mic" aria-pressed="false" title="Record">🎙</button>
+      <div style="flex:1;min-width:0"><div id="micState" class="muted" data-t="micIdle">Tap to record their answer. Tap again to stop.</div></div>
+    </div>
+    <label class="f"><span data-t="fTranscript">What they said (you can correct or type here)</span><textarea id="transcript" rows="5"></textarea></label>
+    <div class="row"><button class="primary" id="extract" data-t="extract">Sort into observations</button><span class="muted" id="extractState"></span></div>
+    <div id="drafts" style="display:grid;gap:10px"></div>
+    <div class="row hidden" id="saveRow"><button class="primary" id="save"></button><span class="muted" data-t="saveNote">Nothing is overwritten: each save adds to the record.</span></div>
+  </section>
+
+  <!-- 4. Form -->
+  <section class="card" data-layer="form">
+    <h2><span class="seal">形</span><span data-t="hForm">Form</span><small data-t="hFormSub">how it can be seen</small></h2>
+    <div class="grid">
+      <label class="f"><span data-t="fCaption">Caption for the next upload</span><input id="fCaption"></label>
+      <label class="f"><span data-t="fDate">When it was taken or made</span><input id="fDate" data-ph="phDate"></label>
+    </div>
+    <div class="tiles" id="tiles"></div>
+    <div class="muted" id="upState"></div>
+    <div class="forms" id="forms"></div>
+  </section>
+
+  <!-- 5. Record -->
+  <section class="card" data-layer="time">
+    <h2><span class="seal">時</span><span data-t="hRecord">The record so far</span></h2>
+    <div id="record" style="display:grid;gap:8px"></div>
+  </section>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+const $ = (id) => document.getElementById(id);
+const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+const api = async (path, opts) => { const r = await fetch(`/api/gather/${path}`, opts); const d = await r.json().catch(() => ({})); if (!r.ok) throw new Error(d.error || `Failed (${r.status})`); return d; };
+function toast(text) { const t = $("toast"); t.textContent = text; t.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("on"), 2600); }
+
+// ---------- Language
+const S = {
+  en: {
+    title: "The Envelope · Gather", subtitle: "Record what someone knows about a place or a thing, one observation at a time.",
+    hEnvelope: "The envelope", hEnvelopeSub: "the place or thing that holds the memory", newEnvelope: "New envelope", choose: "Choose an envelope…",
+    fName: "Name", phName: "Grandmother's kimono · The old net shed", fScale: "What it is", fPlace: "Town or place", phPlace: "Yoichi, Hokkaido",
+    fParent: "Sits inside (optional)", none: "nothing", fAudience: "Who may see it, by default", create: "Create", cancel: "Cancel",
+    hSession: "Who is speaking", fInterviewer: "Your name (interviewer)", fSpeaker: "Speaker's name (or leave blank)", fRole: "Their relation to it",
+    fGranted: "Standing recognised by (optional)", phGranted: "family, neighbourhood association…", fSessionAudience: "Who may see what they say",
+    consent: "The speaker has agreed to be recorded, to the audience chosen above, and knows they can ask for anything to be left out.",
+    privacy: "Audio is sent to ElevenLabs for transcription and is not kept. Text is sent to Gemini to sort it into observations. Nothing is saved until you press Save.",
+    hTalk: "Listen and ask", askNext: "Ask next", askEmpty: "Press “Suggest a question” to begin, or just start recording.", playQ: "Ask aloud", suggest: "Suggest a question", autoAsk: "ask aloud automatically",
+    micIdle: "Tap to record their answer. Tap again to stop.", micRec: (s) => `Recording… ${s}s · tap to stop`, micBusy: "Writing it down…", micBlocked: "Microphone blocked. Allow it in the browser, or type below.",
+    fTranscript: "What they said (you can correct or type here)", extract: "Sort into observations", thinking: "Reading…", nothingFound: "No observations found in that. Try a longer answer.",
+    save: (n) => `Save ${n} to the record`, saveNote: "Nothing is overwritten: each save adds to the record.", saved: (n) => `Saved ${n}.`, needConsent: "Tick the consent box first.", needName: "Add your name as interviewer.",
+    keep: "Keep", drop: "Leave out", dKind: "Type", dStratum: "Time", dWhen: "When (their words)", dEvidence: "Evidence", dRole: "Standing", dAudience: "Who may see", dCause: "Unknown because", dNote: "Why",
+    replaces: "Corrects an earlier entry; the earlier one stays in the history.", correct: "Correct this", earlier: (n) => `${n} earlier version${n > 1 ? "s" : ""}`,
+    hForm: "Form", hFormSub: "how it can be seen", fCaption: "Caption for the next upload", fDate: "When it was taken or made", phDate: "2026-11 · around 1965",
+    tSplat: "Gaussian splat", tSplatSub: ".sog .spz .ply", tPhoto: "Photographs", tPhotoSub: "one or many; resized, location data removed", tScan: "Scanned mesh", tScanSub: ".glb .obj .stl from a 3D scan",
+    tSynth: "Placeholder mesh", tSynthSub: "AI-made stand-in (.glb)", recorded: "Recorded ●●●", symbolic: "Symbolic ●○○", uploading: (n) => `Uploading ${n}…`, uploaded: "Uploaded.",
+    hRecord: "The record so far", emptyRecord: "Nothing recorded yet.", by: "told by", unknown: "Unknown",
+    cover: { form: "Form", time: "Time", actors: "Actors", types: "Types", evidence: "Evidence · standing", absence: "Absence", protocol: "Protocol", voice: "Voice" },
+    coverVoiceReady: "ready", coverVoiceNot: "needs more",
+    v: {},
+  },
+  ja: {
+    title: "エンベロープ · 聞き書き", subtitle: "場所やものについて、その人が知っていることを一つずつ記録します。",
+    hEnvelope: "エンベロープ", hEnvelopeSub: "記憶を宿す場所・もの", newEnvelope: "新しく作る", choose: "エンベロープを選ぶ…",
+    fName: "名前", phName: "祖母の着物 · 古い網小屋", fScale: "種類", fPlace: "町・場所", phPlace: "北海道余市町",
+    fParent: "含まれる先（任意）", none: "なし", fAudience: "基本の公開範囲", create: "作成", cancel: "やめる",
+    hSession: "話し手", fInterviewer: "あなたの名前（聞き手）", fSpeaker: "話し手の名前（空欄でも可）", fRole: "話し手との関わり",
+    fGranted: "立場を認めている人・団体（任意）", phGranted: "家族、町内会など", fSessionAudience: "話の公開範囲",
+    consent: "話し手は、録音されること、上で選んだ公開範囲、そして残したくないことは外せることに同意しています。",
+    privacy: "音声は文字起こしのためElevenLabsに送られ、保存されません。文章は観察に整理するためGeminiに送られます。「保存」を押すまで何も保存されません。",
+    hTalk: "聞く・たずねる", askNext: "次の質問", askEmpty: "「質問を提案」を押すか、そのまま録音を始めてください。", playQ: "声でたずねる", suggest: "質問を提案", autoAsk: "自動で読み上げる",
+    micIdle: "タップして答えを録音。もう一度タップで停止。", micRec: (s) => `録音中… ${s}秒 · タップで停止`, micBusy: "書き起こしています…", micBlocked: "マイクが使えません。ブラウザで許可するか、下に入力してください。",
+    fTranscript: "話された内容（直したり、入力したりできます）", extract: "観察に整理する", thinking: "読んでいます…", nothingFound: "観察が見つかりませんでした。もう少し長い答えで試してください。",
+    save: (n) => `${n}件を記録に保存`, saveNote: "上書きはされません。保存するたびに記録に加わります。", saved: (n) => `${n}件を保存しました。`, needConsent: "先に同意の欄にチェックを入れてください。", needName: "聞き手の名前を入れてください。",
+    keep: "残す", drop: "外す", dKind: "種類", dStratum: "時", dWhen: "いつ（本人の言葉）", dEvidence: "根拠", dRole: "立場", dAudience: "公開範囲", dCause: "分からない理由", dNote: "わけ",
+    replaces: "以前の記録を訂正します。元の記録は履歴に残ります。", correct: "訂正する", earlier: (n) => `以前の版 ${n}件`,
+    hForm: "形態", hFormSub: "どのように見られるか", fCaption: "次のアップロードの説明", fDate: "撮影・制作の時期", phDate: "2026年11月 · 1965年頃",
+    tSplat: "ガウシアンスプラット", tSplatSub: ".sog .spz .ply", tPhoto: "写真", tPhotoSub: "複数可。縮小し、位置情報を除きます", tScan: "スキャンしたメッシュ", tScanSub: "3Dスキャンの .glb .obj .stl",
+    tSynth: "仮のメッシュ", tSynthSub: "AIで作った代役（.glb）", recorded: "実写 ●●●", symbolic: "象徴 ●○○", uploading: (n) => `${n} をアップロード中…`, uploaded: "アップロードしました。",
+    hRecord: "これまでの記録", emptyRecord: "まだ記録はありません。", by: "話し手：", unknown: "不明",
+    cover: { form: "形態", time: "時", actors: "人物", types: "種類", evidence: "根拠・立場", absence: "欠落", protocol: "公開の決まり", voice: "声" },
+    coverVoiceReady: "準備よし", coverVoiceNot: "もう少し",
+    v: {
+      keepsake: "形見・品物", room: "部屋", building: "建物", neighborhood: "地区", village: "集落", place: "場所", institution: "施設",
+      event: "出来事", use: "使い方", making: "作り方", meaning: "意味", inheritance: "受け継ぎ", contact: "出会い", appearance: "見た目", absence: "欠落",
+      made: "作られた時", lived: "使われていた時", observed: "その後", present: "いま",
+      "contemporary-document": "当時の資料", "later-account": "後の語り", "physical-trace": "残る跡", inference: "推測", none: "なし",
+      witness: "見た・経験した人", maker: "作った人", descendant: "子孫・家族", "community-authority": "地域の代表", scholar: "研究者", curator: "学芸員", contributor: "聞いた話", passerby: "通りがかり",
+      "never-collected": "聞かれなかった", destroyed: "壊された・捨てられた", suppressed: "やめさせられた", restricted: "広めない", lost: "知る人がいない",
+      family: "家族", community: "地域", team: "聞き手チーム", public: "一般",
+    },
+  },
+};
+const EN_V = { keepsake: "keepsake or object", made: "when it was made", lived: "when it was in use", observed: "since then", present: "now",
+  "later-account": "remembered and told", "physical-trace": "can still be seen", "contemporary-document": "document from the time", inference: "a guess", witness: "saw or lived it",
+  descendant: "family, heard at home", contributor: "heard from others", "never-collected": "nobody asked", lost: "no one left who knows", restricted: "not to be shared widely", team: "project team" };
+let LANG = new URLSearchParams(location.search).get("lang");
+try { LANG = LANG || localStorage.getItem("gather.lang"); } catch {}
+if (LANG !== "ja" && LANG !== "en") LANG = navigator.language?.startsWith("ja") ? "ja" : "en";
+const t = (k) => S[LANG][k];
+const label = (v) => (LANG === "ja" ? S.ja.v[v] : EN_V[v]) || String(v || "").replace(/-/g, " ");
+
+// ---------- State
+let ENUMS = null, envelopes = [], env = null, observations = [], forms = [], drafts = [], lastQuestion = "";
+const remember = (id) => { const n = $(id); try { n.value = localStorage.getItem(`gather.${id}`) || n.value; } catch {} n.addEventListener("change", () => { try { localStorage.setItem(`gather.${id}`, n.value); } catch {} }); };
+
+function fillSelect(sel, values, value) { sel.innerHTML = ""; for (const v of values) { const o = el("option", "", label(v)); o.value = v; if (v === value) o.selected = true; sel.append(o); } }
+function applyLang() {
+  document.documentElement.lang = LANG;
+  for (const f of document.querySelectorAll(".flag")) f.classList.toggle("on", f.dataset.l === LANG);
+  for (const n of document.querySelectorAll("[data-t]")) if (typeof t(n.dataset.t) === "string" && !(n.id === "askQ" && lastQuestion)) n.textContent = t(n.dataset.t);
+  for (const n of document.querySelectorAll("[data-ph]")) n.placeholder = t(n.dataset.ph);
+  if (!ENUMS) return;
+  fillSelect($("eScale"), ENUMS.scale, $("eScale").value || "keepsake");
+  fillSelect($("eAudience"), ENUMS.audience, $("eAudience").value || "family");
+  fillSelect($("sRole"), ENUMS.role.filter((r) => !["scholar", "curator"].includes(r)), $("sRole").value || "witness");
+  fillSelect($("sAudience"), ENUMS.audience, $("sAudience").value || env?.audience || "family");
+  renderEnvSelect(); renderTiles(); renderAll();
+}
+$("lang").addEventListener("click", () => { LANG = LANG === "ja" ? "en" : "ja"; try { localStorage.setItem("gather.lang", LANG); } catch {} applyLang(); });
+
+// ---------- Envelope
+function renderEnvSelect() {
+  const sel = $("envSelect"); sel.innerHTML = "";
+  const first = el("option", "", t("choose")); first.value = ""; sel.append(first);
+  for (const e of envelopes) { const o = el("option", "", `${e.name} · ${label(e.scale)}${e.place ? ` · ${e.place}` : ""}`); o.value = e.id; if (env?.id === e.id) o.selected = true; sel.append(o); }
+  const par = $("eParent"); par.innerHTML = ""; const none = el("option", "", t("none")); none.value = ""; par.append(none);
+  for (const e of envelopes) { const o = el("option", "", e.name); o.value = e.id; par.append(o); }
+}
+async function openEnvelope(id) {
+  if (!id) { env = null; $("work").classList.add("hidden"); $("cover").innerHTML = ""; $("crumb").textContent = ""; return; }
+  const d = await api(`envelope?id=${encodeURIComponent(id)}`);
+  env = d.envelope; observations = d.observations; forms = d.forms; drafts = []; lastQuestion = "";
+  try { localStorage.setItem("gather.env", id); } catch {}
+  $("sAudience").value = env.audience || "family";
+  $("work").classList.remove("hidden");
+  $("askQ").textContent = t("askEmpty"); $("askWhy").textContent = ""; $("askPlay").disabled = true;
+  renderAll();
+}
+$("envSelect").addEventListener("change", (e) => openEnvelope(e.target.value).catch((err) => toast(err.message)));
+$("envNewBtn").addEventListener("click", () => $("envForm").classList.toggle("hidden"));
+$("envCancel").addEventListener("click", () => $("envForm").classList.add("hidden"));
+$("envForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  try {
+    const created = await api("envelopes", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({
+      name: $("eName").value, scale: $("eScale").value, place: $("ePlace").value, parent: $("eParent").value, audience: $("eAudience").value, createdBy: $("sInterviewer").value }) });
+    envelopes.push(created); $("envForm").classList.add("hidden"); $("eName").value = "";
+    renderEnvSelect(); $("envSelect").value = created.id; await openEnvelope(created.id);
+  } catch (err) { toast(err.message); }
+});
+
+// ---------- Coverage of the eight layers
+const current = () => observations.filter((o) => !observations.some((x) => x.supersedes === o.id));
+function renderCover() {
+  const box = $("cover"); box.innerHTML = ""; if (!env) return;
+  const obs = current(), kinds = new Set(obs.map((o) => o.kind)), strata = new Set(obs.map((o) => o.stratum));
+  const cells = [
+    ["form", "形", forms.length, forms.length],
+    ["time", "時", strata.size, `${strata.size}/4`],
+    ["actors", "人", obs.filter((o) => o.actors?.length).length, new Set(obs.flatMap((o) => o.actors || [])).size],
+    ["types", "類", kinds.size, `${[...kinds].filter((k) => k !== "absence").length}/7`],
+    ["evidence", "証", obs.length, obs.length],
+    ["absence", "欠", obs.filter((o) => o.kind === "absence").length, obs.filter((o) => o.kind === "absence").length],
+    ["protocol", "掟", 1, label(env.audience || "family")],
+    ["voice", "声", obs.length >= 5 ? 1 : 0, obs.length >= 5 ? t("coverVoiceReady") : t("coverVoiceNot")],
+  ];
+  for (const [layer, seal, filled, text] of cells) {
+    const d = el("div", filled ? "" : "empty"); d.dataset.layer = layer;
+    d.append(el("span", "seal", seal), el("b", "", t("cover")[layer]), el("span", "", String(text)));
+    box.append(d);
+  }
+  const parent = env.parent && envelopes.find((e) => e.id === env.parent);
+  $("crumb").textContent = `${parent ? `${parent.name} › ` : ""}${env.name}${env.place ? ` · ${env.place}` : ""}`;
+}
+
+// ---------- Voice: speak the question, hear the answer
+const audio = new Audio();
+async function speak(text) {
+  try {
+    const r = await fetch("/api/speak", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text, figure: "narrator", lang: LANG }) });
+    if (!r.ok) throw new Error("no voice");
+    if (audio.src) URL.revokeObjectURL(audio.src);
+    audio.src = URL.createObjectURL(await r.blob()); await audio.play();
+  } catch {
+    if (!("speechSynthesis" in window)) return;
+    speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = LANG === "ja" ? "ja-JP" : "en-GB"; u.rate = 0.92; speechSynthesis.speak(u);
+  }
+}
+function showQuestion(next) {
+  if (!next?.question) return;
+  lastQuestion = next.question;
+  $("askQ").textContent = next.question; $("askWhy").textContent = `${t("cover")[next.layer] || ""}${next.why ? ` · ${next.why}` : ""}`;
+  $("askBox").dataset.layer = next.layer; $("askPlay").disabled = false;
+  if ($("askAuto").checked) speak(next.question);
+}
+$("askPlay").addEventListener("click", () => lastQuestion && speak(lastQuestion));
+async function runInterview(transcript) {
+  $("extract").disabled = $("askNew").disabled = true; $("extractState").textContent = t("thinking");
+  try {
+    const d = await api("interview", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({
+      envelope: env.id, lang: LANG, transcript, lastQuestion, speaker: { name: $("sSpeaker").value, role: $("sRole").value } }) });
+    if (transcript && !d.observations.length) toast(t("nothingFound"));
+    for (const o of d.observations) drafts.push({ ...o, keep: true, audience: o.restricted ? "family" : $("sAudience").value });
+    if (d.observations.length) $("transcript").value = "";
+    renderDrafts(); showQuestion(d.next);
+  } catch (err) { toast(err.message); }
+  finally { $("extract").disabled = $("askNew").disabled = false; $("extractState").textContent = ""; }
+}
+$("extract").addEventListener("click", () => { const tx = $("transcript").value.trim(); if (tx) runInterview(tx); });
+$("askNew").addEventListener("click", () => runInterview(""));
+
+let rec = null, tick = null;
+$("mic").addEventListener("click", async () => {
+  const mic = $("mic");
+  if (rec) { rec.stop(); return; }
+  audio.pause();
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); } catch { $("micState").textContent = t("micBlocked"); return; }
+  const type = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg"].find((m) => MediaRecorder.isTypeSupported(m)) || "";
+  const r = new MediaRecorder(stream, type ? { mimeType: type, audioBitsPerSecond: 48000 } : undefined);
+  const chunks = []; let secs = 0;
+  r.ondataavailable = (e) => e.data.size && chunks.push(e.data);
+  tick = setInterval(() => { secs++; $("micState").textContent = t("micRec")(secs); if (secs >= 300) r.stop(); }, 1000);
+  r.onstop = async () => {
+    clearInterval(tick); stream.getTracks().forEach((x) => x.stop()); rec = null; mic.setAttribute("aria-pressed", "false");
+    $("micState").textContent = t("micBusy");
+    try {
+      const blob = new Blob(chunks, { type: r.mimeType || "audio/webm" });
+      const res = await fetch(`/api/listen?lang=${LANG}`, { method: "POST", headers: { "content-type": blob.type }, body: blob });
+      const d = await res.json(); if (!res.ok) throw new Error(d.error || "Could not hear that.");
+      const box = $("transcript"); box.value = (box.value ? `${box.value.trim()}\n` : "") + (d.text || "");
+    } catch (err) { toast(err.message); }
+    $("micState").textContent = t("micIdle");
+  };
+  rec = r; r.start(); mic.setAttribute("aria-pressed", "true"); $("micState").textContent = t("micRec")(0);
+});
+
+// ---------- Draft observations: review before anything is saved
+function sel(values, value, on) { const s = el("select"); fillSelect(s, values, value); s.addEventListener("change", () => on(s.value)); return s; }
+function field(text, input) { const w = el("label", "f"); w.append(el("span", "", text), input); return w; }
+function renderDrafts() {
+  const box = $("drafts"); box.innerHTML = "";
+  drafts.forEach((d) => {
+    const card = el("div", `draft${d.kind === "absence" ? " absence" : ""}${d.keep ? "" : " off"}`);
+    if (d.supersedes) card.append(el("div", "muted", t("replaces")));
+    const claim = el("textarea"); claim.rows = 2; claim.value = d.claim; claim.addEventListener("input", () => { d.claim = claim.value; });
+    card.append(claim);
+    if (d.quote) card.append(el("div", "quote", `“${d.quote}”`));
+    const g = el("div", "grid");
+    const when = el("input"); when.value = d.when || ""; when.addEventListener("input", () => { d.when = when.value; });
+    g.append(field(t("dKind"), sel(ENUMS.kind, d.kind, (v) => { d.kind = v; if (v === "absence") { d.absenceCause = d.absenceCause || "never-collected"; d.evidence = "none"; } renderDrafts(); })),
+      field(t("dStratum"), sel(ENUMS.stratum, d.stratum, (v) => { d.stratum = v; })), field(t("dWhen"), when),
+      field(t("dEvidence"), sel(ENUMS.evidence, d.evidence, (v) => { d.evidence = v; })), field(t("dRole"), sel(ENUMS.role, d.role, (v) => { d.role = v; })),
+      field(t("dAudience"), sel(ENUMS.audience, d.audience, (v) => { d.audience = v; })));
+    if (d.kind === "absence") {
+      const note = el("input"); note.value = d.absenceNote || ""; note.addEventListener("input", () => { d.absenceNote = note.value; });
+      g.append(field(t("dCause"), sel(ENUMS.cause, d.absenceCause || "never-collected", (v) => { d.absenceCause = v; })), field(t("dNote"), note));
+    }
+    card.append(g);
+    if (d.actors?.length) { const c = el("div", "chips"); for (const a of d.actors) { const ch = el("span", "chip", a); ch.style.setProperty("--c", "var(--l-actors)"); c.append(ch); } card.append(c); }
+    const b = el("button", "quiet", d.keep ? t("drop") : t("keep")); b.type = "button"; b.addEventListener("click", () => { d.keep = !d.keep; renderDrafts(); });
+    const row = el("div", "row"); row.append(b); card.append(row);
+    box.append(card);
+  });
+  const n = drafts.filter((d) => d.keep).length;
+  $("saveRow").classList.toggle("hidden", !drafts.length); $("save").textContent = t("save")(n); $("save").disabled = !n;
+}
+$("save").addEventListener("click", async () => {
+  if (!$("sConsent").checked) return toast(t("needConsent"));
+  if (!$("sInterviewer").value.trim()) return toast(t("needName"));
+  const items = drafts.filter((d) => d.keep);
+  try {
+    const r = await api("observations", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({
+      session: { envelope: env.id, interviewer: $("sInterviewer").value, speaker: $("sSpeaker").value, grantedBy: $("sGranted").value, audience: $("sAudience").value, consent: true, lang: LANG },
+      items }) });
+    toast(t("saved")(r.saved)); drafts = [];
+    const d = await api(`envelope?id=${encodeURIComponent(env.id)}`); observations = d.observations; forms = d.forms; renderAll();
+  } catch (err) { toast(err.message); }
+});
+
+// ---------- The record
+const STRATA = ["made", "lived", "observed", "present"];
+function renderRecord() {
+  const box = $("record"); box.innerHTML = "";
+  const obs = current();
+  if (!obs.length) { box.append(el("div", "muted", t("emptyRecord"))); return; }
+  for (const st of STRATA) {
+    const items = obs.filter((o) => o.stratum === st).sort((a, b) => (a.kind === "absence") - (b.kind === "absence"));
+    if (!items.length) continue;
+    box.append(el("div", "stratum", label(st)));
+    for (const o of items) {
+      const c = el("div", `obs${o.kind === "absence" ? " absence" : ""}`);
+      c.append(el("div", "", `${o.kind === "absence" ? `${t("unknown")}: ` : ""}${o.claim}`));
+      if (o.absence?.note) c.append(el("div", "muted", `${label(o.absence.cause)} — ${o.absence.note}`));
+      if (o.quote) c.append(el("div", "quote", `“${o.quote}”`));
+      const chips = el("div", "chips");
+      const chip = (text, color, solid) => { const s = el("span", `chip${solid ? " solid" : ""}`, text); s.style.setProperty("--c", color); chips.append(s); };
+      if (o.when) chip(o.when, "var(--l-time)", true);
+      chip(label(o.kind), o.kind === "absence" ? "var(--l-absence)" : "var(--l-types)", true);
+      chip(label(o.evidence), "var(--l-evidence)"); chip(label(o.standing.role), "var(--l-evidence)", true);
+      for (const a of o.actors || []) chip(a, "var(--l-actors)");
+      chip(label(o.protocol.audience), "var(--l-protocol)");
+      c.append(chips, el("div", "muted", `${t("by")} ${o.speaker} · ${o.createdAt.slice(0, 10)} · ${o.author}`));
+      const row = el("div", "row");
+      const fix = el("button", "link", t("correct")); fix.type = "button";
+      fix.addEventListener("click", () => { drafts.push({ claim: o.claim, quote: o.quote, kind: o.kind, stratum: o.stratum, when: o.when, evidence: o.evidence, role: o.standing.role, actors: o.actors, absenceCause: o.absence?.cause, absenceNote: o.absence?.note, audience: o.protocol.audience, supersedes: o.id, keep: true }); renderDrafts(); $("drafts").scrollIntoView({ behavior: "smooth", block: "center" }); });
+      row.append(fix);
+      let n = 0; for (let p = o; p?.supersedes; p = observations.find((x) => x.id === p.supersedes)) n++;
+      if (n) row.append(el("span", "muted", t("earlier")(n)));
+      c.append(row); box.append(c);
+    }
+  }
+}
+
+// ---------- Form: uploads, each with its reality basis
+const TILES = [["splat", "tSplat", "tSplatSub", ".sog,.spz,.ply,.splat,.ksplat", false], ["photo", "tPhoto", "tPhotoSub", "image/*", true], ["scan", "tScan", "tScanSub", ".glb,.obj,.stl,.ply", false], ["reconstruction", "tSynth", "tSynthSub", ".glb,.obj,.stl", false]];
+function renderTiles() {
+  const box = $("tiles"); box.innerHTML = "";
+  for (const [kind, name, sub, accept, multiple] of TILES) {
+    const tile = el("label", "tile");
+    const basis = ENUMS.basis[kind];
+    const input = el("input"); input.type = "file"; input.accept = accept; input.multiple = multiple;
+    input.addEventListener("change", () => { uploadFiles(kind, [...input.files]); input.value = ""; });
+    tile.append(el("b", "", t(name)), el("small", "", t(sub)), el("span", `basis ${basis}`, t(basis)), input);
+    box.append(tile);
+  }
+}
+// Photos are resized to 2048 px JPEG in the browser, which also drops location and camera data.
+async function shrink(file) {
+  if (!file.type.startsWith("image/")) return file;
+  try {
+    const bmp = await createImageBitmap(file); const k = Math.min(1, 2048 / Math.max(bmp.width, bmp.height));
+    const c = Object.assign(document.createElement("canvas"), { width: Math.round(bmp.width * k), height: Math.round(bmp.height * k) });
+    c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+    const blob = await new Promise((r) => c.toBlob(r, "image/jpeg", 0.86));
+    return new File([blob], file.name.replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" });
+  } catch { return file; }
+}
+async function uploadFiles(kind, files) {
+  for (const raw of files) {
+    const file = kind === "photo" ? await shrink(raw) : raw;
+    $("upState").textContent = t("uploading")(file.name);
+    const q = new URLSearchParams({ envelope: env.id, kind, name: file.name, caption: $("fCaption").value, date: $("fDate").value, by: $("sInterviewer").value, audience: $("sAudience").value });
+    try { forms.push(await api(`upload?${q}`, { method: "PUT", headers: { "content-type": file.type || "application/octet-stream" }, body: file })); $("upState").textContent = t("uploaded"); }
+    catch (err) { $("upState").textContent = err.message; }
+    renderForms(); renderCover();
+  }
+}
+function renderForms() {
+  const box = $("forms"); box.innerHTML = "";
+  for (const f of forms) {
+    const d = el("div", "formitem");
+    if (f.kind === "photo") { const img = el("img"); img.src = `/api/gather/file/${f.file}`; img.alt = f.caption || f.name; img.loading = "lazy"; d.append(img); }
+    d.append(el("b", "", t({ splat: "tSplat", photo: "tPhoto", scan: "tScan", reconstruction: "tSynth" }[f.kind])), el("span", `basis ${f.basis}`, t(f.basis)));
+    if (f.caption) d.append(el("span", "", f.caption));
+    d.append(el("span", "muted", [f.captured?.date, f.captured?.by, `${(f.size / 1048576).toFixed(1)} MB`].filter(Boolean).join(" · ")));
+    box.append(d);
+  }
+}
+function renderAll() { renderCover(); renderDrafts(); renderRecord(); renderForms(); }
+
+// ---------- Go
+remember("sInterviewer"); // the speaker's name is not kept in the browser
+[ENUMS, envelopes] = await Promise.all([api("enums"), api("envelopes")]);
+applyLang();
+let last = null; try { last = localStorage.getItem("gather.env"); } catch {}
+if (last && envelopes.some((e) => e.id === last)) { $("envSelect").value = last; openEnvelope(last).catch(() => {}); }
+</script>
+</body>
+</html>

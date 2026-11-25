@@ -67,3 +67,12 @@ journal stamp appears after completion.
   close to notice one; the end card explains what you noticed and one you
   slid past. The journal keeps `found`; the panel shows the street
   notebook. More exhibits need new cited claims first.
+- 2026-11-25: Shaw's Omusha diorama splat (vendor/sapporo-omusha): kind
+  `splat-look` in `captures/`. "Look closer" opens a full-screen stage
+  (portal, Esc closes the stage only) with the capture (three + Spark,
+  loaded with import() on open) and a spot list that works without it.
+  Each spot shows its claims; complete when every spot claim was read. No
+  score or game: a colonial power scene (museum catalog note). The splat
+  comes from `/api/museum-assets/<key>` behind the demo password (Lukas);
+  401 shows a password form, 404/503/no WebGL2 the list only. Phones and
+  ≤4 GB devices: pixel ratio 1.25, 1M splats.

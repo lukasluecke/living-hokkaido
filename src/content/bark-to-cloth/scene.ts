@@ -206,6 +206,7 @@ export const memoryCabin: DetailSceneInput = {
     "quiz-ainu-today",
     "sequence-postwar",
     "quiz-tools-mixed",
+    "omusha-look",
   ],
   timelineIds: ["house-over-time"],
 };

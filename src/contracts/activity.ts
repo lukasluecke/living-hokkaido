@@ -5,6 +5,7 @@
 // in src/parts/activities. Add a kind = additive contract change.
 import { z } from "zod";
 import { idSchema } from "./ids";
+import { vec3Schema } from "./space";
 
 const base = {
   id: idSchema,
@@ -582,6 +583,58 @@ export const placeActivitySchema = z.object({
   illustrative: z.literal(true).default(true),
 });
 
+// ---------------------------------------------------------------- captures
+
+/**
+ * Look closer at a captured museum diorama (a Gaussian splat, vendored data
+ * from xjets/sapporo-omusha, see vendor/README.md). The visitor turns the
+ * capture and opens spots (figures and parts of the scene); each spot shows
+ * its claims. No score and no game: the capture records a museum diorama,
+ * not the place itself. The splat file is museum material: it is never in
+ * Git and is served from a private bucket behind a demo password.
+ */
+export const splatLookActivitySchema = z
+  .object({
+    ...base,
+    kind: z.literal("splat-look"),
+    /** How to look. Frame text only: it states no historical fact. */
+    prompt: z.string().min(1),
+    /** Shown when every spot claim was read. Must only restate claims. */
+    completion: z.string().min(1),
+    asset: z.object({
+      /** File name in the museum asset store (`/api/museum-assets/<key>`). */
+      key: z.string().regex(/^[a-z0-9-]+\.(sog|spz)$/),
+      /** What the capture records, shown on the stage bar. */
+      label: z.string().min(1),
+      /** True while the file is only for people with the demo password. */
+      gated: z.boolean().default(true),
+      /** Rotate 180° about X (Postshot / INRIA exports have Y down). */
+      flip: z.boolean().default(true),
+    }),
+    /** Start view in splat-local coordinates. */
+    view: z.object({ eye: vec3Schema, target: vec3Schema }),
+    /** Figures and parts of the scene, in splat-local coordinates. */
+    spots: z
+      .array(
+        z.object({
+          id: idSchema,
+          /** Short visible name. Describes what is seen; states no fact. */
+          label: z.string().min(1),
+          group: z.enum(["figure", "scene"]),
+          position: vec3Schema,
+          /** Claims shown for this spot. Empty: shown as "not known yet". */
+          claimIds: z.array(idSchema).default([]),
+        }),
+      )
+      .min(1)
+      .max(40),
+  })
+  .refine(
+    (a) =>
+      a.spots.every((s) => s.claimIds.every((c) => a.claimIds.includes(c))),
+    "Spot claims must be listed in claimIds",
+  );
+
 export const activitySchema = z.discriminatedUnion("kind", [
   quizActivitySchema,
   weaveActivitySchema,
@@ -596,6 +649,7 @@ export const activitySchema = z.discriminatedUnion("kind", [
   hideSeekActivitySchema,
   slopeRunActivitySchema,
   placeActivitySchema,
+  splatLookActivitySchema,
 ]);
 export type ActivityDefinition = z.infer<typeof activitySchema>;
 export type ActivityInput = z.input<typeof activitySchema>;
