@@ -1,4 +1,4 @@
-# Omusha 1808: talk to the diorama
+﻿# Omusha 1808: talk to the diorama
 
 A phone web app that opens a Gaussian splat of the 1808 Omusha diorama in the
 Hokkaido Museum (北海道博物館) and lets you tap figures to meet them. The scene is an
@@ -54,7 +54,7 @@ museum diorama.
 `POST /api/talk` with `{ figure, question, history? }` returns `{ answer, cites, grounding }`.
 The rules are in [talk-prompt.mjs](talk-prompt.mjs), shared with the training-data generator so the
 fine-tune learns the same behaviour the live app shows. Needs `GEMINI_API_KEY` on the server
-(`GEMINI_MODEL` optional, default `gemini-flash-latest`).
+(`GEMINI_MODEL` optional, default `gemini-3.5-flash`; `GEMINI_THINKING` default `minimal`, about 1.5 s per answer).
 
 ### Training data
 

@@ -167,7 +167,9 @@ function validateNew(body, existing) {
 // Behaviour follows training/SPEC.md: period voice, nothing after 1808, each claim labelled
 // documented or inferred with its perspective, gaps answered as gaps, no invented Ainu belief.
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '';
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-flash-latest';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash';
+// Thinking makes answers several times slower; minimal keeps Talk under about 2 s. GEMINI_THINKING=low|medium|high to trade speed for care.
+const GEMINI_THINKING = process.env.GEMINI_THINKING || 'minimal';
 const CHAR_DIR = path.join(ROOT, 'characters', '1808');
 const TALK_PER_MINUTE = 30;
 let talkWindow = { start: 0, count: 0 };
@@ -210,7 +212,7 @@ async function talk(body) {
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: talkPrompt(characters[id], observations, characters) }] },
       contents: [...history, { role: 'user', parts: [{ text: question }] }],
-      generationConfig: { temperature: 0.3, responseMimeType: 'application/json', responseSchema: TALK_SCHEMA },
+      generationConfig: { temperature: 0.3, responseMimeType: 'application/json', responseSchema: TALK_SCHEMA, thinkingConfig: { thinkingLevel: GEMINI_THINKING } },
     }),
     signal: AbortSignal.timeout(45000),
   });
