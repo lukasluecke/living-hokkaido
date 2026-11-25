@@ -17,7 +17,7 @@ Hack Hokkaido Build Week, November 2026.
 |---|---|
 | Splat viewer with tappable figures (Spark) | Working |
 | Hotspot placement tool (`?edit=1`) | Working |
-| Close-up 3D model per figure, with AR on phones | Working (7 elder figures) |
+| Close-up 3D model per figure | Working (7 elder figures) |
 | Character sheets (12 figures) | Drafts, not yet sourced |
 | Retrieval corpus | Not started |
 | Voice (ElevenLabs) and dialogue | Not started |
@@ -61,8 +61,8 @@ Open `http://localhost:8081/src/`. The museum capture is not in this repository
 
 `?figure=<character id>` opens that figure's card on load, for QR codes next to
 the display or demo links, e.g. `src/?figure=elder-star-flowers`. A figure whose
-sheet has a `model` shows its 3D model in the card, with a "View in your room"
-AR button on phones (AR needs the site served over HTTPS).
+sheet has a `model` shows its 3D model in the card. (AR "view in your room" was
+removed: on Android, returning from it lost the splat's WebGL context.)
 
 ### Placing figures
 

@@ -123,7 +123,6 @@
   @media (max-width: 720px) { .figure3d model-viewer { height: 34dvh; } }
   .figure3d .ar { position: absolute; }
   .figure3d .note { font-size: 11px; color: var(--muted); }
-  .arbtn { position: absolute; right: 10px; bottom: 10px; height: 32px; font-size: 12px; }
 
   /* Edit mode */
   .editor { position: fixed; left: 12px; top: 64px; z-index: 6; width: 260px; background: var(--panel-solid);
@@ -200,9 +199,7 @@
   <div class="body">
     <div class="figure3d fig-only" id="sModelWrap" hidden>
       <model-viewer id="sModel" camera-controls auto-rotate auto-rotate-delay="1500" rotation-per-second="20deg"
-        touch-action="pan-y" interaction-prompt="none" shadow-intensity="0.7" exposure="1.05"
-        ar ar-modes="webxr scene-viewer quick-look" ar-scale="auto" alt="">
-        <button slot="ar-button" class="arbtn">View in your room</button>
+        touch-action="pan-y" interaction-prompt="none" shadow-intensity="0.7" exposure="1.05" alt="">
       </model-viewer>
       <div class="note" id="sModelLabel"></div>
     </div>
