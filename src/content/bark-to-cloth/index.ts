@@ -10,12 +10,13 @@ import { locations, overview, owlHome } from "./island";
 import { stamps } from "./journal";
 import { barkToCloth } from "./knowledge";
 import { memories } from "./memories";
+import { houseOverTime, houseTimeline } from "./over-time";
 import { lakeHouse } from "./scene";
 
 export const barkToClothRaw = {
   contractVersion: CONTRACT_VERSION,
   id: "bark-to-cloth",
-  knowledge: [barkToCloth],
+  knowledge: [barkToCloth, houseOverTime],
   island: { owlHome, overview, locations },
   scenes: [lakeHouse],
   artifacts,
@@ -23,6 +24,7 @@ export const barkToClothRaw = {
   stamps,
   guide,
   memories,
+  timelines: [houseTimeline],
 };
 
 /** Parsed with defaults applied. Throws if any reference is broken. */

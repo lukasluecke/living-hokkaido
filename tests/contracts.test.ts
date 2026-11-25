@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   EMPTY_JOURNAL,
+  eraAt,
+  eraWeights,
   type ExperienceEvent,
   experienceEventSchema,
   resolveClaim,
@@ -223,4 +225,57 @@ test("story fact lines and choices cite the activity's claims", () => {
   const line = kindOf(q, "story").chapters[0].lines[1];
   if (line.role === "fact") line.claimIds = [];
   assert.notDeepEqual(validateContentPack(q), []);
+});
+
+test("timeline: eras cite claims in their knowledge entry", () => {
+  const t = pack.timelines[0];
+  assert.ok(t, "pack has a timeline");
+  assert.ok(t.eras.length >= 2);
+  for (const e of t.eras)
+    for (const c of e.claimIds)
+      assert.ok(resolveClaim(pack, t.knowledgeId, c), `${e.id} → ${c}`);
+  const p = clone();
+  p.timelines[0].eras[1].claimIds.push("invented-claim");
+  assert.ok(
+    validateContentPack(p).some(
+      (e) => e.includes("invented-claim") && e.includes("timeline"),
+    ),
+  );
+});
+
+test("timeline: eras must be in time order; packs without timelines parse", () => {
+  const p = clone();
+  p.timelines[0].eras[2].year = 100;
+  assert.ok(validateContentPack(p).some((e) => e.includes("time order")));
+  const { timelines: _drop, ...old } = clone();
+  assert.deepEqual(validateContentPack(old), []);
+});
+
+test("timeline: withdrawn knowledge hides the timeline", () => {
+  const p = clone();
+  const k = p.knowledge.findIndex((x) => x.id === "house-over-time");
+  p.knowledge[k] = { ...p.knowledge[k], presentation: "withdrawn" };
+  assert.ok(
+    validateContentPack(p).some(
+      (e) => e.includes("timeline") && e.includes("withdrawn"),
+    ),
+  );
+});
+
+test("timeline: era weights blend neighbours and sum to 1", () => {
+  assert.deepEqual(eraWeights(5, 0), [1, 0, 0, 0, 0]);
+  const w = eraWeights(5, 2.25);
+  assert.ok(Math.abs(w[2] - 0.75) < 1e-9 && Math.abs(w[3] - 0.25) < 1e-9);
+  assert.deepEqual(eraWeights(3, 9), [0, 0, 1]);
+  assert.equal(eraAt(5, 2.6), 3);
+  assert.equal(eraAt(5, -1), 0);
+});
+
+test("timeline events parse", () => {
+  for (const e of [
+    { type: "timeline.open", timelineId: "house-over-time" },
+    { type: "timeline.era", timelineId: "house-over-time", eraId: "meiji" },
+    { type: "timeline.close", timelineId: "house-over-time" },
+  ])
+    assert.ok(experienceEventSchema.safeParse(e).success, e.type);
 });

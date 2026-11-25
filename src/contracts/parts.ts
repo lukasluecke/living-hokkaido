@@ -12,6 +12,7 @@ import type { JournalState } from "./journal";
 import type { ResolvedClaim } from "./knowledge";
 import type { DetailScene } from "./scene";
 import type { SeasonState } from "./season";
+import type { Timeline } from "./timeline";
 
 /** Every part gets this. */
 export type PartContext = {
@@ -61,6 +62,15 @@ export type RevealPartProps = PartContext & {
   knowledgeId: string;
   claim: ResolvedClaim | null;
   artifact: Artifact | null;
+};
+
+/** "Over time" scrub for one place. Not in PART_IDS yet (shell wiring later). */
+export type TimelinePartProps = PartContext & {
+  timeline: Timeline;
+  /** Resolved claims keyed by claim id (eras + timeline claims). */
+  claims: Record<string, ResolvedClaim>;
+  /** Era index to start at (default 0). */
+  initialEra?: number;
 };
 
 export type PartPropsMap = {
