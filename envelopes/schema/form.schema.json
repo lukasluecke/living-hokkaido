@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/xjets/sapporo-omusha/envelopes/schema/form.schema.json",
+  "title": "Form",
+  "description": "The Form layer of an envelope: one way the thing can be seen (a splat, a scan, photographs, a painting, a reconstruction), how it was captured, and how directly it records the thing. Basis is shown with every form, so a visitor can tell a record of the object from something that only stands for it.",
+  "type": "object",
+  "required": ["id", "of", "kind", "basis", "label"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "of": { "type": "string", "description": "Envelope id or character id this form shows." },
+    "kind": {
+      "enum": ["splat", "scan", "photo", "photo-series", "video", "painting", "drawing", "diorama", "reconstruction"],
+      "description": "What the form is. splat/scan/photo/photo-series/video are captures; painting/drawing/diorama are made by a person; reconstruction is generated."
+    },
+    "basis": {
+      "enum": ["recorded", "interpreted", "symbolic"],
+      "description": "recorded: captured from the object itself, so what is shown was there (photographs, scans, splats). interpreted: made by a person from looking or from sources (paintings, drawings, the 1971 diorama itself). symbolic: generated; it stands for the object but is not a record of it (AI reconstructions)."
+    },
+    "coverage": {
+      "enum": ["all-sides", "partial", "one-view"],
+      "description": "How much of the object the capture saw. A recorded form can still miss sides."
+    },
+    "label": { "$ref": "#/$defs/text", "description": "Short name shown with the basis badge." },
+    "captured": {
+      "type": "object",
+      "properties": {
+        "date": { "type": "string", "description": "ISO date or year." },
+        "by": { "type": "string" },
+        "method": { "$ref": "#/$defs/text" }
+      }
+    },
+    "count": { "type": "integer", "minimum": 1, "description": "Number of photographs or frames, for photo-series and video." },
+    "derivedFrom": { "type": "array", "items": { "type": "string" }, "description": "Form ids this one was made from." },
+    "unseen": { "$ref": "#/$defs/text", "description": "What the form shows that was never captured (e.g. an invented front)." },
+    "src": { "type": "string", "description": "File to display, relative to src/index.html. Omitted when the form is held but not published." },
+    "published": { "type": "boolean", "description": "False when the material is held as a source but not shown (rights not yet cleared)." }
+  },
+  "$defs": {
+    "text": {
+      "type": "object",
+      "required": ["en"],
+      "properties": { "en": { "type": "string" }, "ja": { "type": "string" } }
+    }
+  }
+}

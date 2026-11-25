@@ -1,0 +1,156 @@
+{
+  "machine": true,
+  "model": "gemini-3.5-flash",
+  "translatedAt": "2026-11-25T15:46:04.331Z",
+  "reviewed": false,
+  "observations": {
+    "obs-001-identification": {
+      "claim": "この場面は、1808年にサハリン（樺太）の久春古丹（クシュンコタン）において、会津藩の役人が樺太アイヌに対して執り行ったオムシャである。",
+      "sourceRef": "北海道博物館の展示解説文（来館者Shawによる要約。正確な文言は要確認）"
+    },
+    "obs-002-omusha-meaning": {
+      "claim": "オムシャは知人同士の挨拶として始まったが、和人の役人が触書を読み上げる一方でアイヌが米、酒、たばこを受け取る政治的な儀式へと変化した。",
+      "note": "検証済みとして表示する前に学術的な引用が必要である。",
+      "sourceRef": "Project brief \"Omusha Diorama Interpreter\" (Shaw, 2026-11-25): research summary, primary sources not yet attached"
+    },
+    "obs-003-banquet": {
+      "claim": "儀式の後には通常、宴が催された。",
+      "sourceRef": "Project brief \"Omusha Diorama Interpreter\" (Shaw, 2026-11-25): research summary, primary sources not yet attached"
+    },
+    "obs-004-aizu-deployment": {
+      "claim": "幕府は1807年に蝦夷地を直轄地化し、1807年から1808年にかけて会津藩兵が北方警備に派遣された。",
+      "sourceRef": "Project brief \"Omusha Diorama Interpreter\" (Shaw, 2026-11-25): research summary, primary sources not yet attached"
+    },
+    "obs-005-elders-meaning-unrecorded": {
+      "claim": "この儀式がアイヌの長老たちにとってどのような意味を持っていたかは記録されていない。",
+      "note": "「何も記録されていない」というのは研究者の主張であり、研究者または当事者コミュニティの機関による確認が必要である。",
+      "absenceNote": "現存するオムシャの記録は和人の役人によって執筆されたものである。",
+      "sourceRef": "\"The Envelope — Foundational Document\" (Shaw, 2026-11-25)"
+    },
+    "obs-006-transmission-suppressed": {
+      "claim": "このような儀式についてアイヌの家族間で継承されてきた可能性のある事柄の多くは、伝承されなかった。",
+      "absenceNote": "アイヌの言語や習慣は、後に積極的に抑圧された。",
+      "sourceRef": "\"The Envelope — Foundational Document\" (Shaw, 2026-11-25)"
+    },
+    "obs-007-hakodate-painting": {
+      "claim": "1808年に久春古丹（クシュンコタン）で行われた同オムシャを描いた絵画が、函館市中央図書館に所蔵されている。",
+      "note": "未調査。その作者と年代については別途考察が必要である。",
+      "sourceRef": "Project brief \"Omusha Diorama Interpreter\" (Shaw, 2026-11-25): research summary, primary sources not yet attached"
+    },
+    "obs-008-made-1971": {
+      "claim": "ジオラマは1971年に制作された。",
+      "sourceRef": "\"The Envelope — Foundational Document\" (Shaw, 2026-11-25)"
+    },
+    "obs-009-made-around-1972": {
+      "claim": "ジオラマは1972年頃に制作されたとされる。",
+      "note": "1971年という年代と矛盾している。博物館の記録で確定するまでは両方の記述を保持する。",
+      "sourceRef": "Project brief \"Omusha Diorama Interpreter\" (Shaw, 2026-11-25): research summary, primary sources not yet attached"
+    },
+    "obs-010-figure-count": {
+      "claim": "ジオラマには、会津藩の武士（一部は武装）、役人、通辞、樺太アイヌの長老、女性、子供など、およそ40体の人形が配置されている。",
+      "sourceRef": "Project brief \"Omusha Diorama Interpreter\" (Shaw, 2026-11-25): research summary, primary sources not yet attached"
+    },
+    "obs-011-arrangement": {
+      "claim": "ジオラマでは、和人の通辞が建物の中に座り、アイヌの長老たちが建物の前のござに座って役人と向かい合うしている。",
+      "sourceRef": "Visitor photos of the diorama, 2026-11-25 13:03 (assets/figures/*/photo-*.jpg, not published)"
+    },
+    "obs-012-elder-chrysanthemum-robe": {
+      "claim": "白髪。青い菊、赤の格子模様の丸い花、赤の漢字があしらわれた白い衣装。背面のみ確認可能。",
+      "sourceRef": "Visitor photos of the diorama, 2026-11-25 13:03 (assets/figures/figure-chrysanthemum-kanji/photo-*.jpg, not published)"
+    },
+    "obs-013-elder-star-flowers-robe": {
+      "claim": "白髪。赤、オリーブ色、紺色の星型の花と紺色の波模様があしらわれた白い衣装。背面のみ確認可能。",
+      "sourceRef": "Visitor photos of the diorama, 2026-11-25 13:03 (assets/figures/figure-star-flowers-waves/photo-*.jpg, not published)"
+    },
+    "obs-014-elder-leaf-sprigs-robe": {
+      "claim": "灰色の髪。紺色の小枝と赤茶色の葉があしらわれたクリーム色の衣装。背面のみ確認可能。",
+      "sourceRef": "Visitor photos of the diorama, 2026-11-25 13:03 (assets/figures/figure-leaf-sprigs/photo-*.jpg, not published)"
+    },
+    "obs-015-elder-black-crest-robe": {
+      "claim": "ダークグレーの髪。両肩の間に白い家紋が1つ入った無地の黒い衣装。背面のみ確認可能。",
+      "sourceRef": "Visitor photos of the diorama, 2026-11-25 13:03 (assets/figures/figure-black-crest/photo-*.jpg, not published)"
+    },
+    "obs-016-elder-brushstrokes-robe": {
+      "claim": "灰色の髪。濃色と赤の筆あと模様があしらわれた淡いブルーグレーの衣装。背面のみ確認可能。",
+      "sourceRef": "Visitor photos of the diorama, 2026-11-25 13:03 (assets/figures/figure-blue-brushstrokes/photo-*.jpg, not published)"
+    },
+    "obs-017-elder-pink-flowers-robe": {
+      "claim": "白髪。赤と紺色の花模様、茶色のリボン状の線があしらわれたピンクの衣装。背面のみ確認可能。",
+      "sourceRef": "Visitor photos of the diorama, 2026-11-25 13:03 (assets/figures/figure-pink-flowers/photo-*.jpg, not published)"
+    },
+    "obs-018-elder-maple-leaves-robe": {
+      "claim": "暗い色の髪。赤と紺色の紅葉模様があしらわれたライトグレーの衣装。背面のみ確認可能。",
+      "sourceRef": "Visitor photos of the diorama, 2026-11-25 13:03 (assets/figures/figure-maple-leaves/photo-*.jpg, not published)"
+    },
+    "obs-019-robes-meaning-unrecorded": {
+      "claim": "1971年の制作陣がなぜ座っている長老たちにこれらの文様衣装を着せたのか、またどのような資料を用いたのかは、ここでは記録されていない。",
+      "absenceNote": "制作時のメモや博物館の記録文書はまだ確認されていない。",
+      "sourceRef": "This project"
+    },
+    "obs-020-fronts-unseen": {
+      "claim": "座っている長老たちの顔や前面は来館者側からは見えず、撮影もされていない。",
+      "absenceNote": "人形はガラス面とは逆方向の建物の方向を向いている。",
+      "sourceRef": "Visitor photos of the diorama, 2026-11-25 13:03 (assets/figures/*/photo-*.jpg, not published)"
+    },
+    "obs-021-models-fronts-invented": {
+      "claim": "座っている長老たちの3DモデルはAI復元（Gemini + Hyper3D）によるものである。背面は写真に依拠しているが、髭を生やした前面は文章記述から生成された創作である。",
+      "sourceRef": "assets/figures/*/turnaround.json"
+    },
+    "obs-022-presentation-history": {
+      "claim": "1971年以降、この場面やアイヌに関する博物館の展示表現がどのように変化してきたかは、ここではまだ記録されていない。",
+      "sourceRef": "\"The Envelope — Foundational Document\" (Shaw, 2026-11-25)"
+    },
+    "obs-023-hall-appearance": {
+      "claim": "中央には、高床の茅葺き木造建築が建っている。その内部には役人と通辞が座り、長老たちを見渡している。",
+      "sourceRef": "ジオラマのガウシアンスプラットおよび来館者写真、2026-11-25（未公開）"
+    },
+    "obs-024-hall-unrecorded": {
+      "claim": "これが久春古丹（クシュンコタン）のどの建物を示しているのか、また1971年の制作陣が何に基づいたのかは、ここでは記録されていない。",
+      "absenceNote": "当館の記録および制作者の資料の調査は行われていない。",
+      "sourceRef": "本プロジェクト"
+    },
+    "obs-025-curtains-appearance": {
+      "claim": "建物の正面および柵に沿って白幕が張られており、それぞれに大きな黒い家紋があしらわれている。",
+      "sourceRef": "ジオラマのガウシアンスプラットおよび来館者写真、2026-11-25（未公開）"
+    },
+    "obs-026-curtains-crest": {
+      "claim": "家紋は徳川幕府の三つ葉葵のように見え、これは儀式が幕府の名において執り行われたことを示すものと考えられる。",
+      "note": "来館者側からの同定に過ぎない。学芸員による確認が必要である。",
+      "sourceRef": "ジオラマのガウシアンスプラットおよび来館者写真、2026-11-25（未公開）"
+    },
+    "obs-027-tubs-appearance": {
+      "claim": "座っている長老たちの前の地面には、藁で包まれた小さな丸い樽が一列に並んでいる。",
+      "sourceRef": "ジオラマのガウシアンスプラットおよび来館者写真、2026-11-25（未公開）"
+    },
+    "obs-028-tubs-meaning": {
+      "claim": "これらは、オムシャにおいてアイヌに渡された米、酒、タバコを表している可能性がある。",
+      "sourceRef": "本プロジェクト、儀式の記録（obs-002）より"
+    },
+    "obs-029-troops-appearance": {
+      "claim": "左側には、甲冑を着用した会津藩の武士が縞模様の幟の脇に列をなして座っており、一部は武器を手にしている。",
+      "sourceRef": "ジオラマのガウシアンスプラットおよび来館者写真、2026-11-25（未公開）"
+    },
+    "obs-030-troops-unnamed": {
+      "claim": "1808年に久春古丹（クシュンコタン）に参列した会津藩士の名前は、ここでは記録されていない。",
+      "absenceNote": "会津藩の記録の調査は行われていない。",
+      "sourceRef": "本プロジェクト"
+    },
+    "obs-031-bales-appearance": {
+      "claim": "場面の右側には、俵が高く積まれている。",
+      "sourceRef": "ジオラマのガウシアンスプラットおよび来館者写真、2026-11-25（未公開）"
+    },
+    "obs-032-bales-unrecorded": {
+      "claim": "積まれた俵に何が入っていたのか、またそれらが贈り物の一部であったのかどうかは、ここでは記録されていない。",
+      "sourceRef": "本プロジェクト"
+    },
+    "obs-033-child-unrecorded": {
+      "claim": "この子供が誰であるか、また同席した子供たちにとってこの儀式が何を意味していたのかは、ここには記録されていない。",
+      "absenceNote": "現存するオムシャの記録は、和人の役人によって書かれたものである。",
+      "sourceRef": "\"The Envelope — Foundational Document\" (Shaw, 2026-11-25)"
+    },
+    "obs-034-child-model": {
+      "claim": "この子供の3Dモデルはhyper3d.ai（生成30551fbc）で生成された。作成の元となった参照画像は、ここには記録されていない。",
+      "sourceRef": "assets/figures/figure-boy-brown-robe/hyper3d-generation.txt"
+    }
+  }
+}

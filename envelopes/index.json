@@ -1,0 +1,122 @@
+{
+    "envelopes":  [
+                      {
+                          "id":  "hokkaido-museum",
+                          "name":  {
+                                       "en":  "Hokkaido Museum",
+                                       "ja":  "北海道博物館"
+                                   },
+                          "scale":  "institution",
+                          "strata":  [
+                                         "observed",
+                                         "present-2026"
+                                     ],
+                          "protocol":  {
+                                           "defaultAudience":  "public"
+                                       }
+                      },
+                      {
+                          "id":  "omusha-diorama",
+                          "name":  {
+                                       "en":  "Omusha diorama",
+                                       "ja":  "オムシャのジオラマ"
+                                   },
+                          "scale":  "diorama",
+                          "parent":  "hokkaido-museum",
+                          "depicts":  "kushun-kotan-1808",
+                          "strata":  [
+                                         "made-1971",
+                                         "observed",
+                                         "present-2026"
+                                     ],
+                          "form":  {
+                                       "splat":  "/assets/omusha.sog",
+                                       "figures":  "/assets/figures/"
+                                   },
+                          "protocol":  {
+                                           "defaultAudience":  "public",
+                                           "note":  "To be set with the Hokkaido Museum\u0027s Ainu Culture Research Center and community bodies."
+                                       }
+                      },
+                      {
+                          "id":  "kushun-kotan-1808",
+                          "name":  {
+                                       "en":  "Omusha at Kushun Kotan, 1808",
+                                       "ja":  "久春古丹のオムシャ（1808年）"
+                                   },
+                          "scale":  "place",
+                          "strata":  [
+                                         "depicted-1808",
+                                         "observed"
+                                     ],
+                          "protocol":  {
+                                           "defaultAudience":  "public"
+                                       }
+                      },
+                      {
+                          "id":  "diorama-hall",
+                          "name":  {
+                                       "en":  "The building at the centre",
+                                       "ja":  "中央の建物"
+                                   },
+                          "scale":  "feature",
+                          "parent":  "omusha-diorama",
+                          "strata":  [
+                                         "made-1971",
+                                         "depicted-1808"
+                                     ]
+                      },
+                      {
+                          "id":  "diorama-curtains",
+                          "name":  {
+                                       "en":  "Crested curtains",
+                                       "ja":  "紋の入った幕"
+                                   },
+                          "scale":  "feature",
+                          "parent":  "omusha-diorama",
+                          "strata":  [
+                                         "made-1971",
+                                         "depicted-1808"
+                                     ]
+                      },
+                      {
+                          "id":  "diorama-tubs",
+                          "name":  {
+                                       "en":  "Tubs before the elders",
+                                       "ja":  "長老たちの前の桶"
+                                   },
+                          "scale":  "feature",
+                          "parent":  "omusha-diorama",
+                          "strata":  [
+                                         "made-1971",
+                                         "depicted-1808"
+                                     ]
+                      },
+                      {
+                          "id":  "diorama-troops",
+                          "name":  {
+                                       "en":  "Aizu troops",
+                                       "ja":  "会津藩の兵"
+                                   },
+                          "scale":  "feature",
+                          "parent":  "omusha-diorama",
+                          "strata":  [
+                                         "made-1971",
+                                         "depicted-1808"
+                                     ]
+                      },
+                      {
+                          "id":  "diorama-bales",
+                          "name":  {
+                                       "en":  "Stacked bales",
+                                       "ja":  "積まれた俵"
+                                   },
+                          "scale":  "feature",
+                          "parent":  "omusha-diorama",
+                          "strata":  [
+                                         "made-1971",
+                                         "depicted-1808"
+                                     ]
+                      }
+                  ]
+}
