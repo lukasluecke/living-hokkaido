@@ -31,4 +31,4 @@ All sponsor adapters are mock/unavailable and labeled. Convex and Clerk are deli
 
 ## License
 
-Original code and original placeholder geometry: MIT, see LICENSE. External cultural sources retain their own rights; a link is not permission to redistribute them. Uploaded material is not automatically MIT-licensed. The original event PDFs and participant roster are intentionally excluded from this repository.
+Original code and original placeholder geometry: MIT, see LICENSE. External cultural sources retain their own rights; a link is not permission to redistribute them. The Hokkaido Museum panel transcriptions in `docs/research/hokkaido-museum/transcriptions/` belong to the museum and are not MIT (see its RIGHTS.md). Uploaded material is not automatically MIT-licensed. The original event PDFs and participant roster are intentionally excluded from this repository.
