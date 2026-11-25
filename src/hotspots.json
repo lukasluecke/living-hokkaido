@@ -1,16 +1,16 @@
 {
   "note": "Positions are in splat-local coordinates. Place them with ?edit=1, then paste the exported JSON here.",
   "view": {
-    "position": [-3.8831, -2.9305, 1.1523],
-    "target": [4.5068, -1.7649, 0.998]
+    "position": [-1.295, -2.7196, 2.4193],
+    "target": [4.4642, -1.4891, 1.1797]
   },
   "hotspots": [
-    { "character": "elder-maple-leaves", "position": [2.7092, -0.6411, -0.4421] },
-    { "character": "elder-pink-flowers", "position": [2.8272, -0.513, 0.0465] },
-    { "character": "elder-brushstrokes", "position": [2.7474, -0.563, 0.5042] },
-    { "character": "elder-black-crest", "position": [2.7664, -0.5481, 0.965] },
-    { "character": "elder-chrysanthemum", "position": [2.8013, -0.6168, 1.4354] },
-    { "character": "elder-leaf-sprigs", "position": [2.8149, -0.5139, 1.9802] },
-    { "character": "elder-star-flowers", "position": [2.8064, -0.5698, 2.5338] }
+    { "character": "elder-maple-leaves", "position": [2.4796, -0.3963, -0.3441] },
+    { "character": "elder-pink-flowers", "position": [2.6863, -0.3328, 0.081] },
+    { "character": "elder-brushstrokes", "position": [2.4887, -0.3721, 0.5362] },
+    { "character": "elder-black-crest", "position": [2.6167, -0.341, 0.9785] },
+    { "character": "elder-chrysanthemum", "position": [2.278, -0.4639, 1.4058] },
+    { "character": "elder-leaf-sprigs", "position": [2.6668, -0.292, 1.9926] },
+    { "character": "elder-star-flowers", "position": [2.5715, -0.3979, 2.4836] }
   ]
 }
