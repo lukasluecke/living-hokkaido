@@ -8,6 +8,16 @@ import s from "../shared/Fallback.module.css";
 import { Memories } from "./Memories";
 import { Viewer3D } from "./Viewer3D";
 
+/** Button prefix per activity kind, so two activities never share a label. */
+const VERB: Record<string, string> = {
+  quiz: "Reflect",
+  story: "Listen",
+  words: "Learn",
+  trace: "Trace",
+  weave: "Weave",
+  sequence: "Put in order",
+};
+
 export function ArtifactViewer({
   artifact,
   claims,
@@ -55,16 +65,19 @@ export function ArtifactViewer({
       </ul>
       <Memories memories={memories} />
       <div className={s.row}>
-        {artifact.activityIds.map((id) => (
-          <button
-            key={id}
-            type="button"
-            className={s.button}
-            onClick={() => emit({ type: "activity.start", activityId: id })}
-          >
-            Try the activity
-          </button>
-        ))}
+        {artifact.activityIds.map((id) => {
+          const a = content.activities.find((x) => x.id === id);
+          return (
+            <button
+              key={id}
+              type="button"
+              className={s.button}
+              onClick={() => emit({ type: "activity.start", activityId: id })}
+            >
+              {a ? `${VERB[a.kind] ?? "Try"}: ${a.title}` : "Try the activity"}
+            </button>
+          );
+        })}
         <button
           type="button"
           className={s.button}
