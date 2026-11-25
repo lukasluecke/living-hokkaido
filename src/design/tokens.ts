@@ -40,6 +40,12 @@ export const season = {
   ground: ["#8fb06a", "#6f9a4e", "#b08a4a", "#eef3f7"],
   foliage: ["#f2b8c6", "#4f7f45", "#c8562e", "#dfe7ee"],
   accent: ["#7d9a52", "#8a63c8", "#b08a4a", "#eef3f7"],
+  /** Toon shade tint (dark side of every form). Cool, never black. */
+  shade: ["#8d9bc0", "#7f96b8", "#9a8aa8", "#7d8fb0"],
+  /** Near fog colour (first fog layer); far fog uses the sky colour. */
+  fogNear: ["#d9e4ee", "#c9e0ee", "#e6d3bd", "#b9c6dc"],
+  /** Ink outline colour. */
+  ink: ["#3b4a5e", "#33475e", "#4a3f52", "#2e3c52"],
 } as const satisfies Record<string, Season4>;
 
 /** The season item each season shows (visual only, no cultural claim). */

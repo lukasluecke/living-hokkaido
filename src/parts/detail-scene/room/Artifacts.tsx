@@ -2,10 +2,11 @@
 // Ported from labs/detail-scene (src/room/Artifacts.tsx). Illustrative
 // geometry only.
 import { type ThreeEvent, useFrame } from "@react-three/fiber";
-import { type ReactNode, useEffect, useRef } from "react";
+import { type ReactNode, Suspense, useEffect, useRef } from "react";
 import { useMemo } from "react";
 import * as THREE from "three";
-import type { ArtifactPlacement } from "@/contracts";
+import type { Artifact, ArtifactPlacement } from "@/contracts";
+import { GlbObject } from "../../shared/Glb";
 import { clothTexture, rng, woodTexture } from "./textures";
 
 function useHoverGlow(group: React.RefObject<THREE.Group | null>, on: boolean) {
@@ -232,6 +233,23 @@ export function RoomModel({ artifactId }: { artifactId: string }) {
       <meshStandardMaterial color="#a7a090" />
     </mesh>
   );
+}
+
+/** Code model now; a GLB replaces it by changing artifact.model.source only. */
+export function RoomObject({
+  artifactId,
+  source,
+}: {
+  artifactId: string;
+  source?: Artifact["model"]["source"];
+}) {
+  if (source?.kind === "glb")
+    return (
+      <Suspense fallback={<RoomModel artifactId={artifactId} />}>
+        <GlbObject url={source.url} />
+      </Suspense>
+    );
+  return <RoomModel artifactId={artifactId} />;
 }
 
 export function ArtifactShell({

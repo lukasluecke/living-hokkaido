@@ -18,7 +18,7 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, const in float depth,
 }`;
 
 export class InkEdgesEffect extends Effect {
-  constructor({ color = "#3b4a5e", strength = 0.75, threshold = 0.04 } = {}) {
+  constructor({ color = "#3b4a5e", strength = 0.9, threshold = 0.025 } = {}) {
     super("InkEdgesEffect", fragment, {
       attributes: EffectAttribute.DEPTH,
       blendFunction: BlendFunction.NORMAL,

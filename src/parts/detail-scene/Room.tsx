@@ -13,7 +13,7 @@ import { ToneMappingMode } from "postprocessing";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import type { CameraView, DetailScenePartProps } from "@/contracts";
-import { ArtifactShell, RoomModel } from "./room/Artifacts";
+import { ArtifactShell, RoomObject } from "./room/Artifacts";
 import { Dust, Hearth, WindowLight } from "./room/Hearth";
 import { HouseStatic, Roof } from "./room/House";
 import { MergeStatic } from "./room/MergeStatic";
@@ -157,7 +157,12 @@ export function Room(props: RoomProps) {
             else emit({ type: "artifact.focus", artifactId: id });
           }}
         >
-          <RoomModel artifactId={p.artifactId} />
+          <RoomObject
+            artifactId={p.artifactId}
+            source={
+              props.artifacts.find((a) => a.id === p.artifactId)?.model.source
+            }
+          />
         </ArtifactShell>
       ))}
       <ContactShadows
