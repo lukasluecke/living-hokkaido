@@ -11,6 +11,7 @@ import { type Artifact, type Emit, SCALE } from "@/contracts";
 import { useGlbClone } from "../shared/Glb";
 import { applyLook } from "./model/looks";
 import { builders, type ObjectId } from "./model/models";
+import attn from "../shared/Attention.module.css";
 import c from "./Viewer.module.css";
 
 /** Centre a model on its base so every object frames the same way. */
@@ -164,7 +165,7 @@ export function Viewer3D({
             key={h.id}
             type="button"
             data-hotspot={h.id}
-            className={`${c.hotspot} ${read.includes(h.id) ? c.read : ""}`}
+            className={`${c.hotspot} ${read.includes(h.id) ? c.read : attn.pulse}`}
             aria-label={h.title}
             title={h.title}
             onClick={() =>

@@ -5,6 +5,7 @@ import { Canvas } from "@react-three/fiber";
 import { Suspense, useEffect, useRef } from "react";
 import { type IslandPartProps, type Location, SCALE } from "@/contracts";
 import s from "../shared/Fallback.module.css";
+import attn from "../shared/Attention.module.css";
 import c from "./Island.module.css";
 import { World } from "./World";
 
@@ -39,7 +40,8 @@ export function IslandPart(props: IslandPartProps) {
           <button
             key={l.id}
             type="button"
-            className={`${c.pin} ${l.status === "open" ? "" : c.soon}`}
+            className={`${c.pin} ${l.status === "open" ? `${attn.pulse} ${attn.touchOnly}` : c.soon}`}
+            data-still={props.prefs.reducedMotion || undefined}
             ref={(el) => {
               if (el) pins.current.set(l.id, el);
               else pins.current.delete(l.id);
