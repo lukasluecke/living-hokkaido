@@ -405,7 +405,7 @@ export const hideSeekActivitySchema = z
         seek: z.number().int().min(15).max(300),
         reveal: z.number().int().min(5).max(120),
       })
-      .default({ sceneReveal: 10, disguise: 60, seek: 90, reveal: 20 }),
+      .default({ sceneReveal: 10, disguise: 80, seek: 90, reveal: 20 }),
     /** Seconds taken off the seeker's clock for each wrong tap. */
     wrongTapPenalty: z.number().int().min(0).max(60).default(10),
     /** Only pass-and-play (no network play in the visitor app). */

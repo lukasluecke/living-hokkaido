@@ -34,6 +34,13 @@ the diff):
 
 1. `out-of-place/src/embed.ts`: `import.meta.env.DEV` → `import.meta.env?.DEV`
    (Next has no `import.meta.env`; Vite still replaces it).
+2. Out of Place, Erina's playtest feedback (2026-11-25), one commit:
+   disguise 60 → 80 s (seek unchanged; `round.ts`, `contract-proposal.ts`,
+   tests); walking workers to hide among (`art/people.ts`, `game/crowd.ts`,
+   optional `SceneArt.walkers`, five on the Otaru scene); a smaller, slower
+   finder ring (`FINDER_R` 16, `FINDER_STEP` 6); the reveal card drops
+   "Why it worked" and shows the fact in its own bright "★ Real history"
+   panel (the clip drops "How I hid" too).
 
 ## Pull new upstream changes
 
