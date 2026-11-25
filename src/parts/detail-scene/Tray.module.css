@@ -1,0 +1,400 @@
+/* Object tray and "Try here" sheet in the field label style: snow-white card
+   stock, sea-blue ink, hairlines, tracked captions; seasonal ink for numbers
+   and progress; gold only for keyboard focus. Tokens: --fl-* (globals.css). */
+.wrap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin-inline: auto;
+  width: max-content;
+  max-width: calc(100% - 32px);
+  font-family: var(--fl-body);
+  color: var(--fl-ink);
+  z-index: 1;
+}
+.tray {
+  display: block;
+  background: var(--fl-paper);
+  border: 1px solid var(--fl-line);
+  border-bottom: 0;
+  border-radius: 12px 12px 0 0;
+  box-shadow: var(--fl-shadow);
+  padding: 8px 14px calc(14px + env(safe-area-inset-bottom, 0px));
+}
+.cap {
+  margin: 0;
+  font-family: var(--fl-body);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fl-ink-soft);
+  line-height: 1.4;
+}
+.head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  min-height: 28px;
+}
+.head .cap {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.back {
+  flex: none;
+  font: inherit;
+  font-size: 13px;
+  color: var(--fl-ink-soft);
+  background: none;
+  border: 0;
+  border-right: 1px solid var(--fl-line);
+  padding: 4px 12px 4px 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: var(--fl-line);
+  text-underline-offset: 3px;
+}
+.backShort {
+  display: none;
+}
+.progress {
+  flex: none;
+  font-size: 12px;
+  color: var(--fl-ink-soft);
+  white-space: nowrap;
+}
+.progress b {
+  color: var(--fl-season);
+  font-weight: 700;
+}
+.cards {
+  display: flex;
+  gap: 8px;
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  /* Room for the focus ring inside the scroller. */
+  padding: 4px;
+  margin: -4px;
+}
+.cards > li {
+  display: flex;
+}
+.card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 120px;
+  max-width: 200px;
+  min-height: 50px;
+  padding: 7px 10px 7px 9px;
+  font: inherit;
+  text-align: left;
+  color: var(--fl-ink);
+  background: var(--fl-paper);
+  border: 1px solid var(--fl-line);
+  border-radius: var(--fl-radius);
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease;
+}
+.card[aria-pressed="true"] {
+  border-color: var(--fl-season);
+  box-shadow: inset 0 0 0 1px var(--fl-season);
+  background: var(--fl-season-soft);
+}
+.card:focus-visible,
+.back:focus-visible,
+.row:focus-visible,
+.close:focus-visible {
+  outline: 3px solid var(--fl-gold);
+  outline-offset: 2px;
+}
+.num {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--fl-season);
+  color: var(--fl-season);
+  background: var(--fl-paper);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+.card[data-done] .num {
+  background: var(--fl-season);
+  color: var(--fl-paper);
+}
+.check {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--fl-season);
+}
+.cardLabel {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.tryCard {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0;
+  background: var(--fl-season-soft);
+  border-color: color-mix(in srgb, var(--fl-season) 30%, var(--fl-line));
+}
+.tryCard[aria-expanded="true"] {
+  border-color: var(--fl-season);
+  box-shadow: inset 0 0 0 1px var(--fl-season);
+}
+.tryCap {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fl-season);
+}
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Try here sheet. Laptop: a panel on the right, where the object card goes
+   (the tray moves left while it is open). */
+.sheet {
+  position: fixed;
+  top: calc(56px + env(safe-area-inset-top, 0px));
+  right: 16px;
+  width: 400px;
+  max-height: calc(100% - 80px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  background: var(--fl-paper);
+  border: 1px solid var(--fl-line);
+  border-radius: 12px;
+  box-shadow: var(--fl-shadow);
+  padding: 14px 16px 16px;
+}
+.grab {
+  display: none;
+}
+.sheetHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.sheetTitle {
+  margin: 2px 0 0;
+  font-family: var(--fl-heading);
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1.15;
+  color: var(--fl-ink);
+}
+.close {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin: -4px -6px 0 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--fl-ink);
+  cursor: pointer;
+}
+.sheetSub {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--fl-ink-soft);
+}
+.groups {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+.groups h3 {
+  margin-bottom: 6px;
+}
+.rows {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 10px;
+  font: inherit;
+  text-align: left;
+  color: var(--fl-ink);
+  background: var(--fl-paper);
+  border: 1px solid var(--fl-line);
+  border-radius: var(--fl-radius);
+  cursor: pointer;
+}
+.iconWrap {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--fl-season-soft);
+  color: var(--fl-season);
+}
+.icon {
+  display: block;
+}
+.rowText {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+}
+.kind {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fl-season);
+  line-height: 1.4;
+}
+.rowTitle {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.chev {
+  flex: none;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--fl-ink-soft);
+}
+
+@media (hover: hover) {
+  .back:hover {
+    color: var(--fl-ink);
+    text-decoration-color: currentColor;
+  }
+}
+@media (hover: hover) {
+  .card:hover {
+    border-color: color-mix(in srgb, var(--fl-ink) 35%, var(--fl-line));
+  }
+}
+@media (hover: hover) {
+  .close:hover {
+    background: var(--fl-stock2);
+  }
+}
+@media (hover: hover) {
+  .row:hover {
+    border-color: color-mix(in srgb, var(--fl-ink) 35%, var(--fl-line));
+    background: color-mix(in srgb, var(--fl-stock2) 50%, var(--fl-paper));
+  }
+}
+/* Laptop: leave room for the object card on the right while focused. */
+@media (min-width: 701px) {
+  /* Clear of "Ask the owl" (bottom left) and the object card (right). */
+  .wrap[data-focused],
+  .wrap[data-open] {
+    left: 144px;
+    right: 452px;
+    max-width: none;
+  }
+}
+
+/* Phone: full-width tray that scrolls sideways; hidden while the object
+   sheet is open. Try here is a bottom sheet over the tray. */
+@media (max-width: 700px) {
+  .wrap {
+    width: auto;
+    max-width: none;
+  }
+  .wrap[data-focused] {
+    display: none;
+  }
+  .tray {
+    padding: 6px 0 calc(12px + env(safe-area-inset-bottom, 0px));
+    border-left: 0;
+    border-right: 0;
+  }
+  .head {
+    padding: 0 14px;
+    gap: 10px;
+  }
+  .backLong {
+    display: none;
+  }
+  .backShort {
+    display: inline;
+  }
+  .cards {
+    margin: -4px 0;
+    padding: 4px 14px;
+    scroll-padding: 0 14px;
+    scrollbar-width: none;
+  }
+  .head .cap {
+    letter-spacing: 0.1em;
+  }
+  .card {
+    flex: none;
+    min-width: 0;
+    width: 160px;
+  }
+  .sheet {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    max-height: 78vh;
+    border-radius: 14px 14px 0 0;
+    border-bottom: 0;
+    padding: 6px 16px calc(18px + env(safe-area-inset-bottom, 0px));
+    z-index: 6;
+  }
+  .grab {
+    display: block;
+    width: 40px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--fl-line);
+    margin: 0 auto 10px;
+  }
+  .row {
+    padding: 10px 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+}
+@media (max-width: 700px) {
+  .wrap[data-open] {
+    z-index: 6;
+  }
+}

@@ -36,6 +36,7 @@ Two layers:
 
 | Version | Change |
 |---|---|
+| 1 (additive) | `DetailScenePartProps.inspectedArtifactIds` (optional): placed artifacts already inspected, for the object tray's progress. |
 | 1 (additive) | Activity kinds `canon` (voices, `offset`, `beats`, `structureClaimId`, `lyrics` default `[]`) and `pluck` (strings with gauge and hands, `stringsClaimId`, optional `tune`). Sound is synthetic and illustrative. |
 | 1 (additive) | `ask.ts`: `AskRequest`, `AskAnswer`, `AskAction`; `ContentPack.ask.suggestions` (default `[]`); `AskPartProps` (src/parts/ask, docs/ASK.md). |
 | 1 (additive) | Activity kind `board` (game `stick-grid`, `rulesClaimId`, opponent `owl` by default or `two-players`). |
