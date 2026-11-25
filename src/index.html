@@ -132,6 +132,10 @@
 
   .loader { position: fixed; inset: 0; display: grid; place-items: center; pointer-events: none; z-index: 4; }
   .loader.hide { display: none; }
+  .loader.interactive { pointer-events: auto; }
+  .figlist { display: grid; gap: 6px; margin-top: 12px; max-height: 50dvh; overflow-y: auto; text-align: left; }
+  .figlist button { height: auto; min-height: 40px; padding: 8px 12px; justify-content: space-between; width: 100%; }
+  .figlist small { color: var(--muted); font-size: 11px; }
   .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px;
     width: min(340px, calc(100vw - 32px)); text-align: center; }
   .track { height: 6px; border-radius: 3px; background: rgba(255,255,255,.1); overflow: hidden; margin-top: 10px; }
@@ -326,9 +330,34 @@ async function loadSplat(opts, label) {
     console.error(err);
     const missing = !opts.fileBytes && SRC.includes("assets/");
     failed(missing
-      ? "The museum capture isn't in assets/ on this server. Open your own splat, or add ?src=../sample/sample.sog"
+      ? "The scene scan (splat) isn't uploaded yet. Meanwhile, open a figure or the record:"
       : `Couldn't load ${label}. ${err?.message || ""}`);
+    if (missing) showFigureList();
   }
+}
+
+// Without the scene there are no markers to tap, so list the figures that have something to show.
+function showFigureList() {
+  const card = ui.loader.querySelector(".card");
+  card.querySelector(".figlist")?.remove();
+  const list = document.createElement("div");
+  list.className = "figlist";
+  const add = (label, onClick, sub = "") => {
+    const b = document.createElement("button");
+    b.innerHTML = `<span></span><small></small>`;
+    b.querySelector("span").textContent = label;
+    b.querySelector("small").textContent = sub;
+    b.addEventListener("click", onClick);
+    list.appendChild(b);
+  };
+  add("About this scene", openScene, "what is known, and what is not");
+  for (const id of CHARACTER_IDS) {
+    const c = characters[id]; if (!c) continue;
+    if (!c.model?.src && !Env.about(id).length) continue;
+    add(c.name.en, () => openSheet(id), c.model?.src ? "3D model" : "");
+  }
+  card.appendChild(list);
+  ui.loader.classList.add("interactive");
 }
 
 // ---------- Markers
