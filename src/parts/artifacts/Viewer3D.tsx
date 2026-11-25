@@ -12,6 +12,7 @@ import { useGlbClone } from "../shared/Glb";
 import { QualityGovernor, useQuality } from "../shared/Quality";
 import { applyLook } from "./model/looks";
 import { builders, type ObjectId } from "./model/models";
+import { useT } from "@/i18n";
 import attn from "../shared/Attention.module.css";
 import c from "./Viewer.module.css";
 
@@ -123,6 +124,7 @@ export function Viewer3D({
   read: string[];
   emit: Emit;
 }) {
+  const t = useT();
   const q = useQuality(SCALE.maxDpr);
   const yaw = useRef(0);
   const hotspots = useRef<HTMLDivElement>(null);
@@ -186,15 +188,15 @@ export function Viewer3D({
       <div className={c.turn}>
         <button
           type="button"
-          aria-label="Turn left"
+          aria-label={t("Turn left")}
           onClick={() => (yaw.current -= 0.6)}
         >
           ⟲
         </button>
-        <span>Drag to turn</span>
+        <span>{t("Drag to turn")}</span>
         <button
           type="button"
-          aria-label="Turn right"
+          aria-label={t("Turn right")}
           onClick={() => (yaw.current += 0.6)}
         >
           ⟳

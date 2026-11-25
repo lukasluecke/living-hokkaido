@@ -4,6 +4,7 @@
 import { Canvas } from "@react-three/fiber";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { type IslandPartProps, type Location, SCALE } from "@/contracts";
+import { useT } from "@/i18n";
 import s from "../shared/Fallback.module.css";
 import { QualityGovernor, useQuality } from "../shared/Quality";
 import attn from "../shared/Attention.module.css";
@@ -20,6 +21,7 @@ import { World } from "./World";
 export function IslandPart(props: IslandPartProps) {
   const { content, prefs, emit, view } = props;
   const pins = useRef(new Map<string, HTMLElement>());
+  const t = useT();
   const q = useQuality(SCALE.maxDpr);
   if (!prefs.webgl) return <IslandList {...props} />;
   const select = (l: Location) => {
@@ -66,7 +68,7 @@ export function IslandPart(props: IslandPartProps) {
             onClick={() => select(l)}
           >
             {l.title}
-            {l.status === "open" ? "" : " · soon"}
+            {l.status === "open" ? "" : t(" · soon")}
           </button>
         ))}
       </div>
@@ -81,6 +83,7 @@ function PlaceTray({
   content,
   onSelect,
 }: IslandPartProps & { onSelect: (l: Location) => void }) {
+  const t = useT();
   const [sheet, setSheet] = useState(false);
   const opener = useRef<HTMLButtonElement>(null);
   // Open places first, then the closed ones, each in pack order.
@@ -101,13 +104,13 @@ function PlaceTray({
           onClose={closeSheet}
         />
       )}
-      <nav className={c.tray} aria-label="Places on the island">
+      <nav className={c.tray} aria-label={t("Places on the island")}>
         <div className={c.trayHead}>
-          <span className={c.cap}>Places on the island</span>
+          <span className={c.cap}>{t("Places on the island")}</span>
           <span className={c.count}>
-            {open} open
+            {t("{n} open", { n: open })}
             {locations.length > open
-              ? ` · ${locations.length - open} soon`
+              ? ` · ${t("{n} soon", { n: locations.length - open })}`
               : ""}
           </span>
           <button
@@ -118,7 +121,7 @@ function PlaceTray({
             onClick={() => (sheet ? closeSheet() : setSheet(true))}
           >
             <Icon d={UI_ICON.try} size={16} />
-            All activities
+            {t("All activities")}
           </button>
         </div>
         <ul className={c.cards}>
@@ -135,7 +138,7 @@ function PlaceTray({
                   data-open={l.status === "open" || undefined}
                   aria-label={
                     l.status === "open" && acts.length > 0
-                      ? `${l.title}, ${acts.length} ${acts.length === 1 ? "activity" : "activities"}: ${kindSummary(acts)}`
+                      ? `${l.title}, ${t(acts.length === 1 ? "{n} activity" : "{n} activities", { n: acts.length })}: ${kindSummary(acts, t)}`
                       : undefined
                   }
                   onClick={() => onSelect(l)}
@@ -162,7 +165,7 @@ function PlaceTray({
                     </span>
                   ) : (
                     <span className={c.state}>
-                      {l.status === "open" ? "Open" : "Soon"}
+                      {l.status === "open" ? t("Open") : t("Soon")}
                     </span>
                   )}
                 </button>
@@ -182,6 +185,7 @@ function IslandList({
   prefs,
   emit,
 }: IslandPartProps) {
+  const tr = useT();
   // Stub "flight": a real island emits owl.arrived when the owl lands.
   useEffect(() => {
     if (view !== "travel" || !locationId) return;
@@ -193,9 +197,11 @@ function IslandList({
   }, [view, locationId, prefs.reducedMotion, emit]);
 
   return (
-    <nav className={s.panel} aria-label="Places on the island">
-      <h2>The island</h2>
-      {view === "travel" && <p className={s.muted}>The owl is flying…</p>}
+    <nav className={s.panel} aria-label={tr("Places on the island")}>
+      <h2>{tr("The island")}</h2>
+      {view === "travel" && (
+        <p className={s.muted}>{tr("The owl is flying…")}</p>
+      )}
       <div className={s.row}>
         {content.island.locations.map((l) => (
           <button
@@ -207,7 +213,7 @@ function IslandList({
             onClick={() => emit({ type: "location.select", locationId: l.id })}
           >
             {l.title}
-            {l.status === "soon" ? " · soon" : ""}
+            {l.status === "soon" ? tr(" · soon") : ""}
           </button>
         ))}
       </div>
