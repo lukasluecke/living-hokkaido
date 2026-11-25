@@ -205,6 +205,7 @@ function renderOne(o, onCorrect) {
   }
   const meta = el('div', 'chips');
   meta.append(chip(t.stratumShort[o.stratum] || o.stratum, 'stratum'));
+  if (o.kind !== 'absence') meta.append(chip(human(o.kind), 'kind'));
   meta.append(chip(`${t.evidence}: ${human(o.evidence)}`, 'evidence', t.howSupported));
   meta.append(chip(`${t.standing}: ${human(o.standing?.role)}`, 'standing', o.standing?.grantedBy ? t.grantedBy(o.standing.grantedBy) : t.selfDeclared));
   if (o.perspective && o.perspective !== 'project') meta.append(chip(human(o.perspective)));

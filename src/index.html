@@ -7,6 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b0d10">
 <title>Omusha 1808</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;700;800&display=swap">
 <!-- Figure models are Meshopt-compressed (tools/web-model.mjs); model-viewer needs the decoder. -->
 <script>self.ModelViewerElement = { meshoptDecoderLocation: 'https://cdn.jsdelivr.net/npm/meshoptimizer@0.25.0/meshopt_decoder.js' };</script>
 <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@4.0.0/dist/model-viewer.min.js"></script>
@@ -236,6 +238,126 @@
   .toast { position: fixed; left: 50%; top: 70px; transform: translateX(-50%); z-index: 7; background: var(--panel-solid);
     border: 1px solid var(--line); border-radius: 10px; padding: 8px 14px; font-size: 13px; display: none; }
   .toast.on { display: block; }
+
+  /* ================= Woodblock card ================= */
+  /* One pigment per Envelope layer (moku-hanga palette). */
+  :root {
+    --paper: #efe4cc; --paper-2: #e5d6b6; --paper-3: #f7efdc; --ink: #221c16; --ink-soft: #5d5246;
+    --l-form: #2c4f7c;      /* 藍 indigo — Form */
+    --l-time: #a8741f;      /* 黄土 ochre — Time strata */
+    --l-actors: #8f4527;    /* 弁柄 bengara — Actors */
+    --l-types: #4b7a46;     /* 若竹 green — Observation types */
+    --l-evidence: #634a88;  /* 紫 murasaki — Evidence and standing */
+    --l-absence: #7a7168;   /* 鼠 grey — Absence */
+    --l-protocol: #221c16;  /* 墨 sumi — Protocol */
+    --l-voice: #b5322f;     /* 朱 vermilion — Voice */
+  }
+  .sheet {
+    --text: var(--ink); --muted: var(--ink-soft); --line: rgba(34, 28, 22, .22); --panel: var(--paper-3); --panel-solid: var(--paper);
+    --accent: var(--l-voice); --warn: #9c5a12; --recorded: #3f7a4a; --interpreted: #a8741f; --symbolic: #6b55a0;
+    color: var(--ink);
+    background-color: var(--paper);
+    /* washi fibres: low-contrast noise, multiplied into the paper colour */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .28 0 0 0 0 .2 0 0 0 .16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+      radial-gradient(120% 80% at 50% 0%, #f4ead4, transparent 70%);
+    border: 3px solid var(--ink); border-radius: 4px;
+    box-shadow: inset 0 0 0 5px var(--paper), inset 0 0 0 6px var(--ink), 6px 7px 0 rgba(0, 0, 0, .55);
+    font-family: "Shippori Mincho B1", "Hiragino Mincho ProN", "Yu Mincho", Georgia, serif;
+  }
+  @media (max-width: 720px) { .sheet { border-radius: 6px 6px 0 0; border-bottom: 0; box-shadow: inset 0 0 0 5px var(--paper), inset 0 0 0 6px var(--ink), 0 -4px 0 rgba(0,0,0,.45); } }
+  /* kentō registration mark, as cut into the corner of a block */
+  .sheet::before { content: ""; position: absolute; left: 14px; top: 14px; width: 16px; height: 16px; border-left: 3px solid var(--l-voice); border-top: 3px solid var(--l-voice); opacity: .85; pointer-events: none; z-index: 1; }
+  .sheet header { border-bottom: 3px double var(--ink); background: none; padding: 20px 18px 12px 38px; }
+  .sheet h2 { font-family: inherit; font-weight: 800; font-size: 21px; color: var(--ink); letter-spacing: .02em; }
+  .sheet .ja { color: var(--ink-soft); font-size: 13px; }
+  .sheet header .crumb { color: var(--ink-soft); font-family: system-ui, sans-serif; }
+  .sheet header > button { background: var(--paper-3); border: 2px solid var(--ink); border-radius: 2px; color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
+  .sheet .body { padding: 14px 18px 18px; gap: 14px; grid-template-columns: minmax(0, 1fr); overflow-x: hidden; }
+  .sheet .body * { overflow-wrap: anywhere; }
+  .sheet .body > *, .chat, .known, .layer { min-width: 0; grid-template-columns: minmax(0, 1fr); }
+  .sheet header .who { grid-template-columns: minmax(0, 1fr); }
+  .sheet .body > .tabs { grid-template-columns: 1fr 1fr; }
+  .lh { flex-wrap: wrap; } .lh small { flex-basis: 100%; order: 3; margin-left: 30px; }
+  .sugg button { white-space: normal; text-align: left; height: auto; min-height: 28px; }
+  .sheet button { border-radius: 3px; }
+
+  /* Layer key: the eight seals in the header */
+  .layerkey { display: flex; gap: 3px; flex-wrap: nowrap; margin-top: 6px; }
+  .seal { display: inline-grid; place-items: center; width: 21px; height: 21px; flex: none; border-radius: 2px; color: var(--paper-3);
+    background: var(--lc); font: 800 13px/1 "Shippori Mincho B1", serif; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.25); }
+  .layerkey .seal { border: 0; padding: 0; cursor: pointer; transition: transform .1s; }
+  .layerkey .seal:hover { transform: translateY(-2px) rotate(-3deg); }
+  [data-layer="form"] { --lc: var(--l-form); } [data-layer="time"] { --lc: var(--l-time); } [data-layer="actors"] { --lc: var(--l-actors); }
+  [data-layer="types"] { --lc: var(--l-types); } [data-layer="evidence"] { --lc: var(--l-evidence); } [data-layer="absence"] { --lc: var(--l-absence); }
+  [data-layer="protocol"] { --lc: var(--l-protocol); } [data-layer="voice"] { --lc: var(--l-voice); }
+
+  /* Layer headers: seal + name, ruled like a print cartouche */
+  .lh { display: flex; align-items: center; gap: 8px; margin: 0; font: 700 13px/1.2 "Shippori Mincho B1", serif; color: var(--lc); letter-spacing: .04em; }
+  .lh::after { content: ""; flex: 1; height: 0; border-top: 2px solid var(--lc); opacity: .55; }
+  .lh small { font: 500 11px system-ui, sans-serif; color: var(--ink-soft); letter-spacing: 0; }
+  .layer { display: grid; gap: 8px; }
+
+  /* Form (藍) */
+  .figure3d model-viewer { border-radius: 2px; border: 2px solid var(--ink); background: radial-gradient(circle at 50% 38%, #fbf4e3, #dcc9a6 78%); }
+  .basis-btn { background: var(--paper-3); border: 2px solid var(--ink); border-radius: 2px; box-shadow: 2px 2px 0 var(--ink); backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .basis .meter i { background: rgba(34,28,22,.15); border-radius: 1px; }
+  .formpanel, .scene-forms { background: rgba(44,79,124,.06); border: 2px solid var(--l-form); border-radius: 2px; }
+  .frow + .frow { border-top: 1.5px dashed rgba(44,79,124,.45); }
+  .fmade { color: var(--l-form); font-weight: 700; }
+  .funseen { color: #8c4a12; }
+
+  /* Actors (弁柄) */
+  .ident .chips .chip { background: var(--paper-3); border: 1.5px solid var(--l-actors); color: var(--l-actors); }
+  .ident .chips .chip.draft { border-color: #9c5a12; color: #9c5a12; }
+  .ident .role { font-size: 15px; }
+
+  /* Voice (朱) and the record, as print tabs */
+  .tabs { background: var(--paper-2); border: 2px solid var(--ink); border-radius: 2px; }
+  .tabs button { color: var(--ink-soft); font-family: inherit; font-weight: 700; }
+  .tabs button[aria-selected="true"] { color: var(--paper-3); box-shadow: none; }
+  #tabTalk[aria-selected="true"] { background: var(--l-voice); }
+  #tabRecord[aria-selected="true"] { background: var(--l-time); }
+  .tabs button[aria-selected="true"] .count { color: rgba(255,255,255,.85); }
+  .sugg button { background: var(--paper-3); border: 1.5px solid var(--l-voice); color: var(--l-voice); border-radius: 2px; font-family: inherit; }
+  .msg.q { background: var(--l-voice); color: var(--paper-3); border-radius: 2px; }
+  .msg.a { background: var(--paper-3); border: 2px solid var(--ink); border-left: 5px solid var(--l-voice); border-radius: 2px; }
+  .msg.a.unknown { border-style: solid; border-left-color: var(--l-absence);
+    background: repeating-linear-gradient(-45deg, rgba(122,113,104,.10) 0 2px, transparent 2px 7px), var(--paper-3); }
+  .ask input { background: var(--paper-3); color: var(--ink); border: 2px solid var(--ink); border-radius: 2px; font-family: inherit; }
+  .sheet button.primary { background: var(--l-voice); border: 2px solid var(--ink); color: var(--paper-3); box-shadow: 2px 2px 0 var(--ink); }
+  .ask .mic { background: var(--paper-3); border: 2px solid var(--ink); }
+  .notice { border-left: 3px solid var(--l-voice); color: var(--ink-soft); }
+  .chat { border-top: 0; padding-top: 0; }
+
+  /* Time strata (黄土) as a carved timeline */
+  .known { border-top: 0; padding-top: 0; }
+  .stratum-h { color: var(--l-time) !important; font: 700 12px "Shippori Mincho B1", serif !important; letter-spacing: .06em; }
+  .stratum-h::before { background: var(--l-time); border: 2px solid var(--ink); box-shadow: none; width: 10px; height: 10px; margin-top: -5px; left: 1px; border-radius: 50%; }
+  #sKnown .obs { background: var(--paper-3); border: 1.5px solid rgba(34,28,22,.35); border-left: 4px solid var(--l-time); border-radius: 0 2px 2px 0; margin-left: 5px; }
+  #sKnown .obs .claim { font-size: 14px; line-height: 1.55; }
+  /* Observation types (若竹) */
+  .chip.kind { background: var(--l-types); border-color: var(--l-types); color: var(--paper-3); }
+  /* Evidence and standing (紫): two separate marks, never merged */
+  .chip.evidence { background: var(--paper-3); border: 1.5px solid var(--l-evidence); color: var(--l-evidence); }
+  .chip.standing { background: var(--l-evidence); border: 1.5px solid var(--l-evidence); color: var(--paper-3); }
+  .chip.stratum { background: var(--l-time); border-color: var(--l-time); color: var(--paper-3); }
+  .sheet .chip { border-radius: 2px; }
+  .sheet .chip.draft { color: #9c5a12; border-color: rgba(156,90,18,.55); }
+  /* Absence (鼠): cross-hatched, like an uncut area of the block */
+  #sKnown .obs.absence { border-left-color: var(--l-absence); border-style: solid;
+    background: repeating-linear-gradient(-45deg, rgba(122,113,104,.13) 0 2px, transparent 2px 7px), var(--paper-3); }
+  .obs-unknown { color: var(--l-absence) !important; display: flex; align-items: center; gap: 6px; }
+  .obs-unknown::before { content: "欠"; display: inline-grid; place-items: center; width: 18px; height: 18px; background: var(--l-absence); color: var(--paper-3); border-radius: 2px; font: 800 11px "Shippori Mincho B1", serif; }
+  .obs .why { color: var(--ink-soft) !important; }
+  .legend { color: var(--ink-soft); }
+  details.add { background: var(--paper-3); border: 2px solid var(--ink); border-radius: 2px; }
+  details.add summary { color: var(--l-time); font-weight: 700; }
+  label.f input, label.f select, label.f textarea { background: #fbf6ea; color: var(--ink); border: 1.5px solid var(--ink); border-radius: 2px; }
+  .sheet button.link { color: var(--l-form); text-decoration: underline; text-underline-offset: 2px; }
+
+  /* Protocol (墨) */
+  .protocol { border-top: 3px double var(--ink); color: var(--ink-soft); align-items: center; }
+  .protocol .seal { flex: none; }
 </style>
 </head>
 <body>
@@ -272,12 +394,13 @@
 
 <aside class="sheet" id="sheet" aria-live="polite">
   <header>
-    <div class="who"><div class="crumb" id="sCrumb"></div><h2 id="sName"></h2><div class="ja" id="sJa"></div></div>
+    <div class="who"><div class="crumb" id="sCrumb"></div><h2 id="sName"></h2><div class="ja" id="sJa"></div><div class="layerkey" id="sLayers"></div></div>
     <button id="sClose" title="Close" data-i18n-title="close">✕</button>
   </header>
   <div class="body">
     <!-- Form: how this figure or scene can be seen, and how directly that view records it -->
-    <section class="hero">
+    <section class="hero layer" id="sFormLayer">
+      <h3 class="lh" data-layer="form"><span class="seal">形</span><span data-i18n="lForm">Form</span></h3>
       <div class="figure3d fig-only" id="sModelWrap" hidden>
         <model-viewer id="sModel" camera-controls auto-rotate auto-rotate-delay="1500" rotation-per-second="20deg"
           touch-action="pan-y" interaction-prompt="none" shadow-intensity="0.7" exposure="1.05" alt="">
@@ -292,7 +415,8 @@
       </div>
     </section>
     <!-- Actor: who this is -->
-    <section class="ident fig-only">
+    <section class="ident fig-only layer" id="sActorLayer">
+      <h3 class="lh" data-layer="actors"><span class="seal">人</span><span data-i18n="lActors">Actors</span></h3>
       <div class="chips" id="sChips"></div>
       <div class="role" id="sRole"></div>
       <div class="declines" id="sDeclinesWrap" hidden><span class="k" data-i18n="declines">Will not speculate on</span><span id="sDeclines"></span></div>
@@ -303,7 +427,7 @@
       <button type="button" role="tab" id="tabRecord" data-tab="record"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l3 3v15H6z"/><path d="M9 10h6M9 14h6M9 18h4"/></svg><span data-i18n="tabRecord">Record</span><span class="count" id="sCount"></span></button>
     </nav>
     <section class="chat fig-only panel" data-panel="talk" id="sChat">
-      <div class="known-h" id="sTalkH">Talk <span>· answers only from the record below</span></div>
+      <h3 class="lh" data-layer="voice" id="sTalkH"></h3>
       <div class="row2 voicebar"><span class="chip" id="sVoiceCredit" hidden title="Synthetic voices: not recordings of any person" data-i18n-title="creditTitle">Voices by ElevenLabs · synthetic</span>
         <button type="button" class="link" id="sAuto" hidden aria-pressed="true">🔊 Voice on</button></div>
       <div class="sugg" id="sSugg"></div>
@@ -316,7 +440,7 @@
       <div class="notice" id="sNotice">This voice is a synthetic interpretation built from historical sources. It is not a historical record and does not speak for any person or community.</div>
     </section>
     <section class="known panel" data-panel="record">
-      <div class="known-h" data-i18n-html="knownH">What is known <span>· and what is not</span></div>
+      <h3 class="lh" data-layer="time"><span class="seal">時</span><span data-i18n-html="knownH">What is known</span></h3>
       <div class="legend" data-i18n-html="legend">Every entry shows two separate scores: <b>evidence</b> (how well it is supported) and <b>standing</b> (whose knowledge it is). Nothing is overwritten; corrections keep the history.</div>
       <div id="sKnown"></div>
       <div id="sForm"></div>
@@ -526,7 +650,7 @@ function showRecord(list, { envelopes, about }) {
   Env.renderRecord($("sKnown"), list, { onCorrect: (o) => { setTab("record"); form?.correct(o); } });
   const unknown = list.filter((o) => o.kind === "absence").length;
   $("sCount").textContent = t("count")(list.length, unknown);
-  $("sProtocol").innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span></span>`;
+  $("sProtocol").innerHTML = `<span class="seal" data-layer="protocol">掟</span><span></span>`;
   $("sProtocol").querySelector("span").textContent = t("protocol");
 }
 // Form layer: the badge on the view, and "How this view was made" behind it.
@@ -549,6 +673,33 @@ function setTab(tab) {
   for (const b of document.querySelectorAll(".tabs [role=tab]")) b.setAttribute("aria-selected", String(b.dataset.tab === tab));
 }
 for (const b of document.querySelectorAll(".tabs [role=tab]")) b.addEventListener("click", () => setTab(b.dataset.tab));
+
+// The eight layers of the Envelope as a row of seals; each takes you to where that layer shows.
+const LAYERS = [
+  ["form", "形"], ["time", "時"], ["actors", "人"], ["types", "類"],
+  ["evidence", "証"], ["absence", "欠"], ["protocol", "掟"], ["voice", "声"],
+];
+function goToLayer(layer) {
+  const scene = $("sheet").dataset.mode === "scene";
+  const target = {
+    form: $("sFormLayer"), actors: scene ? null : $("sActorLayer"), protocol: $("sProtocol"),
+    voice: scene ? null : $("sChat"),
+    time: $("sKnown"), types: $("sKnown").querySelector(".chip.kind"), evidence: $("sKnown").querySelector(".chip.evidence"),
+    absence: $("sKnown").querySelector(".obs.absence"),
+  }[layer];
+  if (!scene) { if (layer === "voice") setTab("talk"); else if (["time", "types", "evidence", "absence"].includes(layer)) setTab("record"); }
+  (target || $("sFormLayer")).scrollIntoView({ behavior: "smooth", block: "start" });
+}
+function renderLayerKey() {
+  const box = $("sLayers"); box.innerHTML = "";
+  for (const [k, s] of LAYERS) {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "seal"; b.dataset.layer = k; b.textContent = s;
+    b.title = t("layers")[k]; b.setAttribute("aria-label", t("layers")[k]);
+    b.addEventListener("click", () => goToLayer(k));
+    box.append(b);
+  }
+}
 function openScene() {
   active = null;
   for (const [, m] of markerEls) m.el.dataset.active = "false";
@@ -627,7 +778,7 @@ const I18N = {
     stl: "Download for 3D printing (STL)", stlTitle: "Shape only (STL has no colour). Team use only: not for sharing.",
     stlMaking: "Preparing STL…", stlSaved: (mm) => `STL saved: ${mm} mm tall. Scale it in your slicer.`, stlFailed: (m) => `Couldn't make the STL: ${m}`,
     role: "Role", declines: "Will not speculate on", creditTitle: "Synthetic voices: not recordings of any person", micTitle: "Ask by voice",
-    knownH: "What is known <span>· and what is not</span>",
+    knownH: "What is known <small>· and what is not</small>",
     legend: "Every entry shows two separate scores: <b>evidence</b> (how well it is supported) and <b>standing</b> (whose knowledge it is). Nothing is overwritten; corrections keep the history.",
     aboutScene: "About this scene", aboutSceneSub: "what is known, and what is not", model3d: "3D model",
     noSplat: "The scene scan (splat) isn't uploaded yet. Meanwhile, open a figure or the record:",
@@ -638,6 +789,8 @@ const I18N = {
     faction: { aizu: "Aizu clan", shogunate: "shogunate", "wajin-interpreter": "Wajin interpreter", "sakhalin-ainu": "Sakhalin Ainu" },
     status: { "curator-reviewed": "curator reviewed", sourced: "sourced, not yet reviewed", draft: "draft, not yet sourced" },
     speaksThrough: (n) => `speaks through the ${n.toLowerCase()}`, modelAlt: (n) => `3D model of the ${n}`,
+    lForm: "Form", lActors: "Actors",
+    layers: { form: "Form: how it can be seen", time: "Time strata: depicted, made, observed, present", actors: "Actors: who is depicted, made it, speaks", types: "Observation types: event, contact, meaning, making", evidence: "Evidence and standing: two separate scores", absence: "Absence: what is unknown, and why", protocol: "Protocol: who may see what", voice: "Voice: speaks only from the record" },
     tabTalk: "Talk", tabRecord: "Record", count: (n, u) => `${n}${u ? ` · ${u} unknown` : ""}`,
     protocol: "Protocol: shown to the project team. Access rules are to be set with the Hokkaido Museum's Ainu Culture Research Center and community bodies.",
   },
@@ -657,7 +810,7 @@ const I18N = {
     stl: "3Dプリント用にダウンロード（STL）", stlTitle: "形状のみ（STLには色がありません）。チーム内の利用に限ります。共有しないでください。",
     stlMaking: "STLを作成しています…", stlSaved: (mm) => `STLを保存しました：高さ${mm}mm。スライサーで拡大縮小してください。`, stlFailed: (m) => `STLを作成できませんでした：${m}`,
     role: "役割", declines: "推測しないこと", creditTitle: "合成音声です。実在の人物の録音ではありません。", micTitle: "声で質問する",
-    knownH: "分かっていること <span>・分からないこと</span>",
+    knownH: "分かっていること <small>・分からないこと</small>",
     legend: "各項目には二つの別々の評価があります：<b>根拠</b>（どの程度裏付けられているか）と<b>立場</b>（誰の知識か）。上書きはされず、訂正しても履歴が残ります。",
     aboutScene: "この場面について", aboutSceneSub: "分かっていること、分からないこと", model3d: "3Dモデル",
     noSplat: "場面のスキャン（スプラット）はまだアップロードされていません。その間、人物または記録を開けます：",
@@ -669,6 +822,8 @@ const I18N = {
     status: { "curator-reviewed": "学芸員確認済み", sourced: "出典あり・未確認", draft: "下書き・出典未確認" },
     speaksThrough: (n) => `${n}を介して話す`, modelAlt: (n) => `${n}の3Dモデル`,
     machine: "機械翻訳",
+    lForm: "形態", lActors: "人物",
+    layers: { form: "形態：どのように見られるか", time: "時代層：描かれた時・作られた時・観察・現在", actors: "人物：描かれた人・作った人・語る人", types: "観察の種類：出来事・接触・意味・制作", evidence: "根拠と立場：二つの別々の評価", absence: "欠落：分からないこと、その理由", protocol: "公開の決まり：誰が何を見られるか", voice: "声：記録だけをもとに語る" },
     tabTalk: "話す", tabRecord: "記録", count: (n, u) => `${n}件${u ? ` · 不明${u}` : ""}`,
     protocol: "公開範囲：プロジェクトチームのみ。閲覧の決まりは、北海道博物館アイヌ民族文化研究センターおよび関係する団体と定める予定。",
   },
@@ -689,7 +844,8 @@ function applyLang() {
   for (const n of document.querySelectorAll("[data-i18n]")) n.textContent = t(n.dataset.i18n);
   for (const n of document.querySelectorAll("[data-i18n-html]")) n.innerHTML = t(n.dataset.i18nHtml);
   for (const n of document.querySelectorAll("[data-i18n-title]")) n.title = t(n.dataset.i18nTitle);
-  $("sTalkH").replaceChildren(t("talkH"), Object.assign(document.createElement("span"), { textContent: t("talkSub") }));
+  $("sTalkH").innerHTML = `<span class="seal">声</span>`; $("sTalkH").append(t("talkH"), Object.assign(document.createElement("small"), { textContent: t("talkSub") }));
+  renderLayerKey();
   $("sSend").textContent = t("ask"); $("sQ").placeholder = t("placeholder");
   $("sVoiceCredit").textContent = t("credit"); $("sNotice").textContent = t("notice");
   if (chat.id) renderSuggestions(chat.id);
