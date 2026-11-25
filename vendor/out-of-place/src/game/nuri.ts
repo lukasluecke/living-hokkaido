@@ -23,8 +23,13 @@ interface PartDef {
   path(ctx: CanvasRenderingContext2D): void;
 }
 
-const paintStyle = (p: number | CanvasPattern) =>
-  typeof p === "number" ? "#" + p.toString(16).padStart(6, "0") : p;
+/**
+ * A scene patch as paint, pinned to the world: its top-left pixel belongs
+ * at world (x0, y0), and it repeats from there. So paint near the spot it
+ * came from lines up with the scene, also on a turned arm or a lying body.
+ */
+export type WorldPattern = { pattern: CanvasPattern; x0: number; y0: number };
+export type NuriPaint = number | WorldPattern;
 
 const ATLAS_W = 200;
 const ATLAS_H = 60;
@@ -253,10 +258,31 @@ export class Nuri {
     return this.ctx.createPattern(patch, "repeat");
   }
 
-  /** Paint a round dab at a world point. Paint is clipped to each part's silhouette. */
-  dab(wx: number, wy: number, radius: number, paint: number | CanvasPattern) {
+  /**
+   * Sets ctx.fillStyle for one part: a flat colour, or the world pattern
+   * mapped through the part's transform (world → part → atlas).
+   */
+  private usePaint(name: PartName, paint: NuriPaint) {
     const ctx = this.ctx;
-    ctx.fillStyle = paintStyle(paint);
+    if (typeof paint === "number") {
+      ctx.fillStyle = "#" + paint.toString(16).padStart(6, "0");
+      return;
+    }
+    const img = this.parts.get(name)!;
+    const m = img.getWorldTransformMatrix();
+    const f = PARTS[name].frame;
+    // pattern px → world → part local → atlas.
+    const toAtlas = new DOMMatrix()
+      .translate(f.x + img.displayOriginX, f.y + img.displayOriginY)
+      .multiply(new DOMMatrix([m.a, m.b, m.c, m.d, m.tx, m.ty]).inverse())
+      .translate(paint.x0, paint.y0);
+    paint.pattern.setTransform(toAtlas);
+    ctx.fillStyle = paint.pattern;
+  }
+
+  /** Paint a round dab at a world point. Paint is clipped to each part's silhouette. */
+  dab(wx: number, wy: number, radius: number, paint: NuriPaint) {
+    const ctx = this.ctx;
     for (const name of DRAW_ORDER) {
       const img = this.parts.get(name)!;
       const { frame: f, path } = PARTS[name];
@@ -269,6 +295,7 @@ export class Nuri {
       )
         continue;
       ctx.save();
+      this.usePaint(name, paint);
       ctx.beginPath();
       path(ctx);
       ctx.clip();
@@ -284,13 +311,13 @@ export class Nuri {
    * Paint every part in one colour (undoable): the keyboard and quick-paint
    * path. The outline and face stay, so a perfect hide still takes brushwork.
    */
-  fill(paint: number | CanvasPattern) {
+  fill(paint: NuriPaint) {
     this.beginStroke();
     const ctx = this.ctx;
-    ctx.fillStyle = paintStyle(paint);
     for (const name of DRAW_ORDER) {
       const { frame: f, path } = PARTS[name];
       ctx.save();
+      this.usePaint(name, paint);
       ctx.beginPath();
       path(ctx);
       ctx.clip();

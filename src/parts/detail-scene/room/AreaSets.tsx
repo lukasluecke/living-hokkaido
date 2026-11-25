@@ -5,9 +5,11 @@
 // photos; visual reference only). Original geometry, MIT. Not reconstructions
 // of real places. Claims: knowledge "land-and-sea". Scene space, metres;
 // the camera looks from +z, so the open side of each set faces +z.
-import { useMemo } from "react";
+import { useFrame } from "@react-three/fiber";
+import { useMemo, useRef } from "react";
 import * as THREE from "three";
-import type { SeasonState } from "@/contracts";
+import { type SeasonState, seasonWeights } from "@/contracts";
+import { snowCap } from "../../shared/snowCap";
 import {
   Ground,
   Log,
@@ -48,6 +50,13 @@ function useAreaMats() {
       bear: std("#4a3326"),
       white: std("#f1efe4"),
       garlic: std("#6fae55"),
+      mat: std("#c9b07a"),
+      skin: std("#e0b48a"),
+      shirt: std("#efe4c8"),
+      hare: std("#c8b89a"),
+      grouse: std("#8a6a4a"),
+      jay: std("#c48a5a"),
+      tanuki: std("#6b5a48"),
       katakuri: std("#c98bd0"),
       lamp: std("#ffd27a", { emissive: "#ffb347", emissiveIntensity: 1.2 }),
     }),
@@ -79,8 +88,8 @@ function Person({ p, a, r = 0 }: { p: V3; a: A; r?: number }) {
   return (
     <group position={p} rotation={[0, r, 0]}>
       <Box s={[0.3, 0.75, 0.22]} p={[0, 0.38, 0]} m={a.rail} />
-      <Box s={[0.38, 0.55, 0.26]} p={[0, 1.02, 0]} m={a.canvas} />
-      <mesh position={[0, 1.45, 0]} material={a.sand}>
+      <Box s={[0.38, 0.55, 0.26]} p={[0, 1.02, 0]} m={a.shirt} />
+      <mesh position={[0, 1.45, 0]} material={a.skin}>
         <icosahedronGeometry args={[0.15, 0]} />
       </mesh>
     </group>
@@ -116,22 +125,92 @@ function Beast({
   );
 }
 
+/** A person carrying a basket or a load on the back. */
+function Carrier({
+  p,
+  a,
+  r = 0,
+  load,
+}: {
+  p: V3;
+  a: A;
+  r?: number;
+  load: THREE.Material;
+}) {
+  return (
+    <group position={p} rotation={[0, r, 0]}>
+      <Person p={[0, 0, 0]} a={a} />
+      <Box s={[0.42, 0.42, 0.3]} p={[0, 1.15, -0.3]} m={load} />
+    </group>
+  );
+}
+
+/** A small four-legged animal from boxes (hare, raccoon dog). */
+function Small({
+  p,
+  r,
+  m,
+  ears,
+}: {
+  p: V3;
+  r: number;
+  m: THREE.Material;
+  ears?: boolean;
+}) {
+  return (
+    <group position={p} rotation={[0, r, 0]}>
+      <Box s={[0.4, 0.22, 0.22]} p={[0, 0.2, 0]} m={m} />
+      <Box s={[0.18, 0.16, 0.16]} p={[0.25, 0.32, 0]} m={m} />
+      {ears &&
+        [-0.04, 0.04].map((z) => (
+          <Box key={z} s={[0.04, 0.2, 0.03]} p={[0.22, 0.5, z]} m={m} />
+        ))}
+      {[-0.13, 0.13].map((x) => (
+        <Box key={x} s={[0.06, 0.12, 0.18]} p={[x, 0.06, 0]} m={m} />
+      ))}
+    </group>
+  );
+}
+
+/** A bird on the ground or on a stump. */
+function Bird({ p, r, m }: { p: V3; r: number; m: THREE.Material }) {
+  return (
+    <group position={p} rotation={[0, r, 0]}>
+      <mesh position={[0, 0.12, 0]} scale={[1.4, 1, 1]} material={m}>
+        <icosahedronGeometry args={[0.1, 0]} />
+      </mesh>
+      <mesh position={[0.13, 0.2, 0]} material={m}>
+        <icosahedronGeometry args={[0.06, 0]} />
+      </mesh>
+      <Box s={[0.14, 0.03, 0.08]} p={[-0.16, 0.14, 0]} m={m} r={[0, 0, 0.3]} />
+    </group>
+  );
+}
+
 /** A tent: a triangular prism along x. */
-function Tent({ p, r, m }: { p: V3; r: number; m: THREE.Material }) {
+function Tent({
+  p,
+  r,
+  m,
+  door,
+}: {
+  p: V3;
+  r: number;
+  m: THREE.Material;
+  door: THREE.Material;
+}) {
   const geo = useMemo(() => {
     const g = new THREE.CylinderGeometry(1, 1, 2, 3, 1).rotateZ(Math.PI / 2);
     g.rotateX(-Math.PI / 2).scale(1, 1.3 / 1.5, 1.6 / Math.sqrt(3));
     return g.translate(0, 1.3 / 3, 0);
   }, []);
   return (
-    <mesh
-      position={p}
-      rotation={[0, r, 0]}
-      geometry={geo}
-      material={m}
-      castShadow
-      receiveShadow
-    />
+    <group position={p} rotation={[0, r, 0]} scale={0.8}>
+      <mesh geometry={geo} material={m} castShadow receiveShadow />
+      {/* Ridge pole and the dark door opening at the front end. */}
+      <Box s={[2.2, 0.06, 0.06]} p={[0, 1.31, 0]} m={door} />
+      <Box s={[0.02, 0.75, 0.45]} p={[1.0, 0.38, 0]} m={door} />
+    </group>
   );
 }
 
@@ -195,17 +274,27 @@ function Coast({ m, a }: { m: Mats; a: A }) {
           />
         ))}
       </group>
-      {/* Herring in square trays, middle. */}
+      {/* Herring spread on mats on the ground, middle (sea-diorama-tasks). */}
       {[-1.2, -0.3, 0.6].flatMap((x) =>
         [0.6, 1.5].map((z) => (
-          <Box
-            key={`${x}${z}`}
-            s={[0.7, 0.06, 0.7]}
-            p={[x, 0.03, z]}
-            m={a.herring}
-          />
+          <group key={`${x}${z}`}>
+            <Box s={[0.82, 0.02, 0.82]} p={[x, 0.01, z]} m={a.mat} />
+            <Box s={[0.7, 0.06, 0.7]} p={[x, 0.04, z]} m={a.herring} />
+          </group>
         )),
       )}
+      {/* A second boat pulled up on the shore; workers carry the catch up
+          to the yard (sea-diorama-tasks). */}
+      <group position={[-1.2, 0.02, -4.6]} rotation={[0, -0.2, 0]}>
+        <Box s={[2.6, 0.32, 0.8]} p={[0, 0.16, 0]} m={a.plank} />
+        <Box s={[1.8, 0.14, 0.55]} p={[0, 0.36, 0]} m={a.herring} />
+      </group>
+      <Carrier p={[-0.6, 0, -3.3]} a={a} r={-1.3} load={a.mat} />
+      <Carrier p={[0.2, 0, -2.0]} a={a} r={-1.1} load={a.mat} />
+      {/* Mooring posts on the sand. */}
+      {[-2.4, -0.2, 2].map((x) => (
+        <Box key={x} s={[0.14, 0.7, 0.14]} p={[x, 0.35, -4.4]} m={a.woodDark} />
+      ))}
       {/* A crate to set the basket on. */}
       <Box s={[0.7, 0.42, 0.55]} p={[0.9, 0.21, -0.6]} m={a.plank} />
       {/* Boat on the sea. */}
@@ -242,8 +331,25 @@ function Forest({ m, a }: { m: Mats; a: A }) {
         </group>
       ))}
       {/* Camp: canvas tents at the back right. */}
-      <Tent p={[2.2, 0, -2.6]} r={0.3} m={a.canvas} />
-      <Tent p={[3.6, 0, -1.6]} r={-0.2} m={a.canvas} />
+      <Tent p={[2.2, 0, -2.6]} r={0.3} m={a.canvas} door={a.woodDark} />
+      <Tent p={[3.6, 0, -1.6]} r={-0.2} m={a.canvas} door={a.woodDark} />
+      <Tent p={[1.0, 0, -3.6]} r={0.1} m={a.canvas} door={a.woodDark} />
+      {/* Surveying: a person at a tripod instrument on the line. */}
+      <group position={[-3.0, 0, 0.6]}>
+        {[0, 2.1, 4.2].map((ang) => (
+          <Box
+            key={ang}
+            s={[0.04, 1.2, 0.04]}
+            p={[Math.cos(ang) * 0.18, 0.58, Math.sin(ang) * 0.18]}
+            r={[Math.sin(ang) * 0.28, 0, -Math.cos(ang) * 0.28]}
+            m={a.woodDark}
+          />
+        ))}
+        <Box s={[0.3, 0.14, 0.14]} p={[0, 1.22, 0]} m={a.rail} />
+      </group>
+      <Person p={[-3.6, 0, 0.9]} a={a} r={-0.4} />
+      {/* Carrying the things the survey needs. */}
+      <Carrier p={[-0.2, 0, -2.2]} a={a} r={0.9} load={a.canvas} />
       {/* Pack horses with loads, back left. */}
       <Beast p={[-2.4, 0, -2.4]} r={0.3} m={a.horse} load={a.canvas} />
       <Beast p={[-3.8, 0, -1.9]} r={0.3} m={a.horse} load={a.canvas} />
@@ -326,6 +432,14 @@ function Hills({ m, a }: { m: Mats; a: A }) {
       </group>
       <Stones m={m} seed={3} n={8} r0={3} />
       <Log p={[-1.6, 0, 1.4]} r={0.3} m={m} />
+      {/* Smaller animals and birds (hunt-animals): hares, a raccoon dog,
+          a hazel grouse and a jay on a stump. */}
+      <Small p={[1.4, 0, 1.5]} r={-0.6} m={a.hare} ears />
+      <Small p={[2.3, 0, 0.9]} r={2.2} m={a.hare} ears />
+      <Small p={[-3.4, 0, 0.6]} r={0.8} m={a.tanuki} />
+      <Bird p={[0.9, 0, -0.8]} r={1.2} m={a.grouse} />
+      <Stump p={[-0.6, 0, -2.2]} m={m} />
+      <Bird p={[-0.6, 0.42, -2.2]} r={-0.4} m={a.jay} />
     </group>
   );
 }
@@ -392,6 +506,39 @@ function Mountains({ m, a }: { m: Mats; a: A }) {
           r={[-0.5, 0, 0]}
         />
       </group>
+      {/* A second cart further down the line. */}
+      <group position={[0, 0, 2.4]}>
+        <Box s={[1, 0.55, 1.3]} p={[0, 0.5, 0]} m={a.rail} />
+        <mesh position={[0, 0.85, 0]} scale={[1, 0.4, 1.2]} material={a.coal}>
+          <icosahedronGeometry args={[0.45, 0]} />
+        </mesh>
+      </group>
+      {/* At the coal face: a miner drills with a machine (mine-diorama-tasks). */}
+      <Person p={[-0.5, 0, -1.7]} a={a} r={1.4} />
+      <Box
+        s={[0.7, 0.14, 0.14]}
+        p={[-0.5, 1.0, -2.05]}
+        m={a.rail}
+        r={[0, 1.4, 0]}
+      />
+      <Box s={[0.1, 0.08, 0.06]} p={[-0.47, 1.55, -1.82]} m={a.lamp} />
+      {/* Logs stacked by the sleigh path (winter-logging). */}
+      {(
+        [
+          [0, 0],
+          [0, 0.36],
+          [0.3, 0.18],
+        ] as const
+      ).map(([y, z]) => (
+        <mesh
+          key={`${y}${z}`}
+          position={[4.4, 0.18 + y, 0.2 + z]}
+          rotation={[0, 0, Math.PI / 2]}
+          material={a.plank}
+        >
+          <cylinderGeometry args={[0.18, 0.18, 2, 8]} />
+        </mesh>
+      ))}
       {/* Miners with head lamps. */}
       <Person p={[-1.1, 0, -0.9]} a={a} r={0.5} />
       <Person p={[1.3, 0, 0.1]} a={a} r={-0.6} />
@@ -433,6 +580,19 @@ export function isAreaSetting(kind: string) {
   return (AREA_SETTINGS as readonly string[]).includes(kind);
 }
 
+/** Snow on the top faces of the props in winter (season weight 4). */
+function useSnow(season: SeasonState, mats: THREE.Material[]) {
+  const u = useMemo(() => ({ value: 0 }), []);
+  const s = useRef(season.value);
+  s.current = season.value;
+  useMemo(() => {
+    for (const mat of mats) snowCap(mat, u);
+  }, [mats, u]);
+  useFrame(() => {
+    u.value = seasonWeights(s.current)[3] ?? 0;
+  });
+}
+
 export function AreaStatic({
   kind,
   season,
@@ -442,6 +602,35 @@ export function AreaStatic({
 }) {
   const m = useOutdoorMats(season);
   const a = useAreaMats();
+  const snowy = useMemo(() => {
+    // Not the sea, the lamps, people or animals.
+    const {
+      sea: _sea,
+      lamp: _lamp,
+      skin: _skin,
+      shirt: _shirt,
+      horse: _horse,
+      deer: _deer,
+      bear: _bear,
+      hare: _hare,
+      grouse: _grouse,
+      jay: _jay,
+      tanuki: _tanuki,
+      ...props
+    } = a;
+    return [
+      ...Object.values(props),
+      m.path,
+      m.pine,
+      m.stone,
+      m.trunk,
+      m.wood,
+      m.bark,
+      m.cut,
+      m.fibre,
+    ];
+  }, [a, m]);
+  useSnow(season, snowy);
   if (kind === "area-coast") return <Coast m={m} a={a} />;
   if (kind === "area-forest") return <Forest m={m} a={a} />;
   if (kind === "area-hills") return <Hills m={m} a={a} />;
