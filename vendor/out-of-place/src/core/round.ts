@@ -32,14 +32,25 @@ export const WRONG_TAP_PENALTY_MS = 10_000;
 /** Extra pixels around the hider that still count as a hit (fat-finger friendly). */
 export const TAP_FORGIVENESS = 8;
 
-export type Pose = "standing" | "crouching" | "leaning";
-export const POSES: readonly Pose[] = ["standing", "crouching", "leaning"];
+/**
+ * Practical body shapes, about the same area each: tall and narrow, then
+ * lower and wider, down to flat on the ground. Pick the one that fits the
+ * spot (a doorway, a bench, a row of sacks).
+ */
+export type Pose = "standing" | "sitting" | "kneeling" | "lying";
+export const POSES: readonly Pose[] = [
+  "standing",
+  "sitting",
+  "kneeling",
+  "lying",
+];
 
 /** Hit box per pose in world px, anchored bottom-center at the hider's feet. Renderer must match. */
 export const POSE_HITBOX: Record<Pose, { w: number; h: number }> = {
   standing: { w: 64, h: 142 },
-  crouching: { w: 88, h: 116 },
-  leaning: { w: 104, h: 142 },
+  sitting: { w: 92, h: 120 },
+  kneeling: { w: 80, h: 128 },
+  lying: { w: 152, h: 58 },
 };
 
 export interface Hider {

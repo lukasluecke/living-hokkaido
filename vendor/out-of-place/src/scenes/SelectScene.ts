@@ -2,10 +2,11 @@
 // Shown only when the host passes two or more activities; living-hokkaido
 // passes one, so it goes straight to the game.
 import Phaser from "phaser";
-import { WORLD_W } from "../art/common";
+import { WORLD_H, WORLD_W } from "../art/common";
 import { SCENE_ART } from "../art/scenes";
 import type { HideSeekActivity } from "../integration/contracts";
 import { PALETTE } from "../style/palette";
+import { RES } from "../style/res";
 import { type Button, drawChunkyBox, makeButton, makeText } from "../style/ui";
 import type { GameSceneData } from "./GameScene";
 
@@ -42,6 +43,7 @@ export class SelectScene extends Phaser.Scene {
   }
 
   create() {
+    this.cameras.main.setZoom(RES).centerOn(WORLD_W / 2, WORLD_H / 2);
     makeText(this, WORLD_W / 2, 58, 52)
       .setOrigin(0.5)
       .setText("Out of Place");

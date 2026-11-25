@@ -13,6 +13,7 @@ import {
   type OutOfPlaceProps,
 } from "./integration/contracts";
 import { css } from "./style/palette";
+import { pickRes, RES, setRes } from "./style/res";
 
 export type OutOfPlaceHandle = {
   /** Resolves once the game is running (or right away if destroyed first). */
@@ -83,6 +84,12 @@ export function mountOutOfPlace(
         import("./scenes/SelectScene"),
       ]);
     if (destroyed) return;
+    setRes(
+      pickRes(
+        parent.clientWidth || GAME_WIDTH,
+        globalThis.devicePixelRatio || 1,
+      ),
+    );
     game = new Phaser.Game({
       type: props.prefs.webgl ? Phaser.AUTO : Phaser.CANVAS,
       parent,
@@ -96,8 +103,9 @@ export function mountOutOfPlace(
       scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
-        width: GAME_WIDTH,
-        height: GAME_HEIGHT,
+        // Sharp text: a bigger canvas, the cameras zoom by RES (style/res.ts).
+        width: GAME_WIDTH * RES,
+        height: GAME_HEIGHT * RES,
       },
     });
     const data = {

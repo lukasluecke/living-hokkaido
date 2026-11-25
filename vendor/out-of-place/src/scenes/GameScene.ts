@@ -9,6 +9,8 @@ import {
   createRound,
   type Hider,
   type Phase,
+  POSE_HITBOX,
+  POSES,
   type Pose,
   type RoundAction,
   type RoundState,
@@ -27,6 +29,8 @@ import { Nuri } from "../game/nuri";
 import { Sfx } from "../game/sound";
 import type { OutOfPlaceProps } from "../integration/contracts";
 import { PALETTE } from "../style/palette";
+import { RES } from "../style/res";
+import { hex } from "../art/iso";
 import { type Button, drawChunkyBox, makeButton, makeText } from "../style/ui";
 
 export type GameSceneData = OutOfPlaceProps & {
@@ -42,6 +46,13 @@ const SIZES: BrushSize[] = ["S", "M", "L"];
 const PATCH = 24;
 /** Recent paints kept in the panel's bottom row. */
 const RECENT_MAX = 4;
+/** Eyedropper loupe: the patch at 4×, a frame, and a chip of the colour. */
+const LOUPE_K = 4;
+const LOUPE_B = 6;
+const LOUPE_W = PATCH * LOUPE_K + LOUPE_B * 2;
+const LOUPE_H = LOUPE_W + 22;
+/** The loupe texture is drawn at 2× so it stays sharp at RES 2. */
+const LOUPE_TEX = 2;
 const ZOOM = 2.5;
 const KEY_STEP = 8;
 /** Finder ring (the seeker's magnifying glass): radius and arrow-key step. */
@@ -108,6 +119,8 @@ export class GameScene extends Phaser.Scene {
   private recentKeys: string[] = [];
   private swatchImg!: Phaser.GameObjects.Image;
   private brushGfx!: Phaser.GameObjects.Graphics;
+  private loupeTex!: Phaser.Textures.CanvasTexture;
+  private loupe!: Phaser.GameObjects.Image;
   private zoomed = false;
   private stroking = false;
   private dragging = false;
@@ -194,7 +207,11 @@ export class GameScene extends Phaser.Scene {
     // Two cameras: the world camera can zoom for painting; the UI camera never moves.
     this.world = this.add.layer();
     this.ui = this.add.layer();
-    const uiCam = this.cameras.add(0, 0, WORLD_W, WORLD_H);
+    const uiCam = this.cameras
+      .add(0, 0, WORLD_W * RES, WORLD_H * RES)
+      .setZoom(RES)
+      .centerOn(WORLD_W / 2, WORLD_H / 2);
+    this.cameras.main.setZoom(RES).centerOn(WORLD_W / 2, WORLD_H / 2);
     this.cameras.main.ignore(this.ui);
     uiCam.ignore(this.world);
 
@@ -286,6 +303,17 @@ export class GameScene extends Phaser.Scene {
     this.cursorGfx = this.add.graphics().setDepth(25_000);
     this.brushGfx = this.add.graphics().setDepth(25_000);
     this.world.add([this.spotlight, this.cursorGfx, this.brushGfx]);
+    if (this.textures.exists("loupe")) this.textures.remove("loupe");
+    this.loupeTex = this.textures.createCanvas(
+      "loupe",
+      LOUPE_W * LOUPE_TEX,
+      LOUPE_H * LOUPE_TEX,
+    )!;
+    this.loupe = this.add
+      .image(0, 0, "loupe")
+      .setDepth(25_001)
+      .setVisible(false);
+    this.world.add(this.loupe);
     this.seekCursor = { ...this.art.spawn, shown: false };
   }
 
@@ -348,31 +376,15 @@ export class GameScene extends Phaser.Scene {
     this.panel.add(this.swatchImg);
     btn(THIRDS[1], ROWS[3], "Fill", () => this.fillAll(), 88, 24);
     this.undoBtn = btn(THIRDS[2], ROWS[3], "Undo", () => this.undo(), 88, 24);
+    // Four practical shapes in one row (1–4).
+    const POSE_X = [1001, 1077, 1153, 1229];
+    const poseBtn = (i: number, pose: Pose, text: string) =>
+      btn(POSE_X[i], ROWS[4], text, () => this.setPose(pose), 70, 20);
     this.poseBtns = {
-      standing: btn(
-        THIRDS[0],
-        ROWS[4],
-        "Stand",
-        () => this.setPose("standing"),
-        88,
-        21,
-      ),
-      crouching: btn(
-        THIRDS[1],
-        ROWS[4],
-        "Crouch",
-        () => this.setPose("crouching"),
-        88,
-        21,
-      ),
-      leaning: btn(
-        THIRDS[2],
-        ROWS[4],
-        "Lean",
-        () => this.setPose("leaning"),
-        88,
-        21,
-      ),
+      standing: poseBtn(0, "standing", "Stand"),
+      sitting: poseBtn(1, "sitting", "Sit"),
+      kneeling: poseBtn(2, "kneeling", "Kneel"),
+      lying: poseBtn(3, "lying", "Lie"),
     };
     const label = (y: number, t: string) =>
       this.panel.add(
@@ -644,11 +656,14 @@ export class GameScene extends Phaser.Scene {
         else this.onMainButton();
       } else if (phase === "disguise") {
         const k = ev.key.toLowerCase();
-        if (k === "1") this.setPose("standing");
-        else if (k === "2") this.setPose("crouching");
-        else if (k === "3") this.setPose("leaning");
+        const poseKey = POSES[Number(k) - 1];
+        if (poseKey) this.setPose(poseKey);
         else if (k === "e")
-          this.pickColor(this.state.hider.x, this.state.hider.y - 70); // colour behind Nuri
+          // The colour behind the middle of Nuri, whatever the pose.
+          this.pickColor(
+            this.state.hider.x,
+            this.state.hider.y - POSE_HITBOX[this.state.hider.pose].h / 2,
+          );
         else if (k === "f" || k === " ") this.fillAll();
         else if (k === "z") this.undo();
         else if (k === "[") this.stepBrushSize(-1);
@@ -684,6 +699,7 @@ export class GameScene extends Phaser.Scene {
     this.dragging = this.stroking = false;
     this.lastShownSeconds = -1;
     this.brushGfx?.clear();
+    this.loupe?.setVisible(false);
     if (phase !== "roundOver") {
       this.clearRevealFx();
       this.resetCamera();
@@ -693,6 +709,7 @@ export class GameScene extends Phaser.Scene {
     this.drawSeekCursor();
     // The crowd freezes with the reveal and walks again in the next round.
     this.crowd.setPaused(phase === "reveal" || phase === "roundOver");
+    this.crowd.setFaded(this, phase === "disguise");
     const a = this.cfg.activity;
     if (phase === "sceneReveal") {
       this.nuri.reset();
@@ -711,7 +728,7 @@ export class GameScene extends Phaser.Scene {
     }
     if (phase === "disguise") {
       this.cfg.announce(
-        `Disguise, ${a.durations.disguise} seconds. Hider: arrow keys move Nuri, E picks the colour behind Nuri, F fills, 1 to 3 change pose, Enter when hidden.`,
+        `Disguise, ${a.durations.disguise} seconds. Hider: arrow keys move Nuri, E picks the colour behind Nuri, F fills, 1 to 4 change pose (stand, sit, kneel, lie), Enter when hidden.`,
       );
     }
     if (phase === "handoff")
@@ -771,7 +788,7 @@ export class GameScene extends Phaser.Scene {
         .filter(Boolean)
         .join("\n"),
       disguise:
-        "Hider: move Nuri to a spot, paint to blend in, pick a pose. The eyedropper picks up colour and pattern.\nKeys: arrows move · E pick paint · [ ] brush size · F fill · 1–3 pose · Enter done",
+        "Hider: move Nuri to a spot, paint to blend in, pick a pose. The eyedropper picks up colour and pattern.\nKeys: arrows move · E pick paint · [ ] brush size · F fill · 1–4 pose · Enter done",
       handoff: "",
       seek: `Seeker: tap whoever looks out of place. Wrong taps cost ${this.penaltySeconds} seconds.\nKeys: arrows move the ring · Space taps · G gives up`,
       reveal: "",
@@ -830,6 +847,7 @@ export class GameScene extends Phaser.Scene {
   private drawBrushPreview(x: number, y: number) {
     const g = this.brushGfx;
     g.clear();
+    this.loupe.setVisible(false);
     if (this.state.phase !== "disguise") return;
     if (this.tool === "brush") {
       const r = BRUSH_RADIUS[this.brushSize];
@@ -848,7 +866,76 @@ export class GameScene extends Phaser.Scene {
         PATCH,
         PATCH,
       );
+      this.drawLoupe(x, y);
     }
+  }
+
+  /**
+   * The loupe beside the eyedropper: the exact patch the brush will paint
+   * with, enlarged, the targeted pixel marked, and a chip of its colour.
+   */
+  private drawLoupe(x: number, y: number) {
+    const px = Math.round(x);
+    const py = Math.round(y);
+    if (px < 0 || py < 0 || px >= WORLD_W || py >= WORLD_H) return;
+    const ctx = this.loupeTex.getContext();
+    const B = LOUPE_B;
+    const side = PATCH * LOUPE_K;
+    ctx.save();
+    ctx.setTransform(LOUPE_TEX, 0, 0, LOUPE_TEX, 0, 0);
+    ctx.clearRect(0, 0, LOUPE_W, LOUPE_H);
+    ctx.imageSmoothingEnabled = false;
+    ctx.fillStyle = hex("outline");
+    ctx.beginPath();
+    ctx.roundRect(0, 0, LOUPE_W, LOUPE_H, 10);
+    ctx.fill();
+    ctx.fillStyle = hex("backdrop");
+    ctx.fillRect(B, B, side, side);
+    ctx.drawImage(
+      this.art.composite,
+      px - PATCH / 2,
+      py - PATCH / 2,
+      PATCH,
+      PATCH,
+      B,
+      B,
+      side,
+      side,
+    );
+    // The targeted pixel, ringed dark then light so it shows on any colour.
+    const c = B + (PATCH / 2) * LOUPE_K;
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = hex("outline");
+    ctx.strokeRect(c - 2, c - 2, LOUPE_K + 4, LOUPE_K + 4);
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = hex("cream");
+    ctx.strokeRect(c - 0.5, c - 0.5, LOUPE_K + 1, LOUPE_K + 1);
+    const [r, g, b, a] = this.compositeCtx.getImageData(px, py, 1, 1).data;
+    ctx.fillStyle = a > 0 ? `rgb(${r}, ${g}, ${b})` : hex("backdrop");
+    ctx.beginPath();
+    ctx.roundRect(B, B + side + 4, side, 14, 5);
+    ctx.fill();
+    ctx.strokeStyle = hex("cream");
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.restore();
+    this.loupeTex.refresh();
+
+    // Same size on screen at any zoom; up and right of the pointer, flipped
+    // when it would run under the tool panel or off the top.
+    const cam = this.cameras.main;
+    const k = RES / cam.zoom;
+    const gap = 22 * k;
+    const w = LOUPE_W * k;
+    const h = LOUPE_H * k;
+    const panelX = cam.getWorldPoint(PANEL_X0 * RES, 0).x;
+    const left = x + gap + w > panelX;
+    const below = y - gap - h < cam.worldView.top;
+    this.loupe
+      .setScale(k / LOUPE_TEX)
+      .setOrigin(left ? 1 : 0, below ? 0 : 1)
+      .setPosition(left ? x - gap : x + gap, below ? y + gap : y - gap)
+      .setVisible(true);
   }
 
   private stepBrushSize(d: number) {
@@ -882,14 +969,14 @@ export class GameScene extends Phaser.Scene {
     this.zoomed = on;
     const cam = this.cameras.main;
     if (on) {
-      cam.setZoom(ZOOM);
+      cam.setZoom(ZOOM * RES);
       // Shift right a little so Nuri sits in the middle of the area the panel doesn't cover.
       cam.centerOn(
         this.state.hider.x + (WORLD_W - PANEL_X0) / (2 * ZOOM),
-        this.state.hider.y - 70,
+        this.hiderMidY,
       );
     } else {
-      cam.setZoom(1);
+      cam.setZoom(RES);
       cam.centerOn(WORLD_W / 2, WORLD_H / 2);
     }
     this.zoomBtn?.setLabel(on ? "Zoom −" : "Zoom +");
@@ -1183,6 +1270,7 @@ export class GameScene extends Phaser.Scene {
     const cam = this.cameras.main;
     cam.panEffect.reset();
     cam.zoomEffect.reset();
+    cam.roundPixels = true;
   }
 
   private clearRevealFx() {
@@ -1215,19 +1303,22 @@ export class GameScene extends Phaser.Scene {
     this.resetCamera();
     this.revealCardShown = forClip; // the clip replays after the card was shown
     const cam = this.cameras.main;
-    const { x: hx, y: hy } = this.state.hider;
-    const cy = hy - 70;
+    const { x: hx } = this.state.hider;
+    const cy = this.hiderMidY;
     const cx = forClip
       ? hx
       : hx + (WORLD_W / 2 - REVEAL_SCREEN_X) / REVEAL_ZOOM;
     const zoomMs = this.still ? 0 : REVEAL_ZOOM_MS;
 
-    cam.setZoom(1).centerOn(WORLD_W / 2, WORLD_H / 2);
+    cam.setZoom(RES).centerOn(WORLD_W / 2, WORLD_H / 2);
     if (zoomMs) {
+      // Snapping to whole pixels while the zoom changes makes the slow zoom
+      // step and judder; let it glide (resetCamera turns snapping back on).
+      cam.roundPixels = false;
       cam.pan(cx, cy, zoomMs, "Sine.easeInOut", true);
-      cam.zoomTo(REVEAL_ZOOM, zoomMs, "Sine.easeInOut", true);
+      cam.zoomTo(REVEAL_ZOOM * RES, zoomMs, "Sine.easeInOut", true);
     } else {
-      cam.setZoom(REVEAL_ZOOM).centerOn(cx, cy);
+      cam.setZoom(REVEAL_ZOOM * RES).centerOn(cx, cy);
     }
 
     this.time.delayedCall(zoomMs, () =>
@@ -1242,10 +1333,20 @@ export class GameScene extends Phaser.Scene {
     this.render();
   }
 
+  /** World y of the middle of the hider's body, for the pose they are in. */
+  private get hiderMidY() {
+    const h = this.state.hider;
+    return h.y - POSE_HITBOX[h.pose].h / 2;
+  }
+
   private spotlightRing() {
-    const { x, y } = this.state.hider;
-    this.spotlight.lineStyle(5, PALETTE.outline).strokeCircle(x, y - 70, 92);
-    this.spotlight.lineStyle(3, PALETTE.sunGlow).strokeCircle(x, y - 70, 92);
+    const { x } = this.state.hider;
+    this.spotlight
+      .lineStyle(5, PALETTE.outline)
+      .strokeCircle(x, this.hiderMidY, 92);
+    this.spotlight
+      .lineStyle(3, PALETTE.sunGlow)
+      .strokeCircle(x, this.hiderMidY, 92);
     if (!this.still)
       this.tweens.add({
         targets: this.spotlight,
@@ -1427,10 +1528,10 @@ export class GameScene extends Phaser.Scene {
     this.recording = false;
     this.recText.setVisible(false);
     // Back to the normal reveal framing with the card.
-    const { x: hx, y: hy } = this.state.hider;
+    const { x: hx } = this.state.hider;
     this.cameras.main.pan(
       hx + (WORLD_W / 2 - REVEAL_SCREEN_X) / REVEAL_ZOOM,
-      hy - 70,
+      this.hiderMidY,
       this.still ? 0 : 400,
       "Sine.easeInOut",
       true,

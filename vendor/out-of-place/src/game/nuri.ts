@@ -88,21 +88,32 @@ const POSE_LAYOUT: Record<Pose | "victory", Record<PartName, PartPose>> = {
     armR: { x: 23, y: -86, rot: -0.15 },
     head: { x: 0, y: -88 },
   },
-  crouching: {
-    legL: { x: -8, y: -26, rot: 0.95 },
-    legR: { x: 8, y: -26, rot: -0.95 },
-    body: { x: 0, y: -20, sy: 0.85 },
-    armL: { x: -20, y: -62, rot: -0.45 },
-    armR: { x: 20, y: -62, rot: 0.45 },
-    head: { x: 0, y: -63 },
+  /** Sitting on the ground, legs forward, hands on the knees. */
+  sitting: {
+    legL: { x: -6, y: -20, rot: -Math.PI / 2 },
+    legR: { x: 2, y: -14, rot: -Math.PI / 2 },
+    body: { x: -16, y: -8 },
+    armL: { x: -30, y: -58, rot: -0.5 },
+    armR: { x: -2, y: -58, rot: -0.9 },
+    head: { x: -16, y: -64 },
   },
-  leaning: {
-    legL: { x: -5, y: -40, rot: -0.12 },
-    legR: { x: 7, y: -40, rot: 0.2 },
-    body: { x: 3, y: -36, rot: 0.14 },
-    armL: { x: -18, y: -84, rot: 0.6 },
-    armR: { x: 26, y: -82, rot: -2.55 },
-    head: { x: 12, y: -86, rot: 0.1 },
+  /** Kneeling upright, shins flat on the ground behind. */
+  kneeling: {
+    legL: { x: 8, y: -11, rot: Math.PI / 2 },
+    legR: { x: 12, y: -15, rot: Math.PI / 2 },
+    body: { x: 2, y: -14 },
+    armL: { x: -20, y: -66, rot: 0.12 },
+    armR: { x: 24, y: -66, rot: -0.12 },
+    head: { x: 2, y: -70 },
+  },
+  /** Lying on the side, head to the left: low and long. */
+  lying: {
+    legL: { x: 32, y: -34, rot: -Math.PI / 2 },
+    legR: { x: 34, y: -18, rot: -Math.PI / 2 },
+    body: { x: 34, y: -26, rot: -Math.PI / 2 },
+    armL: { x: -14, y: -36, rot: -Math.PI / 2 },
+    armR: { x: -10, y: -20, rot: -Math.PI / 2 },
+    head: { x: -24, y: -28, rot: -Math.PI / 2 },
   },
 };
 
