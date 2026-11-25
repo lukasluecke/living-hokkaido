@@ -96,6 +96,11 @@
   aspect-ratio: 16 / 9;
   width: min(100%, calc((100dvh - 64px) * 16 / 9));
 }
+.loading {
+  position: absolute;
+  color: var(--lh-paper);
+  font-size: 1.1rem;
+}
 .error {
   position: absolute;
   bottom: 16px;

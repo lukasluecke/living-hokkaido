@@ -56,7 +56,12 @@ export const locations: LocationInput[] = [
     anchor: [-2.25, 0, 9],
     arrivalView: { eye: [0.75, 6, 14.25], target: [-2.25, 0.6, 9] },
     sceneId: "memory-cabin",
-    knowledgeIds: ["bark-to-cloth", "house-over-time", "hokkaido-museum"],
+    knowledgeIds: [
+      "bark-to-cloth",
+      "house-over-time",
+      "hokkaido-museum",
+      "omusha-diorama",
+    ],
     building: "cabin",
     placeholder: true,
   },

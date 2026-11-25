@@ -4,6 +4,7 @@
 // room's own activities, grouped by kind. Keyboard path of the room.
 import { useEffect, useId, useRef, useState } from "react";
 import type { ActivityDefinition, DetailScenePartProps } from "@/contracts";
+import { useT } from "@/i18n";
 import { groupActivities, kindCaption } from "../shared/activityGroups";
 import { Icon, KindIcon, UI_ICON } from "../shared/Icon";
 import t from "./Tray.module.css";
@@ -39,6 +40,7 @@ function TryHere({
   onStart: (id: string) => void;
   onClose: () => void;
 }) {
+  const tx = useT();
   const root = useRef<HTMLDivElement>(null);
   const head = useId();
   useEffect(() => {
@@ -66,13 +68,13 @@ function TryHere({
         <div>
           <p className={t.cap}>{title}</p>
           <h2 id={head} className={t.sheetTitle}>
-            Try here
+            {tx("Try here")}
           </h2>
         </div>
         <button
           type="button"
           className={t.close}
-          aria-label="Close Try here"
+          aria-label={tx("Close Try here")}
           onClick={onClose}
         >
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
@@ -85,12 +87,14 @@ function TryHere({
           </svg>
         </button>
       </div>
-      <p className={t.sheetSub}>Activities about one object are on its card.</p>
+      <p className={t.sheetSub}>
+        {tx("Activities about one object are on its card.")}
+      </p>
       <div className={t.groups}>
         {groups.map((g) => (
-          <section key={g.id} aria-label={g.label}>
+          <section key={g.id} aria-label={tx(g.label)}>
             <h3 className={t.cap}>
-              {g.label} · {g.items.length}
+              {tx(g.label)} · {g.items.length}
             </h3>
             <ul className={t.rows}>
               {g.items.map((a) => (
@@ -101,11 +105,16 @@ function TryHere({
                     data-row=""
                     onClick={() => onStart(a.id)}
                   >
-                    <span className={t.iconWrap} title={kindCaption(a.kind)}>
+                    <span
+                      className={t.iconWrap}
+                      title={tx(kindCaption(a.kind))}
+                    >
                       <KindIcon kind={a.kind} className={t.icon} />
                     </span>
                     <span className={t.rowText}>
-                      <span className={t.srOnly}>{kindCaption(a.kind)}: </span>
+                      <span className={t.srOnly}>
+                        {tx(kindCaption(a.kind))}:{" "}
+                      </span>
                       <span className={t.rowTitle}>{a.title}</span>
                     </span>
                     <span className={t.chev} aria-hidden="true">
@@ -133,6 +142,7 @@ export function Tray({
   label: (artifactId: string) => string;
   activities: ActivityDefinition[];
 }) {
+  const tx = useT();
   const [open, setOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
   const tryCard = useRef<HTMLButtonElement>(null);
@@ -183,24 +193,27 @@ export function Tray({
           />
         </div>
       )}
-      <nav className={t.tray} aria-label={`Objects in ${scene.title}`}>
+      <nav
+        className={t.tray}
+        aria-label={tx("Objects in {place}", { place: scene.title })}
+      >
         <div className={t.head}>
           <button
             type="button"
             className={t.back}
-            aria-label="Back to the island"
+            aria-label={tx("Back to the island")}
             onClick={() => emit({ type: "scene.exit", sceneId: scene.id })}
           >
             <span aria-hidden="true">‹ </span>
-            <span className={t.backLong}>Back to the island</span>
-            <span className={t.backShort}>Island</span>
+            <span className={t.backLong}>{tx("Back to the island")}</span>
+            <span className={t.backShort}>{tx("Island")}</span>
           </button>
           <span className={t.cap}>
-            {scene.title} · {n} {n === 1 ? "object" : "objects"}
+            {scene.title} · {tx(n === 1 ? "{n} object" : "{n} objects", { n })}
           </span>
           {inspectedArtifactIds && (
             <span className={t.progress}>
-              <b>{seen}</b> of {n} looked at
+              <b>{seen}</b> {tx("of {n} looked at", { n })}
             </span>
           )}
         </div>
@@ -230,7 +243,9 @@ export function Tray({
                   )}
                   <span className={t.cardLabel}>
                     {label(p.artifactId)}
-                    {done && <span className={t.srOnly}> (looked at)</span>}
+                    {done && (
+                      <span className={t.srOnly}>{tx(" (looked at)")}</span>
+                    )}
                   </span>
                   {done && (
                     <span className={t.check} aria-hidden="true">
@@ -252,11 +267,11 @@ export function Tray({
                 onClick={() => setOpen((v) => !v)}
               >
                 <Icon d={UI_ICON.try} size={20} className={t.tryIcon} />
-                <span className={t.cardLabel}>Try here</span>
+                <span className={t.cardLabel}>{tx("Try here")}</span>
                 <span className={t.tryCount}>
                   {activities.length}
                   <span className={t.srOnly}>
-                    {activities.length === 1 ? " activity" : " activities"}
+                    {tx(activities.length === 1 ? " activity" : " activities")}
                   </span>
                 </span>
               </button>

@@ -8,6 +8,7 @@ import type {
   IslandPartProps,
   Location,
 } from "@/contracts";
+import { english, type Translate, useT } from "@/i18n";
 import { groupActivities, kindCaption } from "../shared/activityGroups";
 import { Icon, KIND_ICON, KindIcon, UI_ICON } from "../shared/Icon";
 
@@ -41,8 +42,11 @@ export function placeKinds(acts: ActivityDefinition[]): string[] {
 }
 
 /** Distinct kind captions for a screen reader: "Think, Listen, Words". */
-export function kindSummary(acts: ActivityDefinition[]): string {
-  return [...new Set(acts.map((a) => kindCaption(a.kind)))].join(", ");
+export function kindSummary(
+  acts: ActivityDefinition[],
+  t: Translate = english,
+): string {
+  return [...new Set(acts.map((a) => t(kindCaption(a.kind))))].join(t(", "));
 }
 
 /**
@@ -80,6 +84,7 @@ export function ActivitySheet({
   onSelect: (l: Location) => void;
   onClose: () => void;
 }) {
+  const t = useT();
   const [by, setBy] = useState<"place" | "kind">("place");
   const close = useRef<HTMLButtonElement>(null);
   useEffect(() => {
@@ -115,7 +120,7 @@ export function ActivitySheet({
       : groupActivities(rows).map((g) => ({
           key: g.id,
           icon: GROUP_ICON[g.id],
-          label: g.label,
+          label: t(g.label),
           items: g.items,
         }));
   return (
@@ -123,11 +128,13 @@ export function ActivitySheet({
       className={c.sheet}
       role="dialog"
       aria-modal="false"
-      aria-label="All activities"
+      aria-label={t("All activities")}
     >
       <div className={c.sheetHead}>
-        <span className={c.cap}>All activities · {rows.length}</span>
-        <div className={c.seg} role="group" aria-label="Group activities">
+        <span className={c.cap}>
+          {t("All activities")} · {rows.length}
+        </span>
+        <div className={c.seg} role="group" aria-label={t("Group activities")}>
           {(["place", "kind"] as const).map((k) => (
             <button
               key={k}
@@ -135,7 +142,7 @@ export function ActivitySheet({
               aria-pressed={by === k}
               onClick={() => setBy(k)}
             >
-              By {k}
+              {t(k === "place" ? "By place" : "By kind")}
             </button>
           ))}
         </div>
@@ -143,7 +150,7 @@ export function ActivitySheet({
           ref={close}
           type="button"
           className={c.sheetClose}
-          aria-label="Close all activities"
+          aria-label={t("Close all activities")}
           onClick={onClose}
         >
           ×
@@ -164,9 +171,9 @@ export function ActivitySheet({
                     className={c.act}
                     onClick={() => onSelect(a.place)}
                   >
-                    <span className={c.actIcon} title={kindCaption(a.kind)}>
+                    <span className={c.actIcon} title={t(kindCaption(a.kind))}>
                       <KindIcon kind={a.kind} size={20} />
-                      <span className={c.sr}>{kindCaption(a.kind)}: </span>
+                      <span className={c.sr}>{t(kindCaption(a.kind))}: </span>
                     </span>
                     <span className={c.actTitle}>{a.title}</span>
                     {by === "kind" && (

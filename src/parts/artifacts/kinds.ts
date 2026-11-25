@@ -1,6 +1,7 @@
 // Pure helpers for the object card: activity kind labels, a short size
 // line taken only from the activity data, and which activity to offer first.
 import type { ActivityDefinition, ActivityKind } from "@/contracts";
+import { english, type Translate } from "@/i18n/core";
 
 /** Visitor-facing label per activity kind (small caption on the row). */
 export const KIND_LABEL: Record<ActivityKind, string> = {
@@ -17,24 +18,28 @@ export const KIND_LABEL: Record<ActivityKind, string> = {
   "hide-seek": "Game",
   "slope-run": "Game",
   place: "Build",
+  "splat-look": "Look closer",
 };
 
 export function kindLabel(kind: string): string {
   return (KIND_LABEL as Record<string, string>)[kind] ?? "Try";
 }
 
-const plural = (n: number, one: string, many = `${one}s`) =>
-  `${n} ${n === 1 ? one : many}`;
+const plural = (t: Translate, n: number, one: string, many = `${one}s`) =>
+  t(n === 1 ? `{n} ${one}` : `{n} ${many}`, { n });
 
 /** A count read from the activity itself ("4 steps"), or undefined. */
-export function activitySize(a: ActivityDefinition): string | undefined {
+export function activitySize(
+  a: ActivityDefinition,
+  t: Translate = english,
+): string | undefined {
   switch (a.kind) {
     case "quiz":
-      return "1 question";
+      return t("1 question");
     case "sequence":
-      return plural(a.steps.length, "step");
+      return plural(t, a.steps.length, "step");
     case "weave":
-      return plural(a.rows, "row");
+      return plural(t, a.rows, "row");
     default:
       return undefined;
   }

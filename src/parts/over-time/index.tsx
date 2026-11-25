@@ -6,7 +6,9 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { MathUtils } from "three";
 import { eraAt, SCALE, type TimelinePartProps } from "@/contracts";
+import { useT } from "@/i18n";
 import { PresentationBadge, RepresentationBadge } from "../shared/Badges";
+import { QualityGovernor, useQuality } from "../shared/Quality";
 import { Diorama } from "./Diorama";
 import c from "./OverTime.module.css";
 
@@ -35,11 +37,13 @@ export function TimelinePart(props: TimelinePartProps) {
   const { timeline, claims, prefs, emit, season, initialEra = 0 } = props;
   const eras = timeline.eras;
   const last = eras.length - 1;
+  const tr = useT();
   const [t, setT] = useState(Math.min(Math.max(initialEra, 0), last));
   const [playing, setPlaying] = useState(false);
   const [sourcesOpen, setSourcesOpen] = useState(false);
   const target = useRef(t);
   const shown = useRef(t);
+  const q = useQuality(SCALE.maxDpr);
   target.current = t;
   const index = eraAt(eras.length, t);
   const era = eras[index];
@@ -110,8 +114,8 @@ export function TimelinePart(props: TimelinePartProps) {
     <div className={c.stage}>
       {prefs.webgl ? (
         <Canvas
-          shadows
-          dpr={[1, SCALE.maxDpr]}
+          shadows={q.shadows}
+          dpr={q.dpr}
           camera={{
             position: [15, 14, 19],
             fov: SCALE.defaultFov,
@@ -129,8 +133,10 @@ export function TimelinePart(props: TimelinePartProps) {
               seasonValue={season.value}
               reducedMotion={prefs.reducedMotion}
               fx
+              extraFx={q.extraFx}
             />
           </Suspense>
+          <QualityGovernor />
         </Canvas>
       ) : (
         <div className={c.noGl} aria-hidden>
@@ -157,8 +163,8 @@ export function TimelinePart(props: TimelinePartProps) {
           onClick={() => setSourcesOpen((x) => !x)}
         >
           {sourcesOpen
-            ? "Hide sources"
-            : `How do we know? (${eraClaims.length})`}
+            ? tr("Hide sources")
+            : tr("How do we know? ({n})", { n: eraClaims.length })}
         </button>
         {sourcesOpen && (
           <ol className={c.claims}>
@@ -193,7 +199,7 @@ export function TimelinePart(props: TimelinePartProps) {
                     })
                   }
                 >
-                  How this was made
+                  {tr("How this was made")}
                 </button>
               </li>
             ))}
@@ -206,7 +212,10 @@ export function TimelinePart(props: TimelinePartProps) {
         ))}
       </section>
 
-      <nav className={c.bar} aria-label={`${timeline.title}: eras`}>
+      <nav
+        className={c.bar}
+        aria-label={tr("{title}: eras", { title: timeline.title })}
+      >
         <div className={c.controls}>
           <button
             type="button"
@@ -217,9 +226,11 @@ export function TimelinePart(props: TimelinePartProps) {
             }}
             disabled={prefs.reducedMotion}
             aria-pressed={playing}
-            title={prefs.reducedMotion ? "Off with reduced motion" : undefined}
+            title={
+              prefs.reducedMotion ? tr("Off with reduced motion") : undefined
+            }
           >
-            {playing ? "Pause" : "Play"}
+            {playing ? tr("Pause") : tr("Play")}
           </button>
           <input
             className={c.range}
@@ -228,7 +239,7 @@ export function TimelinePart(props: TimelinePartProps) {
             max={last}
             step={0.01}
             value={t}
-            aria-label="Time"
+            aria-label={tr("Time")}
             aria-valuetext={`${era.label}, ${era.period}`}
             onChange={(e) => {
               setPlaying(false);

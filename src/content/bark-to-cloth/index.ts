@@ -14,8 +14,10 @@ import { barkToCloth } from "./knowledge";
 import { memories } from "./memories";
 import { landAndSea } from "./land-and-sea";
 import { hokkaidoMuseum } from "./museum";
+import { omushaKnowledge, omushaLook } from "./omusha";
 import { houseOverTime, houseTimeline } from "./over-time";
 import { placeActivities } from "./place-activities";
+import { placeArtifacts, placeObjectActivities } from "./place-objects";
 import {
   lakeHouse,
   listeningGrove,
@@ -31,6 +33,7 @@ export const barkToClothRaw = {
     houseOverTime,
     hokkaidoMuseum,
     landAndSea,
+    omushaKnowledge,
     ...gameKnowledge,
   ],
   island: { owlHome, overview, locations },
@@ -47,12 +50,14 @@ export const barkToClothRaw = {
       ],
     })),
   ],
-  artifacts: [...artifacts, ...areaArtifacts],
+  artifacts: [...artifacts, ...areaArtifacts, ...placeArtifacts],
   activities: [
     ...activities,
     ...areaActivities,
     ...gameActivities,
     ...placeActivities,
+    ...placeObjectActivities,
+    omushaLook,
   ],
   stamps,
   guide,

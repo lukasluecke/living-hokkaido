@@ -60,7 +60,8 @@ export const deviceVoice = {
     if (!("speechSynthesis" in window)) return on.end?.();
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = "en";
+    // Read in the page language (the shell sets <html lang>).
+    u.lang = document.documentElement.lang === "ja" ? "ja-JP" : "en";
     u.rate = 0.95;
     u.onboundary = (e) => {
       if (e.name === "word") on.word?.(e.charIndex);

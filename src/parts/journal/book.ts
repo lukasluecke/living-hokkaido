@@ -8,6 +8,7 @@ import {
   type Presentation,
   type Stamp,
 } from "@/contracts";
+import { english, type Translate } from "@/i18n/core";
 
 export type SectionId = "stories" | "objects" | "words" | "skills";
 
@@ -78,31 +79,55 @@ export function progressOf(
   }
 }
 
-const list = (items: string[]) =>
+const list = (items: string[], t: Translate) =>
   items.length <= 1
     ? (items[0] ?? "")
-    : `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
+    : t("{items} and {last}", {
+        items: items.slice(0, -1).join(t(", ")),
+        last: items[items.length - 1] ?? "",
+      });
 
 /** What to do to earn a stamp. Built from pack titles only. */
-export function hintOf(pack: ContentPack, stamp: Stamp): string {
+export function hintOf(
+  pack: ContentPack,
+  stamp: Stamp,
+  t: Translate = english,
+): string {
   const u = stamp.unlock;
   const titleOf = (
     items: readonly { id: string; title: string }[],
     ids: string[],
-  ) => list(ids.map((id) => items.find((x) => x.id === id)?.title ?? id));
+  ) =>
+    list(
+      ids.map((id) => items.find((x) => x.id === id)?.title ?? id),
+      t,
+    );
   switch (u.on) {
     case "location-visited":
-      return `Follow the owl to the ${titleOf(pack.island.locations, [u.locationId]).toLowerCase()}.`;
+      return t("Follow the owl to the {place}.", {
+        place: titleOf(pack.island.locations, [u.locationId]).toLowerCase(),
+      });
     case "artifacts-inspected":
-      return `Pick up and turn: ${titleOf(pack.artifacts, u.artifactIds)}.`;
+      return t("Pick up and turn: {items}.", {
+        items: titleOf(pack.artifacts, u.artifactIds),
+      });
     case "hotspots-read":
-      return `Open every detail on: ${titleOf(pack.artifacts, u.artifactIds)}.`;
+      return t("Open every detail on: {items}.", {
+        items: titleOf(pack.artifacts, u.artifactIds),
+      });
     case "activities-completed":
-      return `Finish: ${titleOf(pack.activities, u.activityIds)}.`;
+      return t("Finish: {items}.", {
+        items: titleOf(pack.activities, u.activityIds),
+      });
     case "seasons-seen":
-      return `Watch the island in ${list(u.seasons)}.`;
+      return t("Watch the island in {seasons}.", {
+        seasons: list(
+          u.seasons.map((x) => t(x)),
+          t,
+        ),
+      });
     case "reveal-opened":
-      return "Turn a card over to see where its knowledge came from.";
+      return t("Turn a card over to see where its knowledge came from.");
   }
 }
 
