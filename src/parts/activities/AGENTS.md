@@ -58,9 +58,6 @@ journal stamp appears after completion.
   step hands over ONE figure (named by hat and colour, never a personal
   name) or thing, with a clue, 2–3 rings and a pose sheet of 4. Ainu home
   scenes use `subject: "objects"`.
-- 2026-11-26: 2.5D stage (Lukas): the stage sits in a `.case` with a plinth.
-  It tilts a little in 3D and the pointer turns it a little (CSS vars
-  `--px`/`--py`). Figures further back are smaller and stand behind front
-  ones (`--d` = ring y), with a contact shadow. Light air per stage (leaves,
-  winter snow, hearth smoke, sea mist) is decoration only. No look-around
-  and no air with `prefs.reducedMotion`. Hit-testing is unchanged.
+- 2026-11-25: A tilted 2.5D case with pointer look-around (PR #55) felt
+  weird to Lukas and was reverted to the flat 2D stage. Later idea (Lukas):
+  an isometric scene (needs new stage drawings and new ring positions).
