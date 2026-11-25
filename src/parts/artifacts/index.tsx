@@ -9,6 +9,7 @@ import {
   memoriesForArtifact,
   modelNotes,
 } from "@/contracts";
+import { useT } from "@/i18n";
 import { PresentationBadge, RepresentationBadge } from "../shared/Badges";
 import c from "./Card.module.css";
 import { Icon, KindIcon, UI_ICON } from "../shared/Icon";
@@ -31,6 +32,7 @@ export function ArtifactViewer({
 
   // One hotspot text open at a time: the one the visitor opened last, from
   // a row or from a dot in the viewer (a new id in `read`).
+  const t = useT();
   const [openId, setOpenId] = useState<string | null>(null);
   const seen = useRef<string[]>(read);
   useEffect(() => {
@@ -53,7 +55,12 @@ export function ArtifactViewer({
   const primary = activities.find((x) => x.id === primaryId);
   const primaryLabel =
     primary &&
-    `${doneActivityIds.includes(primary.id) ? "Again" : "Start"}: ${primary.a?.title ?? "the activity"}`;
+    t(
+      doneActivityIds.includes(primary.id)
+        ? "Again: {title}"
+        : "Start: {title}",
+      { title: primary.a?.title ?? t("the activity") },
+    );
   const spots = factHotspots(artifact);
   const notes = modelNotes(artifact);
   const readCount = spots.filter((h) => read.includes(h.id)).length;
@@ -89,7 +96,7 @@ export function ArtifactViewer({
               })
             }
           >
-            How do we know?
+            {t("How do we know?")}
           </button>
         </div>
       </div>
@@ -110,7 +117,10 @@ export function ArtifactViewer({
       {spots.length > 0 && (
         <section className={c.section} aria-labelledby={`${artifact.id}-look`}>
           <h3 id={`${artifact.id}-look`} className={c.cap}>
-            Look closer · {readCount} of {spots.length}
+            {t("Look closer · {read} of {total}", {
+              read: readCount,
+              total: spots.length,
+            })}
           </h3>
           <ol className={c.spots}>
             {spots.map((h, i) => {
@@ -140,7 +150,9 @@ export function ArtifactViewer({
                       {isRead ? "✓" : i + 1}
                     </span>
                     <span className={c.spotTitle}>{h.title}</span>
-                    {isRead && !open && <span className={c.state}>Read</span>}
+                    {isRead && !open && (
+                      <span className={c.state}>{t("Read")}</span>
+                    )}
                     <span
                       className={open ? c.chevOpen : c.chev}
                       aria-hidden="true"
@@ -161,19 +173,19 @@ export function ArtifactViewer({
       {activities.length > 0 && (
         <section className={c.section} aria-labelledby={`${artifact.id}-try`}>
           <h3 id={`${artifact.id}-try`} className={c.cap}>
-            Try it · {activities.length}
+            {t("Try it")} · {activities.length}
           </h3>
           <ul className={c.acts}>
             {activities.map(({ id, a }) => {
               const done = doneActivityIds.includes(id);
-              const kind = a ? kindLabel(a.kind) : "Try";
-              const title = a?.title ?? "Try the activity";
+              const kind = t(a ? kindLabel(a.kind) : "Try");
+              const title = a?.title ?? t("Try the activity");
               return (
                 <li key={id}>
                   <button
                     type="button"
                     className={c.act}
-                    aria-label={`${kind}: ${title}${done ? " (done)" : ""}`}
+                    aria-label={`${kind}: ${title}${done ? t(" (done)") : ""}`}
                     onClick={() => start(id)}
                   >
                     <span className={c.actIcon} title={kind}>
@@ -183,7 +195,7 @@ export function ArtifactViewer({
                       <span className={c.actTitle}>{title}</span>
                     </span>
                     {done ? (
-                      <span className={c.done}>✓ Done</span>
+                      <span className={c.done}>✓ {t("Done")}</span>
                     ) : (
                       <span className={c.chev} aria-hidden="true">
                         ›
@@ -200,7 +212,7 @@ export function ArtifactViewer({
       {memories.length > 0 && (
         <details className={c.memories}>
           <summary className={c.cap}>
-            Curator memories · {memories.length}
+            {t("Curator memories")} · {memories.length}
           </summary>
           <Memories memories={memories} />
         </details>
@@ -221,7 +233,7 @@ export function ArtifactViewer({
               <KindIcon kind={primary.a?.kind ?? "quiz"} size={20} />
             )}
             <span className={c.primaryText}>
-              {primary.a?.title ?? "Start the activity"}
+              {primary.a?.title ?? t("Start the activity")}
             </span>
           </button>
         </div>

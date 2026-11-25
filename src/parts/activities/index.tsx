@@ -1,6 +1,7 @@
 "use client";
 // Activities part: one renderer per activity kind, inside one paper panel.
 // Plain DOM + inline SVG, so it works without WebGL and by keyboard.
+import { useT } from "@/i18n";
 import type { ActivityPartProps, Presentation } from "@/contracts";
 import { seasonWeights } from "@/contracts";
 import { PresentationBadge } from "../shared/Badges";
@@ -56,6 +57,7 @@ export function ActivityPart({
     : presentations.has("approved")
       ? "approved"
       : null;
+  const t = useT();
   const close = () => emit({ type: "activity.close", activityId: activity.id });
 
   return (
@@ -66,22 +68,22 @@ export function ActivityPart({
     >
       <div className={s.head}>
         <div className={s.badges}>
-          <span className={s.kind}>{KIND_LABEL[activity.kind]}</span>
+          <span className={s.kind}>{t(KIND_LABEL[activity.kind])}</span>
           {presentation && <PresentationBadge value={presentation} />}
           {activity.kind === "place" && (
-            <span className={s.illustrative}>Illustrative sketch</span>
+            <span className={s.illustrative}>{t("Illustrative sketch")}</span>
           )}
           {activity.kind === "weave" && activity.illustrative && (
             <span className={s.illustrative}>
-              Playful illustration · not a real technique
+              {t("Playful illustration · not a real technique")}
             </span>
           )}
         </div>
         <button
           type="button"
           className={s.close}
-          aria-label="Close activity"
-          title="Close (Esc)"
+          aria-label={t("Close activity")}
+          title={t("Close (Esc)")}
           onClick={close}
         >
           ×
@@ -167,7 +169,7 @@ export function ActivityPart({
       )}
       <div className={s.foot}>
         <button type="button" className={s.secondary} onClick={close}>
-          Back
+          {t("Back")}
         </button>
       </div>
     </section>

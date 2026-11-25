@@ -5,6 +5,7 @@
 import type { CSSProperties } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { JournalPartProps } from "@/contracts";
+import { type Locale, useI18n } from "@/i18n";
 import { material, type as font, ui } from "@/design/tokens";
 import { PresentationBadge } from "../shared/Badges";
 import { hintOf, progressOf, remindersOf, SECTIONS, sectionOf } from "./book";
@@ -26,11 +27,11 @@ const vars = {
   "--font-heading": font.heading,
 } as CSSProperties;
 
-function earnedDate(iso: string): string {
+function earnedDate(iso: string, locale?: Locale): string {
   const d = new Date(iso);
   return Number.isNaN(d.getTime())
     ? ""
-    : d.toLocaleDateString(undefined, { day: "numeric", month: "short" });
+    : d.toLocaleDateString(locale, { day: "numeric", month: "short" });
 }
 
 export function JournalPart({
@@ -58,6 +59,7 @@ export function JournalPart({
   );
   const selected = content.stamps.find((st) => st.id === selectedId) ?? null;
   const closeRef = useRef<HTMLButtonElement>(null);
+  const { t } = useI18n();
 
   useEffect(() => {
     closeRef.current?.focus();
@@ -76,10 +78,10 @@ export function JournalPart({
       <header className={s.header}>
         <div>
           <h2 id="journal-title" className={s.title}>
-            Heritage Journal
+            {t("Heritage Journal")}
           </h2>
           <p className={s.count}>
-            {have} of {total} stamps
+            {t("{have} of {total} stamps", { have, total })}
           </p>
         </div>
         <button
@@ -88,7 +90,7 @@ export function JournalPart({
           className={s.close}
           onClick={() => emit({ type: "journal.close" })}
         >
-          Close
+          {t("Close")}
         </button>
       </header>
 
@@ -100,11 +102,11 @@ export function JournalPart({
             aria-labelledby={`journal-${sec.id}`}
           >
             <h3 id={`journal-${sec.id}`} className={s.sectionTitle}>
-              {sec.title}
+              {t(sec.title)}
             </h3>
-            <p className={s.blurb}>{sec.blurb}</p>
+            <p className={s.blurb}>{t(sec.blurb)}</p>
             {sec.stamps.length === 0 ? (
-              <p className={s.empty}>No stamps here yet.</p>
+              <p className={s.empty}>{t("No stamps here yet.")}</p>
             ) : (
               <ul className={s.stamps}>
                 {sec.stamps.map((st) => {
@@ -120,7 +122,7 @@ export function JournalPart({
                         <StampIcon icon={st.icon} earned={earned} />
                         <span className={s.stampTitle}>{st.title}</span>
                         <span className={s.stampState}>
-                          {earned ? "Earned" : "Not yet found"}
+                          {earned ? t("Earned") : t("Not yet found")}
                         </span>
                       </button>
                     </li>
@@ -156,27 +158,36 @@ function StampDetail({
   stamp: JournalPartProps["content"]["stamps"][number];
   earnedAt: string | null;
 }) {
+  const { t, locale } = useI18n();
   const earned = earnedAt !== null;
   const p = progressOf(content, journal, stamp);
   const reminders = earned ? remindersOf(content, stamp) : [];
   return (
-    <aside className={s.detail} aria-live="polite" aria-label="Selected stamp">
+    <aside
+      className={s.detail}
+      aria-live="polite"
+      aria-label={t("Selected stamp")}
+    >
       <StampIcon icon={stamp.icon} earned={earned} size={64} />
       <div className={s.detailBody}>
         <h3 className={s.detailTitle}>{stamp.title}</h3>
         {earned ? (
           <p>
             {stamp.description}
-            {earnedDate(earnedAt) && (
-              <span className={s.date}> · Earned {earnedDate(earnedAt)}</span>
+            {earnedDate(earnedAt, locale) && (
+              <span className={s.date}>
+                {" · "}
+                {t("Earned {date}", { date: earnedDate(earnedAt, locale) })}
+              </span>
             )}
           </p>
         ) : (
           <>
-            <p>{hintOf(content, stamp)}</p>
+            <p>{hintOf(content, stamp, t)}</p>
             {p.need > 1 && (
               <p className={s.progress}>
-                <progress value={p.have} max={p.need} /> {p.have} of {p.need}
+                <progress value={p.have} max={p.need} />{" "}
+                {t("{have} of {need}", { have: p.have, need: p.need })}
               </p>
             )}
           </>
@@ -196,7 +207,7 @@ function StampDetail({
                 })
               }
             >
-              Where this comes from
+              {t("Where this comes from")}
             </button>
           </div>
         ))}

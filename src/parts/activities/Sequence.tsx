@@ -1,5 +1,6 @@
 "use client";
 // Sequence: put steps in order. A wrong step gives a gentle nudge.
+import { useT } from "@/i18n";
 import { useEffect, useRef, useState } from "react";
 import type { ActivityOf, Emit, ResolvedClaim } from "@/contracts";
 import s from "./Activities.module.css";
@@ -14,6 +15,7 @@ export function Sequence({
   claims: Record<string, ResolvedClaim>;
   emit: Emit;
 }) {
+  const t = useT();
   const [order, setOrder] = useState<string[]>([]);
   const [miss, setMiss] = useState<string | null>(null);
   const sent = useRef(false);
@@ -67,8 +69,11 @@ export function Sequence({
           {done
             ? a.explanation
             : miss
-              ? "Not this one yet. Try another step."
-              : `Step ${order.length + 1} of ${a.order.length}.`}
+              ? t("Not this one yet. Try another step.")
+              : t("Step {n} of {total}.", {
+                  n: order.length + 1,
+                  total: a.order.length,
+                })}
         </p>
       </div>
       {done && <Sources ids={a.claimIds} claims={claims} />}
