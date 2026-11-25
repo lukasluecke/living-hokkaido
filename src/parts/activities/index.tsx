@@ -1,125 +1,81 @@
 "use client";
-// Activities part: one renderer per activity kind. Stubs in plain HTML.
-import { useState } from "react";
-import type { ActivityOf, ActivityPartProps, Emit } from "@/contracts";
-import s from "../shared/Fallback.module.css";
+// Activities part: one renderer per activity kind, inside one paper panel.
+// Plain DOM + inline SVG, so it works without WebGL and by keyboard.
+import type { ActivityPartProps, Presentation } from "@/contracts";
+import { seasonWeights } from "@/contracts";
+import { PresentationBadge } from "../shared/Badges";
+import s from "./Activities.module.css";
+import { Quiz } from "./Quiz";
+import { Sequence } from "./Sequence";
+import { themeVars } from "./theme";
+import { Weave } from "./Weave";
 
-const done = (emit: Emit, activityId: string, score?: number) =>
-  emit({
-    type: "activity.complete",
-    result: {
-      activityId,
-      completed: true,
-      score,
-      at: new Date().toISOString(),
-    },
-  });
+const KIND_LABEL = { quiz: "Quiz", weave: "Hands-on", sequence: "Order" };
 
-function Quiz({ a, emit }: { a: ActivityOf<"quiz">; emit: Emit }) {
-  const [pick, setPick] = useState<number | null>(null);
+export function ActivityPart({
+  activity,
+  claims,
+  emit,
+  season,
+  prefs,
+}: ActivityPartProps) {
+  const presentations = new Set<Presentation>(
+    activity.claimIds.flatMap((id) =>
+      claims[id] ? [claims[id].presentation] : [],
+    ),
+  );
+  const presentation: Presentation | null = presentations.has(
+    "research-preview",
+  )
+    ? "research-preview"
+    : presentations.has("approved")
+      ? "approved"
+      : null;
+  const close = () => emit({ type: "activity.close", activityId: activity.id });
+
   return (
-    <>
-      <p>{a.question}</p>
-      <div className={s.row}>
-        {a.options.map((o, i) => (
-          <button
-            key={o}
-            type="button"
-            className={s.button}
-            aria-pressed={pick === i}
-            onClick={() => {
-              setPick(i);
-              if (i === a.answer) done(emit, a.id, 1);
-            }}
-          >
-            {o}
-          </button>
-        ))}
+    <section
+      className={`${s.panel} ${prefs.reducedMotion ? s.still : ""}`}
+      style={themeVars(seasonWeights(season.value))}
+      aria-labelledby={`${activity.id}-title`}
+    >
+      <div className={s.head}>
+        <div className={s.badges}>
+          <span className={s.kind}>{KIND_LABEL[activity.kind]}</span>
+          {presentation && <PresentationBadge value={presentation} />}
+          {activity.kind === "weave" && activity.illustrative && (
+            <span className={s.illustrative}>
+              Playful illustration · not a real technique
+            </span>
+          )}
+        </div>
+        <button
+          type="button"
+          className={s.close}
+          aria-label="Close activity"
+          title="Close (Esc)"
+          onClick={close}
+        >
+          ×
+        </button>
       </div>
-      {pick !== null && (
-        <p className={s.muted}>
-          {pick === a.answer ? a.explanation : "Not quite. Try again."}
-        </p>
+      <h2 id={`${activity.id}-title`} className={s.title}>
+        {activity.title}
+      </h2>
+      {activity.kind === "quiz" && (
+        <Quiz a={activity} title={activity.title} claims={claims} emit={emit} />
       )}
-    </>
-  );
-}
-
-function Weave({ a, emit }: { a: ActivityOf<"weave">; emit: Emit }) {
-  const [filled, setFilled] = useState(0);
-  const total = a.rows * a.columns;
-  return (
-    <>
-      <p>{a.prompt}</p>
-      <div
-        className={s.grid}
-        style={{ gridTemplateColumns: `repeat(${a.columns}, 22px)` }}
-      >
-        {Array.from({ length: total }, (_, i) => (
-          <button
-            // biome-ignore lint/suspicious/noArrayIndexKey: fixed grid
-            key={i}
-            type="button"
-            aria-label={`Row ${Math.floor(i / a.columns) + 1}, column ${(i % a.columns) + 1}`}
-            className={`${s.cell} ${i < filled ? s.cellOn : ""}`}
-            disabled={i !== filled}
-            onClick={() => {
-              setFilled(i + 1);
-              if (i + 1 === total) done(emit, a.id, 1);
-            }}
-          />
-        ))}
+      {activity.kind === "weave" && (
+        <Weave a={activity} claims={claims} emit={emit} />
+      )}
+      {activity.kind === "sequence" && (
+        <Sequence a={activity} claims={claims} emit={emit} />
+      )}
+      <div className={s.foot}>
+        <button type="button" className={s.secondary} onClick={close}>
+          Back
+        </button>
       </div>
-      {filled === total && <p>{a.completion}</p>}
-    </>
-  );
-}
-
-function Sequence({ a, emit }: { a: ActivityOf<"sequence">; emit: Emit }) {
-  const [order, setOrder] = useState<string[]>([]);
-  const next = a.order[order.length];
-  return (
-    <>
-      <p>{a.prompt}</p>
-      <div className={s.row}>
-        {a.steps.map((st) => (
-          <button
-            key={st.id}
-            type="button"
-            className={s.button}
-            disabled={order.includes(st.id)}
-            onClick={() => {
-              if (st.id !== next) return;
-              const o = [...order, st.id];
-              setOrder(o);
-              if (o.length === a.order.length) done(emit, a.id, 1);
-            }}
-          >
-            {st.label}
-          </button>
-        ))}
-      </div>
-      {order.length === a.order.length && <p>{a.explanation}</p>}
-    </>
-  );
-}
-
-export function ActivityPart({ activity, emit }: ActivityPartProps) {
-  return (
-    <section className={s.panel} aria-label={activity.title}>
-      <h2>{activity.title}</h2>
-      {activity.kind === "quiz" && <Quiz a={activity} emit={emit} />}
-      {activity.kind === "weave" && <Weave a={activity} emit={emit} />}
-      {activity.kind === "sequence" && <Sequence a={activity} emit={emit} />}
-      <button
-        type="button"
-        className={s.button}
-        onClick={() =>
-          emit({ type: "activity.close", activityId: activity.id })
-        }
-      >
-        Close
-      </button>
     </section>
   );
 }
