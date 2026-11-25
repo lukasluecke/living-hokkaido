@@ -279,3 +279,27 @@ test("timeline events parse", () => {
   ])
     assert.ok(experienceEventSchema.safeParse(e).success, e.type);
 });
+
+test("timeline overlay opens, returns from a reveal and closes", () => {
+  const prefs = { reducedMotion: true, webgl: false };
+  const tl = pack.timelines[0];
+  assert.ok(tl, "pack has a timeline");
+  let s = initialState(prefs);
+  s = reduce(pack, s, { type: "timeline.open", timelineId: "nope" });
+  assert.equal(s.overlay, null, "unknown timeline does not open");
+  s = reduce(pack, s, { type: "timeline.open", timelineId: tl.id });
+  assert.equal(s.overlay, "timeline");
+  s = reduce(pack, s, {
+    type: "reveal.open",
+    knowledgeId: tl.knowledgeId,
+    claimId: tl.claimIds[0],
+  });
+  assert.equal(s.overlay, "reveal");
+  // The part unmounts under the reveal; that must not close the timeline.
+  s = reduce(pack, s, { type: "timeline.close", timelineId: tl.id });
+  s = reduce(pack, s, { type: "reveal.close" });
+  assert.equal(s.overlay, "timeline");
+  s = reduce(pack, s, { type: "nav.back" });
+  assert.equal(s.overlay, null);
+  assert.equal(s.timelineId, null);
+});

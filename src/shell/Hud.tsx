@@ -36,12 +36,15 @@ export function Hud({
   stamps,
   total,
   sound,
+  onOverTime,
 }: {
   season: SeasonState;
   emit: Emit;
   stamps: number;
   total: number;
   sound: Soundscape;
+  /** Shown inside a location that has an "Over time" timeline. */
+  onOverTime?: () => void;
 }) {
   const now = seasonAt(season.value);
   return (
@@ -76,6 +79,17 @@ export function Hud({
         </button>
       </div>
       <div className={s.tools}>
+        {onOverTime && (
+          <button
+            type="button"
+            className={s.round}
+            aria-label="Over time"
+            title="Over time"
+            onClick={onOverTime}
+          >
+            <Icon d="M7 3h10M7 21h10M8 3c0 5 8 6 8 9s-8 4-8 9M16 3c0 5-8 6-8 9s8 4 8 9" />
+          </button>
+        )}
         <button
           type="button"
           className={s.round}

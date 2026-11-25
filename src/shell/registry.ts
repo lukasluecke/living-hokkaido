@@ -6,6 +6,7 @@ import { ArtifactViewer } from "@/parts/artifacts";
 import { DetailScenePart } from "@/parts/detail-scene";
 import { IslandPart } from "@/parts/island";
 import { JournalPart } from "@/parts/journal";
+import { TimelinePart } from "@/parts/over-time";
 import { RevealPart } from "@/parts/reveal";
 
 export const parts = {
@@ -15,4 +16,5 @@ export const parts = {
   activities: ActivityPart,
   journal: JournalPart,
   reveal: RevealPart,
+  "over-time": TimelinePart,
 } as const;

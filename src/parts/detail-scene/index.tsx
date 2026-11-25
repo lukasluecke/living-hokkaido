@@ -23,6 +23,9 @@ function useKeys({ scene, emit }: DetailScenePartProps) {
 export function DetailScenePart(props: DetailScenePartProps) {
   const { scene, artifacts, focusedArtifactId, emit, prefs } = props;
   const overlay = useRef<HTMLDivElement>(null);
+  // Tap outside the objects puts the focused object back; a drag (look
+  // around) does not.
+  const down = useRef<[number, number] | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
   useKeys(props);
   if (!prefs.webgl) return <SceneList {...props} />;
@@ -39,6 +42,15 @@ export function DetailScenePart(props: DetailScenePartProps) {
           position: scene.views.outside.eye,
         }}
         gl={{ antialias: false }}
+        onPointerDown={(e) => {
+          down.current = [e.clientX, e.clientY];
+        }}
+        onPointerMissed={(e) => {
+          const d = down.current;
+          const still =
+            !d || Math.hypot(e.clientX - d[0], e.clientY - d[1]) < 8;
+          if (still && focusedArtifactId) emit({ type: "artifact.blur" });
+        }}
       >
         <Suspense fallback={null}>
           <Room
