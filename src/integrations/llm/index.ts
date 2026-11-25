@@ -1,7 +1,7 @@
 // Server-only chat model for "Ask the owl". Provider-agnostic: any
 // OpenAI-compatible chat-completions endpoint. No key = no live mode.
 //
-//   LLM_PROVIDER = zai | openai-compatible | none   (default: zai when a key is set)
+//   LLM_PROVIDER = zai | carbonforge | openai-compatible | none (default: zai when a key is set)
 //   LLM_API_KEY  = ...                              (server only; never NEXT_PUBLIC_)
 //   LLM_BASE_URL = override the endpoint base       (zai default below)
 //   LLM_MODEL    = override the model id            (zai default: glm-5.3-flash)
@@ -27,6 +27,14 @@ const PRESETS: Record<
   string,
   { baseUrl: string; model: string; extra: Record<string, unknown> }
 > = {
+  // Hack Hokkaido sponsor access (temporary). Values from the organiser's
+  // perks email: OpenAI-compatible, base URL ending in /v1. Not yet called
+  // from CI or the cloud sandbox (network blocked there).
+  carbonforge: {
+    baseUrl: "https://endpoint.carbonforge.ai/v1",
+    model: "carbonforge-flash",
+    extra: {},
+  },
   zai: {
     baseUrl: "https://api.z.ai/api/paas/v4",
     model: "glm-5.3-flash",

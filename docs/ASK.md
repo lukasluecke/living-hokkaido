@@ -43,6 +43,17 @@ Then `npm run dev` and open http://localhost:3000. Check the mode with
 `curl localhost:3000/api/ask` (it never returns the key). Each answer shows
 "AI summary (glm-5.3-flash)" in live mode.
 
+**CarbonForge (Hack Hokkaido access, active until Fri 27 Nov 23:59 JST).**
+Use the key from the organiser's "all your perks in one place" email:
+
+```sh
+LLM_PROVIDER=carbonforge
+LLM_API_KEY=<CarbonForge key from the perks email>
+# preset: LLM_BASE_URL=https://endpoint.carbonforge.ai/v1, LLM_MODEL=carbonforge-flash
+```
+
+After 27 Nov, switch back to `zai` or another provider; no code change.
+
 Other providers: `LLM_PROVIDER=openai-compatible` with `LLM_BASE_URL` and
 `LLM_MODEL` works for any OpenAI-compatible chat-completions API. A Claude
 adapter can be added in `src/integrations/llm/` with the same `ChatModel`

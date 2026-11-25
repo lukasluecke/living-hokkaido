@@ -136,6 +136,10 @@ test("ask: no key means no live model; zai preset uses the documented endpoint",
     chatModel({ LLM_API_KEY: "k", LLM_PROVIDER: "openai-compatible" }),
     null,
   );
+  assert.equal(
+    chatModel({ LLM_API_KEY: "k", LLM_PROVIDER: "carbonforge" })?.model,
+    "carbonforge-flash",
+  );
   const m = chatModel({ LLM_API_KEY: "secret" });
   assert.equal(m?.model, "glm-5.3-flash");
   const real = globalThis.fetch;
