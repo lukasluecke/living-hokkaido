@@ -8,6 +8,8 @@
 | Shaw | Room scan/assets, 3D scene, technique interactions; World, public/models | Small approved GLB or measured splat experiment | Asset manifest; loading and WebGL fallback; mobile performance |
 | Chika | Museum/source research, cultural context, Japanese communication | Source/rights packet and organizer timing clarification | Every claim traceable; permissions explicit; qualified language review |
 
+Optional rendering pick-list for Shaw: [TASKS-SHAW.md](TASKS-SHAW.md).
+
 Anyone may experiment on any part (docs/PARTS.md) in `labs/<part>`; the owners above integrate. Daily integration: agree IDs/contracts first, share small PRs, integrate the whole journey before polishing isolated pieces. Lukas coordinates schema changes; Erina + Yuling align copy; Chika reviews source-dependent text; Shaw + Yuling align asset style. These are responsibilities supplied by the user, not inferred from the private participant roster.
 
 Sponsor additions compete with core polish and rehearsal time. Propose value, owner, time cap, fallback and eligibility evidence; drop on uncertainty or time overrun.

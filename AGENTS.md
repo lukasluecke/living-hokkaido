@@ -35,6 +35,10 @@ verbatim). To keep that possible:
 When the user asks for something that crosses a part boundary or changes a
 contract, say so and propose the smallest additive change.
 
+Optional, more involved rendering work (shaders, GLB geometry, baked light,
+real-GPU profiling, video renders) is listed for Shaw in docs/TASKS-SHAW.md.
+It is a pick-list, not a plan; do not start it without the owner.
+
 Ownership boundaries are documented in docs/TEAM.md. Coordinate shared contracts before edits. Do not overwrite another teammate’s work or widen scope merely to qualify for prizes. Keep changes reviewable and document tested behavior and limitations.
 
 <!-- BEGIN:nextjs-agent-rules -->
