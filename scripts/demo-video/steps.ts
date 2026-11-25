@@ -104,7 +104,10 @@ export const shots: Shot[] = [
         fallbackMs: 500,
         optional: true,
       }),
-      hold(3500),
+      hold(3000),
+      // A slow look around the room before picking an object.
+      drag([-200, 0], { ms: 3000, optional: true }),
+      hold(1500),
     ],
   },
   {
@@ -230,7 +233,10 @@ export const shots: Shot[] = [
     steps: [
       mark("Journal"),
       click(button(/^Journal \(/, false), { fallback: press("j") }),
-      waitFor(region("Heritage Journal"), { optional: true }),
+      waitFor(
+        { role: "dialog", name: "Heritage Journal" },
+        { optional: true, timeoutMs: 4000 },
+      ),
       hold(5000),
       click(button("Close"), { fallback: press("Escape") }),
       hold(2500),
