@@ -51,17 +51,33 @@ const K = 2.3;
 
 const at = (v: readonly number[]) => ({ x: v[0], z: v[2] });
 
-export const PEAK = { x: 2, z: -13 };
-export const LAKE = { x: 0.6, z: -2.4, r: 2.6 };
+/**
+ * Tighter layout (Lukas, 2026-11-26): the island and its features are drawn
+ * at this share of the first design. elevation() samples the first design at
+ * (x, z) / LAYOUT; the exported feature positions are already scaled.
+ */
+export const LAYOUT = 0.75;
+
+const PEAK = { x: 2, z: -13 };
+const LAKE0 = { x: 0.6, z: -2.4, r: 2.6 };
+export const LAKE = {
+  x: LAKE0.x * LAYOUT,
+  z: LAKE0.z * LAYOUT,
+  r: LAKE0.r * LAYOUT,
+};
 export const LAKE_LEVEL = 26;
-export const RIVER: [number, number][] = [
+const RIVER0: [number, number][] = [
   [-0.6, 0.2],
   [-0.2, 4.5],
   [1.6, 9.5],
   [2.6, 14],
   [3.4, 21],
 ];
-export const FLOWER_FIELD = { x: -14, z: 6 };
+export const RIVER: [number, number][] = RIVER0.map(([x, z]) => [
+  x * LAYOUT,
+  z * LAYOUT,
+]);
+export const FLOWER_FIELD = { x: -14 * LAYOUT, z: 6 * LAYOUT };
 
 /**
  * Themed areas (world/Areas.tsx): toy scenes after Hokkaido Museum dioramas.
@@ -78,10 +94,10 @@ export type Area = {
   r: number;
 };
 export const AREAS: Area[] = [
-  { id: "coast", x: 12, z: 11.2, ry: 0.1, s: 1.25, r: 2.4 },
-  { id: "forest", x: -16, z: -1, ry: 0.35, s: 1.35, r: 2.1 },
-  { id: "hills", x: 19, z: 0, ry: -0.3, s: 1.4, r: 1.9 },
-  { id: "mountains", x: -5, z: -12.6, ry: 0.15, s: 1.35, r: 2.4 },
+  { id: "coast", x: 9, z: 8.4, ry: 0.1, s: 1.25, r: 2.4 },
+  { id: "forest", x: -12, z: -0.75, ry: 0.35, s: 1.35, r: 2.1 },
+  { id: "hills", x: 14.25, z: 0, ry: -0.3, s: 1.4, r: 1.9 },
+  { id: "mountains", x: -3.75, z: -9.45, ry: 0.15, s: 1.35, r: 2.4 },
 ];
 
 export const ISLAND = {
@@ -96,7 +112,9 @@ export const ISLAND = {
       ...AREAS.map((a) => ({ x: a.x, z: a.z, r: a.r * 0.75 })),
     ];
   },
-  elevation(x: number, z: number): number {
+  elevation(px: number, pz: number): number {
+    const x = px / LAYOUT;
+    const z = pz / LAYOUT;
     // coastline: overlapping lobes with a noisy edge
     let land = Math.max(
       ell(x, z, 0, -0.5, 22, 17),
@@ -111,13 +129,22 @@ export const ISLAND = {
     // peak + ridge running east
     const pd = Math.hypot(x - PEAK.x, z - PEAK.z);
     const ridged = 1 - Math.abs(2 * vnoise(x * 0.7 + 5, z * 0.7) - 1);
-    e += 1900 * Math.exp(-((pd / (1.9 * K)) ** 1.5)) * (0.8 + 0.35 * ridged);
+    e +=
+      1900 *
+      LAYOUT *
+      Math.exp(-((pd / (1.9 * K)) ** 1.5)) *
+      (0.8 + 0.35 * ridged);
     const r = segDist(x, z, PEAK.x, PEAK.z, 15, -12);
-    e += 780 * Math.exp(-((r.d / (1.1 * K)) ** 2)) * (1 - r.t * 0.6) * inland;
+    e +=
+      780 *
+      LAYOUT *
+      Math.exp(-((r.d / (1.1 * K)) ** 2)) *
+      (1 - r.t * 0.6) *
+      inland;
     // rolling hills
     e += (fbm(x * 0.14, z * 0.14) - 0.35) * 420 * inland;
     // lake basin with a gentle rim
-    const ld = Math.hypot(x - LAKE.x, z - LAKE.z) / LAKE.r;
+    const ld = Math.hypot(x - LAKE0.x, z - LAKE0.z) / LAKE0.r;
     if (ld < 1) return LAKE_LEVEL - 25 * (1 - ld);
     e =
       e * sstep(1, 2.0, ld) +
@@ -125,11 +152,11 @@ export const ISLAND = {
     // river valley and a shallow channel under the river ribbon
     let rd = 99,
       rt = 0;
-    for (let k = 0; k < RIVER.length - 1; k++) {
-      const s = segDist(x, z, ...RIVER[k], ...RIVER[k + 1]);
+    for (let k = 0; k < RIVER0.length - 1; k++) {
+      const s = segDist(x, z, ...RIVER0[k], ...RIVER0[k + 1]);
       if (s.d < rd) {
         rd = s.d;
-        rt = (k + s.t) / (RIVER.length - 1);
+        rt = (k + s.t) / (RIVER0.length - 1);
       }
     }
     const valley = Math.exp(-((rd / ((0.6 + rt * 0.8) * K)) ** 2));
