@@ -117,6 +117,6 @@ export const artifacts: ArtifactInput[] = [
         kind: "disclaimer",
       },
     ],
-    activityIds: ["variation"],
+    activityIds: ["variation", "story-bark-to-cloth"],
   },
 ];

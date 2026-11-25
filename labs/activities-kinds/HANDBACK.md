@@ -2,7 +2,7 @@
 
 Part: activities
 Author: Lukas (+ agent)   Date: 2026-11-25
-Status: ready to integrate (contracts + content merged in this PR; renderers wait in the lab)
+Status: integrated (contracts in #6; renderers in src/parts/activities/kinds, playable in /shell)
 
 ## Recommendation (3–5 lines)
 Add three additive activity kinds: `story` (owl-read chapters with synced
@@ -53,7 +53,7 @@ exist. See DESIGN.md for the rules and the other kinds we considered.
     fact-line and choice claims must be in `claimIds`; term artifacts exist.
 - No new events.
 
-## How to make them playable in /shell
+## How they were made playable in /shell (done)
 1. Copy `src/Story.tsx`, `src/Words.tsx`, `src/Trace.tsx`, `src/Owl.tsx`,
    `src/icons.tsx`, `src/shared.tsx` into `src/parts/activities/kinds/`. Add
    `"use client"` at the top of the three renderers.
@@ -95,7 +95,16 @@ and zod; the content pack is included. No fps numbers (container only).
 ## Screenshots
 `shots/story-captions.jpg`, `shots/story-pause.jpg`, `shots/words-listen.jpg`,
 `shots/words-match.jpg`, `shots/trace-progress.jpg`, `shots/trace-done.jpg`,
-`shots/story-mobile.jpg` (made by `scripts/shots.mjs`).
+`shots/story-mobile.jpg` (made by `scripts/shots.mjs`). In /shell:
+`shots/shell-story-pause.jpg`, `shots/shell-words.jpg`, `shots/shell-trace.jpg`.
+
+## Port notes
+- The shell re-renders often (season clock) and passes a new `emit`; the
+  story keeps `emit` in a ref so the caption timer is not reset.
+- The panel is ≤ 640 px, so the CSS uses a container query, not a viewport
+  media query.
+- In the container (software WebGL) the captions run about 3× slower than
+  set, because the 3D scene takes the main thread. Check on a real GPU.
 
 ## Open questions
 1. Language reviewer (name / role / variety) for `words`. Assumed for the

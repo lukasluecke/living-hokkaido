@@ -39,5 +39,13 @@ export const lakeHouse: DetailSceneInput = {
       key: 3,
     },
   ],
-  activityIds: ["material", "weave-rows", "variation", "care"],
+  activityIds: [
+    "material",
+    "weave-rows",
+    "variation",
+    "care",
+    "story-bark-to-cloth",
+    "words-objects",
+    "trace-sources",
+  ],
 };

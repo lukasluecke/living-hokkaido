@@ -1,7 +1,7 @@
 # Part: activities
 
-One renderer per activity kind (`quiz`, `weave`, `sequence`). No lab yet;
-start `labs/activities` (or `labs/activities-weave`) to explore the D2 loom.
+One renderer per activity kind (`quiz`, `weave`, `sequence`, and `story`,
+`words`, `trace` in `kinds/`, from `labs/activities-kinds`).
 
 - Component: `ActivityPart`. Props: `ActivityPartProps` (`activity`, `claims`).
 - Emits: `activity.complete` with an `ActivityResult`, or `activity.close`.
@@ -28,3 +28,8 @@ journal stamp appears after completion.
   shuttle (drag, ←/→ or button), then press the row down (↓, click the bar
   or button). Pure state in `logic.ts`, tested in `tests/activities.test.ts`.
   Colours from tokens via `theme.ts`; backdrop follows the season blend.
+- 2026-11-25: `story`, `words`, `trace` ported from `labs/activities-kinds`
+  into `kinds/` (one CSS module, `.root` scope). `words` shows English
+  stand-ins until a language reviewer and consented recordings exist; story
+  voice = captions + labelled device-voice placeholder (Lukas: assumptions
+  for the prototype, verification later).
