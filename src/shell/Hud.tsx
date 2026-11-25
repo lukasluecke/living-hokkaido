@@ -1,10 +1,13 @@
 "use client";
-// Compact HUD: title, a season segmented control with play, and icon buttons
-// (journal, sound, contribute). Accessible names stay the same words as the
-// old text buttons ("spring", "Timelapse", "Journal (n/m)", "Sound on").
+// Field-label HUD: brand, the line rail (route stations), a stamp counter
+// that opens the journal, and one menu for seasons, timelapse, over time,
+// sound and contribute. Accessible names keep the old words ("spring",
+// "Timelapse", "Journal (n/m)", "Sound on") so scripts and tests still work.
+import { useEffect, useRef, useState } from "react";
 import { type Emit, SEASON_IDS, type SeasonState, seasonAt } from "@/contracts";
 import { SoundToggle, type Soundscape } from "@/audio/react";
 import s from "./Hud.module.css";
+import type { Station } from "./route";
 
 const P = {
   spring:
@@ -36,6 +39,7 @@ export function Hud({
   stamps,
   total,
   sound,
+  stations,
   onOverTime,
 }: {
   season: SeasonState;
@@ -43,84 +47,164 @@ export function Hud({
   stamps: number;
   total: number;
   sound: Soundscape;
+  stations: Station[];
   /** Shown inside a location that has an "Over time" timeline. */
   onOverTime?: () => void;
 }) {
   const now = seasonAt(season.value);
+  const [menu, setMenu] = useState(false);
+  const menuBtn = useRef<HTMLButtonElement>(null);
+  const menuBox = useRef<HTMLDivElement>(null);
+
+  // Close the menu on Esc (before the shell steps back) or an outside click.
+  useEffect(() => {
+    if (!menu) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      e.stopImmediatePropagation();
+      setMenu(false);
+      menuBtn.current?.focus();
+    };
+    const onDown = (e: PointerEvent) => {
+      const t = e.target as Node;
+      if (!menuBox.current?.contains(t) && !menuBtn.current?.contains(t))
+        setMenu(false);
+    };
+    window.addEventListener("keydown", onKey, true);
+    window.addEventListener("pointerdown", onDown);
+    return () => {
+      window.removeEventListener("keydown", onKey, true);
+      window.removeEventListener("pointerdown", onDown);
+    };
+  }, [menu]);
+
   return (
     <header className={s.hud}>
       <strong className={s.title}>Living Hokkaido</strong>
-      <div className={s.seasons} role="group" aria-label={`Season: ${now}`}>
-        {SEASON_IDS.map((id, i) => (
-          <button
-            key={id}
-            type="button"
-            aria-label={id}
-            title={id}
-            aria-pressed={now === id}
-            onClick={() => emit({ type: "season.set", value: i })}
-          >
-            <Icon d={P[id]} fill={id === "spring"} />
-          </button>
-        ))}
-        <button
-          type="button"
-          aria-label={season.playing ? "Pause" : "Timelapse"}
-          title={season.playing ? "Pause the seasons" : "Play the seasons"}
-          aria-pressed={season.playing}
-          onClick={() =>
-            emit({ type: "season.play", playing: !season.playing })
-          }
-        >
-          <Icon
-            d={season.playing ? "M8 5v14M16 5v14" : "M8 5l11 7-11 7Z"}
-            fill={!season.playing}
-          />
-        </button>
-      </div>
+      <nav className={s.rail} aria-label="Your route">
+        <ol>
+          {stations.map((st, i) => {
+            const text = `${st.label}${st.sub ? ` ${st.sub}` : ""}`;
+            return (
+              <li key={st.id} data-status={st.status}>
+                {i > 0 && <span className={s.seg} aria-hidden="true" />}
+                <button
+                  type="button"
+                  className={s.station}
+                  disabled={!st.event}
+                  aria-current={st.status === "now" ? "step" : undefined}
+                  aria-label={`${text}${st.status === "done" ? ", done" : ""}`}
+                  onClick={() => st.event && emit(st.event)}
+                >
+                  <i aria-hidden="true" />
+                  <span className={s.stationLabel}>
+                    {st.label}
+                    {st.sub && st.status === "now" && (
+                      <span className={s.sub}> {st.sub}</span>
+                    )}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ol>
+      </nav>
       <div className={s.tools}>
-        {onOverTime && (
-          <button
-            type="button"
-            className={s.round}
-            aria-label="Over time"
-            title="Over time"
-            onClick={onOverTime}
-          >
-            <Icon d="M7 3h10M7 21h10M8 3c0 5 8 6 8 9s-8 4-8 9M16 3c0 5-8 6-8 9s8 4 8 9" />
-          </button>
-        )}
         <button
           type="button"
-          className={s.round}
+          className={s.counter}
           aria-label={`Journal (${stamps}/${total})`}
           title="Heritage Journal"
           onClick={() => emit({ type: "journal.open" })}
         >
-          <Icon d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4Zm0 13a3 3 0 0 1 3-3h10" />
-          <span className={s.badge} aria-hidden="true">
-            {stamps}
+          <b aria-hidden="true">{stamps}</b>
+          <span className={s.counterText} aria-hidden="true">
+            of {total} stamps
           </span>
         </button>
-        <SoundToggle sound={sound} className={s.round}>
-          {(muted) => (
-            <Icon
-              d={
-                muted
-                  ? "M4 9h4l5-4v14l-5-4H4V9Zm13 1 4 4m0-4-4 4"
-                  : "M4 9h4l5-4v14l-5-4H4V9Zm12 0a4 4 0 0 1 0 6m2-9a8 8 0 0 1 0 12"
-              }
-            />
-          )}
-        </SoundToggle>
-        <a
+        <button
+          ref={menuBtn}
+          type="button"
           className={s.round}
-          href="/contribute"
-          aria-label="Contribute a story"
-          title="Contribute a story"
+          aria-label="Menu: seasons, sound and more"
+          aria-expanded={menu}
+          aria-controls="hud-menu"
+          onClick={() => setMenu((m) => !m)}
         >
-          <Icon d="M4 20l4-1 11-11-3-3L5 16l-1 4Zm10-13 3 3" />
-        </a>
+          <Icon d={P[now]} fill={now === "spring"} />
+        </button>
+        {menu && (
+          <div id="hud-menu" ref={menuBox} className={s.menu}>
+            <p className={s.cap}>Season</p>
+            <div
+              className={s.seasons}
+              role="group"
+              aria-label={`Season: ${now}`}
+            >
+              {SEASON_IDS.map((id, i) => (
+                <button
+                  key={id}
+                  type="button"
+                  aria-label={id}
+                  title={id}
+                  aria-pressed={now === id}
+                  onClick={() => emit({ type: "season.set", value: i })}
+                >
+                  <Icon d={P[id]} fill={id === "spring"} />
+                </button>
+              ))}
+              <button
+                type="button"
+                aria-label={season.playing ? "Pause" : "Timelapse"}
+                title={
+                  season.playing ? "Pause the seasons" : "Play the seasons"
+                }
+                aria-pressed={season.playing}
+                onClick={() =>
+                  emit({ type: "season.play", playing: !season.playing })
+                }
+              >
+                <Icon
+                  d={season.playing ? "M8 5v14M16 5v14" : "M8 5l11 7-11 7Z"}
+                  fill={!season.playing}
+                />
+              </button>
+            </div>
+            <div className={s.items}>
+              {onOverTime && (
+                <button
+                  type="button"
+                  className={s.item}
+                  onClick={() => {
+                    setMenu(false);
+                    onOverTime();
+                  }}
+                >
+                  <Icon d="M7 3h10M7 21h10M8 3c0 5 8 6 8 9s-8 4-8 9M16 3c0 5-8 6-8 9s8 4 8 9" />
+                  Over time
+                </button>
+              )}
+              <SoundToggle sound={sound} className={s.item}>
+                {(muted) => (
+                  <>
+                    <Icon
+                      d={
+                        muted
+                          ? "M4 9h4l5-4v14l-5-4H4V9Zm13 1 4 4m0-4-4 4"
+                          : "M4 9h4l5-4v14l-5-4H4V9Zm12 0a4 4 0 0 1 0 6m2-9a8 8 0 0 1 0 12"
+                      }
+                    />
+                    {muted ? "Sound off" : "Sound on"}
+                  </>
+                )}
+              </SoundToggle>
+              <a className={s.item} href="/contribute">
+                <Icon d="M4 20l4-1 11-11-3-3L5 16l-1 4Zm10-13 3 3" />
+                Contribute a story
+              </a>
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );

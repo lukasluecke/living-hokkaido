@@ -8,58 +8,119 @@
   overflow: hidden;
   background: #1f2d46;
   color: #fbf4e6;
-  font-family: ui-rounded, "Hiragino Maru Gothic ProN", system-ui, sans-serif;
+  font-family: var(--fl-body);
 }
 .stage {
   position: absolute;
   inset: 0;
   overflow: auto;
 }
-.guide {
+/* Owl guide: our own fictional owl, its line, and the one next step (the
+   same step the rail offers). Always top left, under the HUD, so it never
+   meets the tray, the object card or "Ask the owl" (lower left). */
+.owl {
   position: absolute;
   left: 12px;
-  top: calc(56px + env(safe-area-inset-top, 0px));
-  max-width: min(340px, calc(100% - 24px));
-  margin: 0;
+  top: calc(58px + env(safe-area-inset-top, 0px));
   display: flex;
-  gap: 8px;
   align-items: flex-start;
-  background: rgb(251 244 230 / 94%);
-  color: #2b2118;
-  border-radius: 12px;
-  padding: 7px 12px;
-  font-size: 14px;
-  line-height: 1.35;
-  box-shadow: 0 4px 16px rgb(43 33 24 / 22%);
-  pointer-events: none;
+  gap: 6px;
+  max-width: min(420px, calc(100% - 24px));
   z-index: 2;
-  animation: guide 9s ease forwards;
+  pointer-events: none;
 }
-.guide[data-still] {
-  animation: none;
-}
-@keyframes guide {
-  0% {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  4%,
-  85% {
-    opacity: 1;
-    transform: none;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-.owlDot {
+.owlMark {
   flex: none;
-  width: 10px;
-  height: 10px;
-  margin-top: 5px;
+  width: 64px;
+  height: 64px;
+  filter: drop-shadow(0 0 10px #cfe7ff);
+}
+.bubble {
+  pointer-events: auto;
+  background: var(--fl-paper);
+  color: var(--fl-ink);
+  border: 2px solid var(--fl-edge);
+  border-radius: 4px 14px 14px 14px;
+  padding: 10px 14px 12px;
+  box-shadow: var(--fl-shadow);
+  animation: owlIn 240ms ease-out;
+}
+@keyframes owlIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+.cap {
+  margin: 0 0 2px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fl-ink-soft);
+}
+.line {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.4;
+}
+.next {
+  margin-top: 10px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  border: 2px solid var(--fl-edge);
   border-radius: 999px;
-  background: radial-gradient(circle, #ffffff 30%, #bfe0ff 100%);
-  box-shadow: 0 0 8px #bfe0ff;
+  padding: 8px 16px;
+  background: var(--fl-gold);
+  color: var(--fl-ink);
+  box-shadow: var(--fl-lift);
+  cursor: pointer;
+  text-align: left;
+}
+.next:hover {
+  background: #2a3b4b;
+}
+.next:active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+.next:focus-visible {
+  outline: 3px solid var(--fl-ink);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .bubble {
+    animation: none;
+  }
+}
+/* In focus view on a laptop, the card is on the right; keep the owl small. */
+.shell[data-view="focus"] .owlMark {
+  width: 48px;
+  height: 48px;
+}
+@media (max-width: 700px) {
+  .owl {
+    top: calc(62px + env(safe-area-inset-top, 0px));
+  }
+  .owlMark {
+    width: 44px;
+    height: 44px;
+  }
+  .bubble {
+    padding: 8px 12px 10px;
+  }
+  .line {
+    font-size: 14px;
+  }
+  .next {
+    margin-top: 8px;
+    padding: 8px 12px;
+  }
+  /* The object sheet covers the lower part; keep the owl line short. */
+  .shell[data-view="focus"] .owl {
+    display: none;
+  }
 }
 .visuallyHidden {
   position: absolute;
@@ -71,17 +132,22 @@
 }
 .toast {
   position: absolute;
-  top: calc(104px + env(safe-area-inset-top, 0px));
+  top: calc(64px + env(safe-area-inset-top, 0px));
   left: 50%;
   transform: translateX(-50%);
-  background: #e8c27a;
-  color: #2b2118;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--fl-paper);
+  color: var(--fl-ink);
+  border: 2px solid var(--fl-season);
   border-radius: 999px;
-  padding: 5px 12px;
+  padding: 6px 14px;
   font-size: 14px;
+  font-weight: 700;
   white-space: nowrap;
-  box-shadow: 0 4px 16px rgb(43 33 24 / 22%);
-  z-index: 2;
+  box-shadow: var(--fl-shadow);
+  z-index: 4;
 }
 .side {
   position: absolute;
@@ -103,7 +169,7 @@
   display: grid;
   place-items: center;
   padding: 16px;
-  background: rgb(31 45 70 / 45%);
+  background: rgb(16 22 32 / 62%);
   z-index: 4;
 }
 /* Phone: the side slot (object card, activity) is a bottom sheet. */
@@ -139,12 +205,12 @@
   border: 0;
   border-radius: 999px;
   padding: 7px 14px;
-  background: #fbf4e6;
-  color: #2b2118;
+  background: var(--fl-paper);
+  color: var(--fl-ink);
   box-shadow: 0 4px 16px rgb(43 33 24 / 22%);
   cursor: pointer;
 }
 .timelineClose:focus-visible {
-  outline: 2px solid #e8c27a;
+  outline: 2px solid var(--fl-gold);
   outline-offset: 2px;
 }

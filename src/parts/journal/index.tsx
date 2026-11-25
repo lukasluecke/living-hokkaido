@@ -18,9 +18,10 @@ const vars = {
   "--ink-soft": ui.inkSoft,
   "--gold": ui.gold,
   "--gold-deep": ui.goldDeep,
-  "--seal": material.tie,
+  // Station-stamp ink follows the season (the shell sets --fl-season).
+  "--seal": `var(--fl-season, ${material.tie})`,
   "--locked": ui.inkSoft,
-  "--cover": material.woodDark,
+  "--cover": ui.ink,
   "--font-body": font.body,
   "--font-heading": font.heading,
 } as CSSProperties;
