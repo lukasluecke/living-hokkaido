@@ -4,6 +4,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   type ContentPack,
+  type Emit,
   EMPTY_JOURNAL,
   type ExperienceEvent,
   type ExperienceState,
@@ -69,6 +70,8 @@ export function Shell({ pack }: { pack: ContentPack }) {
   const emit = useCallback(
     (e: ExperienceEvent) => {
       setState((st) => reduce(pack, st, e));
+      // Demo recorder and e2e hook: mirror every event as a DOM event.
+      window.dispatchEvent(new CustomEvent("lh:event", { detail: e }));
       const { journal: next, earned } = record(pack, journalRef.current, e);
       if (next !== journalRef.current) {
         journalRef.current = next;
@@ -95,6 +98,16 @@ export function Shell({ pack }: { pack: ContentPack }) {
     },
     [pack],
   );
+
+  // Demo recorder and e2e hook (scripts/demo-video): scripts send the same
+  // events the UI sends, through the same reducer. No new power.
+  useEffect(() => {
+    const w = window as Window & { __livingHokkaido?: { emit: Emit } };
+    w.__livingHokkaido = { emit };
+    return () => {
+      delete w.__livingHokkaido;
+    };
+  }, [emit]);
 
   useEffect(() => {
     if (!toast) return;
@@ -155,7 +168,11 @@ export function Shell({ pack }: { pack: ContentPack }) {
     ) : null;
 
   return (
-    <main className={s.shell}>
+    <main
+      className={s.shell}
+      data-view={state.view}
+      data-overlay={state.overlay ?? undefined}
+    >
       <div className={s.stage}>{stage}</div>
       <header className={s.hud}>
         <strong>Living Hokkaido</strong>
