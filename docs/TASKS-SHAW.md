@@ -37,21 +37,21 @@ almost done are safe; the rest is for after the hackathon.
 
 ## Summary
 
-| # | Task | Area | Plugs in at | Effort |
-|---|---|---|---|---|
-| 1 | [Stylised water with freeze](#1-stylised-water-with-freeze) | shader | `island/world/Water.tsx`, `Environment.tsx` | M |
-| 2 | [Snow accumulation and ice](#2-snow-accumulation-and-ice) | shader | `island/world/season.ts`, `Terrain.tsx`, `Trees.tsx`, `Places.tsx` | M |
-| 3 | [Wind in trees, grass and lavender](#3-wind-in-trees-grass-and-lavender) | shader | `island/world/Trees.tsx`, `Environment.tsx` | S–M |
-| 4 | [Owl spirit glow and trail](#4-owl-spirit-glow-and-trail) | shader | `island/world/Owl.tsx`, `World.tsx` | M |
-| 5 | [Outline quality](#5-outline-quality) | post-process | `shared/InkEdges.ts`, `artifacts/model/looks.ts` | M |
-| 6 | [Hearth fire and smoke](#6-hearth-fire-and-smoke) | shader | `detail-scene/room/Hearth.tsx` | S–M |
-| 7 | [Artifact GLB models](#7-artifact-glb-models) | geometry | `model.source` in `content/bark-to-cloth/artifacts.ts` | M each |
-| 8 | [Building and room GLBs](#8-building-and-room-glbs) | geometry | `public/models/building-*.glb`, `scene-*.glb` | L |
-| 9 | [Owl GLB](#9-owl-glb) | geometry | `public/models/owl.glb`, `island/world/Owl.tsx` | M |
-| 10 | [Hand-sculpted island terrain](#10-hand-sculpted-island-terrain) | geometry | `island/world/field.ts`, `island.ts` | L |
-| 11 | [Baked lighting and AO](#11-baked-lighting-and-ao) | lighting | `detail-scene/room/*`, `over-time/Diorama.tsx` | M–L |
-| 12 | [Real-GPU performance profile](#12-real-gpu-performance-profile) | profiling | all 3D parts, `budget` | S–M |
-| 13 | [High-quality backup video](#13-high-quality-backup-video) | render | `scripts/demo-video`, docs/DEMO.md | S–M |
+| # | Task | Area | Plugs in at | Effort | Issue |
+|---|---|---|---|---|---|
+| 1 | [Stylised water with freeze](#1-stylised-water-with-freeze) | shader | `island/world/Water.tsx`, `Environment.tsx` | M | [#19](https://github.com/lukasluecke/living-hokkaido/issues/19) |
+| 2 | [Snow accumulation and ice](#2-snow-accumulation-and-ice) | shader | `island/world/season.ts`, `Terrain.tsx`, `Trees.tsx`, `Places.tsx` | M | [#20](https://github.com/lukasluecke/living-hokkaido/issues/20) |
+| 3 | [Wind in trees, grass and lavender](#3-wind-in-trees-grass-and-lavender) | shader | `island/world/Trees.tsx`, `Environment.tsx` | S–M | [#21](https://github.com/lukasluecke/living-hokkaido/issues/21) |
+| 4 | [Owl spirit glow and trail](#4-owl-spirit-glow-and-trail) | shader | `island/world/Owl.tsx`, `World.tsx` | M | [#22](https://github.com/lukasluecke/living-hokkaido/issues/22) |
+| 5 | [Outline quality](#5-outline-quality) | post-process | `shared/InkEdges.ts`, `artifacts/model/looks.ts` | M | [#23](https://github.com/lukasluecke/living-hokkaido/issues/23) |
+| 6 | [Hearth fire and smoke](#6-hearth-fire-and-smoke) | shader | `detail-scene/room/Hearth.tsx` | S–M | [#24](https://github.com/lukasluecke/living-hokkaido/issues/24) |
+| 7 | [Artifact GLB models](#7-artifact-glb-models) | geometry | `model.source` in `content/bark-to-cloth/artifacts.ts` | M each | [#25](https://github.com/lukasluecke/living-hokkaido/issues/25) |
+| 8 | [Building and room GLBs](#8-building-and-room-glbs) | geometry | `public/models/building-*.glb`, `scene-*.glb` | L | [#26](https://github.com/lukasluecke/living-hokkaido/issues/26) |
+| 9 | [Owl GLB](#9-owl-glb) | geometry | `public/models/owl.glb`, `island/world/Owl.tsx` | M | [#27](https://github.com/lukasluecke/living-hokkaido/issues/27) |
+| 10 | [Hand-sculpted island terrain](#10-hand-sculpted-island-terrain) | geometry | `island/world/field.ts`, `island.ts` | L | [#28](https://github.com/lukasluecke/living-hokkaido/issues/28) |
+| 11 | [Baked lighting and AO](#11-baked-lighting-and-ao) | lighting | `detail-scene/room/*`, `over-time/Diorama.tsx` | M–L | [#29](https://github.com/lukasluecke/living-hokkaido/issues/29) |
+| 12 | [Real-GPU performance profile](#12-real-gpu-performance-profile) | profiling | all 3D parts, `budget` | S–M | [#30](https://github.com/lukasluecke/living-hokkaido/issues/30) |
+| 13 | [High-quality backup video](#13-high-quality-backup-video) | render | `scripts/demo-video`, docs/DEMO.md | S–M | [#31](https://github.com/lukasluecke/living-hokkaido/issues/31) |
 
 All paths under `src/parts/` unless written in full.
 
