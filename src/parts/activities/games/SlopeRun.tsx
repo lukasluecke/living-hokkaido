@@ -1,12 +1,15 @@
 "use client";
 // slope-run kind: Don't Fall on the Slope (vendor/dont-fall-on-the-slope).
-// Finds (museum labels in the street) carry their claim's text and source
-// into the game; the panel also lists every claim. Without WebGL the game
-// shows its own HTML card.
-import { useCallback, useState } from "react";
+// Exhibits (real things of the street) carry their claim's text and source
+// into the game; the journal's "found" list tells the game which ones this
+// visitor saw before, so each Play brings new ones. The panel shows the
+// street notebook and lists every claim. Without WebGL the game shows its
+// own HTML card.
+import { useCallback, useRef, useState } from "react";
 import type { Emit } from "@/contracts";
 import { mountSlope } from "@vendor/dont-fall-on-the-slope/src/embed";
 import type { KindProps } from "../kinds/shared";
+import g from "./games.module.css";
 import { GameStage, type MountGame } from "./GameStage";
 
 export function SlopeRunActivity({
@@ -14,8 +17,12 @@ export function SlopeRunActivity({
   claims,
   prefs,
   emit,
+  found = [],
 }: KindProps<"slope-run">) {
   const [done, setDone] = useState(false);
+  // Read at mount (each Play): the journal's list of exhibits seen before.
+  const foundRef = useRef(found);
+  foundRef.current = found;
   const report: Emit = (e) => {
     if (e.type === "activity.complete") setDone(true);
     emit(e);
@@ -36,6 +43,7 @@ export function SlopeRunActivity({
             {
               id: f.id,
               label: f.label,
+              look: f.look,
               text: c.claim.text,
               source: src
                 ? `${src.title}${cite ? ` · ${cite.locator}` : ""}`
@@ -43,9 +51,12 @@ export function SlopeRunActivity({
             },
           ];
         }),
+        seen: foundRef.current,
       }),
     [a],
   );
+  const seenIds = new Set(found);
+  const notebook = a.finds.filter((f) => seenIds.has(f.id));
   return (
     <GameStage
       activityId={a.id}
@@ -60,6 +71,18 @@ export function SlopeRunActivity({
       emit={report}
       mount={mount}
       fit="fill"
+      notes={
+        a.finds.length > 0 && (
+          <div className={g.notebook}>
+            <strong>
+              Street notebook: {notebook.length} of {a.finds.length} seen
+            </strong>
+            {notebook.length > 0 && (
+              <span> · {notebook.map((f) => f.label).join(" · ")}</span>
+            )}
+          </div>
+        )
+      }
       controls={
         <>
           ← → or A D lean (tap for a small correction), ↓ or Space brace, Enter

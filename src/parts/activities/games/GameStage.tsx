@@ -43,6 +43,7 @@ export function GameStage({
   mount,
   fit,
   controls,
+  notes,
 }: {
   activityId: string;
   knowledgeId: string;
@@ -61,6 +62,8 @@ export function GameStage({
   fit: "wide" | "fill";
   /** Short keyboard help, shown under the prompt. */
   controls: ReactNode;
+  /** Optional extra panel content under the Play button (progress). */
+  notes?: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -133,6 +136,7 @@ export function GameStage({
         </button>
       </div>
       {done && <p className="feedback">{completion}</p>}
+      {notes}
       <details className={g.facts}>
         <summary>What the game is based on ({claimIds.length})</summary>
         <ul>

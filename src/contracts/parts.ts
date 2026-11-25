@@ -59,6 +59,8 @@ export type ArtifactViewerProps = PartContext & {
 export type ActivityPartProps = PartContext & {
   activity: ActivityDefinition;
   claims: Record<string, ResolvedClaim>;
+  /** Ids this visitor found in this activity before (from the journal). */
+  found?: string[];
 };
 
 /** Heritage Journal (E1 stamp book). */

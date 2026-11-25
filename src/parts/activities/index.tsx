@@ -42,6 +42,7 @@ export function ActivityPart({
   emit,
   season,
   prefs,
+  found,
 }: ActivityPartProps) {
   const presentations = new Set<Presentation>(
     activity.claimIds.flatMap((id) =>
@@ -153,6 +154,7 @@ export function ActivityPart({
           claims={claims}
           prefs={prefs}
           emit={emit}
+          found={found}
         />
       )}
       {activity.kind === "place" && (

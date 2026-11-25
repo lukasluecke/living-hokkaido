@@ -439,9 +439,11 @@ export const slopeRunActivitySchema = z.object({
   /** Street layout seed. Same seed, same street. */
   seed: z.number().int().nonnegative().optional(),
   /**
-   * Museum labels floating in the street, in street order. Slide through
-   * one to collect it; the end card explains it with its claim. `label` is
-   * a short game name and states no fact.
+   * Exhibits: real things of the street (`look`), each explained by one of
+   * the activity's claims. Each street shows a few, new ones first; slide
+   * close past one to notice it, and the end card explains it with its
+   * claim. `label` is a short game name and states no fact. `look` has a
+   * default, so definitions from before (museum labels) still parse.
    */
   finds: z
     .array(
@@ -449,6 +451,16 @@ export const slopeRunActivitySchema = z.object({
         id: idSchema,
         label: z.string().min(1),
         claimId: idSchema,
+        look: z
+          .enum([
+            "warehouse-wall",
+            "shachihoko",
+            "straw-sacks",
+            "sack-cart",
+            "herring-boxes",
+            "canal",
+          ])
+          .default("straw-sacks"),
       }),
     )
     .max(12)
@@ -578,5 +590,8 @@ export const activityResultSchema = z.object({
   /** 0..1 where it makes sense (quiz correct = 1). */
   score: z.number().min(0).max(1).optional(),
   at: z.string(),
+  /** Ids of things found in this run (slope-run: the exhibits noticed).
+   *  The journal keeps them per activity. */
+  found: z.array(idSchema).optional(),
 });
 export type ActivityResult = z.infer<typeof activityResultSchema>;

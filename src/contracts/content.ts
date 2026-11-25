@@ -418,5 +418,6 @@ export function sanitizeJournal(
     }),
     completed: j.completed.filter((id) => act.has(id)),
     stamps: j.stamps.filter((s) => st.has(s.stampId)),
+    found: j.found.filter((key) => act.has(key.split("/")[0] ?? "")),
   };
 }

@@ -55,10 +55,15 @@ export function record(
         hotspotsRead: add(j.hotspotsRead, `${e.artifactId}/${e.hotspotId}`),
       };
       break;
-    case "activity.complete":
+    case "activity.complete": {
       if (e.result.completed)
         next = { ...j, completed: add(j.completed, e.result.activityId) };
+      let found = next.found;
+      for (const id of e.result.found ?? [])
+        found = add(found, `${e.result.activityId}/${id}`);
+      if (found !== next.found) next = { ...next, found };
       break;
+    }
     case "season.set":
       next = { ...j, seasonsSeen: add(j.seasonsSeen, seasonAt(e.value)) };
       break;
