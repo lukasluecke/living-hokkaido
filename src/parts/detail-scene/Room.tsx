@@ -18,6 +18,15 @@ import { ArtifactShell, RoomObject } from "./room/Artifacts";
 import { Dust, Hearth, WindowLight } from "./room/Hearth";
 import { HouseStatic, Roof } from "./room/House";
 import { MergeStatic } from "./room/MergeStatic";
+import {
+  blend4,
+  CABIN_SCALE,
+  CabinStatic,
+  ClearingStatic,
+  GroveStatic,
+  Lantern,
+} from "./room/Outdoor";
+import { season as tone } from "@/design/tokens";
 
 type V3 = [number, number, number];
 const look = (c: CameraControls, v: CameraView, smooth: boolean) =>
@@ -65,7 +74,19 @@ function Director({
       emit({ type: "scene.ready", sceneId: scene.id });
     };
     (async () => {
-      if (prefs.reducedMotion || scene.entry === "cut") {
+      if (scene.entry === "fly-in" && !prefs.reducedMotion) {
+        // Outdoor: no roof; glide from high above down to the home view.
+        c.smoothTime = 1.1;
+        await look(c, scene.views.outside, false);
+        await wait(300);
+        if (cancelled) return;
+        await look(c, scene.views.home, true);
+        if (cancelled) return;
+        c.smoothTime = 0.45;
+        done();
+        return;
+      }
+      if (prefs.reducedMotion || scene.entry !== "roof-lift") {
         liftTarget.current = 1;
         lift.current = 1;
         await look(c, scene.views.home, false);
@@ -130,22 +151,8 @@ export function Room(props: RoomProps) {
   const [inside, setInside] = useState(false);
   return (
     <>
-      <color attach="background" args={["#1a1d24"]} />
-      <fog attach="fog" args={["#1a1d24", 14, 40]} />
-      <hemisphereLight args={["#9fb4e8", "#4a3424", 0.6]} />
+      <Setting kind={scene.setting} lift={lift} {...props} />
       <RoomToon />
-      <directionalLight
-        position={[8, 12, 6]}
-        intensity={0.45}
-        color="#dfe8ff"
-      />
-      <MergeStatic>
-        <HouseStatic />
-      </MergeStatic>
-      <Roof lift={lift} />
-      <Hearth shadows={false} />
-      <WindowLight shadows={false} />
-      {!props.prefs.reducedMotion && <Dust />}
       {scene.placements.map((p) => (
         <ArtifactShell
           key={p.artifactId}
@@ -201,6 +208,89 @@ export function Room(props: RoomProps) {
 }
 
 /** Same two-tone look as the island, with a cool blue shade (no fog). */
+/** The set around the objects, by `scene.setting` (unknown = "house"). */
+function Setting({
+  kind,
+  lift,
+  season,
+  prefs,
+}: RoomProps & { kind: string; lift: { current: number } }) {
+  if (kind === "grove" || kind === "clearing")
+    return (
+      <>
+        <OutdoorSky season={season.value} />
+        <hemisphereLight args={["#dfeaf5", "#6a7a4c", 1.7]} />
+        <directionalLight
+          position={[6, 10, 4]}
+          intensity={1.6}
+          color="#fff1df"
+        />
+        <MergeStatic>
+          {kind === "grove" ? (
+            <GroveStatic season={season} />
+          ) : (
+            <ClearingStatic season={season} />
+          )}
+        </MergeStatic>
+      </>
+    );
+  return (
+    <>
+      <color attach="background" args={["#1a1d24"]} />
+      <fog attach="fog" args={["#1a1d24", 14, 40]} />
+      <hemisphereLight args={["#9fb4e8", "#4a3424", 0.6]} />
+      <directionalLight
+        position={[8, 12, 6]}
+        intensity={0.45}
+        color="#dfe8ff"
+      />
+      {kind === "cabin" ? (
+        <>
+          <MergeStatic>
+            <CabinStatic />
+          </MergeStatic>
+          <group scale={CABIN_SCALE}>
+            <Roof lift={lift} />
+          </group>
+          <Lantern />
+          <WindowLight shadows={false} />
+        </>
+      ) : (
+        <>
+          <MergeStatic>
+            <HouseStatic />
+          </MergeStatic>
+          <Roof lift={lift} />
+          <Hearth shadows={false} />
+          <WindowLight shadows={false} />
+        </>
+      )}
+      {!prefs.reducedMotion && <Dust />}
+    </>
+  );
+}
+
+/** Season sky as background and far fog for the outdoor sets. */
+function OutdoorSky({ season }: { season: number }) {
+  const { scene } = useThree();
+  const sky = useMemo(() => new THREE.Color(), []);
+  const s = useRef(season);
+  s.current = season;
+  useEffect(() => {
+    scene.background = sky;
+    scene.fog = new THREE.Fog(sky, 16, 42);
+    return () => {
+      scene.background = null;
+      scene.fog = null;
+    };
+  }, [scene, sky]);
+  useFrame(() => {
+    blend4(sky, tone.sky, s.current);
+    if (scene.fog) scene.fog.color.copy(sky);
+  });
+  return null;
+}
+
 function RoomToon() {
   const { scene } = useThree();
   const T = useMemo(() => {

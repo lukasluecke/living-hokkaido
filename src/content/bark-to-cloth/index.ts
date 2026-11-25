@@ -11,14 +11,19 @@ import { stamps } from "./journal";
 import { barkToCloth } from "./knowledge";
 import { memories } from "./memories";
 import { houseOverTime, houseTimeline } from "./over-time";
-import { lakeHouse } from "./scene";
+import {
+  lakeHouse,
+  listeningGrove,
+  makersClearing,
+  memoryCabin,
+} from "./scene";
 
 export const barkToClothRaw = {
   contractVersion: CONTRACT_VERSION,
   id: "bark-to-cloth",
   knowledge: [barkToCloth, houseOverTime],
   island: { owlHome, overview, locations },
-  scenes: [lakeHouse],
+  scenes: [lakeHouse, listeningGrove, makersClearing, memoryCabin],
   artifacts,
   activities,
   stamps,

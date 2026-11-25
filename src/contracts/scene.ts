@@ -32,8 +32,15 @@ export const detailSceneSchema = z.object({
     /** High 3/4 "dollhouse" home view, roof lifted. */
     home: cameraViewSchema,
   }),
-  /** "roof-lift" = B3 entry; "cut" = reduced motion / fallback. */
-  entry: z.enum(["roof-lift", "cut"]).default("roof-lift"),
+  /** "roof-lift" = B3 entry; "fly-in" = outdoor glide, no roof; "cut" =
+   * reduced motion / fallback. */
+  entry: z.enum(["roof-lift", "fly-in", "cut"]).default("roof-lift"),
+  /** Look key the detail-scene part maps to a set (like Location.building):
+   * "house", "grove", "clearing", "cabin". Unknown keys fall back to "house". */
+  setting: z.string().min(1).default("house"),
+  /** "Over time" timelines offered in this scene, besides the one whose
+   * locationId is this scene's location. */
+  timelineIds: z.array(idSchema).default([]),
   /** Name of the roof node in the scene model, so it can lift. */
   roofNode: z.string().default("roof"),
   placements: z.array(artifactPlacementSchema).min(1),

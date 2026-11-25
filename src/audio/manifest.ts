@@ -79,6 +79,27 @@ export const soundManifest = {
         },
       ],
     },
+    // Outdoor places: forest birds, leaves and wind instead of the hearth.
+    grove: {
+      views: ["scene", "focus", "activity"],
+      scenes: ["listening-grove", "makers-clearing"],
+      layers: [
+        {
+          sound: "island-birds",
+          seasons: { spring: 0.85, summer: 0.6, autumn: 0.3, winter: 0.05 },
+        },
+        {
+          sound: "island-leaves",
+          seasons: { spring: 0.3, summer: 0.4, autumn: 0.85, winter: 0.1 },
+        },
+        { sound: "island-insects", seasons: { summer: 0.45, autumn: 0.1 } },
+        {
+          sound: "island-wind",
+          seasons: { spring: 0.35, summer: 0.25, autumn: 0.45, winter: 0.3 },
+        },
+        { sound: "island-winter-wind", seasons: { winter: 0.7 } },
+      ],
+    },
     interior: {
       views: ["scene", "focus", "activity"],
       layers: [

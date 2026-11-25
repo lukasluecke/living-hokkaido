@@ -211,6 +211,9 @@ export function validateContentPack(input: unknown): string[] {
     for (const a of s.activityIds)
       if (!activityIds.has(a))
         errors.push(`scene ${s.id}: unknown activity "${a}"`);
+    for (const t of s.timelineIds)
+      if (!p.timelines.some((x) => x.id === t))
+        errors.push(`scene ${s.id}: unknown timeline "${t}"`);
   }
   for (const a of p.artifacts) {
     visible(a.knowledgeId, `artifact ${a.id}`);

@@ -45,6 +45,9 @@ export const VIEWS = [
 export const zoneSchema = z.object({
   /** Experience views that play this zone. */
   views: z.array(z.enum(VIEWS)).min(1),
+  /** Only in these detail scenes (ids). Empty = any scene. A zone with
+   * scenes wins over one without for the same view. */
+  scenes: z.array(id).default([]),
   layers: z.array(ambientLayerSchema),
 });
 export type Zone = z.infer<typeof zoneSchema>;
@@ -103,7 +106,9 @@ export function validateManifest(m: ResolvedManifest): string[] {
       errors.push(`dom ${r.selector}: no cue ${r.cue}`);
   const seen = new Map<string, string>();
   for (const [zid, z] of Object.entries(m.zones))
-    for (const v of z.views) {
+    for (const v of z.views.flatMap((x) =>
+      z.scenes.length ? z.scenes.map((s) => `${x} (${s})`) : [x],
+    )) {
       if (seen.has(v))
         errors.push(`view ${v} in zones ${seen.get(v)} and ${zid}`);
       seen.set(v, zid);

@@ -40,3 +40,4 @@ calls; HTML path works with WebGL off.
 
 * 2026-11-25: variant A ported into `Room.tsx` + `room/`. Home view is the high dollhouse view with the roof lifted; no real-time shadows (ContactShadows instead); keys 1–3 handled in the part.
 * 2026-11-25: room uses the same toon patch with a cool shade; reed, mat and basket colours vary so the room is not one brown.
+* 2026-11-25: `scene.setting` picks the set: `house` (lake house), `cabin` (house shell at 0.72 with plain shelves and a lantern), `grove` and `clearing` (outdoor, season ground and leaves, `entry: "fly-in"`). Objects and activities are reused from the lake house; the bar lists scene activities whose object is not placed here.

@@ -13,6 +13,27 @@ export const stamps: StampInput[] = [
     unlock: { on: "location-visited", locationId: "lake-house" },
   },
   {
+    id: "grove-visit",
+    title: "Sat in the grove",
+    description: "You followed the owl to the listening grove.",
+    icon: "leaf",
+    unlock: { on: "location-visited", locationId: "listening-grove" },
+  },
+  {
+    id: "clearing-visit",
+    title: "At the workbench",
+    description: "You followed the owl to the makers’ clearing.",
+    icon: "shuttle",
+    unlock: { on: "location-visited", locationId: "makers-clearing" },
+  },
+  {
+    id: "cabin-visit",
+    title: "Inside the memory cabin",
+    description: "You followed the owl to the memory cabin.",
+    icon: "house",
+    unlock: { on: "location-visited", locationId: "memory-cabin" },
+  },
+  {
     id: "three-objects",
     title: "Looked closely",
     description: "You picked up and turned all three objects.",

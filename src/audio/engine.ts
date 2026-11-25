@@ -12,6 +12,8 @@ export type SoundScene = {
   view: ExperienceState["view"];
   overlay: ExperienceState["overlay"];
   season: number;
+  /** Open detail scene, for scene-specific zones. */
+  sceneId?: string | null;
 };
 
 type Bus = "master" | "ambient" | "ui";
@@ -126,8 +128,8 @@ export class SoundEngine {
   /** Current view, overlay and season from the shell. */
   setScene(next: SoundScene) {
     const zoneChanged =
-      zoneForView(this.manifest, next.view) !==
-      zoneForView(this.manifest, this.scene.view);
+      zoneForView(this.manifest, next.view, next.sceneId) !==
+      zoneForView(this.manifest, this.scene.view, this.scene.sceneId);
     this.scene = next;
     this.applyMix(
       zoneChanged ? this.manifest.zoneFadeSec : this.manifest.seasonFadeSec,
@@ -241,7 +243,7 @@ export class SoundEngine {
     const ctx = this.ctx;
     if (!ctx || ctx.state !== "running") return;
     const m = this.manifest;
-    this.zone = zoneForView(m, this.scene.view);
+    this.zone = zoneForView(m, this.scene.view, this.scene.sceneId);
     const gains = layerGains(m, this.zone, this.scene.season);
     this.ramp(this.buses.duck, this.scene.overlay ? m.overlayDuck : 1, 0.4);
     for (const id of ambientSounds(m)) {
