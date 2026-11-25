@@ -32,8 +32,8 @@
   --fl-season-soft: color-mix(in srgb, var(--fl-season) 16%, white);
   --fl-radius: 6px;
   --fl-shadow: 0 10px 26px rgb(15 25 40 / 22%);
-  --fl-body: "Zen Kaku Gothic New", "Hiragino Kaku Gothic ProN", system-ui,
-    sans-serif;
+  --fl-body:
+    "Zen Kaku Gothic New", "Hiragino Kaku Gothic ProN", system-ui, sans-serif;
   --fl-heading: "Shippori Mincho B1", "Hiragino Mincho ProN", Georgia, serif;
 }
 :root {
