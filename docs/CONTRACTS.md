@@ -36,6 +36,7 @@ Two layers:
 
 | Version | Change |
 |---|---|
+| 1 (additive) | `slope-run` gets `finds` (default `[]`, max 12): `{ id, label, claimId }` labels on the street; each `claimId` must be in `claimIds` (`checkActivityKind`). |
 | 1 (default) | `hide-seek` default `durations.disguise` 60 → 80 s (Erina's playtest; seek stays 90 s). Same in `vendor/out-of-place/contract-proposal.ts`. |
 | 1 (additive) | Activity kind `place` (Build the scene, labs/activities-scene): `stage`, `subject` (`people` or `objects`), `season` default `"summer"`, `steps` with `say`, `claimIds`, `observed` default `false`, optional `season`, `ask`, `figure` (label, hat, colour or thing), `options` (one `right`), `pose`, `poses`, hints and `why`; `illustrative` default `true`. Step claims must be in the activity's `claimIds`. |
 | 1 (additive) | Activity kinds `hide-seek` (Out of Place: `scene`, `prompt`, `captionClaimIds`, `accurateClaimIds`, `anachronismClaimIds` default `[]`, `durations`, `wrongTapPenalty`, `players`, `illustrative` default `true`) and `slope-run` (Don't Fall on the Slope: `prompt`, `completion`, optional `seed`, `illustrative` default `true`). Both games are vendored, see vendor/README.md. |

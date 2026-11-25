@@ -14,18 +14,59 @@ export const gameKnowledge: KnowledgeEntry[] = [
 ];
 
 /**
- * Don't Fall on the Slope has no knowledge of its own yet (its captions are
- * upstream milestone M3). Until then it reuses the cited Otaru claims, as
- * its CLAUDE.md suggests; the completion only restates one of them.
+ * Don't Fall on the Slope has no knowledge of its own yet. It reuses the
+ * cited Otaru claims, as its CLAUDE.md suggests: each find is one claim,
+ * and the completion only restates one of them.
  */
 const slopeRun: ActivityInput = {
   kind: "slope-run",
   id: "slope-run-otaru",
   knowledgeId: otaruWarehouseKnowledge.id,
   title: "Don't Fall on the Slope",
-  claimIds: ["kitahama-tuff-on-timber", "otaru-canal-1914-1923"],
+  claimIds: [
+    "otaru-warehouse-1890",
+    "kitahama-tuff-on-timber",
+    "otaru-warehouse-shachihoko",
+    "kimura-warehouse-1894",
+    "herring-fertilizer",
+    "herring-peak-1897",
+    "otaru-canal-1914-1923",
+  ],
   prompt:
-    "January, an icy shopping street. Slide down to the canal without touching anything: not the shops, not the snow piles, not the tourists.",
+    "January, an icy shopping street. Slide down to the canal without touching the shops, lamp posts or people. Snow piles only slow you down. Slide through the floating museum labels to collect them: the end card explains each one.",
+  // Labels are short game names; the end card shows each claim's text.
+  finds: [
+    {
+      id: "find-warehouse",
+      label: "A stone warehouse",
+      claimId: "otaru-warehouse-1890",
+    },
+    {
+      id: "find-tuff",
+      label: "Tuff stone",
+      claimId: "kitahama-tuff-on-timber",
+    },
+    {
+      id: "find-shachihoko",
+      label: "Shachihoko",
+      claimId: "otaru-warehouse-shachihoko",
+    },
+    {
+      id: "find-fertilizer",
+      label: "Herring fertilizer",
+      claimId: "herring-fertilizer",
+    },
+    {
+      id: "find-kimura",
+      label: "The Kimura warehouse",
+      claimId: "kimura-warehouse-1894",
+    },
+    {
+      id: "find-peak",
+      label: "The herring peak",
+      claimId: "herring-peak-1897",
+    },
+  ],
   completion:
     "Otaru Canal was built from 1914 to 1923, to ease moving goods between ships in the bay and the warehouses on shore.",
 };

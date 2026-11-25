@@ -127,6 +127,12 @@ function checkActivityKind(
     for (const c of [a.stringsClaimId, a.tune?.claimId])
       if (c && !cited.has(c))
         errors.push(`${at}: claim "${c}" not in claimIds`);
+  if (a.kind === "slope-run")
+    for (const f of a.finds)
+      if (!cited.has(f.claimId))
+        errors.push(
+          `${at}: find ${f.id} cites "${f.claimId}", not in claimIds`,
+        );
   if (a.kind === "board" && !cited.has(a.rulesClaimId))
     errors.push(`${at}: rules claim "${a.rulesClaimId}" not in claimIds`);
   if (a.kind === "place")

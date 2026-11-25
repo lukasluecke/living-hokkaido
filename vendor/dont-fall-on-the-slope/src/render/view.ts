@@ -158,6 +158,8 @@ export function createView(
       renderer.render(scene, camera);
     },
     canvas: renderer.domElement,
+    /** The three scene, for extra markers (finds). */
+    scene,
     /** Snap the camera back behind the player (after a restart). */
     snap() {
       placed = false;

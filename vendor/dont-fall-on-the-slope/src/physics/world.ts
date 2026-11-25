@@ -38,6 +38,14 @@ export const TUNING = {
   slip: 1.5,
 };
 
+/**
+ * Soft obstacles: the body ploughs through and slows down instead of
+ * crashing. `keep` is the share of speed left after one.
+ */
+export const SOFT: Record<string, { keep: number }> = {
+  "snow-pile": { keep: 0.62 },
+};
+
 /** Wall-label sizes: how far shopfront colliders sink below the ice. */
 const SINK = 3;
 
@@ -189,6 +197,7 @@ export function createPhysics(R: R, track: Track, seed = 1, startAt = 0) {
         : o.kind === "tourist"
           ? R.ColliderDesc.capsule(o.h / 2 - o.w / 2, o.w / 2)
           : R.ColliderDesc.cuboid(o.w / 2, o.h / 2, o.d / 2);
+    if (SOFT[o.kind]) shape.setSensor(true);
     fixed(pos, rot, shape, o.kind);
   }
 
@@ -264,6 +273,14 @@ export function createPhysics(R: R, track: Track, seed = 1, startAt = 0) {
         h1 === collider.handle ? h2 : h2 === collider.handle ? h1 : -1;
       hit = labels.get(other) ?? null;
     });
+    const soft = hit ? SOFT[hit] : undefined;
+    if (soft && !crashed) {
+      const v = body.linvel();
+      body.setLinvel(
+        { x: v.x * soft.keep, y: v.y * soft.keep, z: v.z * soft.keep },
+        true,
+      );
+    }
     return hit;
   }
 
