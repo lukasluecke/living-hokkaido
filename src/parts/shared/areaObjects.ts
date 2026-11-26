@@ -17,7 +17,8 @@ export type AreaPart =
   | "float"
   | "lacquer"
   | "lacquer-red"
-  | "vine";
+  | "vine"
+  | "glass";
 export type AreaObjectId =
   | "herring"
   | "coal"
@@ -30,7 +31,8 @@ export type AreaObjectId =
   | "tonkori"
   | "vine-rings"
   | "canoe"
-  | "lacquer-vessel";
+  | "lacquer-vessel"
+  | "omusha-case";
 
 /** Colours for the parts this file adds (the viewer's toon look uses them). */
 export const AREA_PALETTE: Record<AreaPart, string> = {
@@ -43,6 +45,7 @@ export const AREA_PALETTE: Record<AreaPart, string> = {
   lacquer: "#2a1714",
   "lacquer-red": "#8e2a1e",
   vine: "#7a6040",
+  glass: "#cfe6ee",
 };
 /** Colours of parts that already exist in the viewer palette. */
 const BASE: Record<string, string> = {
@@ -583,6 +586,111 @@ function lacquerVessel() {
   return g;
 }
 
+/**
+ * A museum display case for the Omusha diorama (memory cabin): a wooden
+ * plinth with a glass box and plain stand-in shapes inside. The shapes only
+ * mark where the scene's parts are (a building, a line of seven seated
+ * figures, rows of figures, bales); they are not the museum's figures and
+ * show no clothing or pattern. Clicking it opens the splat. About 1.1 m.
+ */
+function omushaCase() {
+  const g = new THREE.Group();
+  g.name = "omusha-case";
+  const W = 0.8;
+  const D = 0.5;
+  const H = 0.75;
+  g.add(
+    mesh(
+      new THREE.BoxGeometry(W, H, D).translate(0, H / 2, 0),
+      "wood",
+      "plinth",
+    ),
+  );
+  const ground = mesh(
+    new THREE.BoxGeometry(W - 0.04, 0.03, D - 0.04).translate(0, H + 0.015, 0),
+    "canvas",
+    "ground",
+  );
+  const gm = ground.material as THREE.MeshStandardMaterial;
+  gm.emissive = new THREE.Color("#f2c14e");
+  gm.emissiveIntensity = 0.35;
+  g.add(ground);
+  const top = H + 0.03;
+  // Building at the back, figures as plain capsules.
+  g.add(
+    mesh(
+      new THREE.BoxGeometry(0.22, 0.12, 0.1).translate(0, top + 0.06, -0.15),
+      "bark",
+      "building",
+    ),
+  );
+  g.add(
+    mesh(
+      new THREE.ConeGeometry(0.16, 0.06, 4)
+        .rotateY(Math.PI / 4)
+        .scale(1, 1, 0.5)
+        .translate(0, top + 0.15, -0.15),
+      "bark",
+      "roof",
+    ),
+  );
+  const figure = (x: number, z: number, part: string, name: string) =>
+    g.add(
+      mesh(
+        new THREE.CapsuleGeometry(0.012, 0.025, 3, 6).translate(
+          x,
+          top + 0.025,
+          z,
+        ),
+        part,
+        name,
+      ),
+    );
+  for (let i = 0; i < 7; i++)
+    figure(-0.12 + i * 0.04, -0.04, "float", `elder-${i}`);
+  for (let r = 0; r < 2; r++)
+    for (let i = 0; i < 4; i++)
+      figure(0.22 + i * 0.035, -0.12 + r * 0.06, "metal", `row-${r}-${i}`);
+  for (let i = 0; i < 6; i++)
+    figure(
+      -0.3 + (i % 3) * 0.04,
+      0.06 + Math.floor(i / 3) * 0.05,
+      "fur",
+      `crowd-${i}`,
+    );
+  for (let i = 0; i < 3; i++)
+    g.add(
+      mesh(
+        new THREE.CylinderGeometry(0.018, 0.018, 0.05, 8)
+          .rotateZ(Math.PI / 2)
+          .translate(-0.3 + i * 0.05, top + 0.018, 0.17),
+        "fiber",
+        `bale-${i}`,
+      ),
+    );
+  // Glass box last (transparent, drawn over the inside).
+  const glass = mesh(
+    new THREE.BoxGeometry(W - 0.02, 0.34, D - 0.02).translate(0, top + 0.17, 0),
+    "glass",
+    "glass",
+  );
+  const mat = glass.material as THREE.MeshStandardMaterial;
+  mat.transparent = true;
+  mat.opacity = 0.22;
+  mat.depthWrite = false;
+  mat.roughness = 0.1;
+  glass.castShadow = false;
+  g.add(glass);
+  g.add(
+    mesh(
+      new THREE.BoxGeometry(W, 0.02, D).translate(0, top + 0.35, 0),
+      "wood",
+      "lid",
+    ),
+  );
+  return g;
+}
+
 export const areaObjects: Record<AreaObjectId, () => THREE.Group> = {
   herring,
   coal,
@@ -596,4 +704,5 @@ export const areaObjects: Record<AreaObjectId, () => THREE.Group> = {
   "vine-rings": vineRings,
   canoe,
   "lacquer-vessel": lacquerVessel,
+  "omusha-case": omushaCase,
 };
