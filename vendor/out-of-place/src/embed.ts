@@ -119,6 +119,7 @@ export function mountOutOfPlace(
     // Dev only (stripped from builds): lets tests step the game clock by hand.
     if (import.meta.env?.DEV)
       (parent as HTMLElement & { __phaserGame?: unknown }).__phaserGame = game;
+    turnable(game, parent as HTMLElement);
     game.scene.add("Game", GameScene, false);
     game.scene.add("Select", SelectScene, false);
     // Two or more scenes: open on the scene select. One scene: straight in.
@@ -139,4 +140,59 @@ export function mountOutOfPlace(
       else parent.setAttribute("aria-label", hadLabel);
     },
   };
+}
+
+/**
+ * A host may turn the stage a quarter turn clockwise (an ancestor with
+ * data-rotate="90", e.g. a phone held upright). Phaser measures the screen
+ * box, so size the game from the element's own layout size and map pointer
+ * positions back into the turned canvas.
+ */
+function turnable(game: Phaser.Game, parent: HTMLElement) {
+  const turned = () => !!parent.closest('[data-rotate="90"]');
+  const scale = game.scale as unknown as {
+    getParentBounds(): boolean;
+    updateCenter(): void;
+    parentSize: Phaser.Structs.Size;
+  };
+  const center = scale.updateCenter.bind(scale);
+  scale.updateCenter = () => {
+    center();
+    if (!turned()) return;
+    // Phaser centres with the screen box (turned); use the layout box.
+    const c = game.canvas;
+    c.style.marginLeft = `${Math.floor((parent.clientWidth - c.offsetWidth) / 2)}px`;
+    c.style.marginTop = `${Math.floor((parent.clientHeight - c.offsetHeight) / 2)}px`;
+  };
+  const bounds = scale.getParentBounds.bind(scale);
+  scale.getParentBounds = () => {
+    if (!turned()) return bounds();
+    const w = parent.clientWidth;
+    const h = parent.clientHeight;
+    if (scale.parentSize.width === w && scale.parentSize.height === h)
+      return false;
+    scale.parentSize.setSize(w, h);
+    return true;
+  };
+  const input = game.input as unknown as {
+    transformPointer(
+      p: Phaser.Input.Pointer,
+      x: number,
+      y: number,
+      move: boolean,
+    ): void;
+  };
+  const plain = input.transformPointer.bind(input);
+  input.transformPointer = (pointer, pageX, pageY, wasMove) => {
+    if (!turned()) return plain(pointer, pageX, pageY, wasMove);
+    const r = game.canvas.getBoundingClientRect();
+    const cx = pageX - window.scrollX;
+    const cy = pageY - window.scrollY;
+    pointer.prevPosition.x = pointer.position.x;
+    pointer.prevPosition.y = pointer.position.y;
+    // Clockwise turn: screen down is the canvas's x, screen left its y.
+    pointer.position.x = ((cy - r.top) / r.height) * game.scale.width;
+    pointer.position.y = ((r.right - cx) / r.width) * game.scale.height;
+  };
+  game.scale.refresh();
 }

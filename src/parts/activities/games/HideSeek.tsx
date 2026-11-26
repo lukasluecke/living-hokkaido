@@ -50,6 +50,7 @@ export function HideSeekActivity({
       emit={report}
       mount={mount}
       fit="wide"
+      landscape
       preload={() =>
         Promise.all([
           import("@vendor/out-of-place/src/embed"),
