@@ -15,6 +15,12 @@ import {
   validKey,
 } from "@/integrations/museum-assets";
 import {
+  type MediaBucket,
+  parseRange,
+  PUBLIC_MEDIA,
+  serveMedia,
+} from "@/integrations/museum-assets/edge";
+import {
   goalClaims,
   initialLook,
   isComplete,
@@ -97,4 +103,73 @@ test("museum asset gate: keys, password cookie, shut without a password", async 
   assert.equal(await access(req(`${COOKIE}=${t}`), "other"), "locked");
   // A key marked public needs neither a password nor a cookie.
   assert.equal(await access(req(), undefined, true), "open");
+});
+
+test("public media list covers every non-gated capture", () => {
+  for (const a of barkToClothPack.activities)
+    if (a.kind === "splat-look" && !a.asset.gated)
+      assert.ok(PUBLIC_MEDIA.has(a.asset.key), a.asset.key);
+});
+
+test("edge media: ranges, HEAD, 404 and fall-through", async () => {
+  assert.deepEqual(parseRange("bytes=0-99"), { offset: 0, length: 100 });
+  assert.deepEqual(parseRange("bytes=100-"), { offset: 100 });
+  assert.deepEqual(parseRange("bytes=-10"), { suffix: 10 });
+  assert.equal(parseRange("bytes=5-1"), null);
+  assert.equal(parseRange("items=0-1"), null);
+  const data = new Uint8Array(1000).map((_, i) => i % 256);
+  const bucket: MediaBucket = {
+    async head(key) {
+      return key === "omusha.sog"
+        ? { size: data.length, httpEtag: '"e"' }
+        : null;
+    },
+    async get(key, opt) {
+      if (key !== "omusha.sog") return null;
+      const r = opt?.range;
+      const start = !r ? 0 : "suffix" in r ? data.length - r.suffix : r.offset;
+      const end =
+        !r || "suffix" in r || r.length === undefined
+          ? data.length
+          : start + r.length;
+      return {
+        body: new Blob([data.slice(start, end)]).stream(),
+        size: data.length,
+        httpEtag: '"e"',
+      };
+    },
+  };
+  const url = "https://x/api/museum-assets/omusha.sog";
+  const full = await serveMedia(new Request(url), bucket);
+  assert.equal(full?.status, 200);
+  assert.equal(full?.headers.get("content-length"), "1000");
+  assert.equal((await full?.arrayBuffer())?.byteLength, 1000);
+  const part = await serveMedia(
+    new Request(url, { headers: { range: "bytes=10-19" } }),
+    bucket,
+  );
+  assert.equal(part?.status, 206);
+  assert.equal(part?.headers.get("content-range"), "bytes 10-19/1000");
+  assert.deepEqual(
+    [...new Uint8Array((await part?.arrayBuffer()) ?? new ArrayBuffer(0))],
+    [10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+  );
+  const head = await serveMedia(new Request(url, { method: "HEAD" }), bucket);
+  assert.equal(head?.status, 200);
+  assert.equal(head?.headers.get("content-length"), "1000");
+  const video = await serveMedia(
+    new Request("https://x/api/museum-assets/intro.mp4"),
+    bucket,
+  );
+  assert.equal(video?.status, 404);
+  // Not public media, or no bucket: OpenNext answers.
+  assert.equal(
+    await serveMedia(
+      new Request("https://x/api/museum-assets/secret.sog"),
+      bucket,
+    ),
+    null,
+  );
+  assert.equal(await serveMedia(new Request("https://x/shell"), bucket), null);
+  assert.equal(await serveMedia(new Request(url), undefined), null);
 });

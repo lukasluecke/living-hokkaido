@@ -10,13 +10,10 @@
 // living-hokkaido-museum/<key>`); the viewer then shows its list fallback.
 
 export const COOKIE = "lh_museum";
-const KEY_RE = /^[a-z0-9-]+\.(sog|spz)$/;
+const KEY_RE = /^[a-z0-9-]+\.(sog|spz|mp4|webm)$/;
 
-/** Only plain file names of splat formats. No paths, no other types. */
+/** Only plain file names of splat or video formats. No paths. */
 export const validKey = (key: string) => KEY_RE.test(key);
-
-/** Splat files are binary; Spark reads the format from the file name. */
-export const CONTENT_TYPE = "application/octet-stream";
 
 /** Cookie value for a password: SHA-256 hex of a fixed prefix + password. */
 export async function tokenFor(password: string): Promise<string> {
