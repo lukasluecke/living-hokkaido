@@ -31,3 +31,31 @@ scaled to the sketch's size (metres, origin on the base), then
 
 Rejected first tries (not shipped): deer 2d83d342… (two heads), tonkori
 1d31bd50… (lute-like bowl body), canoe 54d05ac8… (plank rowboat with seats).
+
+# Generated clips (PixVerse)
+
+Stored in the R2 bucket `living-hokkaido-museum` (not in Git) and streamed by
+`/api/media/<key>` only after the visitor taps "Watch". Made on 2026-11-26 with
+PixVerse V6, text-to-video, 5 s, 720p, from text prompts only (no museum photos,
+no renders as input). No people on purpose. They are AI-imagined, not historical
+footage; each card says so and says that a finished product would send the clip
+through curator approval. Web version: `ffmpeg` H.264, 960 px wide, no audio
+track for eras, ambient audio kept for places.
+
+Every prompt ends with: "Cinematic film look, natural colours, soft light, slow
+steady camera. No people, no animals unless named, no text, no logos." Era
+prompts start with: "Slow aerial drift towards a river mouth where a river
+meets a cold sea, forested hills behind, Hokkaido."
+
+| Key | Shown for | PixVerse video id | Prompt |
+|---|---|---|---|
+| era-1-pit.mp4 | era "pit-dwellings" | 437314918395453 | A small settlement of square pit dwellings near the river mouth, thatched roofs that slope down to the ground, thin smoke from the roofs, small fields of millet and barley. |
+| era-4-meiji.mp4 | era "today" (asked for Meiji, came out present-day) | 437313765093302 | The forest is cleared into straight farm fields, a new dirt road runs along the river, wooden houses with board walls and glass windows. |
+| place-coast.mp4 | scene "herring-coast" | 437313766289650 | Wide shot of a cold northern sea coast in early spring, grey-green waves rolling onto a pebble beach, wooden fishing boats pulled up on the shore, fishing nets drying on wooden racks, gulls overhead, slow dolly along the shore. Sound of waves and gulls. |
+| place-forest.mp4 | scene "survey-forest" | 437313767445343 | A dense Hokkaido forest of spruce and birch in winter, snow falling between the trunks, a straight line of wooden survey stakes running into the woods, slow forward dolly. Sound of wind and soft snowfall. |
+| place-hills.mp4 | scene "animal-hills" | 437314919223177 | Rolling grassy hills at dawn with low mist, a few sika deer grazing at the forest edge, slow pan. Sound of birds and wind in the grass. |
+| place-mine.mp4 | scene "coal-mountain" | 437313768639710 | A coal mining town in snowy mountains in the mid 20th century, a tall wooden mine headframe, heaps of coal, smoke from chimneys, slow aerial drift. Sound of distant wind and machinery. |
+
+Known flaws: place-hills shows deer that look European and a wire fence;
+place-mine has letterbox bars. Not shipped: era-2-flat 437313758878851 (modern
+shed, utility pole), era-3-cise 437313764144673 (stilt houses, modern houses).

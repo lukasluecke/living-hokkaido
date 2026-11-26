@@ -8,6 +8,7 @@ import { MathUtils } from "three";
 import { eraAt, SCALE, type TimelinePartProps } from "@/contracts";
 import { useT } from "@/i18n";
 import { PresentationBadge, RepresentationBadge } from "../shared/Badges";
+import { ClipPlayer } from "../shared/Clip";
 import { QualityGovernor, useQuality } from "../shared/QualityGovernor";
 import { Diorama } from "./Diorama";
 import c from "./OverTime.module.css";
@@ -156,6 +157,14 @@ export function TimelinePart(props: TimelinePartProps) {
           {era.title}
         </h2>
         <p className={c.summary}>{era.summary}</p>
+        {era.clip && (
+          <ClipPlayer
+            key={era.id}
+            clip={era.clip}
+            reducedMotion={prefs.reducedMotion}
+            hideLabels={prefs.hideModelLabels}
+          />
+        )}
         <button
           type="button"
           className={c.link}

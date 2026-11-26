@@ -10,6 +10,7 @@ export * from "./guide";
 export * from "./ids";
 export * from "./journal";
 export * from "./knowledge";
+export * from "./media";
 export * from "./memory";
 export * from "./parts";
 export * from "./scene";
