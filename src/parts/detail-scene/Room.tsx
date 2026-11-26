@@ -18,7 +18,7 @@ import {
   type DetailScenePartProps,
   SCALE,
 } from "@/contracts";
-import { useQuality } from "../shared/Quality";
+import { useQuality } from "../shared/QualityGovernor";
 import { createToonUniforms, toonifyTree } from "../shared/toon";
 import { AreaStatic, isAreaSetting } from "./room/AreaSets";
 import { ArtifactShell, RoomObject } from "./room/Artifacts";

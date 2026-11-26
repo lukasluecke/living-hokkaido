@@ -9,7 +9,7 @@ import { Suspense, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { type Artifact, type Emit, factHotspots, SCALE } from "@/contracts";
 import { toonify, useGlbClone } from "../shared/Glb";
-import { QualityGovernor, useQuality } from "../shared/Quality";
+import { QualityGovernor, useQuality } from "../shared/QualityGovernor";
 import { applyLook } from "./model/looks";
 import { builders, type ObjectId } from "./model/models";
 import { useT } from "@/i18n";
