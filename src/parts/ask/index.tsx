@@ -92,6 +92,7 @@ export function AskPart({
     artifactId: string;
   } | null>(null);
   const input = useRef<HTMLInputElement>(null);
+  const mic = useVoiceQuestion((q) => ask(q));
   const trigger = useRef<HTMLButtonElement>(null);
   const log = useRef<HTMLDivElement>(null);
   const nextId = useRef(1);
@@ -273,13 +274,56 @@ export function AskPart({
       >
         <input
           ref={input}
-          value={text}
+          value={mic.state === "recording" ? "" : text}
           onChange={(e) => setText(e.target.value)}
           maxLength={ASK_MAX_QUESTION}
-          placeholder="Ask a question about what you see…"
+          placeholder={
+            mic.state === "recording"
+              ? "Listening… press stop"
+              : mic.state === "sending"
+                ? "Writing down your question…"
+                : "Ask a question about what you see…"
+          }
           aria-label="Your question"
           enterKeyHint="send"
         />
+        {mic.available && (
+          <button
+            type="button"
+            className={s.mic}
+            data-on={mic.state === "recording" || undefined}
+            aria-pressed={mic.state === "recording"}
+            aria-label={
+              mic.state === "recording"
+                ? "Stop and send your spoken question"
+                : "Ask by voice"
+            }
+            title={mic.state === "recording" ? "Stop and send" : "Ask by voice"}
+            disabled={busy || mic.state === "sending"}
+            onClick={mic.toggle}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" className={s.icon}>
+              {mic.state === "recording" ? (
+                <rect
+                  x="7"
+                  y="7"
+                  width="10"
+                  height="10"
+                  rx="2"
+                  fill="currentColor"
+                />
+              ) : (
+                <path
+                  d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Zm-6 9a6 6 0 0 0 12 0M12 18v3"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                />
+              )}
+            </svg>
+          </button>
+        )}
         <button type="submit" disabled={busy || text.trim().length < 2}>
           Ask
         </button>
@@ -338,4 +382,85 @@ function Answer({
       </p>
     </div>
   );
+}
+
+type MicState = "idle" | "recording" | "sending";
+
+/**
+ * Spoken questions: record with MediaRecorder, send to /api/ask/listen
+ * (ElevenLabs speech to text, server key), then ask the transcript. The mic
+ * shows only when the server has a key and the browser can record.
+ */
+function useVoiceQuestion(onText: (text: string) => void) {
+  const [available, setAvailable] = useState(false);
+  const [state, setState] = useState<MicState>("idle");
+  const rec = useRef<MediaRecorder | null>(null);
+  const onTextRef = useRef(onText);
+  onTextRef.current = onText;
+
+  useEffect(() => {
+    if (
+      typeof MediaRecorder === "undefined" ||
+      !navigator.mediaDevices?.getUserMedia
+    )
+      return;
+    let live = true;
+    fetch("/api/ask/listen", { signal: AbortSignal.timeout(5000) })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => live && setAvailable(j?.available === true))
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, []);
+
+  useEffect(() => () => rec.current?.stop(), []);
+
+  const send = async (blob: Blob) => {
+    setState("sending");
+    try {
+      const form = new FormData();
+      form.set("audio", blob, "question.webm");
+      form.set("lang", document.documentElement.lang === "ja" ? "ja" : "en");
+      const res = await fetch("/api/ask/listen", {
+        method: "POST",
+        body: form,
+        signal: AbortSignal.timeout(30_000),
+      });
+      const j = res.ok ? await res.json() : null;
+      const text =
+        j?.mode === "live" && typeof j.value?.text === "string"
+          ? j.value.text.trim()
+          : "";
+      if (text) onTextRef.current(text);
+    } catch {}
+    setState("idle");
+  };
+
+  const toggle = async () => {
+    if (state === "recording") return rec.current?.stop();
+    if (state !== "idle") return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const r = new MediaRecorder(stream);
+      const chunks: Blob[] = [];
+      r.ondataavailable = (e) => e.data.size && chunks.push(e.data);
+      r.onstop = () => {
+        for (const t of stream.getTracks()) t.stop();
+        rec.current = null;
+        const blob = new Blob(chunks, { type: r.mimeType || "audio/webm" });
+        if (blob.size) void send(blob);
+        else setState("idle");
+      };
+      rec.current = r;
+      r.start();
+      setState("recording");
+      // A question is short: stop by itself after 30 s.
+      setTimeout(() => r.state === "recording" && r.stop(), 30_000);
+    } catch {
+      setState("idle");
+    }
+  };
+
+  return { available, state, toggle };
 }

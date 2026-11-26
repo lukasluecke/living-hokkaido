@@ -267,3 +267,13 @@
     animation: none;
   }
 }
+
+.form button.mic {
+  display: inline-grid;
+  place-items: center;
+  padding-inline: 0.6rem;
+}
+
+.form button.mic[data-on] {
+  background: #b3261e;
+}

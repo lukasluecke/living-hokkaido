@@ -79,3 +79,13 @@ uses the scripted answer. The key is never in the client bundle.
 - The AI summary can still word things badly. The cited claims under it are
   the source of truth, and the whole pack is a research preview.
 - No chat history; each question stands alone.
+
+## Voice questions (2026-11-26)
+
+A mic button next to the text box records a spoken question (MediaRecorder,
+max 30 s) and sends it to `POST /api/ask/listen`, which calls ElevenLabs
+speech to text (Scribe) with the server secret `ELEVENLABS_API_KEY`. The
+transcript is asked like a typed question. `GET /api/ask/listen` says whether
+the key is set; without it, or without recording support, the mic is hidden.
+The recording is not stored. Set the key: `npx wrangler secret put
+ELEVENLABS_API_KEY` (the key needs the "Speech to Text" permission).
