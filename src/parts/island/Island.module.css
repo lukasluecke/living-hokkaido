@@ -497,10 +497,9 @@
   }
 }
 
-/* First look on a phone: only the owl's step; labels come with "Explore
-   freely" (the places in the 3D view still glow and can be tapped). */
-@media (max-width: 700px) {
-  .pins[data-calm] {
-    display: none;
-  }
+/* First look (phone and desktop, Lukas): only the owl's step; labels come
+   with "Explore freely" (the places in the 3D view still glow and take a
+   tap or click). */
+.pins[data-calm] {
+  display: none;
 }

@@ -73,6 +73,8 @@ export const jaUi: Record<string, string> = {
   "Start: {title}": "始める: {title}",
   "All activities": "すべてのアクティビティ",
   "Explore freely": "自由に見てまわる",
+  "Ask me a question": "わたしに質問する",
+  "Back to the tour": "ツアーにもどる",
   "Approved by {reviewer} on": "確認者: {reviewer}、確認日:",
   Audio: "音声",
   Back: "もどる",

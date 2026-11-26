@@ -29,8 +29,8 @@ export type IslandPartProps = PartContext & {
   locationId: string | null;
   /** Highlights already done (journal), for the tick on each. Optional. */
   doneHighlightIds?: string[];
-  /** First look (progressive disclosure): hide the place tray and, on
-   *  phones, the place labels, so the owl's first step stands alone. The
+  /** First look (progressive disclosure): hide the place tray and the
+   *  place labels, so the owl's first step stands alone. The
    *  shell sets it until the visitor goes somewhere or picks "Explore
    *  freely". Optional, default false. */
   calm?: boolean;
@@ -103,6 +103,15 @@ export type AskPartProps = PartContext & {
   artifactId: string | null;
   /** True while an overlay (journal, reveal, timeline) covers the stage. */
   covered: boolean;
+  /** One owl (Lukas, 2026-11-26): the shell opens the box from the owl's
+   *  tour bubble. Each change of this number opens it. Optional. */
+  openSignal?: number;
+  /** Leave out the own "Ask the owl" button (the owl bubble has the link).
+   *  Optional, default false. */
+  hideTrigger?: boolean;
+  /** When set, the box ends with this link; it closes the box so the owl's
+   *  tour step is there again (for example "Back to the tour"). Optional. */
+  backLabel?: string;
 };
 
 export type PartPropsMap = {

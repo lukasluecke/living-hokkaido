@@ -117,6 +117,8 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
   // Progressive disclosure (Lukas): "Explore freely" shows the full island
   // UI (tray, labels, route, Ask) before the first trip.
   const [explore, setExplore] = useState(false);
+  // One owl: the tour bubble's "Ask me a question" opens Ask the owl.
+  const [askSignal, setAskSignal] = useState(0);
 
   useEffect(() => {
     setState((st) => ({ ...st, prefs: detectPrefs() }));
@@ -479,6 +481,15 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
                   {t("Explore freely")}
                 </button>
               )}
+              {!calm && (
+                <button
+                  type="button"
+                  className={s.explore}
+                  onClick={() => setAskSignal((n) => n + 1)}
+                >
+                  {t("Ask me a question")}
+                </button>
+              )}
             </div>
           </section>
         )}
@@ -493,6 +504,10 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
             sceneId={state.sceneId}
             artifactId={state.artifactId}
             covered={state.overlay !== null}
+            openSignal={askSignal}
+            // One owl: while the bubble shows, its link opens the box.
+            hideTrigger={owlShown}
+            backLabel={next ? t("Back to the tour") : undefined}
           />
         )}
         {toast && (

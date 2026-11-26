@@ -82,8 +82,15 @@ export function AskPart({
   sceneId,
   artifactId,
   covered,
+  openSignal,
+  hideTrigger = false,
+  backLabel,
 }: AskPartProps) {
   const [open, setOpen] = useState(false);
+  // The owl bubble's "Ask me a question" link opens the box.
+  useEffect(() => {
+    if (openSignal) setOpen(true);
+  }, [openSignal]);
   const [text, setText] = useState("");
   const [turns, setTurns] = useState<Turn[]>([]);
   const [busy, setBusy] = useState(false);
@@ -176,7 +183,7 @@ export function AskPart({
   const sheet = view === "focus" || view === "activity";
 
   if (!open)
-    return (
+    return hideTrigger ? null : (
       <button
         ref={trigger}
         type="button"
@@ -253,6 +260,11 @@ export function AskPart({
             )}
           </article>
         ))}
+        {backLabel && turns.some((t) => t.answer) && (
+          <button type="button" className={s.back} onClick={close}>
+            {backLabel}
+          </button>
+        )}
       </div>
       {suggestions.length > 0 && !busy && (
         <ul className={s.chips} aria-label="Example questions">
