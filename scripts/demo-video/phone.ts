@@ -183,13 +183,39 @@ export const phoneShots: Shot[] = [
         optional: true,
         timeoutMs: 8000,
       }),
-      hold(6000),
-      drag([120, 0], { ms: 2500, optional: true }),
+      hold(1000),
+      // Turn the splat only after it has loaded (Lukas, 26 Nov).
+      waitFor(
+        { text: /Loading the capture/ },
+        { state: "hidden", optional: true, timeoutMs: 60000 },
+      ),
+      hold(2000),
+      drag([200, 0], {
+        target: { css: "canvas:visible >> nth=-1" },
+        ms: 3500,
+        optional: true,
+      }),
+      hold(800),
+      drag([-120, 40], {
+        target: { css: "canvas:visible >> nth=-1" },
+        ms: 2500,
+        optional: true,
+      }),
       hold(1500),
       click(button(/^Sakhalin Ainu elder/, false), { optional: true }),
       hold(3500),
       click(button("Close"), { optional: true, timeoutMs: 3000 }),
       hold(1500),
+    ],
+  },
+  {
+    id: "skipomusha",
+    title: "Skip the Omusha step (when it is recorded as its own take)",
+    enabled: false,
+    steps: [
+      mark("Skip Omusha"),
+      click(button("Skip this step"), { synthetic: true }),
+      hold(600),
     ],
   },
   {
