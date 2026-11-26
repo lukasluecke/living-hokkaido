@@ -283,3 +283,14 @@ export const phoneOmushaPreroll: Step[] = [
   ]),
   waitFor(button(`Highlight: ${omusha.title}`), { timeoutMs: 10000 }),
 ];
+
+/** Warm-up that skips the first `n` tour steps (`--phone-skip <n>`), so a
+ *  later shot can be its own take: 3 = Omusha, 4 = slope. */
+export const phoneSkipPreroll = (n: number): Step[] => [
+  goto("/"),
+  waitFor(button(`Highlight: ${film.title}`), { timeoutMs: 60000 }),
+  ...Array.from({ length: n }, () => [
+    click(button("Skip this step"), { synthetic: true }),
+    hold(800),
+  ]).flat(),
+];

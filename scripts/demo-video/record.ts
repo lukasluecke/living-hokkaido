@@ -20,7 +20,12 @@ import {
 } from "playwright";
 import type { Shot, Step, Target } from "./dsl";
 import { installOverlay } from "./overlay";
-import { phoneOmushaPreroll, phonePreroll, phoneShots } from "./phone";
+import {
+  phoneOmushaPreroll,
+  phonePreroll,
+  phoneShots,
+  phoneSkipPreroll,
+} from "./phone";
 import { preroll as deskPreroll, shots as deskShots } from "./steps";
 import { installVirtualClock } from "./vclock";
 
@@ -61,6 +66,8 @@ Output: recordings/demo-<time>.mp4 (needs ffmpeg; else .webm) + markers.
                       viewport: touch, mobile mode, 2x pixel ratio
   --phone-omusha      With --phone --shots omusha: skip the tour to the
                       Omusha step first (a separate take on a real GPU)
+  --phone-skip <n>    With --phone: skip the first n tour steps before the
+                      take (4 = slope), to record a later part on its own
   --media-dir <dir>   Serve /api/museum-assets/<key> from this folder
                       (owl-story.mp4, omusha-mobile.sog; not in Git)
   --out <dir>         Output folder (default recordings)
@@ -75,6 +82,7 @@ const { values: opt } = parseArgs({
     size: { type: "string" },
     phone: { type: "boolean", default: false },
     "phone-omusha": { type: "boolean", default: false },
+    "phone-skip": { type: "string" },
     "media-dir": { type: "string" },
     headed: { type: "boolean", default: false },
     browser: { type: "string", default: "chromium" },
@@ -99,11 +107,13 @@ const { values: opt } = parseArgs({
 });
 
 const shots = opt.phone ? phoneShots : deskShots;
-const preroll = opt["phone-omusha"]
-  ? phoneOmushaPreroll
-  : opt.phone
-    ? phonePreroll
-    : deskPreroll;
+const preroll = opt["phone-skip"]
+  ? phoneSkipPreroll(Number(opt["phone-skip"]))
+  : opt["phone-omusha"]
+    ? phoneOmushaPreroll
+    : opt.phone
+      ? phonePreroll
+      : deskPreroll;
 
 const csv = (s?: string) =>
   s
