@@ -232,8 +232,8 @@ function woodenShop(ctx: Ctx, x0: number, x1: number) {
     left: "bark",
     right: "barkDark",
   });
-  // Upper lattice window.
-  poly(ctx, face(x0 + 18, x1 - 18, y1, 100, 136), "woodLight", 2);
+  // Upper lattice window over warm light (as the slope game's machiya).
+  poly(ctx, face(x0 + 18, x1 - 18, y1, 100, 136), "windowLit", 2);
   for (let x = x0 + 24; x < x1 - 18; x += 7)
     line(ctx, P(x, y1, 100), P(x, y1, 136), "bark", 1.5);
   // Small pent roof over the shop front.
@@ -247,6 +247,13 @@ function woodenShop(ctx: Ctx, x0: number, x1: number) {
     ],
     "tileLight",
   );
+  line(ctx, P(x0 - 4, y1 + 1, 90), P(x1 + 4, y1 + 1, 90), "snow", 4);
+  for (let x = x0; x <= x1; x += 10) {
+    const len = 4 + ((x * 5) % 7);
+    line(ctx, P(x, y1 + 18, 79), P(x, y1 + 18, 79 - len), "icicle", 2);
+  }
+  // Lit shop floor behind the curtain.
+  poly(ctx, face(x0 + 12, x1 - 12, y1 + 1, 6, 80), "windowLit", 2);
   // Noren: indigo curtain panels with a pale circle crest.
   const panels = 4;
   const pw = (x1 - x0 - 30) / panels;
@@ -274,6 +281,12 @@ function woodenShop(ctx: Ctx, x0: number, x1: number) {
     line(ctx, P(x0 - 4, y, z), P(x1 + 4, y, z), "tile", 2);
   }
   line(ctx, P(x0 - 8, 50, h + 27), P(x1 + 8, 50, h + 27), "outline", 5);
+  // Snow on the roof edge, icicles under it.
+  line(ctx, P(x0 - 6, y1 + 8, h - 2), P(x1 + 6, y1 + 8, h - 2), "snow", 5);
+  for (let x = x0 - 2; x <= x1; x += 12) {
+    const len = 6 + ((x * 7) % 9);
+    line(ctx, P(x, y1 + 10, h - 5), P(x, y1 + 10, h - 5 - len), "icicle", 2.5);
+  }
 }
 
 /** Wooden shop sign standing on the pavement, with plain generic words. */
