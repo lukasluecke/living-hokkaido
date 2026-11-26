@@ -15,7 +15,7 @@ import { type Color, MathUtils, Vector3 } from "three";
 import { season as seasonTokens } from "@/design/tokens";
 import { mix4, U } from "./world/season";
 import type { CameraView, IslandPartProps, Location } from "@/contracts";
-import { Sea, SeasonDriver } from "./world/Environment";
+import { Sea, SeasonDriver, Weather } from "./world/Environment";
 import { buildField, type Field } from "./world/field";
 import { AREAS, RIVER } from "./world/island";
 import { Areas } from "./world/Areas";
@@ -104,6 +104,9 @@ export function World(props: WorldProps) {
       />
       <Terrain field={field} />
       <Sea field={field} />
+      {/* Light winter snowfall now and then; off with reduced motion and on
+          the lower quality tiers (no extra effects there). */}
+      {!prefs.reducedMotion && extraFx && <Weather count={700} />}
       <Lake />
       <River field={field} />
       <Trees field={field} count={2600} clearings={clearings} scale={2} />

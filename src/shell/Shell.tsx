@@ -44,7 +44,7 @@ import {
 import { route } from "./route";
 import s from "./Shell.module.css";
 import { SidePanel } from "./SidePanel";
-import { initialState, reduce, WINTER } from "./state";
+import { initialState, reduce } from "./state";
 
 function detectPrefs() {
   if (typeof window === "undefined")
@@ -124,54 +124,6 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
       if (j) setJournal(j);
     } catch {}
   }, [pack]);
-
-  // Intro: a short timelapse through the year that lands on winter. It
-  // changes only the shell's season value (no season.set event), so it
-  // earns no stamp and plays no cue. A click, tap or key skips to winter;
-  // reduced motion starts in winter at once.
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const setValue = (value: number) =>
-      setState((st) => ({ ...st, season: { ...st.season, value } }));
-    const DELAY = 700;
-    const LENGTH = 3600;
-    const t0 = performance.now();
-    let raf = 0;
-    let last = 0;
-    let done = false;
-    const end = (value: number | null) => {
-      if (done) return;
-      done = true;
-      cancelAnimationFrame(raf);
-      window.removeEventListener("pointerdown", skip, true);
-      window.removeEventListener("keydown", skip, true);
-      window.removeEventListener("lh:event", onEvent);
-      if (value !== null) setValue(value);
-    };
-    const skip = () => end(WINTER);
-    // A season the visitor (or a script) picks wins over the intro.
-    const onEvent = (e: Event) => {
-      const type = (e as CustomEvent<{ type?: string }>).detail?.type;
-      if (type === "season.set" || type === "season.play") end(null);
-    };
-    const tick = (now: number) => {
-      const k = Math.min(1, Math.max(0, (now - t0 - DELAY) / LENGTH));
-      if (k >= 1) return skip();
-      // 10 updates a second, like the Play clock (each one re-renders the
-      // scene's seasonal look), eased in and out so each season holds.
-      if (now - last > 100) {
-        last = now;
-        setValue(WINTER * (k * k * (3 - 2 * k)));
-      }
-      raf = requestAnimationFrame(tick);
-    };
-    setValue(0);
-    raf = requestAnimationFrame(tick);
-    window.addEventListener("pointerdown", skip, true);
-    window.addEventListener("keydown", skip, true);
-    window.addEventListener("lh:event", onEvent);
-    return skip;
-  }, []);
 
   // Lazy parts (registry.ts): fetch them once the island had time to draw.
   useEffect(() => {

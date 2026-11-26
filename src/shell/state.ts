@@ -20,8 +20,8 @@ export function initialState(prefs: Prefs): ExperienceState {
     artifactId: null,
     activityId: null,
     reveal: null,
-    // Start in winter: Hokkaido is known as a snowy island (Lukas). The
-    // shell plays a short intro timelapse up to it (Shell.tsx).
+    // Start in winter: Hokkaido is known as a snowy island (Lukas). No
+    // intro timelapse (Lukas, later); the island shows light snowfall.
     season: { ...DEFAULT_SEASON, value: WINTER, playing: false },
     prefs,
   };
