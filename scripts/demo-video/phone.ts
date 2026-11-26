@@ -111,10 +111,6 @@ export const phoneShots: Shot[] = [
       click(button("Close activity"), { optional: true }),
       hold(1200),
       click(button("Inner bark fibers"), { timeoutMs: 8000 }),
-      waitFor(
-        { role: "article", name: /Inner bark fibers/ },
-        { optional: true },
-      ),
       hold(2500),
       drag([150, 0], { ms: 2000, optional: true }),
       hold(1000),
