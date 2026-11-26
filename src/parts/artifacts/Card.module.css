@@ -329,3 +329,46 @@
 .card .primary:focus-visible {
   outline-color: var(--fl-ink);
 }
+
+/* Generated model or sketch (only on objects with a generated model). */
+.modelToggle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  margin: 0.4rem 0 0;
+}
+.toggleGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.toggleGroup legend {
+  float: left;
+  margin-right: 0.4rem;
+}
+.modelOption {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.7;
+}
+.modelOption[aria-pressed="true"] {
+  opacity: 1;
+  background: var(--ink, #2a1d17);
+  color: var(--paper, #f3e6c9);
+  border-color: var(--ink, #2a1d17);
+}
+.modelOption:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}

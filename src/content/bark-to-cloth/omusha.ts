@@ -9,7 +9,9 @@
 // look closer, no game, no score.
 //
 // The splat file itself is museum material. It is not in Git; the app loads
-// it from a private bucket behind a demo password (Lukas, 2026-11-25).
+// it from the R2 bucket. Public without a password (Lukas, 2026-11-26:
+// "skip the demo password"); written museum permission is still open
+// (docs/REVIEW.md). Set `gated: true` to put it behind the password again.
 import type { ActivityInput, KnowledgeEntry, Source, Vec3 } from "@/contracts";
 import ainuChild from "@vendor/sapporo-omusha/characters/1808/ainu-child.json";
 import ainuElder from "@vendor/sapporo-omusha/characters/1808/ainu-elder.json";
@@ -217,7 +219,7 @@ export const omushaLook: ActivityInput = {
   asset: {
     key: "omusha.sog",
     label: "Capture of a museum diorama",
-    gated: true,
+    gated: false,
     flip: true,
   },
   view: { eye: v3(hotspots.view.position), target: v3(hotspots.view.target) },

@@ -8,7 +8,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { Suspense, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { type Artifact, type Emit, factHotspots, SCALE } from "@/contracts";
-import { useGlbClone } from "../shared/Glb";
+import { toonify, useGlbClone } from "../shared/Glb";
 import { QualityGovernor, useQuality } from "../shared/QualityGovernor";
 import { applyLook } from "./model/looks";
 import { builders, type ObjectId } from "./model/models";
@@ -29,8 +29,12 @@ function frame(g: THREE.Object3D) {
   return wrap;
 }
 
+const toonFrame = (o: THREE.Object3D) => frame(toonify(o));
+
 type ModelProps = {
   artifact: Artifact;
+  /** The model to show (generated GLB or the sketch). */
+  source: Artifact["model"]["source"];
   yaw: React.RefObject<number>;
   hotspots: React.RefObject<HTMLDivElement | null>;
 };
@@ -46,16 +50,25 @@ function ProceduralModel(p: ModelProps & { builder: string }) {
 }
 
 function GlbModel(p: ModelProps & { url: string }) {
-  const obj = useGlbClone(p.url, frame);
+  const obj = useGlbClone(p.url, toonFrame);
   return <Model {...p} obj={obj} />;
+}
+
+/** The sketch builder, shown while a generated GLB loads. */
+function sketchBuilder(a: Artifact) {
+  return a.model.source.kind === "procedural" ? a.model.source.builder : "";
 }
 
 /** Code model now; a GLB replaces it by changing artifact.model.source only. */
 function ModelFromSource(p: ModelProps) {
-  const src = p.artifact.model.source;
+  const src = p.source;
   if (src.kind === "glb")
     return (
-      <Suspense fallback={null}>
+      <Suspense
+        fallback={
+          <ProceduralModel {...p} builder={sketchBuilder(p.artifact)} />
+        }
+      >
         <GlbModel {...p} url={src.url} />
       </Suspense>
     );
@@ -123,10 +136,12 @@ function Model({
 
 export function Viewer3D({
   artifact,
+  source,
   read,
   emit,
 }: {
   artifact: Artifact;
+  source: Artifact["model"]["source"];
   read: string[];
   emit: Emit;
 }) {
@@ -162,7 +177,13 @@ export function Viewer3D({
           intensity={0.6}
           color="#9fb8d8"
         />
-        <ModelFromSource artifact={artifact} yaw={yaw} hotspots={hotspots} />
+        <ModelFromSource
+          key={source.kind === "glb" ? source.url : "sketch"}
+          artifact={artifact}
+          source={source}
+          yaw={yaw}
+          hotspots={hotspots}
+        />
         <QualityGovernor />
         <ContactShadows
           position={[0, -0.95, 0]}
