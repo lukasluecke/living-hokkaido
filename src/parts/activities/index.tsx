@@ -65,6 +65,9 @@ export function ActivityPart({
 
   return (
     <section
+      // Number keys belong to the activity while it is open (tonkori
+      // strings, pose sheet): the scene skips its object shortcuts.
+      data-own-keys=""
       className={`${s.panel} ${prefs.reducedMotion ? s.still : ""}`}
       style={themeVars(seasonWeights(season.value))}
       aria-labelledby={`${activity.id}-title`}
