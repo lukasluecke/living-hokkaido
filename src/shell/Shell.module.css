@@ -83,6 +83,25 @@
   cursor: pointer;
   text-align: left;
 }
+.explore {
+  display: inline-flex;
+  margin: 10px 0 0 4px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  min-height: 40px;
+  padding: 8px 6px;
+  border: 0;
+  background: none;
+  color: var(--fl-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.explore:focus-visible {
+  outline: 3px solid var(--fl-ink);
+  outline-offset: 2px;
+}
 .next:hover {
   background: var(--fl-gold-deep, #dcae5c);
 }

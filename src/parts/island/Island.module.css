@@ -496,3 +496,10 @@
     flex: 0 0 auto;
   }
 }
+
+/* First look (phone and desktop, Lukas): only the owl's step; labels come
+   with "Explore freely" (the places in the 3D view still glow and take a
+   tap or click). */
+.pins[data-calm] {
+  display: none;
+}

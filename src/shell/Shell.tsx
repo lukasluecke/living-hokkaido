@@ -114,6 +114,11 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
   // The owl reads its line in a pre-generated AI voice (labelled in the
   // bubble) when sound is on and the bubble shows. Captions stay primary.
   const [guideVoiced, setGuideVoiced] = useState(false);
+  // Progressive disclosure (Lukas): "Explore freely" shows the full island
+  // UI (tray, labels, route, Ask) before the first trip.
+  const [explore, setExplore] = useState(false);
+  // One owl: the tour bubble's "Ask me a question" opens Ask the owl.
+  const [askSignal, setAskSignal] = useState(0);
 
   useEffect(() => {
     setState((st) => ({ ...st, prefs: detectPrefs() }));
@@ -371,6 +376,10 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
       live = false;
     };
   }, [owlVoiceId, owlShown, sound.muted]);
+  // First look: the owl's line and one step only, until the visitor goes
+  // somewhere (any visit) or picks "Explore freely".
+  const calm =
+    state.view === "island" && journal.visited.length === 0 && !explore;
   const ink = seasonInk[SEASON_IDS.indexOf(seasonAt(state.season.value))];
 
   const stage =
@@ -379,6 +388,7 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
         {...ctx}
         view={state.view}
         locationId={state.locationId}
+        calm={calm}
         doneHighlightIds={pack.highlights
           .filter((h) => highlightDone(h, journal))
           .map((h) => h.id)}
@@ -409,6 +419,7 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
         </div>
         <Hud
           inert={covered}
+          calm={calm}
           season={state.season}
           emit={emit}
           stamps={journal.stamps.length}
@@ -461,20 +472,44 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
                   <Icon d={UI_ICON.go} size={16} className={s.nextGo} />
                 </button>
               )}
+              {calm && (
+                <button
+                  type="button"
+                  className={s.explore}
+                  onClick={() => setExplore(true)}
+                >
+                  {t("Explore freely")}
+                </button>
+              )}
+              {!calm && (
+                <button
+                  type="button"
+                  className={s.explore}
+                  onClick={() => setAskSignal((n) => n + 1)}
+                >
+                  {t("Ask me a question")}
+                </button>
+              )}
             </div>
           </section>
         )}
-        <Ask
-          {...ctx}
-          // Retrieval matches English words, so the owl answers from the
-          // English pack for now (src/i18n/AGENTS.md, limitations).
-          content={source}
-          view={state.view}
-          locationId={state.locationId}
-          sceneId={state.sceneId}
-          artifactId={state.artifactId}
-          covered={state.overlay !== null}
-        />
+        {!calm && (
+          <Ask
+            {...ctx}
+            // Retrieval matches English words, so the owl answers from the
+            // English pack for now (src/i18n/AGENTS.md, limitations).
+            content={source}
+            view={state.view}
+            locationId={state.locationId}
+            sceneId={state.sceneId}
+            artifactId={state.artifactId}
+            covered={state.overlay !== null}
+            openSignal={askSignal}
+            // One owl: while the bubble shows, its link opens the box.
+            hideTrigger={owlShown}
+            backLabel={next ? t("Back to the tour") : undefined}
+          />
+        )}
         {toast && (
           <output className={s.toast}>
             {t("New stamp: {title}", { title: t(toast) })}
