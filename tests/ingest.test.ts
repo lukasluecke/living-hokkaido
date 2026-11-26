@@ -318,3 +318,53 @@ test("research: Linkup results become links only (https, text, deduplicated)", a
   assert.equal(body.outputType, "searchResults");
   assert.equal(body.q, "attus");
 });
+
+test("ask route: Linkup links are added only with a key, scoped to heritage sites", async () => {
+  const { POST } = await import("../src/app/api/ask/route");
+  const ask = () =>
+    POST(
+      new Request("http://x/api/ask", {
+        method: "POST",
+        body: JSON.stringify({
+          question: "How was bark cloth made?",
+          context: { locationId: null, sceneId: null, artifactId: null },
+        }),
+      }),
+    ).then((r) => r.json());
+  const saved = { ...process.env };
+  const real = globalThis.fetch;
+  try {
+    delete process.env.LLM_API_KEY;
+    delete process.env.LINKUP_API_KEY;
+    globalThis.fetch = (() =>
+      assert.fail("no call without keys")) as typeof fetch;
+    assert.deepEqual((await ask()).web, []);
+    process.env.LINKUP_API_KEY = "k";
+    let sent: Record<string, unknown> = {};
+    globalThis.fetch = (async (_u: string, init: RequestInit) => {
+      sent = JSON.parse(String(init.body));
+      return Response.json({
+        results: [
+          {
+            type: "text",
+            name: "Upopoy",
+            url: "https://ainu-upopoy.jp/en/",
+            content: "x",
+          },
+        ],
+      });
+    }) as typeof fetch;
+    const a = await ask();
+    assert.deepEqual(a.web, [
+      { name: "Upopoy", url: "https://ainu-upopoy.jp/en/" },
+    ]);
+    assert.ok(Array.isArray(sent.includeDomains));
+    assert.ok(
+      a.citations.length > 0 || a.known === false,
+      "answer still from the pack",
+    );
+  } finally {
+    globalThis.fetch = real;
+    process.env = saved;
+  }
+});

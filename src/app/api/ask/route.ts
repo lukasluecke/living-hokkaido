@@ -2,7 +2,12 @@
 // is checked against the content pack; any model or network problem falls
 // back to the scripted answer, labelled as such.
 import { defaultPack } from "@/content";
-import { askAnswerSchema, askRequestSchema } from "@/contracts";
+import {
+  type AskAnswer,
+  type AskRequest,
+  askAnswerSchema,
+  askRequestSchema,
+} from "@/contracts";
 import {
   checkAnswer,
   livePlan,
@@ -10,6 +15,11 @@ import {
   scriptedAnswer,
 } from "@/domain/ask";
 import { chatModel } from "@/integrations/llm";
+import {
+  HERITAGE_DOMAINS,
+  researchAvailable,
+  suggestSources,
+} from "@/integrations/research";
 
 export const dynamic = "force-dynamic";
 
@@ -38,15 +48,36 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   const req = parsed.data;
+  const [answer, web] = await Promise.all([
+    answerFor(req, request.signal),
+    webLinks(req.question, request.signal),
+  ]);
+  return Response.json({ ...answer, web });
+}
+
+/** Linkup "read more" links. Links only; the model never sees them. */
+async function webLinks(question: string, signal: AbortSignal) {
+  if (!researchAvailable()) return [];
+  const r = await suggestSources(
+    `Ainu culture, Hokkaido heritage: ${question}`,
+    process.env,
+    signal,
+    { includeDomains: HERITAGE_DOMAINS, timeoutMs: 8_000 },
+  );
+  return r.suggestions.slice(0, 3).map(({ name, url }) => ({ name, url }));
+}
+
+async function answerFor(
+  req: AskRequest,
+  signal: AbortSignal,
+): Promise<AskAnswer> {
   const pack = defaultPack;
   const model = chatModel();
   if (!model)
-    return Response.json(
-      scriptedAnswer(
-        pack,
-        req,
-        "Scripted answer: no LLM key on the server (keyword match, no AI).",
-      ),
+    return scriptedAnswer(
+      pack,
+      req,
+      "Scripted answer: no LLM key on the server (keyword match, no AI).",
     );
 
   const plan = livePlan(pack, req);
@@ -54,34 +85,28 @@ export async function POST(request: Request) {
   try {
     // No claim fits: do not spend a model call to say "I don't know yet".
     if (plan.claims.size === 0)
-      return Response.json(
-        scriptedAnswer(
-          pack,
-          req,
-          "No museum claim fits this question, so the AI was not asked.",
-        ),
+      return scriptedAnswer(
+        pack,
+        req,
+        "No museum claim fits this question, so the AI was not asked.",
       );
-    const reply = await model.complete(plan.messages, request.signal);
+    const reply = await model.complete(plan.messages, signal);
     const answer = parseLiveReply(plan, reply, notice);
     if (answer) {
       const checked = askAnswerSchema.safeParse(checkAnswer(pack, answer));
-      if (checked.success) return Response.json(checked.data);
+      if (checked.success) return checked.data;
     }
-    return Response.json(
-      scriptedAnswer(
-        pack,
-        req,
-        "Scripted answer: the model reply did not pass the checks.",
-      ),
+    return scriptedAnswer(
+      pack,
+      req,
+      "Scripted answer: the model reply did not pass the checks.",
     );
   } catch (err) {
     console.warn("[ask] live call failed:", (err as Error).message);
-    return Response.json(
-      scriptedAnswer(
-        pack,
-        req,
-        "Scripted answer: the model did not answer in time.",
-      ),
+    return scriptedAnswer(
+      pack,
+      req,
+      "Scripted answer: the model did not answer in time.",
     );
   }
 }
