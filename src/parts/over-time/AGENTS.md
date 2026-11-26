@@ -35,9 +35,13 @@ houses, and rebuilt cise today. Route for now: `/over-time`
   side of the hearth, bear ceremony items) unless an Ainu cultural reviewer
   approves them. The sources mention them; we do not draw them.
 - Do not show the past as the present: the `not-frozen` note is on every era.
-- Keyboard: range slider (arrow keys jump one era, Home/End), era buttons,
-  Play. Play is off with `prefs.reducedMotion` (no timelapse autoplay);
-  scrub moves cut instead of easing. `prefs.webgl === false`: no canvas, the
+- Step by step: the visitor reads one era card, taps "Next: {era}", the
+  diorama plays the time to the next era (about 2.6 s, a year counter on
+  the card, "Skip" ends it), then the next card comes in. Cards already
+  read stack above the current card (tap one to go back). Back, and
+  "Start again" on the last era. No continuous timelapse.
+- Keyboard: Back / Next buttons, range slider (arrow keys travel one era,
+  Home/End), era buttons. With `prefs.reducedMotion` every move is a cut. `prefs.webgl === false`: no canvas, the
   card and bar still carry all content.
 
 ## Limits
@@ -78,5 +82,7 @@ houses, and rebuilt cise today. Route for now: `/over-time`
   `hm-panel-*`. Flat-ground era follows the panel ("by about the 13th
   century"); Meiji era extended to the 1930s ("Meiji era and after") for
   the gradual change of houses. Drafts, listed in docs/REVIEW.md.
+- 2026-11-26: Play timelapse replaced by step-by-step cards with a time
+  animation between eras (Lukas: the timelapse made the cards hard to read).
 - 2026-11-25: ink outline moved to `src/parts/shared/InkEdges.ts` (island
   re-exports it), so both parts share one effect.
