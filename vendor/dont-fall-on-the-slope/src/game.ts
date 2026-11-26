@@ -276,7 +276,7 @@ export function startGame(
       label: canShareImage() ? t.share : t.download,
       onClick: async () => {
         if (!card) return;
-        const blob = await scoreCard(still, card, t);
+        const blob = await scoreCard(still, card, t, props.honesty ?? true);
         if (props.onScoreCard) {
           props.onScoreCard(blob);
           return;

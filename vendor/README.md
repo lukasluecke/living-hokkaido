@@ -123,6 +123,9 @@ Synced back: Erina pulled patches 1–10 into her repo (`194f4bf`), added
 steps 5–8, Japanese text, Otaru obstacles and a canal ending, and we pulled
 her `b794383` back (her tree as is). See her `HANDBACK.md`. The adapter
 passes the app's language as `lang` (no in-game language button).
+Patch 11 (vendor, one commit): optional `honesty` prop (default true) hides
+the score card's "Illustrative · research preview" line; the adapter passes
+`SHOW_DISCLAIMERS`.
 
 ## Pull new upstream changes
 

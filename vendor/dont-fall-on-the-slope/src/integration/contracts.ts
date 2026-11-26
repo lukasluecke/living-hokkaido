@@ -78,6 +78,9 @@ export type SlopeProps = {
   /** Receives the score card image. Without it the game opens the share
    *  sheet (phones) or downloads the image. */
   onScoreCard?: (card: Blob) => void;
+  /** Show the "Illustrative · research preview" line on the score card.
+   *  Default true; a host that lists its labels elsewhere can turn it off. */
+  honesty?: boolean;
   /** Dev only: start this many metres down the street (the page reads
    *  ?at=N). Hosts leave it out. */
   startAt?: number;
