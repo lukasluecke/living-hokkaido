@@ -198,6 +198,14 @@ export const memoryCabin: DetailSceneInput = {
       focusView: { eye: [0.9, 1.1, 2.1], target: [0.25, 0.4, 0.9] },
       key: 3,
     },
+    {
+      // The Omusha diorama case (omusha.ts): opens the splat.
+      artifactId: "omusha-case",
+      position: [-1.75, 0, 0.85],
+      rotationY: 0.6,
+      focusView: { eye: [-0.6, 1.5, 2.2], target: [-1.75, 0.85, 0.85] },
+      key: 4,
+    },
   ],
   activityIds: [
     "variation",

@@ -18,7 +18,7 @@ import { barkToCloth } from "./knowledge";
 import { memories } from "./memories";
 import { landAndSea } from "./land-and-sea";
 import { hokkaidoMuseum } from "./museum";
-import { omushaKnowledge, omushaLook } from "./omusha";
+import { omushaCase, omushaKnowledge, omushaLook } from "./omusha";
 import { houseOverTime, houseTimeline } from "./over-time";
 import { placeActivities } from "./place-activities";
 import { placeArtifacts, placeObjectActivities } from "./place-objects";
@@ -54,7 +54,12 @@ export const barkToClothRaw = {
       ],
     })),
   ],
-  artifacts: withGenerated([...artifacts, ...areaArtifacts, ...placeArtifacts]),
+  artifacts: withGenerated([
+    ...artifacts,
+    ...areaArtifacts,
+    ...placeArtifacts,
+    omushaCase,
+  ]),
   activities: [
     ...activities,
     ...areaActivities,
