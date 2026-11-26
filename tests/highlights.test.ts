@@ -141,3 +141,29 @@ test("tiers: highlights first, quiz and order questions apart", () => {
     ["q", "s"],
   );
 });
+
+test("owl tour: a place you pick yourself pauses the tour there", () => {
+  const j = { ...EMPTY_JOURNAL, visited: ["listening-grove"] };
+  let st = reduce(pack, initialState(prefs), {
+    type: "location.select",
+    locationId: "makers-clearing",
+  });
+  st = reduce(pack, st, { type: "owl.arrived", locationId: "makers-clearing" });
+  assert.equal(st.touring, false);
+  assert.equal(tourStep(pack, st, j), null);
+  // Back on the island the owl offers the next highlight again.
+  st = reduce(pack, st, { type: "scene.exit", sceneId: st.sceneId ?? "" });
+  assert.equal(tourStep(pack, st, j)?.event.type, "highlight.open");
+  // Through the tour, the owl keeps pointing on from the place.
+  st = reduce(pack, st, { type: "highlight.open", highlightId: "tonkori" });
+  st = reduce(pack, st, { type: "owl.arrived", locationId: "listening-grove" });
+  st = reduce(pack, st, {
+    type: "activity.close",
+    activityId: "pluck-tonkori",
+  });
+  const done = { ...j, completed: ["pluck-tonkori"] };
+  assert.deepEqual(tourStep(pack, st, done)?.event, {
+    type: "highlight.open",
+    highlightId: "over-time",
+  });
+});

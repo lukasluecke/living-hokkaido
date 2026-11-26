@@ -416,3 +416,7 @@ li:not([data-status="now"]) .stationLabel {
   line-height: 1.4;
   opacity: 0.75;
 }
+.item[data-armed] {
+  color: var(--fl-ink);
+  background: var(--fl-gold);
+}

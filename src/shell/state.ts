@@ -42,6 +42,7 @@ export function reduce(
         locationId: loc.id,
         overlay: null,
         pendingHighlightId: null,
+        touring: false,
       };
     }
     case "highlight.open": {
@@ -51,7 +52,8 @@ export function reduce(
       const here = s.sceneId !== null && s.locationId === loc.id;
       const inScene = s.view === "scene" || s.view === "focus";
       // Already in that place: open it now, without a flight.
-      if (here && inScene) return openHighlight(pack, s, h.id);
+      if (here && inScene)
+        return { ...openHighlight(pack, s, h.id), touring: true };
       if (s.view !== "island" && !inScene) return s;
       return {
         ...s,
@@ -62,6 +64,7 @@ export function reduce(
         artifactId: null,
         activityId: null,
         pendingHighlightId: h.id,
+        touring: true,
       };
     }
     case "owl.arrived": {

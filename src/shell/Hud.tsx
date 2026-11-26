@@ -47,6 +47,7 @@ export function Hud({
   locale,
   onLocale,
   onOverTime,
+  onResetProgress,
   inert,
 }: {
   /** An overlay covers the page: take the HUD out of focus order. */
@@ -61,11 +62,20 @@ export function Hud({
   onLocale: (locale: Locale) => void;
   /** Shown inside a location that has an "Over time" timeline. */
   onOverTime?: () => void;
+  /** Clear saved progress (journal, highlights done) and start over. */
+  onResetProgress?: () => void;
 }) {
   const now = seasonAt(season.value);
   const { t, draft } = useI18n();
   const other: Locale = locale === "ja" ? "en" : "ja";
   const [menu, setMenu] = useState<"season" | "more" | null>(null);
+  // Reset asks twice: the first tap arms it for a few seconds.
+  const [armed, setArmed] = useState(false);
+  useEffect(() => {
+    if (!armed) return;
+    const id = setTimeout(() => setArmed(false), 4000);
+    return () => clearTimeout(id);
+  }, [armed]);
   const menuBtn = useRef<HTMLButtonElement>(null);
   const moreBtn = useRef<HTMLButtonElement>(null);
   const menuBox = useRef<HTMLDivElement>(null);
@@ -227,6 +237,18 @@ export function Hud({
                 <Icon d="M4 20l4-1 11-11-3-3L5 16l-1 4Zm10-13 3 3" />
                 {t("Contribute a story")}
               </a>
+              {onResetProgress && (
+                <button
+                  type="button"
+                  className={s.item}
+                  data-armed={armed || undefined}
+                  aria-live="polite"
+                  onClick={() => (armed ? onResetProgress() : setArmed(true))}
+                >
+                  <Icon d="M4 12a8 8 0 1 0 2.3-5.7M4 4v4h4" />
+                  {armed ? t("Tap again to reset") : t("Reset progress")}
+                </button>
+              )}
             </div>
             <p className={s.about}>{t(DEMO_NOTE)}</p>
           </div>

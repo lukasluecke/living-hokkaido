@@ -110,6 +110,8 @@ export function route(
  * The owl's first-visit tour: the next highlight not done yet, in pack
  * order. In a place, its own open highlight comes first; a film highlight
  * is already on screen there, so it is skipped while you are in its place.
+ * In a place you picked yourself, the tour pauses there (only that place's
+ * own highlight); it goes on from the island or the highlight row.
  * When every highlight is done, the normal look / try route takes over.
  */
 export function tourStep(
@@ -134,7 +136,11 @@ export function tourStep(
         (l) => l.id === h.locationId && l.status === "open",
       ),
   );
-  const h = todo.find((x) => x.locationId === here) ?? todo[0];
+  const own = todo.find((x) => x.locationId === here);
+  // Exploring on your own (you picked this place, not the tour): the owl
+  // helps with this place and offers the tour again on the island.
+  if (here && !own && !state.touring) return null;
+  const h = own ?? todo[0];
   if (!h) return null;
   return {
     label: t("Highlight: {title}", { title: t(h.title) }),
