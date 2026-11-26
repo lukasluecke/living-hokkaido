@@ -12,6 +12,8 @@ export const experienceEventSchema = z.discriminatedUnion("type", [
   // Island
   e("location.select", { locationId: idSchema }),
   e("owl.arrived", { locationId: idSchema }),
+  /** Fly to a highlight's place and open it on arrival (additive). */
+  e("highlight.open", { highlightId: idSchema }),
   // Detail scene
   e("scene.enter", { sceneId: idSchema }),
   e("scene.ready", { sceneId: idSchema }),

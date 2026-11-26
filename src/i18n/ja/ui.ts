@@ -408,4 +408,9 @@ export const jaUi: Record<string, string> = {
   "{title}: eras": "{title}: 時代",
   "Off with reduced motion": "動きを減らす設定ではオフ",
   Time: "時代",
+  Highlights: "見どころ",
+  "Start with a highlight": "まずは見どころから",
+  "Highlight: {title}": "見どころ：{title}",
+  "Quick questions": "かんたんな問題",
+  done: "済み",
 };

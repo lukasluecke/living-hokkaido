@@ -9,8 +9,18 @@ import type {
   Location,
 } from "@/contracts";
 import { english, type Translate, useT } from "@/i18n";
-import { groupActivities, kindCaption } from "../shared/activityGroups";
-import { Icon, KIND_ICON, KindIcon, UI_ICON } from "../shared/Icon";
+import {
+  groupActivities,
+  kindCaption,
+  QUICK_KINDS,
+} from "../shared/activityGroups";
+import {
+  highlightIcon,
+  Icon,
+  KIND_ICON,
+  KindIcon,
+  UI_ICON,
+} from "../shared/Icon";
 
 const GROUP_ICON: Record<string, string> = {
   "hands-on": UI_ICON.try,
@@ -77,11 +87,15 @@ export function activityHomes(
 
 export function ActivitySheet({
   content,
+  done = [],
   onSelect,
+  onHighlight,
   onClose,
 }: {
   content: Pack;
+  done?: string[];
   onSelect: (l: Location) => void;
+  onHighlight: (id: string) => void;
   onClose: () => void;
 }) {
   const t = useT();
@@ -107,6 +121,16 @@ export function ActivitySheet({
       })),
     [content, open],
   );
+  const highlights = content.highlights.filter((h) =>
+    open.some((l) => l.id === h.locationId),
+  );
+  const heroActs = new Set(
+    highlights.flatMap((h) =>
+      h.open.kind === "activity" ? [h.open.activityId] : [],
+    ),
+  );
+  // Highlight activities are listed once, at the top.
+  const rest = rows.filter((r) => !heroActs.has(r.id));
   const sections =
     by === "place"
       ? open
@@ -114,10 +138,10 @@ export function ActivitySheet({
             key: l.id,
             icon: undefined as string | undefined,
             label: l.title,
-            items: rows.filter((r) => r.place.id === l.id),
+            items: rest.filter((r) => r.place.id === l.id),
           }))
           .filter((s) => s.items.length > 0)
-      : groupActivities(rows).map((g) => ({
+      : groupActivities(rest).map((g) => ({
           key: g.id,
           icon: GROUP_ICON[g.id],
           label: t(g.label),
@@ -157,34 +181,84 @@ export function ActivitySheet({
         </button>
       </div>
       <div className={c.sheetBody}>
-        {sections.map((s) => (
-          <div key={s.key} className={c.group}>
+        {highlights.length > 0 && (
+          <div className={`${c.group} ${c.heroGroup}`}>
             <h3 className={c.groupTitle}>
-              {s.icon && <Icon d={s.icon} size={16} className={c.groupIcon} />}
-              {s.label}
+              <Icon d={UI_ICON.star} size={16} className={c.groupIcon} />
+              {t("Highlights")}
             </h3>
-            <ul>
-              {s.items.map((a) => (
-                <li key={`${s.key}-${a.place.id}-${a.id}`}>
+            <ul className={c.heroList}>
+              {highlights.map((h) => (
+                <li key={h.id}>
                   <button
                     type="button"
-                    className={c.act}
-                    onClick={() => onSelect(a.place)}
+                    className={`${c.act} ${c.heroAct}`}
+                    data-done={done.includes(h.id) || undefined}
+                    onClick={() => onHighlight(h.id)}
                   >
-                    <span className={c.actIcon} title={t(kindCaption(a.kind))}>
-                      <KindIcon kind={a.kind} size={20} />
-                      <span className={c.sr}>{t(kindCaption(a.kind))}: </span>
+                    <span className={c.actIcon}>
+                      <Icon d={highlightIcon(h.icon)} size={20} />
                     </span>
-                    <span className={c.actTitle}>{a.title}</span>
-                    {by === "kind" && (
-                      <span className={c.actPlace}>{a.place.title}</span>
-                    )}
+                    <span className={c.actTitle}>
+                      {t(h.title)}
+                      {done.includes(h.id) && (
+                        <span className={c.sr}>, {t("done")}</span>
+                      )}
+                    </span>
+                    <span className={c.actPlace}>
+                      {t(h.teaser)} ·{" "}
+                      {open.find((l) => l.id === h.locationId)?.title}
+                    </span>
                   </button>
                 </li>
               ))}
             </ul>
           </div>
-        ))}
+        )}
+        {sections.map((s) => {
+          const main = s.items.filter((a) => !QUICK_KINDS.includes(a.kind));
+          const quick = s.items.filter((a) => QUICK_KINDS.includes(a.kind));
+          const row = (a: (typeof s.items)[number]) => (
+            <li key={`${s.key}-${a.place.id}-${a.id}`}>
+              <button
+                type="button"
+                className={c.act}
+                onClick={() => onSelect(a.place)}
+              >
+                <span className={c.actIcon} title={t(kindCaption(a.kind))}>
+                  <KindIcon kind={a.kind} size={20} />
+                  <span className={c.sr}>{t(kindCaption(a.kind))}: </span>
+                </span>
+                <span className={c.actTitle}>{a.title}</span>
+                {by === "kind" && (
+                  <span className={c.actPlace}>{a.place.title}</span>
+                )}
+              </button>
+            </li>
+          );
+          return (
+            <div key={s.key} className={c.group}>
+              <h3 className={c.groupTitle}>
+                {s.icon && (
+                  <Icon d={s.icon} size={16} className={c.groupIcon} />
+                )}
+                {s.label}
+              </h3>
+              {main.length > 0 && <ul>{main.map(row)}</ul>}
+              {quick.length > 0 &&
+                (main.length > 0 || by === "kind" ? (
+                  <details className={c.quick}>
+                    <summary>
+                      {t("Quick questions")} · {quick.length}
+                    </summary>
+                    <ul>{quick.map(row)}</ul>
+                  </details>
+                ) : (
+                  <ul>{quick.map(row)}</ul>
+                ))}
+            </div>
+          );
+        })}
       </div>
     </section>
   );

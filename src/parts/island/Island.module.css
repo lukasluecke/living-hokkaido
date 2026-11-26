@@ -376,3 +376,123 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Highlights: the signature experiences, one row above the places. */
+.heroes {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 8px;
+  padding: 0 0 2px;
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.heroes li {
+  flex: 1 0 auto;
+}
+.hero {
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 6px;
+  font: inherit;
+  text-align: left;
+  color: var(--fl-ink);
+  background: var(--fl-card);
+  border: 1.5px solid var(--fl-gold);
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px var(--fl-gold);
+  cursor: pointer;
+}
+.hero:hover {
+  background: var(--fl-season-soft);
+}
+.hero:focus-visible {
+  outline: 3px solid var(--fl-gold);
+  outline-offset: 2px;
+}
+.hero[data-done] {
+  box-shadow: none;
+  border-color: var(--fl-line);
+}
+.heroIcon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--fl-gold);
+  color: var(--fl-ink);
+}
+.hero[data-done] .heroIcon {
+  background: var(--fl-stock2);
+}
+.heroDone {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--fl-season);
+  color: var(--fl-paper);
+}
+.heroText {
+  display: grid;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+.heroTitle {
+  font-weight: 700;
+  font-size: 13px;
+}
+.heroPlace {
+  font-size: 11px;
+  color: var(--fl-ink-soft);
+}
+.heroChip {
+  background: var(--fl-gold);
+}
+.heroGroup {
+  grid-column: 1 / -1;
+}
+.heroList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 4px 16px;
+}
+.heroAct {
+  border-color: var(--fl-gold);
+  box-shadow: inset 0 0 0 1px var(--fl-gold);
+}
+.heroAct .actIcon {
+  background: var(--fl-gold);
+}
+.quick summary {
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--fl-ink-soft);
+  padding: 4px 2px;
+}
+.quick summary:focus-visible {
+  outline: 3px solid var(--fl-gold);
+  outline-offset: 2px;
+}
+.quick ul {
+  margin-top: 4px;
+}
+@media (max-width: 700px) {
+  .heroes li {
+    flex: 0 0 auto;
+  }
+}

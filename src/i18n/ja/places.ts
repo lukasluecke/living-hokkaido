@@ -23,8 +23,34 @@ export const jaPlaces: Record<string, string> = {
   "Coal mining and winter logging": "炭鉱と冬の木材切り出し",
 
   // Owl lines (navigation only)
-  "Hello! Pick a glowing place and I will fly you there.":
-    "こんにちは！光っている場所を選んでね。そこまで飛んで連れていくよ。",
+  "Welcome to the island! I am the owl. Follow me through the highlights, or pick any glowing place to explore.":
+    "島へようこそ！わたしはフクロウ。見どころを案内するよ。光っている場所を自由に選んで探検してもいいよ。",
+
+  // Highlights (navigation only)
+  "Watch the owl's film": "フクロウの映画を見る",
+  "A short folktale film, told by the owl": "フクロウが語る短い昔話の映画",
+  "First, sit with me in the grove. I have a story film for you.":
+    "まずは森でいっしょに座ろう。お話の映画があるよ。",
+  "Play the tonkori": "トンコリを弾く",
+  "Pluck the five open strings": "5本の開放弦をはじく",
+  "Now try the tonkori. Pluck the strings and listen.":
+    "次はトンコリ。弦をはじいて、音を聞いてみて。",
+  "See the house over time": "家の移り変わりを見る",
+  "Pit dwellings to today, in one place": "竪穴住居から今まで、同じ場所で",
+  "Let us fly to the lake house and watch it change over time.":
+    "湖の家へ飛んで、時代とともに変わる様子を見よう。",
+  "Step into the Omusha diorama": "オムシャのジオラマに入る",
+  "A museum diorama, captured in 3D": "3Dで記録した博物館のジオラマ",
+  "In the memory cabin, a museum diorama waits. Look around in it.":
+    "思い出の小屋で博物館のジオラマが待っているよ。中を見回してみて。",
+  "Don't fall on the slope": "坂で転ばないで",
+  "Slide down an icy Otaru street": "凍った小樽の坂をすべりおりる",
+  "To the coast! Slide down the icy street to the canal.":
+    "海辺へ！凍った坂を運河まですべりおりよう。",
+  "Find what is out of place": "場違いなものを探す",
+  "Hide and seek in a herring warehouse": "ニシン倉庫でかくれんぼ",
+  "One more game here: find what does not belong in the warehouse.":
+    "ここでもうひとつゲーム。倉庫にふさわしくないものを探そう。",
   "Here we are. Let us lift the roof and look inside.":
     "着いたよ。屋根を持ち上げて、中をのぞいてみよう。",
   "Three objects are waiting. Pick one up and turn it.":
