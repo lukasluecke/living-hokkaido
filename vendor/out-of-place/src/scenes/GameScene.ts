@@ -345,6 +345,17 @@ const ACTION_Y = 334;
 const POSE_Y = 548;
 /** The current paint, big, left of the brush sizes. */
 const SWATCH = { x: 1042, y: SIZE_Y, w: 122, h: 62 };
+/**
+ * Phone panel (the game shows under ~1000 css px wide): bigger buttons in two
+ * and three columns, at least 44 px on screen, no trays or recent paints.
+ */
+const COMPACT_BELOW_PX = 1000;
+const C2 = [1037, 1193];
+const C3 = [1011, 1115, 1219];
+const CROWS = [66, 162, 258, 354, 450, 546];
+const CW2 = 146;
+const CW3 = 96;
+const CH = 88;
 /** Brush sizes S, M, L (narrow buttons right of the swatch). */
 const SIZE_X = [1133, 1179, 1225];
 const MAIN_BTN = { x: 1115, y: 650, w: 296, h: 84 };
@@ -400,6 +411,9 @@ export class GameScene extends Phaser.Scene {
   private zoomed = false;
   private stroking = false;
   private dragging = false;
+  /** Phone panel layout (set in create from the game's size on screen). */
+  private compact = false;
+  private swatchBox = SWATCH;
   /** Kept across rounds and scene restarts (Phaser reuses the scene object). */
   private mode: Mode = "duo";
   private modeBtns!: Record<Mode, Button>;
@@ -496,6 +510,10 @@ export class GameScene extends Phaser.Scene {
     this.cameras.main.ignore(this.ui);
     uiCam.ignore(this.world);
 
+    this.compact = this.scale.displaySize.width < COMPACT_BELOW_PX;
+    this.swatchBox = this.compact
+      ? { x: C3[0], y: CROWS[3], w: CW3, h: CH }
+      : SWATCH;
     this.buildWorld();
     this.buildHud();
     this.bindPointer();
@@ -623,108 +641,122 @@ export class GameScene extends Phaser.Scene {
       "backdropDeep",
       "backdropDeep",
     );
-    const trayX = PANEL_X0 + 10;
-    const trayW = 290;
-    for (const [top, bottom] of Object.values(TRAY)) {
-      bg.fillStyle(PALETTE.backdrop).fillRoundedRect(
-        trayX,
-        top,
-        trayW,
-        bottom - top,
-        12,
+    if (this.compact) {
+      this.panel.add(bg);
+      this.buildCompactPanel();
+    } else {
+      const trayX = PANEL_X0 + 10;
+      const trayW = 290;
+      for (const [top, bottom] of Object.values(TRAY)) {
+        bg.fillStyle(PALETTE.backdrop).fillRoundedRect(
+          trayX,
+          top,
+          trayW,
+          bottom - top,
+          12,
+        );
+        bg.lineStyle(2, PALETTE.backdropLight).strokeRoundedRect(
+          trayX,
+          top,
+          trayW,
+          bottom - top,
+          12,
+        );
+      }
+      this.panel.add(bg);
+      const label = (y: number, t: string, keys: string) => {
+        this.panel.add(
+          makeText(this, trayX + 12, y, 17, "sunGlow").setText(t.toUpperCase()),
+        );
+        this.panel.add(
+          makeText(this, trayX + trayW - 12, y + 1, 15, "creamSoft")
+            .setOrigin(1, 0)
+            .setText(keys),
+        );
+      };
+      label(TRAY.tools[0] + 6, "Tools", "arrows move");
+      label(TRAY.paint[0] + 6, "Paint", "E pick · [ ] size");
+      label(TRAY.pose[0] + 6, "Pose", "keys 1–4");
+      const iconBtn = (
+        x: number,
+        y: number,
+        w: number,
+        h: number,
+        text: string,
+        icon: IconPart[],
+        fn: () => void,
+      ) => {
+        const b = makeIconButton(this, x, y, w, h, text, icon, fn);
+        this.panel.add(b.root);
+        return b;
+      };
+      const tool = (i: number, t: string, text: string) =>
+        iconBtn(QUAD[i], TOOL_Y, 58, 88, text, ICON[t], () =>
+          t === "zoom" ? this.setZoom(!this.zoomed) : this.setTool(t as Tool),
+        );
+      this.toolBtns = {
+        move: tool(0, "move", "Move"),
+        brush: tool(1, "brush", "Brush"),
+        eyedrop: tool(2, "eyedrop", "Pick"),
+      };
+      this.zoomBtn = tool(3, "zoom", "Zoom +");
+      // Current paint, then brush sizes drawn as dots.
+      this.swatch = this.add.graphics();
+      this.panel.add(this.swatch);
+      this.swatchImg = this.add
+        .image(SWATCH.x, SWATCH.y - 3, "__DEFAULT")
+        .setVisible(false);
+      this.panel.add(this.swatchImg);
+      const size = (i: number, s: BrushSize, r: number) =>
+        iconBtn(SIZE_X[i], SIZE_Y, 38, 62, "", [{ dot: [0, 0, r] }], () =>
+          this.setBrushSize(s),
+        );
+      this.sizeBtns = {
+        S: size(0, "S", 3),
+        M: size(1, "M", 6),
+        L: size(2, "L", 10),
+      };
+      // Wide buttons with the icon left of the word.
+      const action = (
+        x: number,
+        text: string,
+        icon: IconPart[],
+        fn: () => void,
+      ) => {
+        const b = makeButton(
+          this,
+          x,
+          ACTION_Y,
+          134,
+          58,
+          `     ${text}`,
+          fn,
+          22,
+        );
+        const ig = this.add.graphics();
+        drawIcon(ig, icon, -36, -3);
+        b.root.addAt(ig, 2);
+        this.panel.add(b.root);
+        return b;
+      };
+      action(1042, "Fill", ICON.fill, () => this.fillAll());
+      this.undoBtn = action(1178, "Undo", ICON.undo, () => this.undo());
+      this.panel.add(
+        makeText(this, trayX + 12, RECENT_Y - 40, 15, "creamSoft").setText(
+          "Recent paints",
+        ),
       );
-      bg.lineStyle(2, PALETTE.backdropLight).strokeRoundedRect(
-        trayX,
-        top,
-        trayW,
-        bottom - top,
-        12,
-      );
+      const poseBtn = (i: number, pose: Pose, text: string) =>
+        iconBtn(QUAD[i], POSE_Y, 58, 88, text, ICON[pose], () =>
+          this.setPose(pose),
+        );
+      this.poseBtns = {
+        standing: poseBtn(0, "standing", "Stand"),
+        sitting: poseBtn(1, "sitting", "Sit"),
+        kneeling: poseBtn(2, "kneeling", "Kneel"),
+        lying: poseBtn(3, "lying", "Lie"),
+      };
     }
-    this.panel.add(bg);
-    const label = (y: number, t: string, keys: string) => {
-      this.panel.add(
-        makeText(this, trayX + 12, y, 17, "sunGlow").setText(t.toUpperCase()),
-      );
-      this.panel.add(
-        makeText(this, trayX + trayW - 12, y + 1, 15, "creamSoft")
-          .setOrigin(1, 0)
-          .setText(keys),
-      );
-    };
-    label(TRAY.tools[0] + 6, "Tools", "arrows move");
-    label(TRAY.paint[0] + 6, "Paint", "E pick · [ ] size");
-    label(TRAY.pose[0] + 6, "Pose", "keys 1–4");
-    const iconBtn = (
-      x: number,
-      y: number,
-      w: number,
-      h: number,
-      text: string,
-      icon: IconPart[],
-      fn: () => void,
-    ) => {
-      const b = makeIconButton(this, x, y, w, h, text, icon, fn);
-      this.panel.add(b.root);
-      return b;
-    };
-    const tool = (i: number, t: string, text: string) =>
-      iconBtn(QUAD[i], TOOL_Y, 58, 88, text, ICON[t], () =>
-        t === "zoom" ? this.setZoom(!this.zoomed) : this.setTool(t as Tool),
-      );
-    this.toolBtns = {
-      move: tool(0, "move", "Move"),
-      brush: tool(1, "brush", "Brush"),
-      eyedrop: tool(2, "eyedrop", "Pick"),
-    };
-    this.zoomBtn = tool(3, "zoom", "Zoom +");
-    // Current paint, then brush sizes drawn as dots.
-    this.swatch = this.add.graphics();
-    this.panel.add(this.swatch);
-    this.swatchImg = this.add
-      .image(SWATCH.x, SWATCH.y - 3, "__DEFAULT")
-      .setVisible(false);
-    this.panel.add(this.swatchImg);
-    const size = (i: number, s: BrushSize, r: number) =>
-      iconBtn(SIZE_X[i], SIZE_Y, 38, 62, "", [{ dot: [0, 0, r] }], () =>
-        this.setBrushSize(s),
-      );
-    this.sizeBtns = {
-      S: size(0, "S", 3),
-      M: size(1, "M", 6),
-      L: size(2, "L", 10),
-    };
-    // Wide buttons with the icon left of the word.
-    const action = (
-      x: number,
-      text: string,
-      icon: IconPart[],
-      fn: () => void,
-    ) => {
-      const b = makeButton(this, x, ACTION_Y, 134, 58, `     ${text}`, fn, 22);
-      const ig = this.add.graphics();
-      drawIcon(ig, icon, -36, -3);
-      b.root.addAt(ig, 2);
-      this.panel.add(b.root);
-      return b;
-    };
-    action(1042, "Fill", ICON.fill, () => this.fillAll());
-    this.undoBtn = action(1178, "Undo", ICON.undo, () => this.undo());
-    this.panel.add(
-      makeText(this, trayX + 12, RECENT_Y - 40, 15, "creamSoft").setText(
-        "Recent paints",
-      ),
-    );
-    const poseBtn = (i: number, pose: Pose, text: string) =>
-      iconBtn(QUAD[i], POSE_Y, 58, 88, text, ICON[pose], () =>
-        this.setPose(pose),
-      );
-    this.poseBtns = {
-      standing: poseBtn(0, "standing", "Stand"),
-      sitting: poseBtn(1, "sitting", "Sit"),
-      kneeling: poseBtn(2, "kneeling", "Kneel"),
-      lying: poseBtn(3, "lying", "Lie"),
-    };
 
     // One main button for every phase: Skip / I'm hidden / Give up / Next / Play again.
     this.mainBtn = makeButton(
@@ -1578,7 +1610,7 @@ export class GameScene extends Phaser.Scene {
         ?.setFilter(Phaser.Textures.FilterMode.NEAREST);
       this.swatchImg
         ?.setTexture("swatch-patch")
-        .setDisplaySize(SWATCH.w - 8, SWATCH.h - 14);
+        .setDisplaySize(this.swatchBox.w - 8, this.swatchBox.h - 14);
     }
     this.swatchImg?.setVisible(!!p.patch);
     if (remember) {
@@ -1598,7 +1630,8 @@ export class GameScene extends Phaser.Scene {
       if (this.textures.exists(k)) this.textures.remove(k);
     this.recentBtns = [];
     this.recentKeys = [];
-    if (!this.panel) return;
+    // The phone panel has no room for recent paints.
+    if (!this.panel || this.compact) return;
     this.recent.forEach((p, i) => {
       const x = QUAD[i];
       const root = this.add.container(x, RECENT_Y);
@@ -1623,6 +1656,63 @@ export class GameScene extends Phaser.Scene {
     });
   }
 
+  /** Phone layout: the same controls as big buttons (see COMPACT_BELOW_PX). */
+  private buildCompactPanel() {
+    const btn = (
+      x: number,
+      y: number,
+      w: number,
+      text: string,
+      icon: IconPart[],
+      fn: () => void,
+    ) => {
+      const b = makeIconButton(this, x, y, w, CH, text, icon, fn, 20);
+      this.panel.add(b.root);
+      return b;
+    };
+    this.toolBtns = {
+      move: btn(C2[0], CROWS[0], CW2, "Move", ICON.move, () =>
+        this.setTool("move"),
+      ),
+      brush: btn(C2[1], CROWS[0], CW2, "Brush", ICON.brush, () =>
+        this.setTool("brush"),
+      ),
+      eyedrop: btn(C2[0], CROWS[1], CW2, "Pick", ICON.eyedrop, () =>
+        this.setTool("eyedrop"),
+      ),
+    };
+    this.zoomBtn = btn(C2[1], CROWS[1], CW2, "Zoom +", ICON.zoom, () =>
+      this.setZoom(!this.zoomed),
+    );
+    const size = (i: number, s: BrushSize, r: number) =>
+      btn(C3[i], CROWS[2], CW3, "", [{ dot: [0, 0, r] }], () =>
+        this.setBrushSize(s),
+      );
+    this.sizeBtns = {
+      S: size(0, "S", 4),
+      M: size(1, "M", 8),
+      L: size(2, "L", 13),
+    };
+    this.swatch = this.add.graphics();
+    this.panel.add(this.swatch);
+    this.swatchImg = this.add
+      .image(this.swatchBox.x, this.swatchBox.y - 3, "__DEFAULT")
+      .setVisible(false);
+    this.panel.add(this.swatchImg);
+    btn(C3[1], CROWS[3], CW3, "Fill", ICON.fill, () => this.fillAll());
+    this.undoBtn = btn(C3[2], CROWS[3], CW3, "Undo", ICON.undo, () =>
+      this.undo(),
+    );
+    const pose = (x: number, y: number, p: Pose, text: string) =>
+      btn(x, y, CW2, text, ICON[p], () => this.setPose(p));
+    this.poseBtns = {
+      standing: pose(C2[0], CROWS[4], "standing", "Stand"),
+      sitting: pose(C2[1], CROWS[4], "sitting", "Sit"),
+      kneeling: pose(C2[0], CROWS[5], "kneeling", "Kneel"),
+      lying: pose(C2[1], CROWS[5], "lying", "Lie"),
+    };
+  }
+
   private syncPanel() {
     for (const t of Object.keys(this.toolBtns) as Tool[])
       this.toolBtns[t].setSelected(t === this.tool);
@@ -1634,10 +1724,10 @@ export class GameScene extends Phaser.Scene {
     this.swatch.clear();
     drawChunkyBox(
       this.swatch,
-      SWATCH.x,
-      SWATCH.y,
-      SWATCH.w,
-      SWATCH.h,
+      this.swatchBox.x,
+      this.swatchBox.y,
+      this.swatchBox.w,
+      this.swatchBox.h,
       this.color,
       this.color,
     );
