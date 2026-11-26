@@ -224,9 +224,10 @@ export function Story({
                     : tr("Device voice")
                   : tr("Captions")}
             </p>
-            {useAi && voice.kind === "ai-voice" && voiceOn && (
-              <p className="credit">{voice.credit}</p>
-            )}
+            {SHOW_DISCLAIMERS &&
+              useAi &&
+              voice.kind === "ai-voice" &&
+              voiceOn && <p className="credit">{voice.credit}</p>}
           </div>
           <nav aria-label={tr("Chapters")}>
             <ol className="chapters">

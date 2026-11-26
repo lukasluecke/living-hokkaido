@@ -18,6 +18,7 @@ import {
   seasonAt,
   wrapSeason,
 } from "@/contracts";
+import { SHOW_DISCLAIMERS } from "@/design/disclaimers";
 import { seasonInk } from "@/design/tokens";
 import { useSoundscape } from "@/audio/react";
 import { playVoiceLine, stopVoiceLine } from "@/audio/voice";
@@ -384,7 +385,7 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
                 <span className={s.visuallyHidden}>{t("Owl: ")}</span>
                 {t(guideLine)}
               </p>
-              {guideVoiced && (
+              {SHOW_DISCLAIMERS && guideVoiced && (
                 <p className={s.voiceNote}>{t("AI voice · ElevenLabs")}</p>
               )}
               {next && (
