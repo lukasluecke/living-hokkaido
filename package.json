@@ -17,7 +17,8 @@
     "cf:build": "opennextjs-cloudflare build",
     "cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-    "perf": "tsx scripts/perf/measure.ts"
+    "perf": "tsx scripts/perf/measure.ts",
+    "assets:generate": "tsx scripts/assets/generate.ts"
   },
   "dependencies": {
     "@dimforge/rapier3d-compat": "^0.21.0",

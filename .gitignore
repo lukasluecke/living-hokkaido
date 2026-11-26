@@ -16,3 +16,6 @@ recordings/
 
 # Museum captures (never in Git; vendor/README.md, Omusha)
 .museum-assets/
+
+# Raw AI asset downloads (scripts/assets/generate.ts)
+.asset-raw/
