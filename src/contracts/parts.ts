@@ -29,6 +29,11 @@ export type IslandPartProps = PartContext & {
   locationId: string | null;
   /** Highlights already done (journal), for the tick on each. Optional. */
   doneHighlightIds?: string[];
+  /** First look (progressive disclosure): hide the place tray and, on
+   *  phones, the place labels, so the owl's first step stands alone. The
+   *  shell sets it until the visitor goes somewhere or picks "Explore
+   *  freely". Optional, default false. */
+  calm?: boolean;
 };
 
 /** One detail scene: entry, dollhouse view, artifact placement and focus. */
