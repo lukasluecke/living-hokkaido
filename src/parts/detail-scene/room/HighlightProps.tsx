@@ -2,9 +2,12 @@
 // Highlight signposts (content `highlight.marker`): a small code-built prop
 // in the place's scene for a highlight that has no object there (the slope
 // game, Out of Place, the house over time). A click opens the highlight. The
-// props are illustrative signposts, not objects with facts.
+// props are illustrative signposts, not objects with facts. A GLB in
+// `marker.model` (Hyper3D, public/models/prop-*.glb) replaces the code prop;
+// the code prop shows while it loads.
 import { useCursor } from "@react-three/drei";
-import { useState } from "react";
+import { Suspense, useMemo, useState } from "react";
+import * as THREE from "three";
 import type { Emit, Highlight } from "@/contracts";
 import { useGlbClone } from "../../shared/Glb";
 
@@ -101,10 +104,26 @@ function Hourglass() {
   );
 }
 
-function Model({ url }: { url: string }) {
+/** Generated GLBs come centred at the origin in any size: scale the
+ *  largest side to `size` metres and stand the model on the ground. */
+function Model({ url, size }: { url: string; size: number }) {
   const o = useGlbClone(url);
-  return <primitive object={o} />;
+  const fit = useMemo(() => {
+    const box = new THREE.Box3().setFromObject(o);
+    const dim = box.getSize(new THREE.Vector3());
+    const k = size / Math.max(dim.x, dim.y, dim.z, 1e-6);
+    const c = box.getCenter(new THREE.Vector3());
+    return { k, pos: [-c.x * k, -box.min.y * k, -c.z * k] as const };
+  }, [o, size]);
+  return (
+    <group position={[...fit.pos]} scale={fit.k}>
+      <primitive object={o} />
+    </group>
+  );
 }
+
+/** Largest side of each prop, in metres (matches the code-built props). */
+const SIZE = { sled: 0.9, crates: 0.75, hourglass: 0.7 };
 
 const PROPS = { sled: Sled, crates: Crates, hourglass: Hourglass };
 
@@ -139,7 +158,13 @@ export function HighlightProps({
               emit({ type: "highlight.open", highlightId: h.id });
             }}
           >
-            {m.model ? <Model url={m.model} /> : <Prop />}
+            {m.model ? (
+              <Suspense fallback={<Prop />}>
+                <Model url={m.model} size={SIZE[m.prop]} />
+              </Suspense>
+            ) : (
+              <Prop />
+            )}
           </group>
         );
       })}

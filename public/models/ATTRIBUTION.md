@@ -90,3 +90,14 @@ chimneys, a cart).
 Not shipped: era-3-cise-v2 437320679580883 (overhead wires, fences, metal
 chimneys), era-4-meiji-v2 437320686122909 (utility poles), era-1-pit-night
 437320693628848 (rail fences, looks like a 3D render).
+| prop-sled.glb | cb0402b4-c7ee-4408-9ccf-97f2198f1ca6 | A small old wooden snow sled with two curved wooden runners and a flat slatted seat, a little snow on it. |
+| prop-crates.glb | 68e54233-af15-49da-b737-5b90d8fe30e1 | A stack of three plain old wooden fish crates made of rough boards, slightly uneven. |
+| prop-hourglass.glb | 37daa3ca-c59c-4b63-9652-baf28985571b | A large old hourglass with a plain wooden frame of two round plates and three turned posts, clear glass with pale sand. |
+
+The three `prop-*.glb` files are highlight signposts in the scenes (sled: the
+slope game, crates: Out of Place, hourglass: the house over time). They carry
+no facts. Generated 2026-11-26 with the same settings and style suffix (about
+20k faces), then `gltf-transform optimize --compress meshopt
+--texture-compress webp --texture-size 512 --simplify true
+--simplify-ratio 0.5`; the scene scales them to size at load.
+
