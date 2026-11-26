@@ -7,6 +7,7 @@ import type { Emit } from "@/contracts";
 import { useT } from "@/i18n";
 import type { KindProps } from "../kinds/shared";
 import { deferMount, GameStage, type MountGame } from "./GameStage";
+import { SHOW_DISCLAIMERS } from "@/design/disclaimers";
 
 export function HideSeekActivity({
   activity: a,
@@ -33,7 +34,7 @@ export function HideSeekActivity({
   );
   const labels = [
     "Two players · one device",
-    ...(a.illustrative ? ["Illustrative scene"] : []),
+    ...(SHOW_DISCLAIMERS && a.illustrative ? ["Illustrative scene"] : []),
   ];
   return (
     <GameStage

@@ -12,6 +12,7 @@ import { ClipPlayer } from "../shared/Clip";
 import { QualityGovernor, useQuality } from "../shared/QualityGovernor";
 import { Diorama } from "./Diorama";
 import c from "./OverTime.module.css";
+import { SHOW_DISCLAIMERS, showModelLabels } from "@/design/disclaimers";
 
 /** Seconds per era in play mode. */
 const PLAY_SECONDS = 3.2;
@@ -146,10 +147,12 @@ export function TimelinePart(props: TimelinePartProps) {
       )}
 
       <section className={c.card} aria-live="polite" aria-labelledby="ot-title">
-        <div className={c.badges}>
-          <PresentationBadge value={presentation} />
-          <RepresentationBadge value={timeline.representation} />
-        </div>
+        {SHOW_DISCLAIMERS && (
+          <div className={c.badges}>
+            <PresentationBadge value={presentation} />
+            <RepresentationBadge value={timeline.representation} />
+          </div>
+        )}
         <p className={c.kicker}>
           {timeline.title} · {era.period}
         </p>
@@ -162,7 +165,7 @@ export function TimelinePart(props: TimelinePartProps) {
             key={era.id}
             clip={era.clip}
             reducedMotion={prefs.reducedMotion}
-            hideLabels={prefs.hideModelLabels}
+            hideLabels={!showModelLabels(prefs)}
           />
         )}
         <button

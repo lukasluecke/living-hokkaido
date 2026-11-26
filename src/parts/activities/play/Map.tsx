@@ -9,6 +9,7 @@ import { Cite, complete, type KindProps } from "../kinds/shared";
 import { FIGURE_BOX, FigureArt } from "./Figures";
 import { mapFinished, mapScore, startMap, stepMap } from "./mapLogic";
 import p from "./play.module.css";
+import { SHOW_DISCLAIMERS } from "@/design/disclaimers";
 
 export function MapActivity({ activity: a, claims, emit }: KindProps<"map">) {
   const tr = useT();
@@ -146,9 +147,11 @@ export function MapActivity({ activity: a, claims, emit }: KindProps<"map">) {
             {current.gloss}
             {current.region ? ` · ${current.region}` : ""}
           </p>
-          <span className="draft">
-            {tr("Draft · spelling not yet reviewed")}
-          </span>
+          {SHOW_DISCLAIMERS && (
+            <span className="draft">
+              {tr("Draft · spelling not yet reviewed")}
+            </span>
+          )}
           <Cite
             claim={claims[current.claimId]}
             onReveal={() => reveal(current.claimId)}
