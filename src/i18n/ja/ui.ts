@@ -420,4 +420,6 @@ export const jaUi: Record<string, string> = {
   "Highlight: {title}": "見どころ：{title}",
   "Quick questions": "かんたんな問題",
   done: "済み",
+  "Reset progress": "進み具合をリセット",
+  "Tap again to reset": "もう一度押すとリセット",
 };

@@ -104,9 +104,8 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
   const [journal, setJournal] = useState<JournalState>(EMPTY_JOURNAL);
   const [toast, setToast] = useState<string | null>(null);
   // Guide line and toast hold English text; they are translated on render.
-  const [guideLine, setGuideLine] = useState(
-    source.guide.find((g) => g.on === "start")?.text ?? "",
-  );
+  const startLine = source.guide.find((g) => g.on === "start")?.text ?? "";
+  const [guideLine, setGuideLine] = useState(startLine);
   const journalRef = useRef(journal);
   journalRef.current = journal;
   // Sound (src/audio): ambient follows view + season; events play cues.
@@ -228,6 +227,10 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
         (g) => g.on === e.type && (!g.targetId || g.targetId === target),
       );
       if (line) setGuideLine(line.text);
+      // The welcome is for the first look at the island only: once the
+      // visitor sets off, it must not come back (or be read out) later.
+      else if (e.type === "location.select" || e.type === "highlight.open")
+        setGuideLine((prev) => (prev === startLine ? "" : prev));
       for (const id of earned) {
         soundEvent({ type: "stamp.earned", stampId: id });
         setToast(source.stamps.find((x) => x.id === id)?.title ?? id);
@@ -384,7 +387,12 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
     (state.view !== "island" || journal.visited.length > 0)
       ? tourHighlight.owl
       : guideLine;
-  const owlShown = !!owlLine && state.view !== "activity" && !state.overlay;
+  // No bubble while the owl flies: the arrival line follows on landing.
+  const owlShown =
+    !!owlLine &&
+    state.view !== "activity" &&
+    state.view !== "travel" &&
+    !state.overlay;
   // Voice file ids (scripts/audio/voices.ts): guide ids, "highlight-<id>".
   const owlVoiceId =
     source.guide.find((g) => g.text === owlLine)?.id ??
@@ -447,6 +455,14 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
           stations={stations}
           locale={locale}
           onLocale={chooseLocale}
+          onResetProgress={() => {
+            // Demo: forget stamps and highlights done (language and sound
+            // stay), then reload so the first-visit welcome shows again.
+            try {
+              localStorage.removeItem(JOURNAL_STORAGE_KEY);
+            } catch {}
+            window.location.reload();
+          }}
           onOverTime={
             localTimeline
               ? () =>
@@ -454,7 +470,7 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
               : undefined
           }
         />
-        {owlLine && state.view !== "activity" && !state.overlay && (
+        {owlShown && (
           <section className={s.owl} aria-label={t("Owl guide")}>
             <OwlMark />
             <div className={s.bubble}>
