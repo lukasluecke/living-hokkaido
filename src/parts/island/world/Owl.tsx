@@ -127,6 +127,9 @@ export const Owl = forwardRef<
       s.t < 1
         ? Math.sin(state.clock.elapsedTime * 14) * 0.9
         : Math.sin(state.clock.elapsedTime * 1.5) * 0.05 - 0.1;
+    // The generated body has folded wings: its code wings show only in flight.
+    for (const w of [wl.current, wr.current])
+      if (w) w.visible = !w.userData.flyOnly || s.t < 1;
     if (wl.current) wl.current.rotation.z = 0.2 + flap;
     if (wr.current) wr.current.rotation.z = -0.2 - flap;
     if (!s.curve || s.t >= 1) {
@@ -234,7 +237,7 @@ function GlbOwlBody({ wl, wr }: Wings) {
   return (
     <>
       <primitive object={obj} />
-      <CodeWings wl={wl} wr={wr} />
+      <CodeWings wl={wl} wr={wr} flyOnly />
       <sprite position={[0, 0.42, 0]} scale={2.4}>
         <spriteMaterial
           map={halo}
@@ -250,7 +253,7 @@ function GlbOwlBody({ wl, wr }: Wings) {
   );
 }
 
-function CodeWings({ wl, wr }: Wings) {
+function CodeWings({ wl, wr, flyOnly = false }: Wings & { flyOnly?: boolean }) {
   return (
     <>
       {[
@@ -261,6 +264,7 @@ function CodeWings({ wl, wr }: Wings) {
           key={s as number}
           ref={ref as React.RefObject<Group>}
           position={[(s as number) * 0.36, 0.45, -0.04]}
+          userData={{ flyOnly }}
         >
           <mesh
             position={[(s as number) * 0.3, -0.04, 0]}
