@@ -18,8 +18,8 @@ const clip = (key: string, title: string, audio = false): ClipInput => ({
 });
 
 /**
- * Era id → clip. Only keys that are uploaded to the bucket. The round-2 "meiji" prompt came out as a present-day river town, so that clip
- * is used for "today" (key keeps its file name). Round 3
+ * Era id → clip. Only keys that are uploaded to the bucket. Round 4 gave
+ * "today" in the same look as the other eras. Round 3
  * (owl-film look: dusk, hearth light, people in plain robes) gave flat-ground,
  * the night pit dwellings, cise-and-kotan and Meiji.
  */
@@ -40,7 +40,7 @@ export const ERA_CLIPS: Record<string, ClipInput> = {
     true,
   ),
   meiji: clip("era-4-meiji-v3.mp4", "Watch: the river mouth in this era", true),
-  today: clip("era-4-meiji.mp4", "Watch: the river mouth today"),
+  today: clip("era-5-today-v3.mp4", "Watch: the river mouth today", true),
 };
 
 /** Scene id → ambient postcard. */
@@ -48,7 +48,7 @@ export const SCENE_CLIPS: Record<string, ClipInput> = {
   "herring-coast": clip("place-coast.mp4", "Watch: the coast", true),
   "survey-forest": clip("place-forest-night.mp4", "Watch: the forest", true),
   "animal-hills": clip("place-hills.mp4", "Watch: the hills", true),
-  "coal-mountain": clip("place-mine.mp4", "Watch: the mountain", true),
+  "coal-mountain": clip("place-mine-night.mp4", "Watch: the mountain", true),
 };
 
 export function withSceneClips(list: DetailSceneInput[]): DetailSceneInput[] {
