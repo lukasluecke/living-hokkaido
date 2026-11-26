@@ -5,8 +5,10 @@ The product is the priority. No sponsor is required for the demo or architecture
 | Candidate | Natural role | Current state | Fallback / stop rule |
 |---|---|---|---|
 | ElevenLabs | Consented synthetic narration or optional assisted interview; curator voice memories (speech-to-text, dubbing into visitor languages with a consented voice clone) | Voice memories: server adapter written against the official docs, not yet called live (no key). Mock is the default. See [VOICE-MEMORIES.md](VOICE-MEMORIES.md) | Curator-typed transcript, original audio only, translation marked "Mock, not translated"; no clone without recorded consent; Ainu content marked as draft for the review pass |
+| OpenAI-compatible LLM (Z.ai / CarbonForge) | Ask the owl; source ingestion drafts cited claims and a quiz ([INGEST.md](INGEST.md)) | Server adapter `src/integrations/llm`; ingestion tested against a local fake server only | Mock draft (one claim per source sentence); claims without a verbatim source quote are dropped; human review always |
 | Adaption Labs | Improve source extraction or source-grounded activity generation | Typed CulturalAI contract; deterministic mock | Manual review and template activity. Partner deck describes Adaptive Data and AutoScientist/custom models; verify actual API/product fit before committing |
-| OrcaRouter | Optional external-model routing/guardrails | Unavailable; external processing denied | Local mock; never claim firewall protection is active |
+| OrcaRouter | Guard before the ingestion model call (gateway with input guardrails) | Wired in `src/integrations/guard`, off without `ORCAROUTER_API_KEY`; not called live | Direct model call with local rules (quote check, risk flags); never claim firewall protection is active |
+| Linkup | Suggest more sources for the reviewer in ingestion ([INGEST.md](INGEST.md)) | Wired in `src/integrations/research`, off without `LINKUP_API_KEY`; not called live | No suggestions; suggestions never become claims |
 | Hyper3D Rodin | Original non-sensitive scene props | No-op/null | Original primitives/GLB; never manufacture “museum scans” |
 | PixVerse | Optional cinematic transition | No-op/null | Immediate scene change; no blocked navigation |
 | Convex | Shared drafts, review/audit, storage | Proposed contract only | Session memory; do not claim durable storage |
