@@ -328,15 +328,18 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
           : nextEvent?.type === "journal.open"
             ? UI_ICON.journal
             : UI_ICON.place;
-  // Owl tour: the owl says the next highlight's line; the first island
-  // visit keeps the welcome.
   const tourHighlight =
     nextEvent?.type === "highlight.open"
       ? pack.highlights.find((h) => h.id === nextEvent.highlightId)
       : undefined;
+  // One line per moment: on the island (after the first visit) and in the
+  // highlight's own place the owl says the highlight's line; in any other
+  // place it keeps that place's own line, and the button offers the tour.
   const owlLine =
     tourHighlight?.owl &&
-    (state.view !== "island" || journal.visited.length > 0)
+    (state.view === "island"
+      ? journal.visited.length > 0
+      : tourHighlight.locationId === state.locationId)
       ? tourHighlight.owl
       : guideLine;
   // No bubble while the owl flies: the arrival line follows on landing.

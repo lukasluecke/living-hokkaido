@@ -40,6 +40,9 @@ export type ExperienceState = {
   timelineId?: string | null;
   /** Highlight to open when the owl lands (set by highlight.open). */
   pendingHighlightId?: string | null;
+  /** On the owl's highlights tour (set by highlight.open). Picking a place
+   *  yourself pauses it until you are back on the island. */
+  touring?: boolean;
   season: SeasonState;
   prefs: Prefs;
 };
