@@ -713,8 +713,8 @@
   color: #8a98a6;
 }
 .place :global(.frame) svg {
-  width: 48px;
-  height: 64px;
+  width: 36px;
+  height: 48px;
 }
 .place :global(.frame):global(.bad) {
   outline: 2px solid #e0805a;
@@ -726,7 +726,19 @@
   outline-offset: -2px;
 }
 .place :global(.stepcard) {
-  margin-top: 10px;
+  margin-bottom: 8px;
+}
+.place :global(.voice) {
+  display: flex;
+  gap: 6px;
+}
+.place :global(.toggle):global(.listen) {
+  background: var(--lh-gold);
+  border-color: var(--lh-gold-deep);
+  font-weight: 700;
+}
+.place :global(.source) {
+  margin-top: 8px;
 }
 .place :global(.stepno) {
   display: flex;
@@ -750,8 +762,8 @@
   background: #1d2a36;
   color: #fbfaf6;
   border-radius: 8px;
-  padding: 10px 12px;
-  margin: 8px 0 4px;
+  padding: 8px 12px;
+  margin: 6px 0 4px;
 }
 .place :global(.caption) small {
   display: block;
@@ -762,18 +774,24 @@
 .place :global(.ask) {
   font-weight: 700;
 }
+.place :global(.hand) :global(.ask) {
+  margin: 0 0 2px;
+}
+.place :global(.hand) p:global(.small) {
+  margin: 0;
+}
 .place :global(.hand) {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
   background: var(--lh-paper-edge);
   border-radius: 8px;
-  padding: 8px 10px;
+  padding: 6px 10px;
   margin: 6px 0;
 }
 .place :global(.card) {
-  width: 70px;
-  height: 90px;
+  width: 54px;
+  height: 70px;
   flex: none;
   padding: 4px;
   border: 2px solid var(--lh-gold-deep);
@@ -787,13 +805,14 @@
   height: 100%;
 }
 .place :global(.hand) p b {
-  display: block;
+  margin-right: 4px;
 }
 .place :global(.msg) {
   border-left: 5px solid var(--lh-paper-edge);
   background: #fff8ea;
   border-radius: 6px;
-  padding: 8px 10px;
+  padding: 6px 10px;
+  margin: 4px 0;
 }
 .place :global(.msg):global(.ok) {
   border-left-color: #4f7f45;
