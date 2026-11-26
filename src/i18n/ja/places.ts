@@ -53,8 +53,24 @@ export const jaPlaces: Record<string, string> = {
     "ここでもうひとつゲーム。倉庫にふさわしくないものを探そう。",
   "Here we are. Let us lift the roof and look inside.":
     "着いたよ。屋根を持ち上げて、中をのぞいてみよう。",
+  "One object is waiting. Pick it up and turn it.":
+    "品がひとつ待っているよ。手に取って、回してみてね。",
+  "Two objects are waiting. Pick one up and turn it.":
+    "二つの品が待っているよ。ひとつ手に取って、回してみてね。",
   "Three objects are waiting. Pick one up and turn it.":
     "三つの品が待っているよ。ひとつ手に取って、回してみてね。",
+  "Four objects are waiting. Pick one up and turn it.":
+    "四つの品が待っているよ。ひとつ手に取って、回してみてね。",
+  "Five objects are waiting. Pick one up and turn it.":
+    "五つの品が待っているよ。ひとつ手に取って、回してみてね。",
+  "Six objects are waiting. Pick one up and turn it.":
+    "六つの品が待っているよ。ひとつ手に取って、回してみてね。",
+  "Seven objects are waiting. Pick one up and turn it.":
+    "七つの品が待っているよ。ひとつ手に取って、回してみてね。",
+  "Eight objects are waiting. Pick one up and turn it.":
+    "八つの品が待っているよ。ひとつ手に取って、回してみてね。",
+  "Nine objects are waiting. Pick one up and turn it.":
+    "九つの品が待っているよ。ひとつ手に取って、回してみてね。",
   "A quiet grove. Sit on a log and I will tell you a story.":
     "静かな林だね。丸太に座って。お話をしてあげるよ。",
   "Listen to my story, or learn some words for things.":

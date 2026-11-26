@@ -22,7 +22,7 @@ import {
   region,
   type Shot,
   type Step,
-  text,
+  typeInto,
   waitFor,
   waitForEvent,
 } from "./dsl";
@@ -55,30 +55,30 @@ function focusArtifact(id: string): Step[] {
 /** Open each hotspot of an artifact, with a short hold to read it. */
 function readHotspots(id: string, holdMs = 1600): Step[] {
   return art(id).hotspots.flatMap((h) => [
-    click(button(h.title), { optional: true, timeoutMs: 3000 }),
+    click(button(new RegExp(`${h.title}›?$`), false), {
+      optional: true,
+      timeoutMs: 3000,
+    }),
     hold(holdMs),
   ]);
 }
 
-/** Weave stub: click every cell in order. The D2 weave will replace this. */
-function weaveAll(activityId: string): Step[] {
-  const a = pack.activities.find((x) => x.id === activityId);
-  if (a?.kind !== "weave") return [];
-  const steps: Step[] = [];
-  for (let r = 1; r <= a.rows; r++)
-    for (let c = 1; c <= a.columns; c++)
-      steps.push(
-        click(
-          { label: `Row ${r}, column ${c}` },
-          { moveMs: 25, pauseMs: 0, timeoutMs: 2000, optional: true },
-        ),
-      );
-  return steps;
-}
+const fiber = art("fiber");
+const herring = pack.island.locations.find((l) => l.id === "herring-coast");
+const yard = pack.activities.find((a) => a.id === "place-herring-yard");
+const slope = pack.activities.find((a) => a.kind === "slope-run");
+const hideSeek = pack.activities.find((a) => a.kind === "hide-seek");
+/** The recorded live reply (ask-live.json) answers exactly this question. */
+const ASK = "How was cloth made from bark?";
 
-const cloth = art("cloth");
-const weaveId = cloth.activityIds[0] ?? "weave-rows";
+/** Back to the island from any view: close what is open, then Esc. */
+const toIsland: Step[] = [
+  click(button("Back to the island"), { fallback: press("Escape") }),
+  waitFor(button(location.title), { optional: true }),
+  hold(1500),
+];
 
+// The order follows docs/DEMO-SCRIPT.md.
 export const shots: Shot[] = [
   {
     id: "island",
@@ -86,100 +86,162 @@ export const shots: Shot[] = [
     steps: [
       mark("Island"),
       caption("Explore the island"),
-      hold(3000),
-      // A slow orbit if the island is 3D. Harmless on the HTML stub.
-      drag([-240, 0], { ms: 2500, optional: true }),
-      hold(800),
-      click(button(new RegExp(`^${location.title}`), false)),
+      hold(3500),
+      drag([-140, 0], { ms: 3000, optional: true }),
+      hold(1200),
+      click(button(location.title)),
       captionClear(),
       waitForEvent("owl.arrived", { timeoutMs: 15000, fallbackMs: 1500 }),
     ],
   },
   {
     id: "scene",
-    title: "Roof-lift entry into the house",
+    title: "Roof-lift entry into the lake house",
     steps: [
       mark(scene.title),
-      waitFor(region(scene.title), { optional: true, timeoutMs: 15000 }),
       waitForEvent("scene.ready", {
         timeoutMs: 15000,
         fallbackMs: 500,
         optional: true,
       }),
-      hold(3500),
+      hold(3000),
+      // A slow look around the room before picking an object.
+      drag([-200, 0], { ms: 3000, optional: true }),
+      hold(1500),
     ],
   },
   {
     id: "artifact",
-    title: "Inspect an object and its hotspots",
+    title: "Object card, hotspots and How do we know?",
     steps: [
-      mark(cloth.label),
-      ...focusArtifact(cloth.id),
-      hold(1500),
-      // Pick up and turn (3D viewer). Harmless on the HTML stub.
-      drag([300, 0], { ms: 2000, optional: true }),
-      ...readHotspots(cloth.id),
-    ],
-  },
-  {
-    id: "reveal",
-    title: "How do we know? (source, claim, review)",
-    steps: [
+      mark(fiber.label),
+      ...focusArtifact(fiber.id),
+      hold(2000),
+      drag([260, 0], { ms: 2200, optional: true }),
+      hold(600),
+      ...readHotspots(fiber.id, 2200).slice(0, 2),
       mark("How do we know?"),
       click(button("How do we know?")),
-      waitFor(region("How this was made"), { optional: true }),
-      hold(4500),
-      click(button("Turn back"), { fallback: press("Escape") }),
+      hold(5500),
+      click(button("Close"), { fallback: press("Escape") }),
+      hold(900),
+    ],
+  },
+  {
+    id: "ask",
+    title: "Ask the owl (live AI, cited claims)",
+    steps: [
+      mark("Ask the owl"),
+      ...toIsland,
+      click(button("Ask the owl")),
+      hold(1200),
+      typeInto({ label: "Your question" }, ASK),
+      hold(400),
+      press("Enter"),
+      waitFor(
+        { label: "From the sources" },
+        {
+          optional: true,
+          timeoutMs: 30000,
+        },
+      ),
+      hold(7000),
+      click(button("Close Ask the owl"), { optional: true }),
       hold(800),
     ],
   },
   {
-    id: "activity",
-    title: "Weave activity",
+    id: "build",
+    title: "Herring coast: Build the scene",
+    enabled: !!herring && !!yard,
     steps: [
-      mark("Activity"),
-      click(button(/^Weave: /, false), { optional: true }),
-      hold(1500),
-      ...weaveAll(weaveId),
+      mark("Build the scene"),
+      click(button(herring?.title ?? "Herring coast")),
+      waitForEvent("scene.ready", { timeoutMs: 20000, fallbackMs: 6000 }),
+      hold(2500),
+      click(button(/^Try here/, false)),
+      hold(1200),
+      click(button(new RegExp(yard?.title ?? "Build the"), false)),
       hold(3000),
-      click(button("Close"), { fallback: press("Escape"), optional: true }),
+      click(button("Next step")),
+      hold(2500),
+      click(button(/^Put Straw hat at ring 1/, false), { optional: true }),
+      hold(1200),
+      click(button(/Haul a net$/, false), { optional: true }),
+      hold(3500),
+      click(button("Close activity"), { fallback: press("Escape") }),
       hold(800),
     ],
   },
   {
-    id: "journal",
-    title: "Heritage Journal with stamps",
+    id: "games",
+    title: "Erina's games: Out of Place and Don't Fall on the Slope",
+    enabled: !!slope,
     steps: [
-      mark("Journal"),
-      click(button(/^Journal/, false), { fallback: press("j") }),
-      waitFor(region("Heritage Journal"), { optional: true }),
-      hold(4000),
+      mark("Erina's games"),
+      click(button(/^Try here/, false)),
+      hold(1000),
+      click(button(new RegExp(hideSeek?.title ?? "Out of Place"), false), {
+        optional: true,
+      }),
+      hold(1500),
+      click({ text: /^What the game is based on/ }, { optional: true }),
+      hold(3000),
+      click(button("Back"), { fallback: press("Escape"), optional: true }),
+      hold(800),
+      click(button(/^Try here/, false), { optional: true }),
+      hold(1000),
+      click(button(new RegExp(slope?.title ?? "Slope"), false)),
+      hold(2000),
+      // Synthetic clicks: a real click (user activation) on Play crashed
+      // headless Chromium in the Linux container. The video looks the same.
+      click(button("Play"), { synthetic: true }),
+      hold(3000),
+      click(button("Slip"), { synthetic: true, fallback: press("Enter") }),
+      hold(1500),
+      press("ArrowLeft"),
+      hold(1200),
+      press("ArrowRight"),
+      hold(1500),
+      press("ArrowLeft"),
+      hold(2500),
+      press("ArrowRight"),
+      hold(2500),
+      press("Escape"),
+      hold(1500),
+      click(button("Close activity"), { optional: true }),
+      hold(800),
+    ],
+  },
+  {
+    id: "seasons",
+    title: "Season timelapse on the island",
+    steps: [
+      mark("Seasons"),
+      ...toIsland,
+      click(button(/^Menu: seasons/, false)),
+      hold(800),
+      click(button("Timelapse")),
+      hold(9000),
+      click(button("Pause"), { optional: true }),
+      hold(1000),
       press("Escape"),
       hold(600),
     ],
   },
   {
-    id: "outro",
-    title: "Back out to the island",
+    id: "journal",
+    title: "Heritage Journal with the earned stamps",
     steps: [
-      mark("Outro"),
-      press("Escape"), // focus -> scene
-      hold(1200),
-      press("Escape"), // scene -> island
-      waitFor(text(location.title), { optional: true }),
-      hold(3000),
-    ],
-  },
-  {
-    id: "timelapse",
-    title: "Season timelapse on the island (optional)",
-    enabled: false,
-    steps: [
-      mark("Seasons"),
-      click(button("Timelapse"), { optional: true }),
-      hold(12000),
-      click(button("Pause"), { optional: true }),
-      hold(1000),
+      mark("Journal"),
+      click(button(/^Journal \(/, false), { fallback: press("j") }),
+      waitFor(
+        { role: "dialog", name: "Heritage Journal" },
+        { optional: true, timeoutMs: 4000 },
+      ),
+      hold(5000),
+      click(button("Close"), { fallback: press("Escape") }),
+      hold(2500),
     ],
   },
 ];

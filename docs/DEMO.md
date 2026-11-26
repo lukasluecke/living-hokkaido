@@ -18,4 +18,4 @@ Submission checklist: correct public repository, root MIT LICENSE, README reprod
 
 ## Backup video
 
-`npm run demo:video -- --headed` drives the `/shell` flow and records a 1920×1080 MP4 in `recordings/`. Edit the shot list in `scripts/demo-video/steps.ts`. See [scripts/demo-video/README.md](../scripts/demo-video/README.md).
+`npm run demo:video -- --headed` drives the visitor flow of [DEMO-SCRIPT.md](DEMO-SCRIPT.md) and records a 1920×1080 MP4 in `recordings/`. Edit the shot list in `scripts/demo-video/steps.ts`. See [scripts/demo-video/README.md](../scripts/demo-video/README.md).
