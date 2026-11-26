@@ -7,6 +7,7 @@ import { type SceneArt, WORLD_H, WORLD_W } from "../art/common";
 import { SCENE_ART } from "../art/scenes";
 import {
   createRound,
+  hitTest,
   type Hider,
   type Phase,
   POSE_HITBOX,
@@ -131,6 +132,8 @@ export class GameScene extends Phaser.Scene {
   private zoomed = false;
   private stroking = false;
   private dragging = false;
+  /** Feet minus pointer when a drag starts on Nuri, so Nuri does not jump. */
+  private grab = { x: 0, y: 0 };
   private lastDab: { x: number; y: number } | null = null;
   private lastShownSeconds = -1;
   private lastHider: Hider | null = null;
@@ -572,7 +575,13 @@ export class GameScene extends Phaser.Scene {
         if (this.state.phase === "disguise") {
           if (this.tool === "move") {
             this.dragging = true;
-            this.tryMove(w.x, w.y);
+            const h = this.state.hider;
+            // Grabbed Nuri: keep the grab point under the finger. Tapped
+            // elsewhere: walk Nuri's feet to the tap.
+            this.grab = hitTest(h, w.x, w.y)
+              ? { x: h.x - w.x, y: h.y - w.y }
+              : { x: 0, y: 0 };
+            this.tryMove(w.x + this.grab.x, w.y + this.grab.y);
           } else if (this.tool === "brush") {
             this.nuri.beginStroke();
             this.stroking = true;
@@ -591,8 +600,13 @@ export class GameScene extends Phaser.Scene {
       if (this.state.phase !== "disguise") return;
       const w = cam.getWorldPoint(p.x, p.y);
       this.drawBrushPreview(w.x, w.y);
-      if (!p.isDown) return;
-      if (this.dragging) this.tryMove(w.x, w.y);
+      if (!p.isDown) {
+        // A release we missed (outside the window, or a cancelled touch).
+        this.dragging = this.stroking = false;
+        this.lastDab = null;
+        return;
+      }
+      if (this.dragging) this.tryMove(w.x + this.grab.x, w.y + this.grab.y);
       if (this.stroking && this.lastDab) {
         // Fill the gap between pointer events so fast strokes stay continuous.
         const r = BRUSH_RADIUS[this.brushSize];
@@ -1017,9 +1031,31 @@ export class GameScene extends Phaser.Scene {
     );
   }
 
+  /**
+   * Moves Nuri toward (x, y). When the target is blocked (a wall, the water),
+   * Nuri slides along the edge or goes to the open spot closest to it on the way,
+   * instead of freezing until the pointer is back on open ground.
+   */
   private tryMove(x: number, y: number) {
-    if (this.art.walkable(x, y))
-      this.dispatch({ type: "moveHider", x: Math.round(x), y: Math.round(y) });
+    const { x: hx, y: hy } = this.state.hider;
+    const go = (tx: number, ty: number) =>
+      this.dispatch({
+        type: "moveHider",
+        x: Math.round(tx),
+        y: Math.round(ty),
+      });
+    if (this.art.walkable(x, y)) return go(x, y);
+    if (this.art.walkable(x, hy)) return go(x, hy);
+    if (this.art.walkable(hx, y)) return go(hx, y);
+    const steps = Math.ceil(Math.hypot(x - hx, y - hy) / 4);
+    let best: [number, number] | null = null;
+    for (let i = 1; i <= steps; i++) {
+      const t = i / steps;
+      const px = hx + (x - hx) * t;
+      const py = hy + (y - hy) * t;
+      if (this.art.walkable(px, py)) best = [px, py];
+    }
+    if (best) go(best[0], best[1]);
   }
 
   private pickColor(x: number, y: number) {

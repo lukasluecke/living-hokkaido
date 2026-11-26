@@ -272,8 +272,8 @@ export const jaUi: Record<string, string> = {
   "I said it aloud": "声に出して言った",
   "Listen again": "もう一度聞く",
   "Matched: “{text}” · {gloss}.": "結びついた: 「{text}」 · {gloss}。",
-  "Mouse, touch or keyboard. Hide: arrows move, E picks a colour, F fills, Z undoes, 1–3 pose. Seek: arrows and Space. Enter goes on.":
-    "マウス、タッチ、キーボードで遊べます。かくす: 矢印で動く、Eで色を選ぶ、Fでぬる、Zで元にもどす、1〜3でポーズ。さがす: 矢印とスペース。Enterで先へ。",
+  "Mouse, touch or keyboard. Hide: arrows move, E picks a colour, F fills, Z undoes, 1–4 pose. Seek: arrows and Space. Enter goes on.":
+    "マウス、タッチ、キーボードで遊べます。かくす: 矢印で動く、Eで色を選ぶ、Fでぬる、Zで元にもどす、1〜4でポーズ。さがす: 矢印とスペース。Enterで先へ。",
   "Next line": "次のせりふ",
   "Next step": "次の手順",
   "Next: string {n}.": "次: {n}番の弦。",

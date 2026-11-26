@@ -77,6 +77,11 @@ the diff):
 10. Out of Place, Erina's open M7 task, one commit: Save card (I) saves
    the reveal history card as a 9:16 PNG (`cardImage` in `game/clip.ts`);
    long facts shrink to fit above the honesty footer.
+11. Out of Place, Lukas's feedback, one commit: no contact shadow under
+   Nuri (the brush could not paint it, so it gave Nuri away); Move keeps
+   the grab point under the finger, and a blocked target (a wall, the
+   water) slides Nuri along the edge instead of freezing (`tryMove`,
+   `game/nuri.ts`); a missed release ends the drag.
 
 ## Sapporo Omusha (Shaw)
 
