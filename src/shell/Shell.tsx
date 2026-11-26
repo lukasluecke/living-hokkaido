@@ -359,7 +359,10 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
     setGuideVoiced(false);
     if (!owlShown || sound.muted || !owlVoiceId) return stopVoiceLine();
     let live = true;
-    void playVoiceLine("owl", owlVoiceId, 0.9, owlLine).then(
+    // Highlight lines are checked against their text (in the page's
+    // language), so a file made from an older line stays silent.
+    const said = owlVoiceId.startsWith("highlight-") ? t(owlLine) : undefined;
+    void playVoiceLine("owl", owlVoiceId, 0.9, said).then(
       (ok) => live && setGuideVoiced(ok),
     );
     return () => {
