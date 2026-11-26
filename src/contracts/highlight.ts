@@ -25,6 +25,8 @@ export const highlightSchema = z.object({
   icon: z.string().min(1),
   locationId: idSchema,
   open: highlightTargetSchema,
+  /** false: shown as a highlight, but the owl's tour skips it (additive). */
+  tour: z.boolean().default(true),
   /** What the owl says when the tour offers this highlight. */
   owl: z.string().optional(),
   /**

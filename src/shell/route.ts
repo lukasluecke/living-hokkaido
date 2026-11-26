@@ -130,6 +130,7 @@ export function tourStep(
   const here = state.view === "island" ? null : state.locationId;
   const todo = pack.highlights.filter(
     (h) =>
+      h.tour &&
       !highlightDone(h, journal) &&
       !(state.tourPassed ?? []).includes(h.id) &&
       pack.island.locations.some(
