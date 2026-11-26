@@ -205,3 +205,54 @@ test("owl tour: the film step opens the film; closing it marks it watched", () =
   st = reduce(pack, st, { type: "nav.back" });
   assert.equal(st.filmOpen, false);
 });
+
+test("owl tour: closing a highlight activity before it is done moves on", () => {
+  const j = {
+    ...EMPTY_JOURNAL,
+    visited: ["listening-grove", "lake-house"],
+    filmsSeen: ["listening-grove"],
+    completed: ["pluck-tonkori"],
+  };
+  let st = reduce(pack, initialState(prefs), {
+    type: "highlight.open",
+    highlightId: "omusha",
+  });
+  st = reduce(pack, st, { type: "owl.arrived", locationId: "memory-cabin" });
+  assert.equal(st.activityId, "omusha-look");
+  st = reduce(pack, st, { type: "activity.close", activityId: "omusha-look" });
+  assert.deepEqual(st.tourPassed, ["omusha"]);
+  assert.deepEqual(tourStep(pack, st, j)?.event, {
+    type: "highlight.open",
+    highlightId: "slope",
+  });
+  // Not on the tour: closing does not pass the highlight.
+  let own = reduce(pack, initialState(prefs), {
+    type: "location.select",
+    locationId: "memory-cabin",
+  });
+  own = reduce(pack, own, { type: "owl.arrived", locationId: "memory-cabin" });
+  own = reduce(pack, own, {
+    type: "activity.start",
+    activityId: "omusha-look",
+  });
+  own = reduce(pack, own, {
+    type: "activity.close",
+    activityId: "omusha-look",
+  });
+  assert.equal(own.tourPassed, undefined);
+});
+
+test("owl tour: skip a step without doing it", () => {
+  let st = initialState(prefs);
+  st = reduce(pack, st, { type: "highlight.skip", highlightId: "owl-film" });
+  assert.equal(st.touring, true);
+  assert.deepEqual(tourStep(pack, st, EMPTY_JOURNAL)?.event, {
+    type: "highlight.open",
+    highlightId: "tonkori",
+  });
+  assert.ok(!highlightDone(h("owl-film"), EMPTY_JOURNAL));
+  assert.equal(
+    reduce(pack, st, { type: "highlight.skip", highlightId: "nope" }),
+    st,
+  );
+});

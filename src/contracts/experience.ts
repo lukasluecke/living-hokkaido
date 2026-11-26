@@ -43,6 +43,10 @@ export type ExperienceState = {
   /** On the owl's highlights tour (set by highlight.open). Picking a place
    *  yourself pauses it until you are back on the island. */
   touring?: boolean;
+  /** Highlights the visitor tried on the tour and closed before finishing
+   *  (a diorama with notes left to read). The tour goes on past them; the
+   *  journal still counts only real completions. Session only. */
+  tourPassed?: string[];
   /** The scene's story film is open (film.open; a tour film step). */
   filmOpen?: boolean;
   season: SeasonState;

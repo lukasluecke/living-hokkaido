@@ -67,6 +67,17 @@ export function reduce(
         touring: true,
       };
     }
+    case "highlight.skip": {
+      if (!pack.highlights.some((x) => x.id === e.highlightId)) return s;
+      const passed = s.tourPassed ?? [];
+      return {
+        ...s,
+        touring: true,
+        tourPassed: passed.includes(e.highlightId)
+          ? passed
+          : [...passed, e.highlightId],
+      };
+    }
     case "owl.arrived": {
       if (s.view !== "travel" || s.locationId !== e.locationId) return s;
       const loc = pack.island.locations.find((l) => l.id === e.locationId);
@@ -115,7 +126,7 @@ export function reduce(
       return s;
     case "activity.close":
       return {
-        ...s,
+        ...passHighlight(pack, s, e.activityId),
         view: s.artifactId ? "focus" : s.sceneId ? "scene" : "island",
         activityId: null,
       };
@@ -164,7 +175,7 @@ export function reduce(
         return { ...s, overlay: null, reveal: null, timelineId: null };
       if (s.view === "activity")
         return {
-          ...s,
+          ...passHighlight(pack, s, s.activityId),
           view: s.artifactId ? "focus" : "scene",
           activityId: null,
         };
@@ -205,4 +216,20 @@ function openHighlight(
   if (h.open.kind === "timeline")
     return { ...base, overlay: "timeline", timelineId: h.open.timelineId };
   return base;
+}
+
+/** On the tour, closing a highlight's activity moves the tour on, even when
+ *  the visitor did not finish it (Lukas: "how to proceed beyond it?"). */
+function passHighlight(
+  pack: ContentPack,
+  s: ExperienceState,
+  activityId: string | null,
+): ExperienceState {
+  if (!s.touring || !activityId) return s;
+  const h = pack.highlights.find(
+    (x) => x.open.kind === "activity" && x.open.activityId === activityId,
+  );
+  const passed = s.tourPassed ?? [];
+  if (!h || passed.includes(h.id)) return s;
+  return { ...s, tourPassed: [...passed, h.id] };
 }

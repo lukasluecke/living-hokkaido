@@ -131,6 +131,7 @@ export function tourStep(
   const todo = pack.highlights.filter(
     (h) =>
       !highlightDone(h, journal) &&
+      !(state.tourPassed ?? []).includes(h.id) &&
       pack.island.locations.some(
         (l) => l.id === h.locationId && l.status === "open",
       ),

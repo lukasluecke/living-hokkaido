@@ -46,7 +46,7 @@ import {
   kindIconPath,
   UI_ICON,
 } from "@/parts/shared/Icon";
-import { route } from "./route";
+import { route, tourStep } from "./route";
 import s from "./Shell.module.css";
 import { SidePanel } from "./SidePanel";
 import { initialState, reduce } from "./state";
@@ -423,6 +423,31 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
   useEffect(() => {
     if (!calm && !introDone) setIntroDone(true);
   }, [calm, introDone]);
+  // On the tour, an open highlight activity offers the next step, so the
+  // visitor never has to finish it to go on (the diorama has many notes).
+  const tourNext =
+    state.view === "activity" && state.touring && activity
+      ? tourStep(
+          pack,
+          {
+            ...state,
+            view: state.artifactId ? "focus" : "scene",
+            activityId: null,
+            tourPassed: [
+              ...(state.tourPassed ?? []),
+              ...pack.highlights
+                .filter(
+                  (h) =>
+                    h.open.kind === "activity" &&
+                    h.open.activityId === activity.id,
+                )
+                .map((h) => h.id),
+            ],
+          },
+          journal,
+          t,
+        )
+      : null;
   const ink = seasonInk[SEASON_IDS.indexOf(seasonAt(state.season.value))];
 
   const stage =
@@ -579,6 +604,20 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
                   {t("Explore freely")}
                 </button>
               )}
+              {tourHighlight && (
+                <button
+                  type="button"
+                  className={s.explore}
+                  onClick={() =>
+                    emit({
+                      type: "highlight.skip",
+                      highlightId: tourHighlight.id,
+                    })
+                  }
+                >
+                  {t("Skip this step")}
+                </button>
+              )}
               {!calm && (
                 <button
                   type="button"
@@ -650,6 +689,24 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
                 emit({ type: "activity.close", activityId: activity.id })
               }
             >
+              {tourNext && (
+                <button
+                  type="button"
+                  className={`${s.next} ${s.tourNext}`}
+                  aria-label={tourNext.label}
+                  onClick={() => {
+                    emit({ type: "activity.close", activityId: activity.id });
+                    emit(tourNext.event);
+                  }}
+                >
+                  <span>
+                    {t("Next: {label}", {
+                      label: tourNext.name ?? tourNext.label,
+                    })}
+                  </span>
+                  <Icon d={UI_ICON.go} size={16} className={s.nextGo} />
+                </button>
+              )}
               <Activity
                 {...ctx}
                 activity={activity}
