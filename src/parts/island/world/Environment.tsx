@@ -311,7 +311,10 @@ export function FlowerField({
   );
 }
 
-/** Petals (spring), leaves (autumn), snow (winter): one Points draw call. */
+/** Light snowfall in winter that comes and goes (Lukas: "very subtle
+ *  ambient weather, snow falling sometimes"): one Points draw call. A
+ *  slow gust curve fades it in for about a minute, then out for a while.
+ *  Other seasons draw nothing (alpha 0). */
 export function Weather({ count = 2200 }: { count?: number }) {
   const geo = useMemo(() => {
     const R = rng(3),
@@ -342,7 +345,9 @@ export function Weather({ count = 2200 }: { count?: number }) {
             p.y = mod(p.y - uTime * fall * 2.0 * (0.6 + aRand), 26.0);
             p.x += sin(uTime * 0.7 + aRand * 30.0) * 1.3 + uTime * 0.35 * (1.0 - uW.w);
             p.x = mod(p.x + 35.0, 70.0) - 35.0;
-            vA = (uW.x * step(aRand, 0.35) + uW.z * step(aRand, 0.3) + uW.w) * smoothstep(0.0, 1.5, p.y) * smoothstep(26.0, 20.0, p.y);
+            float g = 0.5 + 0.5 * sin(uTime * 0.045 + 0.6) * sin(uTime * 0.017 + 1.3);
+            float gust = smoothstep(0.42, 0.62, g);
+            vA = 0.55 * uW.w * gust * smoothstep(0.0, 1.5, p.y) * smoothstep(26.0, 20.0, p.y);
             vec4 mv = modelViewMatrix * vec4(p, 1.0);
             gl_PointSize = (uW.w > 0.5 ? 3.5 : 5.0) * (60.0 / -mv.z);
             gl_Position = projectionMatrix * mv;
