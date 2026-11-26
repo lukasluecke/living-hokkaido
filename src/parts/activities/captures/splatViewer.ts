@@ -19,6 +19,10 @@ export type SplatViewerOptions = {
   onPick: (spotId: string) => void;
   onProgress?: (loaded: number, total: number) => void;
   reducedMotion: boolean;
+  /** iPhone/iPad: pixel ratio 1 and no LOD tree (less memory). */
+  safe?: boolean;
+  /** The GPU dropped the canvas (often memory on phones). */
+  onLost?: () => void;
 };
 
 export type SplatViewer = {
@@ -71,7 +75,13 @@ export async function mountSplatViewer(
     antialias: false,
     powerPreference: "high-performance",
   });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, weak ? 1.25 : 2));
+  renderer.setPixelRatio(
+    o.safe ? 1 : Math.min(devicePixelRatio, weak ? 1.25 : 2),
+  );
+  canvas.addEventListener("webglcontextlost", (ev) => {
+    ev.preventDefault();
+    o.onLost?.();
+  });
   renderer.setClearColor(0x14110e);
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(55, 1, 0.01, 500);
@@ -81,7 +91,7 @@ export async function mountSplatViewer(
     new SparkRenderer({
       renderer,
       blurAmount: 0.1,
-      lodSplatCount: weak ? 1e6 : 2.5e6,
+      lodSplatCount: o.safe ? 5e5 : weak ? 1e6 : 2.5e6,
     }),
   );
   const controls = new OrbitControls(camera, canvas);
@@ -190,6 +200,7 @@ export async function mountSplatViewer(
   const mesh = new SplatMesh({
     url: o.url,
     fileName: o.url.split("/").pop(),
+    ...(o.safe ? { lod: false } : {}),
     onProgress: (e: ProgressEvent) => {
       if (e.lengthComputable) o.onProgress?.(e.loaded, e.total);
     },
