@@ -444,7 +444,16 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
         artifacts={pack.artifacts.filter((a) =>
           scene.placements.some((p) => p.artifactId === a.id),
         )}
-        focusedArtifactId={state.artifactId}
+        // An open activity of a placed object (the Omusha case) frames that
+        // object, so it stays visible above the activity sheet.
+        focusedArtifactId={
+          state.artifactId ??
+          (state.view === "activity" &&
+          activity?.artifactId &&
+          scene.placements.some((p) => p.artifactId === activity.artifactId)
+            ? activity.artifactId
+            : null)
+        }
         inspectedArtifactIds={journal.inspected}
         filmOpen={!!state.filmOpen}
       />

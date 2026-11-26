@@ -148,7 +148,23 @@ function Director({
     if (!entered.current && focusedArtifactId) finish.current?.();
     if (!entered.current) return;
     const p = scene.placements.find((x) => x.artifactId === focusedArtifactId);
-    look(c, p ? p.focusView : scene.views.home, !prefs.reducedMotion);
+    // Phones: the card is a bottom sheet over most of the screen, so look a
+    // little lower; the object then sits in the free area above the sheet.
+    const sheet =
+      p && matchMedia("(max-width: 700px) and (orientation: portrait)").matches;
+    const v = p
+      ? sheet
+        ? {
+            eye: p.focusView.eye,
+            target: [
+              p.focusView.target[0],
+              p.focusView.target[1] - 0.45,
+              p.focusView.target[2],
+            ] as V3,
+          }
+        : p.focusView
+      : scene.views.home;
+    look(c, v, !prefs.reducedMotion);
   }, [focusedArtifactId, scene, controls, prefs.reducedMotion, finish]);
   return null;
 }
