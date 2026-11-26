@@ -27,7 +27,7 @@ export const locations: LocationInput[] = [
   {
     id: "listening-grove",
     title: "Listening grove",
-    teaser: "The owl’s story and words for things",
+    teaser: "The owl’s story film and words for things",
     status: "open",
     anchor: [-6.75, 0, -4.5],
     arrivalView: { eye: [-3.75, 6, 0.75], target: [-6.75, 0.6, -4.5] },

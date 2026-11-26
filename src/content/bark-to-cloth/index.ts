@@ -7,6 +7,7 @@ import { activities } from "./activities";
 import { areaActivities, areaArtifacts, areaScenes } from "./area-scenes";
 import { artifacts } from "./artifacts";
 import { withEraClips, withSceneClips } from "./clips";
+import { owlFilm } from "./films";
 import { withGenerated } from "./generated-models";
 import { gameActivities, gameActivityIdsByScene, gameKnowledge } from "./games";
 import { guide } from "./guide";
@@ -41,7 +42,7 @@ export const barkToClothRaw = {
   island: { owlHome, overview, locations },
   scenes: [
     lakeHouse,
-    listeningGrove,
+    { ...listeningGrove, film: owlFilm },
     makersClearing,
     memoryCabin,
     ...withSceneClips(areaScenes).map((sc) => ({

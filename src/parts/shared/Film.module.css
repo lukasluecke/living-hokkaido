@@ -1,0 +1,104 @@
+/* Story film card: paper card with a dark wooden "screen" frame and a plain
+   reed-mat band (no patterns: plain banded mats only, see detail-scene). */
+.hall {
+  font-family: var(--fl-body);
+}
+.head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+}
+.icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  font-size: 1.3rem;
+  background: repeating-linear-gradient(90deg, #c9ab72 0 3px, #b8975d 3px 5px);
+  border: 2px solid var(--fl-edge);
+}
+.text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+.kicker {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-variant: small-caps;
+  color: var(--fl-season-text);
+}
+.title {
+  font-family: var(--fl-heading);
+  font-size: 1rem;
+  line-height: 1.2;
+}
+.teaser {
+  font-size: 0.8rem;
+  color: var(--fl-ink-soft);
+  line-height: 1.3;
+}
+.play {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 2px solid var(--fl-edge);
+  background: var(--fl-gold);
+  color: var(--fl-ink);
+  box-shadow: var(--fl-lift);
+  font-size: 1rem;
+  cursor: pointer;
+}
+.play:hover {
+  background: var(--fl-gold-deep);
+}
+.play:focus-visible {
+  outline: 3px solid var(--fl-season);
+  outline-offset: 2px;
+}
+.soon {
+  flex: none;
+  font-size: 0.72rem;
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1.5px dashed var(--fl-ink-soft);
+  color: var(--fl-ink-soft);
+  white-space: nowrap;
+}
+.screen {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  border-radius: 6px;
+  background: #1d1a16;
+  /* Dark wood frame with a reed-mat band around the screen. */
+  outline: 6px solid #4a3424;
+  outline-offset: 0;
+  box-shadow: 0 0 0 10px #b8975d;
+  margin: 12px 10px 14px;
+  width: calc(100% - 20px);
+}
+.note {
+  margin: 0 0 8px;
+  font-size: 0.74rem;
+  line-height: 1.4;
+  color: var(--fl-ink-soft);
+}
+/* Phone: the note shows once the film is open, to keep the poster small. */
+@media (max-width: 700px) {
+  .hall:not([data-open]) .note {
+    display: none;
+  }
+  .hall:not([data-open]) .teaser {
+    display: none;
+  }
+}
