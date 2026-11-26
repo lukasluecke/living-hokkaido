@@ -165,3 +165,44 @@
     font-size: 30px;
   }
 }
+.partners {
+  list-style: none;
+  padding: 0;
+  margin: 14px 0 0;
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+}
+.partners li {
+  border: 1px solid #d4dccc;
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: #fffef9;
+}
+.on,
+.off {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+.on {
+  background: #315d50;
+  color: white;
+}
+.off {
+  background: #e8ebde;
+  color: #53664b;
+}
+.research {
+  margin: 10px 0 4px;
+}
+.research ul {
+  padding-left: 18px;
+  font-size: 14px;
+}
+.research small {
+  display: block;
+  font-size: 12px;
+  color: #5a4a3c;
+}

@@ -63,6 +63,8 @@ export type IngestDraft = {
   claims: DraftClaim[];
   /** Claims the model gave that failed the quote check. */
   dropped: number;
+  /** Which injection guard checked the model call (set by the route). */
+  guard?: { provider: string; active: boolean; notice: string };
 };
 
 export const MAX_CLAIMS = 6;

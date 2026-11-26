@@ -216,3 +216,105 @@ test("ingest: a full sentence before an injected one is not flagged", () => {
   );
   assert.equal(d?.claims[0]?.risks.includes("instruction"), false);
 });
+
+// ---------------------------------------------------------------- partners
+
+import { guardedModel, guardStatus } from "@/integrations/guard";
+import { parseLinkup, suggestSources } from "@/integrations/research";
+
+test("guard: no OrcaRouter key = local rules only, never claimed active", () => {
+  assert.equal(guardedModel({}), null);
+  const g = guardStatus({});
+  assert.equal(g.active, false);
+  assert.match(g.notice, /not connected/);
+});
+
+test("guard: with a key the model call goes to the OrcaRouter gateway", async () => {
+  const m = guardedModel({ ORCAROUTER_API_KEY: "k" });
+  assert.equal(m?.id, "orcarouter");
+  assert.equal(m?.model, "orcarouter/auto");
+  const real = globalThis.fetch;
+  let url = "";
+  let auth = "";
+  globalThis.fetch = (async (u: string, init: RequestInit) => {
+    url = u;
+    auth = (init.headers as Record<string, string>).Authorization ?? "";
+    return new Response("blocked by guardrail", { status: 403 });
+  }) as typeof fetch;
+  try {
+    await assert.rejects(
+      () => m?.complete([{ role: "user", content: "x" }]) ?? Promise.reject(),
+      /HTTP 403/,
+    );
+  } finally {
+    globalThis.fetch = real;
+  }
+  assert.equal(url, "https://api.orcarouter.ai/v1/chat/completions");
+  assert.equal(auth, "Bearer k");
+});
+
+test("research: no Linkup key = no call, no suggestions", async () => {
+  const real = globalThis.fetch;
+  globalThis.fetch = (() => assert.fail("must not call")) as typeof fetch;
+  try {
+    const r = await suggestSources("attus", {});
+    assert.equal(r.mode, "unavailable");
+    assert.equal(r.suggestions.length, 0);
+  } finally {
+    globalThis.fetch = real;
+  }
+});
+
+test("research: Linkup results become links only (https, text, deduplicated)", async () => {
+  const reply = {
+    results: [
+      {
+        type: "text",
+        name: "A",
+        url: "https://example.org/a",
+        content: "x ".repeat(400),
+      },
+      {
+        type: "text",
+        name: "A again",
+        url: "https://example.org/a",
+        content: "",
+      },
+      { type: "image", name: "img", url: "https://example.org/i.png" },
+      {
+        type: "text",
+        name: "Plain http",
+        url: "http://example.org/b",
+        content: "",
+      },
+      {
+        type: "text",
+        name: "B",
+        url: "https://example.org/b",
+        content: "short",
+      },
+    ],
+  };
+  const s = parseLinkup(reply);
+  assert.deepEqual(
+    s.map((x) => x.url),
+    ["https://example.org/a", "https://example.org/b"],
+  );
+  assert.ok((s[0]?.snippet.length ?? 0) <= 280);
+  assert.deepEqual(parseLinkup({ nope: 1 }), []);
+  const real = globalThis.fetch;
+  let body: Record<string, unknown> = {};
+  globalThis.fetch = (async (_u: string, init: RequestInit) => {
+    body = JSON.parse(String(init.body));
+    return Response.json(reply);
+  }) as typeof fetch;
+  try {
+    const r = await suggestSources("attus", { LINKUP_API_KEY: "k" });
+    assert.equal(r.mode, "live");
+    assert.equal(r.suggestions.length, 2);
+  } finally {
+    globalThis.fetch = real;
+  }
+  assert.equal(body.outputType, "searchResults");
+  assert.equal(body.q, "attus");
+});

@@ -11,6 +11,7 @@
   // capture on, create the bucket and add (vendor/README.md):
   //   "r2_buckets": [{ "binding": "MUSEUM_ASSETS", "bucket_name": "living-hokkaido-museum" }],
   // Secrets (set with `wrangler secret put`): LLM_API_KEY, optional ELEVENLABS_API_KEY,
-  // MUSEUM_ASSET_PASSWORD (demo password for museum captures).
+  // MUSEUM_ASSET_PASSWORD (demo password for museum captures), optional
+  // ORCAROUTER_API_KEY (ingestion guard) and LINKUP_API_KEY (source research).
   "vars": { "LLM_PROVIDER": "carbonforge" }
 }

@@ -43,6 +43,19 @@ passes the quote check → the deterministic mock draft (one claim per source
 sentence), labelled "Mock draft" with the reason. If the route cannot be
 reached, the browser makes the same mock.
 
+## Partner services (wired, off without a key)
+
+Both show a "connected / not connected" chip in step 1, so the place and the
+job of each service is visible even without keys. Neither is called live yet.
+
+| Service | Job in the flow | Switch on | Without a key |
+|---|---|---|---|
+| OrcaRouter (`src/integrations/guard`) | Guard before the model: the ingestion call goes through the OrcaRouter gateway (`https://api.orcarouter.ai/v1`, OpenAI-compatible, model `orcarouter/auto`). Its input guardrails (injection, jailbreak, PII, secrets) are attached to the key in the OrcaRouter console. Any non-2xx reply counts as "blocked or refused" and gives a mock draft with that reason (the docs we read do not give the block status code). | `ORCAROUTER_API_KEY` (optional `ORCAROUTER_MODEL`) | Direct model call, local rules only (quote check, risk flags, "instruction" flag) |
+| Linkup (`src/integrations/research`, `/api/research`) | "Find more sources to check": web search (`POST https://api.linkup.so/v1/search`, `depth: fast`, `outputType: searchResults`) on the title and the claims. Returns links with a short snippet. A suggestion is never a claim or a citation; the reviewer opens it and brings it in as its own source. Needs the same "send to AI" consent. | `LINKUP_API_KEY` | No call; the button explains what it would do |
+
+Set the keys as Cloudflare secrets (`wrangler secret put …`), like
+`LLM_API_KEY`.
+
 ## Limits (honest)
 
 - A quote check proves the words are in the source, not that they are a
@@ -60,5 +73,5 @@ reached, the browser makes the same mock.
   panel, paste a section of
   `docs/research/hokkaido-museum/transcriptions/panels.md`.
 
-Code: `src/domain/ingest.ts` (pure: schema, prompt, parse, quote check,
+Code: `src/integrations/guard`, `src/integrations/research`, `src/app/api/research/route.ts`, `src/domain/ingest.ts` (pure: schema, prompt, parse, quote check,
 flags, mock, export), `src/app/api/ingest/route.ts`, `tests/ingest.test.ts`.

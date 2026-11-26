@@ -42,6 +42,14 @@ const PRESETS: Record<
     model: "carbonforge-flash",
     extra: {},
   },
+  // OrcaRouter: OpenAI-compatible gateway with input guardrails (prompt
+  // injection, jailbreak, PII, secrets) attached to the key in its console.
+  // https://www.orcarouter.ai/ (read 2026-11-26). Used by src/integrations/guard.
+  orcarouter: {
+    baseUrl: "https://api.orcarouter.ai/v1",
+    model: "orcarouter/auto",
+    extra: {},
+  },
   zai: {
     baseUrl: "https://api.z.ai/api/paas/v4",
     model: "glm-5.3-flash",

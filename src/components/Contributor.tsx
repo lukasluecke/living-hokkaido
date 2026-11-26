@@ -21,7 +21,18 @@ import {
 import { approve, withdraw } from "@/domain/review";
 import s from "./Contributor.module.css";
 
-type Status = { live: boolean; provider: string; model: string | null };
+type Status = {
+  live: boolean;
+  provider: string;
+  model: string | null;
+  guard?: { provider: string; active: boolean; notice: string };
+  research?: boolean;
+};
+type Research = {
+  mode: "live" | "unavailable";
+  notice: string;
+  suggestions: { name: string; url: string; snippet: string }[];
+};
 
 const KINDS: { value: Source["kind"]; label: string }[] = [
   { value: "museum", label: "Museum panel or label" },
@@ -84,6 +95,50 @@ export default function Contributor({
   const [riskChecks, setRiskChecks] = useState<Partial<Record<Risk, boolean>>>(
     {},
   );
+  const [research, setResearch] = useState<Research | null>(null);
+  const [researching, setResearching] = useState(false);
+
+  async function findSources() {
+    if (!knowledge) return;
+    if (!status?.research) {
+      setResearch({
+        mode: "unavailable",
+        notice:
+          "Linkup not connected (no key on the server). With a key, this searches the web for more sources on these claims, for you to open and check. A suggestion never becomes a claim or a citation by itself.",
+        suggestions: [],
+      });
+      return;
+    }
+    if (!allowAi) {
+      setResearch({
+        mode: "unavailable",
+        notice: "Allow external processing in step 1 first.",
+        suggestions: [],
+      });
+      return;
+    }
+    setResearching(true);
+    try {
+      const res = await fetch("/api/research", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: knowledge.title,
+          claims: claims.map((c) => c.text),
+          allowAi,
+        }),
+      });
+      setResearch((await res.json()) as Research);
+    } catch {
+      setResearch({
+        mode: "unavailable",
+        notice: "Research did not answer. No suggestions.",
+        suggestions: [],
+      });
+    } finally {
+      setResearching(false);
+    }
+  }
 
   useEffect(() => {
     let alive = true;
@@ -114,6 +169,7 @@ export default function Contributor({
     setClaims([]);
     setReview(emptyReview);
     setRiskChecks({});
+    setResearch(null);
     onApproved?.(null);
     setMessage(note);
   }
@@ -414,6 +470,26 @@ export default function Contributor({
               ? `Send this text to the AI model (${status.model}) for a draft`
               : "AI model not configured on this server: the draft is a mock"}
           </label>
+          <ul className={s.partners} aria-label="Safety and research services">
+            <li>
+              <strong>Guard · OrcaRouter</strong>{" "}
+              <span className={status?.guard?.active ? s.on : s.off}>
+                {status?.guard?.active ? "connected" : "not connected"}
+              </span>
+              <br />
+              {status?.guard?.notice ??
+                "OrcaRouter not connected. Local rules only: quote check and risk flags."}
+            </li>
+            <li>
+              <strong>Research · Linkup</strong>{" "}
+              <span className={status?.research ? s.on : s.off}>
+                {status?.research ? "connected" : "not connected"}
+              </span>
+              <br />
+              Suggests more sources for the reviewer in step 2. Never adds
+              claims.
+            </li>
+          </ul>
           <div className="actions">
             <button
               type="button"
@@ -494,6 +570,42 @@ export default function Contributor({
                   </li>
                 ))}
               </ol>
+
+              <div className={s.research}>
+                <button
+                  type="button"
+                  className="secondary"
+                  disabled={researching}
+                  onClick={findSources}
+                >
+                  {researching
+                    ? "Searching…"
+                    : "Find more sources to check · Linkup"}
+                </button>
+                {research && (
+                  <>
+                    <p className="small">{research.notice}</p>
+                    {research.suggestions.length > 0 && (
+                      <ul>
+                        {research.suggestions.map((x) => (
+                          <li key={x.url}>
+                            <a href={x.url} target="_blank" rel="noreferrer">
+                              {x.name}
+                            </a>
+                            {x.snippet && <small>{x.snippet}</small>}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {research.suggestions.length > 0 && (
+                      <p className="small">
+                        Suggestion only, not a citation. To use one, open it,
+                        check it, and bring it in as its own source in step 1.
+                      </p>
+                    )}
+                  </>
+                )}
+              </div>
 
               <h2>3 · Proposed quiz</h2>
               {quiz ? (

@@ -1,8 +1,10 @@
-// Source ingestion (docs/INGEST.md). The key stays here on the server. The
-// model drafts cited claims and one quiz; every claim's quote is checked
-// against the source text. Any model or network problem falls back to the
-// deterministic mock draft, labelled as such. Nothing is stored and nothing
-// is approved here: approval is a human step in the contributor studio.
+// Source ingestion (docs/INGEST.md). Keys stay here on the server. The model
+// drafts cited claims and one quiz; every claim's quote is checked against
+// the source text. With ORCAROUTER_API_KEY the model call goes through the
+// OrcaRouter gateway and its guardrails; without it, only the local rules
+// run. Any model, guard or network problem falls back to the deterministic
+// mock draft, labelled as such. Nothing is stored and nothing is approved
+// here: approval is a human step in the contributor studio.
 import {
   type IngestDraft,
   ingestMessages,
@@ -10,17 +12,23 @@ import {
   mockDraft,
   parseIngestReply,
 } from "@/domain/ingest";
+import { guardedModel, guardStatus } from "@/integrations/guard";
 import { chatModel } from "@/integrations/llm";
+import { researchAvailable } from "@/integrations/research";
 
 export const dynamic = "force-dynamic";
 
-/** Which mode is active. Never returns the key. */
+const model = () => guardedModel() ?? chatModel();
+
+/** Which mode is active. Never returns a key. */
 export async function GET() {
-  const m = chatModel();
+  const m = model();
   return Response.json({
     live: !!m,
     provider: m?.id ?? "none",
     model: m?.model ?? null,
+    guard: guardStatus(),
+    research: researchAvailable(),
   });
 }
 
@@ -45,8 +53,9 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   const req = parsed.data;
-  const model = chatModel();
-  const reply = (d: IngestDraft) => Response.json(d);
+  const m = model();
+  const guard = guardStatus();
+  const reply = (d: IngestDraft) => Response.json({ ...d, guard });
   if (!req.allowAi)
     return reply(
       mockDraft(
@@ -54,7 +63,7 @@ export async function POST(request: Request) {
         "Mock draft: you did not allow AI processing. Each claim is one sentence of the source.",
       ),
     );
-  if (!model)
+  if (!m)
     return reply(
       mockDraft(
         req,
@@ -62,23 +71,30 @@ export async function POST(request: Request) {
       ),
     );
   try {
-    const text = await model.complete(ingestMessages(req), request.signal, {
+    const text = await m.complete(ingestMessages(req), request.signal, {
       maxTokens: 2_000,
       timeoutMs: 40_000,
     });
     const draft = parseIngestReply(
       req,
       text,
-      `AI draft (${model.model}). Unverified: check every claim against the source.`,
+      `AI draft (${m.model}${guard.active ? ", via OrcaRouter" : ""}). Unverified: check every claim against the source.`,
     );
     if (draft) return reply(draft);
     return reply(
       mockDraft(req, "Mock draft: the AI reply did not pass the quote check."),
     );
   } catch (err) {
-    console.warn("[ingest] live call failed:", (err as Error).message);
+    const msg = (err as Error).message;
+    console.warn("[ingest] live call failed:", msg);
+    const http = /HTTP (\d{3})/.exec(msg)?.[1];
     return reply(
-      mockDraft(req, "Mock draft: the AI model did not answer in time."),
+      mockDraft(
+        req,
+        guard.active && http
+          ? `Mock draft: OrcaRouter blocked or refused the request (HTTP ${http}). Check the source for instructions.`
+          : "Mock draft: the AI model did not answer in time.",
+      ),
     );
   }
 }
