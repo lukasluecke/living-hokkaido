@@ -33,6 +33,25 @@ export function stopVoiceLine() {
   current = null;
 }
 
+/** Pause the line now playing (tour pause). Resume with resumeVoiceLine. */
+export function pauseVoiceLine() {
+  if (current && !current.ended) {
+    paused = current;
+    current.pause();
+  }
+}
+
+/** Go on with a paused line. False when there is none (it ended or a new
+ *  line came), so the caller can play the line again. */
+export function resumeVoiceLine(): boolean {
+  const a = paused;
+  paused = null;
+  if (!a || a !== current || a.ended) return false;
+  void a.play().catch(() => {});
+  return true;
+}
+let paused: HTMLAudioElement | null = null;
+
 /** Waits until the line now playing has ended (at most `maxMs`). */
 function untilQuiet(maxMs: number): Promise<void> {
   const a = current;
