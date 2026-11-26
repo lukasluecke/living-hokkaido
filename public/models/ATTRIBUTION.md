@@ -28,6 +28,8 @@ scaled to the sketch's size (metres, origin on the base), then
 | canoe.glb | b4a03e89-168c-4897-8dd2-7430d99adfc8 | A narrow dugout canoe made from one single hollowed-out tree log, no seats, no ribs, no planks, a single wooden pole inside. |
 | set-bow.glb | 8f2ad0ab-5afd-43ce-af99-a111f9ee4cfa | A simple plain wooden hunting bow set low on two short wooden stakes beside a path, with a thin cord stretched across the path, no decoration. |
 | lacquer-vessel.glb | 5efd8b26-48c2-4bc3-a9cf-ffedf4d935b2 | A round lidded lacquered wooden vessel, glossy black body with plain red bands, no motifs. |
+| fiber.glb | c9807ea0-1981-4ceb-9487-618f1b623210 | A loose bundle of long pale cream inner tree-bark fibre strands, tied in the middle with a thin cord, lying on a curled strip of rough brown outer tree bark. (241 KB) |
+| cloth.glb | f633c910-660a-47fd-a84e-2116e9ca716d | A small plain rectangular wooden frame lying flat, holding a piece of plain undecorated light-brown woven plant-fibre cloth, the lower half woven and the upper half loose parallel threads, one simple flat wooden stick resting on it. No patterns, no motifs. (Came out upright; 482 KB; not a real technique, claim material-generated.) |
 | owl.glb | 22ae6567-8320-444c-b423-01b5e34d9dc9 | A cute round stylised snow-white owl spirit standing upright, wings folded tight against its body, big round friendly eyes, small grey beak, two small ear tufts, soft feather shapes (Gen-2.5 Medium, 20k faces; our own fictional guide, not a kamuy, no patterns; docs/STYLE.md § owl look). Island body only: the code wings flap in flight. 138 KB, texture 512 px. |
 
 Rejected first tries (not shipped): deer 2d83d342… (two heads), tonkori
