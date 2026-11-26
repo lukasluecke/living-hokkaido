@@ -1,6 +1,6 @@
 // Detail scenes: one small interior world per open location.
 import { z } from "zod";
-import { clipSchema } from "./media";
+import { clipSchema, filmSchema } from "./media";
 import { idSchema } from "./ids";
 import { cameraViewSchema, vec3Schema } from "./space";
 
@@ -51,6 +51,8 @@ export const detailSceneSchema = z.object({
   technique: z.enum(["low-poly", "splat", "scan"]).default("low-poly"),
   /** Optional ambient "postcard" clip of the place ("Watch"). */
   clip: clipSchema.optional(),
+  /** Optional story film shown in this place (the story hall). */
+  film: filmSchema.optional(),
 });
 export type DetailScene = z.infer<typeof detailSceneSchema>;
 export type DetailSceneInput = z.input<typeof detailSceneSchema>;

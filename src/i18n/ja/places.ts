@@ -6,7 +6,8 @@ export const jaPlaces: Record<string, string> = {
   "Lake house": "湖のほとりの家",
   "From bark to cloth": "樹皮から布へ",
   "Listening grove": "耳をすます林",
-  "The owl’s story and words for things": "フクロウの物語と、ものの名前",
+  "The owl’s story film and words for things":
+    "フクロウの物語の映画と、ものの名前",
   "Makers’ clearing": "つくり手の広場",
   "Weave a few rows at the workbench": "作業台で数段だけ織ってみよう",
   "Memory cabin": "思い出の小屋",

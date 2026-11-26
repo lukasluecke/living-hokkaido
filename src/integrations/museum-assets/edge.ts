@@ -13,6 +13,8 @@ export const PUBLIC_MEDIA: ReadonlySet<string> = new Set([
   "omusha.sog",
   "intro.mp4",
   "intro.webm",
+  // Story film for the Listening grove (content/bark-to-cloth/films.ts).
+  "owl-story.mp4",
 ]);
 
 const PREFIX = "/api/museum-assets/";

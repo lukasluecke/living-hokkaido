@@ -9,6 +9,7 @@ import { QualityGovernor, useQuality } from "../shared/QualityGovernor";
 import { Room } from "./Room";
 import attn from "../shared/Attention.module.css";
 import { ClipPlayer } from "../shared/Clip";
+import { FilmPlayer } from "../shared/Film";
 import c from "./Scene.module.css";
 import t from "./Tray.module.css";
 import { groupActivities, kindCaption } from "../shared/activityGroups";
@@ -129,7 +130,16 @@ export function DetailScenePart(props: DetailScenePartProps) {
             </span>
           )}
       </div>
-      {scene.clip && !focusedArtifactId && (
+      {scene.film && !focusedArtifactId && (
+        <div className={`${c.clip} ${c.film}`}>
+          <FilmPlayer
+            key={scene.id}
+            film={scene.film}
+            reducedMotion={prefs.reducedMotion}
+          />
+        </div>
+      )}
+      {scene.clip && !scene.film && !focusedArtifactId && (
         <div className={c.clip}>
           <ClipPlayer
             key={scene.id}
@@ -149,6 +159,7 @@ function SceneList({
   artifacts,
   content,
   focusedArtifactId,
+  prefs,
   emit,
 }: DetailScenePartProps) {
   useEffect(() => {
@@ -159,6 +170,9 @@ function SceneList({
   return (
     <section className={s.panel} aria-label={scene.title}>
       <h2>{scene.title}</h2>
+      {scene.film && (
+        <FilmPlayer film={scene.film} reducedMotion={prefs.reducedMotion} />
+      )}
       <div className={s.row}>
         {scene.placements.map((p) => (
           <button

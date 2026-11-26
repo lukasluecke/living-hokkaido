@@ -113,6 +113,17 @@ export const jaUi: Record<string, string> = {
   Model: "モデル",
   "Model labels": "モデルの表示",
   "Close the clip": "動画を閉じる",
+  "Story film": "物語の映画",
+  "Play the film": "映画を再生する",
+  "Close the film": "映画を閉じる",
+  "Coming soon": "近日公開",
+  "The owl tells a folktale": "フクロウが語る昔話",
+  "A short film about an Ainu spirit, told by the owl":
+    "フクロウが語る、アイヌの精霊についての短い映画",
+  "Made by our team (Yuling) with AI tools":
+    "チーム（Yuling）がAIツールを使ってつくりました",
+  "A folklore retelling for this demo, not a museum source. In the finished product, a curator and Ainu advisers would check and approve it first.":
+    "このデモのための昔話の語り直しで、博物館の資料ではありません。完成版では、学芸員とアイヌの助言者が先に確かめて承認します。",
   "Watch: the river mouth in this era": "見る：この時代の河口",
   "Watch: the river mouth today": "見る：今日の河口",
   "Watch: the coast": "見る：浜",
