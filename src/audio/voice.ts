@@ -79,11 +79,16 @@ export async function playVoiceLine(
   group: string,
   lineId: string,
   volume = 0.9,
+  /** The line's text: a file made from older text is not played (the
+   *  caption shows alone until `npm run audio:voices` makes it again). */
+  text?: string,
 ): Promise<boolean> {
   if (typeof window === "undefined") return false;
   const mine = ++ticket;
   const index = await loadIndex(group);
   if (!index?.lines[lineId] || mine !== ticket) return false;
+  if (text && !(await sameText(index, lineId, text))) return false;
+  if (mine !== ticket) return false;
   await untilQuiet(12_000);
   if (mine !== ticket) return false;
   current?.pause();
@@ -97,8 +102,26 @@ export async function playVoiceLine(
     if (current === audio) current = null;
     if ((e as DOMException)?.name === "NotAllowedError")
       retryOnGesture(() => {
-        void playVoiceLine(group, lineId, volume);
+        void playVoiceLine(group, lineId, volume, text);
       }, mine);
     return false;
   }
+}
+
+/** Same hash as scripts/audio/voices.ts. No WebCrypto (not a secure
+ *  context): trust the file. */
+async function sameText(
+  index: VoiceIndex,
+  lineId: string,
+  text: string,
+): Promise<boolean> {
+  const subtle = globalThis.crypto?.subtle;
+  if (!subtle) return true;
+  const data = new TextEncoder().encode(
+    `${index.voice}|${index.model}|${text}`,
+  );
+  const hex = Array.from(new Uint8Array(await subtle.digest("SHA-256", data)))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+  return index.lines[lineId]?.hash === hex.slice(0, 12);
 }
