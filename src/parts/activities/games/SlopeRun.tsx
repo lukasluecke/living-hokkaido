@@ -60,6 +60,9 @@ export function SlopeRunActivity({
             }),
             seen: foundRef.current,
             lang: locale,
+            // The score card's honesty line follows the app's switch
+            // (docs/PROVENANCE.md lists it while hidden).
+            honesty: SHOW_DISCLAIMERS,
           }),
         ),
       ),
