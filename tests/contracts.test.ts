@@ -555,3 +555,12 @@ test("films: source from one config value; grove has the owl film", async () => 
     assert.ok(PUBLIC_MEDIA.has(grove.film.source.key));
   assert.ok(PUBLIC_MEDIA.has("owl-story.mp4"));
 });
+
+test("island.ready parses and changes no state or journal", () => {
+  const pack = barkToClothPack;
+  const s = initialState({ reducedMotion: false, webgl: true });
+  assert.equal(reduce(pack, s, { type: "island.ready" }), s);
+  const j = record(pack, EMPTY_JOURNAL, { type: "island.ready" });
+  assert.deepEqual(j.earned, []);
+  assert.ok(experienceEventSchema.safeParse({ type: "island.ready" }).success);
+});

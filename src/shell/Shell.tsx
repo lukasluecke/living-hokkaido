@@ -22,7 +22,12 @@ import {
 import { SHOW_DISCLAIMERS } from "@/design/disclaimers";
 import { seasonInk } from "@/design/tokens";
 import { useSoundscape } from "@/audio/react";
-import { playVoiceLine, stopVoiceLine } from "@/audio/voice";
+import {
+  pauseVoiceLine,
+  playVoiceLine,
+  resumeVoiceLine,
+  stopVoiceLine,
+} from "@/audio/voice";
 import {
   DEFAULT_LOCALE,
   I18nProvider,
@@ -119,6 +124,14 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
   const [explore, setExplore] = useState(false);
   // One owl: the tour bubble's "Ask me a question" opens Ask the owl.
   const [askSignal, setAskSignal] = useState(0);
+  // Tour start (Lukas): wait for the island's first frame, count down
+  // 3 s ("Starting the tour in 3…", Cancel = explore freely), then the owl
+  // speaks and the camera pulls out from the owl to the island.
+  const [islandReady, setIslandReady] = useState(false);
+  const [count, setCount] = useState<number | null>(null);
+  const [introDone, setIntroDone] = useState(false);
+  // Pause / resume the tour's voice-over.
+  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
     setState((st) => ({ ...st, prefs: detectPrefs() }));
@@ -164,6 +177,7 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
     (e: ExperienceEvent) => {
       setState((st) => reduce(pack, st, e));
       soundEvent(e);
+      if (e.type === "island.ready") setIslandReady(true);
       // Demo recorder and e2e hook: mirror every event as a DOM event.
       window.dispatchEvent(new CustomEvent("lh:event", { detail: e }));
       const { journal: next, earned } = record(pack, journalRef.current, e);
@@ -355,14 +369,26 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
     state.view !== "travel" &&
     !state.overlay &&
     // The film has the stage; the owl speaks again once it closes or ends.
-    !state.filmOpen;
+    !state.filmOpen &&
+    // Before the tour starts, the countdown card shows instead.
+    (introDone || journal.visited.length > 0 || explore);
   // Voice file ids (scripts/audio/voices.ts): guide ids, "highlight-<id>".
   const owlVoiceId =
     source.guide.find((g) => g.text === owlLine)?.id ??
     (tourHighlight?.owl === owlLine && tourHighlight
       ? `highlight-${tourHighlight.id}`
       : undefined);
+  const lastVoice = useRef<string | undefined>(undefined);
   useEffect(() => {
+    const same = lastVoice.current === owlVoiceId;
+    lastVoice.current = owlVoiceId;
+    if (paused) {
+      // Paused: hold the line; a new line drops the old one and waits.
+      if (same) pauseVoiceLine();
+      else stopVoiceLine();
+      return;
+    }
+    if (same && owlShown && !sound.muted && resumeVoiceLine()) return;
     setGuideVoiced(false);
     if (!owlShown || sound.muted || !owlVoiceId) return stopVoiceLine();
     let live = true;
@@ -375,11 +401,28 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
     return () => {
       live = false;
     };
-  }, [owlVoiceId, owlShown, sound.muted]);
+  }, [owlVoiceId, owlShown, sound.muted, paused]);
   // First look: the owl's line and one step only, until the visitor goes
   // somewhere (any visit) or picks "Explore freely".
   const calm =
     state.view === "island" && journal.visited.length === 0 && !explore;
+  // Countdown: starts once the island is drawn, only on the first look.
+  const counting = calm && !introDone;
+  useEffect(() => {
+    if (!counting || !islandReady) return;
+    if (count === null) return setCount(3);
+    if (count <= 0) {
+      setIntroDone(true);
+      setCount(null);
+      return;
+    }
+    const id = setTimeout(() => setCount(count - 1), 1000);
+    return () => clearTimeout(id);
+  }, [counting, islandReady, count]);
+  // Not the first look (saved journal, or the visitor went on): no intro.
+  useEffect(() => {
+    if (!calm && !introDone) setIntroDone(true);
+  }, [calm, introDone]);
   const ink = seasonInk[SEASON_IDS.indexOf(seasonAt(state.season.value))];
 
   const stage =
@@ -389,6 +432,7 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
         view={state.view}
         locationId={state.locationId}
         calm={calm}
+        closeUp={counting}
         doneHighlightIds={pack.highlights
           .filter((h) => highlightDone(h, journal))
           .map((h) => h.id)}
@@ -443,8 +487,39 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
               : undefined
           }
         />
+        {counting && islandReady && count !== null && (
+          <section className={s.countdown} aria-label={t("Owl guide")}>
+            <p aria-live="polite">
+              {t("Starting the tour in {n}…", { n: Math.max(count, 1) })}
+            </p>
+            <div className={s.countdownActions}>
+              <button
+                type="button"
+                className={s.next}
+                // A tap also lets the browser play the owl's voice.
+                onClick={() => setIntroDone(true)}
+              >
+                {t("Start now")}
+              </button>
+              <button
+                type="button"
+                className={s.explore}
+                onClick={() => {
+                  setIntroDone(true);
+                  setExplore(true);
+                }}
+              >
+                {t("Cancel")}
+              </button>
+            </div>
+          </section>
+        )}
         {owlShown && (
-          <section className={s.owl} aria-label={t("Owl guide")}>
+          <section
+            className={s.owl}
+            aria-label={t("Owl guide")}
+            data-calm={calm || undefined}
+          >
             <OwlMark />
             <div className={s.bubble}>
               <p
@@ -470,6 +545,20 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
                   {/* The icon says "look" or "try", so show only the name. */}
                   <span>{next.name ?? next.label}</span>
                   <Icon d={UI_ICON.go} size={16} className={s.nextGo} />
+                </button>
+              )}
+              {(guideVoiced || paused) && !sound.muted && (
+                <button
+                  type="button"
+                  className={s.pause}
+                  aria-pressed={paused}
+                  onClick={() => setPaused((v) => !v)}
+                >
+                  <Icon
+                    d={paused ? "M8 5l11 7-11 7Z" : "M8 5v14M16 5v14"}
+                    size={16}
+                  />
+                  {paused ? t("Resume") : t("Pause")}
                 </button>
               )}
               {calm && (
