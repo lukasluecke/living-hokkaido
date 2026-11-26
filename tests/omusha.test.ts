@@ -24,6 +24,7 @@ import {
   goalClaims,
   initialLook,
   isComplete,
+  isIOS,
   openSpot,
   phaseForStatus,
 } from "@/parts/activities/captures/splatLogic";
@@ -63,19 +64,31 @@ test("splat-look: spot claims must be listed in claimIds", () => {
   assert.ok(validateContentPack(raw).length > 0);
 });
 
-test("look closer completes when every spot claim was read", () => {
+test("look closer completes after three panel notes", () => {
   const a = look();
   const known = () => true;
   const goal = goalClaims(a, known);
   assert.ok(goal.includes("omusha-elders"));
   assert.ok(!goal.includes("omusha-capture")); // context only, no spot
   let st = initialLook;
-  for (const s of a.spots.slice(0, 3)) st = openSpot(a, st, s.id);
-  assert.equal(isComplete(a, st, known), false);
+  st = openSpot(a, st, "elder-chrysanthemum");
+  st = openSpot(a, st, "elder-maple-leaves");
+  assert.equal(isComplete(a, st, known), false); // one note, twice
+  st = openSpot(a, st, "interpreter");
+  assert.equal(isComplete(a, st, known), false); // two notes
+  st = openSpot(a, st, "ainu-woman");
+  assert.equal(isComplete(a, st, known), true); // three notes
   for (const s of a.spots) st = openSpot(a, st, s.id);
   assert.equal(isComplete(a, st, known), true);
   assert.equal(st.opened.length, a.spots.length);
   assert.deepEqual(openSpot(a, st, "nobody"), st);
+});
+
+test("iPhone and iPad are detected for the safe splat path", () => {
+  assert.ok(isIOS("Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)", 5));
+  assert.ok(isIOS("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)", 5));
+  assert.ok(!isIOS("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)", 0));
+  assert.ok(!isIOS("Mozilla/5.0 (Linux; Android 15; Pixel 9)", 5));
 });
 
 test("asset status maps to a viewer phase", () => {
