@@ -447,3 +447,18 @@
   outline: 3px solid var(--fl-gold);
   outline-offset: 2px;
 }
+
+/* A highlight of this place, in its own bar (gold edge, like the island's
+   highlight pills). */
+.heroCard {
+  font-weight: 700;
+  border: 2px solid var(--fl-gold-deep);
+  box-shadow: inset 0 0 0 1px var(--fl-gold);
+}
+.heroCard svg {
+  flex: none;
+  color: var(--fl-gold-deep);
+}
+.heroCard:hover {
+  background: var(--fl-stock2);
+}
