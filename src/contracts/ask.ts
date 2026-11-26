@@ -55,6 +55,12 @@ export const askAnswerSchema = z.object({
   action: askActionSchema.nullable(),
   /** Why the answer is in this mode (for example "No LLM key on the server"). */
   notice: z.string(),
+  /** Further reading on the web (Linkup search, only with LINKUP_API_KEY).
+   *  Links only: never given to the model, never a citation. Additive. */
+  web: z
+    .array(z.object({ name: z.string().max(160), url: z.url() }))
+    .max(3)
+    .optional(),
 });
 export type AskAnswer = z.infer<typeof askAnswerSchema>;
 

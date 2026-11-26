@@ -63,10 +63,19 @@ export function parseLinkup(json: unknown, max = 5): SourceSuggestion[] {
   return out;
 }
 
+/** Heritage institutions for the owl's "read more" links. */
+export const HERITAGE_DOMAINS = [
+  "ainu-upopoy.jp",
+  "ff-ainu.or.jp",
+  "hm.pref.hokkaido.lg.jp",
+  "jmapps.ne.jp",
+];
+
 export async function suggestSources(
   query: string,
   env: Env = process.env,
   signal?: AbortSignal,
+  options: { includeDomains?: string[]; timeoutMs?: number } = {},
 ): Promise<ResearchResult> {
   const key = env.LINKUP_API_KEY?.trim();
   if (!key)
@@ -76,7 +85,9 @@ export async function suggestSources(
         "Linkup not connected (no key). With a key, this suggests more sources for the reviewer to open. Suggestions never become claims.",
       suggestions: [],
     };
-  const timeout = AbortSignal.timeout(Number(env.LINKUP_TIMEOUT_MS) || 12_000);
+  const timeout = AbortSignal.timeout(
+    options.timeoutMs ?? (Number(env.LINKUP_TIMEOUT_MS) || 12_000),
+  );
   try {
     const res = await fetch("https://api.linkup.so/v1/search", {
       method: "POST",
@@ -89,6 +100,9 @@ export async function suggestSources(
         depth: "fast",
         outputType: "searchResults",
         maxResults: 8,
+        ...(options.includeDomains?.length
+          ? { includeDomains: options.includeDomains }
+          : {}),
       }),
       signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
     });

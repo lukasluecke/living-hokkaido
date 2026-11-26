@@ -89,3 +89,13 @@ transcript is asked like a typed question. `GET /api/ask/listen` says whether
 the key is set; without it, or without recording support, the mic is hidden.
 The recording is not stored. Set the key: `npx wrangler secret put
 ELEVENLABS_API_KEY` (the key needs the "Speech to Text" permission).
+
+## Read more on the web (Linkup, optional)
+
+With `LINKUP_API_KEY` set (`npx wrangler secret put LINKUP_API_KEY`), the
+route also runs a Linkup search for the question, limited to heritage sites
+(`HERITAGE_DOMAINS` in `src/integrations/research`: Upopoy, the Foundation
+for Ainu Culture, the Hokkaido Museum and its collection database), and adds
+up to 3 links under the answer (`AskAnswer.web`, additive). The links are
+never given to the model and never become citations: the owl still answers
+only from pack claims. No key, a timeout (8 s) or an error = no links.

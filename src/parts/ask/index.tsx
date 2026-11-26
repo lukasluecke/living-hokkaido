@@ -389,6 +389,17 @@ function Answer({
           {actionLabel(pack, answer.action)}
         </button>
       )}
+      {answer.web && answer.web.length > 0 && (
+        <ul className={s.web} aria-label="Read more on the web">
+          {answer.web.map((w) => (
+            <li key={w.url}>
+              <a href={w.url} target="_blank" rel="noreferrer">
+                {w.name}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
       <p className={s.notice} data-mode={answer.mode}>
         {answer.notice}
       </p>
