@@ -1,9 +1,10 @@
 // Museum asset store: captures of museum material (the Omusha splat) that
-// must never be in Git and are not public. On Cloudflare they live in a
+// must never be in Git. A capture is public only when its activity says
+// `asset.gated: false` (the Omusha splat, Lukas 2026-11-26). On Cloudflare they live in a
 // private R2 bucket (binding MUSEUM_ASSETS); in `next dev` they may be read
-// from the git-ignored folder `.museum-assets/`. Every read needs the demo
+// from the git-ignored folder `.museum-assets/`. A gated read needs the demo
 // password (MUSEUM_ASSET_PASSWORD), sent once to /api/museum-assets/unlock,
-// which sets an HttpOnly cookie. No password configured: the store is shut.
+// which sets an HttpOnly cookie. No password configured: gated keys are shut.
 //
 // Withdrawal: delete the object from the bucket (`wrangler r2 object delete
 // living-hokkaido-museum/<key>`); the viewer then shows its list fallback.
@@ -44,11 +45,17 @@ export function readCookie(header: string | null, name: string): string {
 
 export type Access = "open" | "locked" | "off";
 
-/** "off": no password set, the store is shut for everybody. */
+/**
+ * "open" without a password for a key the content pack marks as not gated
+ * (`asset.gated: false`). Otherwise "off" when no password is set (the
+ * store is shut for everybody), else the cookie decides.
+ */
 export async function access(
   request: Request,
   password: string | undefined,
+  publicKey = false,
 ): Promise<Access> {
+  if (publicKey) return "open";
   if (!password) return "off";
   const got = readCookie(request.headers.get("cookie"), COOKIE);
   return got && sameToken(got, await tokenFor(password)) ? "open" : "locked";
@@ -102,10 +109,13 @@ export async function findAsset(
   key: string,
   withBody: boolean,
 ): Promise<AssetFile | null> {
+  // Dev first: `next dev` may give an empty local R2 (wrangler proxy).
+  const dev = await local(key, withBody);
+  if (dev) return dev;
   const b = await bucket();
   if (b) {
     if (!withBody) return b.head(key);
     return b.get(key);
   }
-  return local(key, withBody);
+  return null;
 }

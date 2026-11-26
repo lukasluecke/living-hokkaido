@@ -35,7 +35,7 @@ test("the Omusha look is in the Memory cabin, with Shaw's spots", () => {
   assert.equal(a.spots.filter((s) => s.group === "figure").length, 13);
   assert.equal(a.spots.filter((s) => s.group === "scene").length, 5);
   assert.equal(a.asset.key, "omusha.sog");
-  assert.equal(a.asset.gated, true);
+  assert.equal(a.asset.gated, false); // public (Lukas, 2026-11-26)
   const k = barkToClothPack.knowledge.find((x) => x.id === a.knowledgeId);
   assert.equal(k?.presentation, "research-preview");
   // Every claim cites a source of its own knowledge entry.
@@ -95,4 +95,6 @@ test("museum asset gate: keys, password cookie, shut without a password", async 
   const t = await tokenFor("pw");
   assert.equal(await access(req(`a=1; ${COOKIE}=${t}`), "pw"), "open");
   assert.equal(await access(req(`${COOKIE}=${t}`), "other"), "locked");
+  // A key marked public needs neither a password nor a cookie.
+  assert.equal(await access(req(), undefined, true), "open");
 });

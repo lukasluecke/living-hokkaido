@@ -1,6 +1,7 @@
-// Streams one museum capture (src/integrations/museum-assets) to a visitor
-// who has the demo password cookie. HEAD answers the same status without
+// Streams one museum capture (src/integrations/museum-assets): a public
+// key to everybody, a gated key only with the demo password cookie. HEAD answers the same status without
 // the body, so the viewer can ask for the password before it loads.
+import { defaultPack } from "@/content";
 import {
   access,
   CONTENT_TYPE,
@@ -9,6 +10,13 @@ import {
 } from "@/integrations/museum-assets";
 
 export const dynamic = "force-dynamic";
+
+/** Keys of captures whose activity is not gated (`asset.gated: false`). */
+const PUBLIC_KEYS = new Set(
+  defaultPack.activities.flatMap((a) =>
+    a.kind === "splat-look" && !a.asset.gated ? [a.asset.key] : [],
+  ),
+);
 
 const HEADERS = {
   "cache-control": "private, max-age=3600",
@@ -23,7 +31,11 @@ async function serve(
   const { key } = await params;
   if (!validKey(key))
     return new Response("Not found", { status: 404, headers: HEADERS });
-  const a = await access(request, process.env.MUSEUM_ASSET_PASSWORD);
+  const a = await access(
+    request,
+    process.env.MUSEUM_ASSET_PASSWORD,
+    PUBLIC_KEYS.has(key),
+  );
   if (a === "off")
     return new Response("Museum assets are not set up here.", {
       status: 503,

@@ -89,15 +89,15 @@ Talk and Gather are not built or served here.
 | `src/contracts/activity.ts` | `splat-look` kind: asset key, start view, spots in splat-local coordinates |
 | `src/content/bark-to-cloth/omusha.ts` | Imports `src/hotspots.json` and the names in `characters/1808/*.json`; claims are our paraphrases of museum panels 7835/7836, not Shaw's drafts |
 | `src/parts/activities/captures/` | `SplatLook.tsx` (panel, stage, spot list, password form), `splatViewer.ts` (three + Spark 2.4, the same loader and settings as Shaw), `splatLogic.ts` |
-| `src/integrations/museum-assets/`, `src/app/api/museum-assets/` | The splat from a private R2 bucket (`MUSEUM_ASSETS`), only with the demo password (`MUSEUM_ASSET_PASSWORD`) |
+| `src/integrations/museum-assets/`, `src/app/api/museum-assets/` | The splat from the R2 bucket (`MUSEUM_ASSETS`). Public while `asset.gated` is false (Lukas, 2026-11-26); a gated key needs the demo password (`MUSEUM_ASSET_PASSWORD`) |
 
 **The splat is not in Git** (here or upstream: museum material, NOTICE.md).
 Get `omusha.sog` from Shaw, then:
 
-Both the bucket and the password are optional: without them the deploy
-works and the diorama shows the spot list with a "capture not available"
-note. To turn the capture on, add the binding from the comment in
-`wrangler.jsonc`, then:
+`wrangler.jsonc` binds the bucket `living-hokkaido-museum` (it exists since
+2026-11-26; a deploy fails without it). Without the object the diorama shows
+the spot list with "Splat not available". The password is needed only for
+gated keys. Setup on a new account:
 
 ```bash
 npx wrangler r2 bucket create living-hokkaido-museum   # once
