@@ -5,10 +5,11 @@ Every file in `public/audio/` needs a row here. `credit` in
 
 | credit | Files | Source | Licence |
 |---|---|---|---|
-| `original-synth` | all files in `ambient/` and `ui/` | Original, synthesised for Living Hokkaido by `scripts/audio/generate.ts` (fixed seed, no samples, no recordings, no third-party material) | MIT (this repository) |
+| `original-synth` | the files in `ui/` except `owl-hoot`, `owl-takeoff` and `pick-up` | Original, synthesised for Living Hokkaido by `scripts/audio/generate.ts` (fixed seed, no samples, no recordings, no third-party material) | MIT (this repository) |
+| `elevenlabs-sfx` | all files in `ambient/` (`island-wind`, `island-winter-wind`, `island-birds`, `island-water`, `island-leaves`, `island-insects`, `interior-hearth`, `interior-wind`) and `ui/owl-hoot`, `ui/owl-takeoff`, `ui/pick-up` | AI sound effects made with the ElevenLabs Sound Effects API (`eleven_text_to_sound_v2`) from our own short English text prompts describing generic nature and interface sounds. No recordings, no samples, no voices or music. Loudness matched to the earlier placeholders; ambient loops crossfaded to 22 s seamless loops. | Generated under the ElevenLabs terms of the account that made them (commercial use needs a paid plan) |
 | `elevenlabs-ai-voice` | all files in `voice/` | AI voice (text to speech) made with ElevenLabs by `scripts/audio/voices.ts` from our own English owl lines and story captions (and their Japanese machine-translated drafts, in `voice/ja/`), plus an AI imitation of the owl-story refrain from the museum's katakana text. Voice designed from a text prompt (ElevenLabs Voice Design); no cloned voice of any person. Labelled "AI voice" in the UI. | Generated under the ElevenLabs terms of the account that ran the script (commercial use needs a paid plan) |
 
-The placeholder sounds are generic nature and interface sounds. They are not
+The placeholder and AI sound effects (`original-synth`, `elevenlabs-sfx`) are generic nature and interface sounds. They are not
 recordings of any place, person, ceremony or music, and they do not represent
 Ainu sound or music.
 
