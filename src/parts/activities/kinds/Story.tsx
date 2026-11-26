@@ -115,12 +115,16 @@ export function Story({
     audio.onended = () => {
       t = setTimeout(advance, LINE_GAP_MS);
     };
-    audio.onerror = () => setAiFailed(true);
-    audio.play().catch(() => setAiFailed(true));
+    let live = true;
+    // A missing file or blocked playback falls back to timed captions.
+    // Stopping the line on cleanup must not count as a failure.
+    const fail = () => live && setAiFailed(true);
+    audio.onerror = fail;
+    audio.play().catch(fail);
     return () => {
+      live = false;
       clearTimeout(t);
       audio.pause();
-      audio.src = "";
     };
   }, [playing, atPause, done, voiceOn, canVoice, line, useAi, ai, advance]);
 
