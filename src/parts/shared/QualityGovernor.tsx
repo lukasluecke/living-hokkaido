@@ -13,7 +13,8 @@ import {
   type Tier,
 } from "./quality";
 
-const STORAGE_KEY = "lh-quality-v1";
+// v2: forget tiers that the old, more eager monitor saved this session.
+const STORAGE_KEY = "lh-quality-v2";
 let tier: Tier = FULL;
 /** True when the URL fixes the tier (?quality=…): no automatic steps. */
 let pinned = false;
