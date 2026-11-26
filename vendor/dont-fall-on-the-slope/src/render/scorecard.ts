@@ -28,6 +28,8 @@ export function scoreCard(
   still: HTMLCanvasElement | null,
   d: ScoreCardData,
   t: Strings = strings("en"),
+  /** Draw the "Illustrative · research preview" line (default true). */
+  honesty = true,
 ): Promise<Blob> {
   const c = document.createElement("canvas");
   c.width = W;
@@ -89,7 +91,7 @@ export function scoreCard(
   });
   g.font = `28px ${sans}`;
   g.globalAlpha = 0.6;
-  g.fillText(t.card.honesty, lx + 50, ly + 560);
+  if (honesty) g.fillText(t.card.honesty, lx + 50, ly + 560);
   g.globalAlpha = 1;
 
   // Footer: the game and the same-slope link.
