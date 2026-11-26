@@ -114,6 +114,7 @@ export const jaUi: Record<string, string> = {
   "Model labels": "モデルの表示",
   "Close the clip": "動画を閉じる",
   "Watch: the river mouth in this era": "見る：この時代の河口",
+  "Watch: the river mouth today": "見る：今日の河口",
   "Watch: the coast": "見る：浜",
   "Watch: the forest": "見る：森",
   "Watch: the hills": "見る：丘",

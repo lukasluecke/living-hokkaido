@@ -17,15 +17,15 @@ const clip = (key: string, title: string, audio = false): ClipInput => ({
   seconds: 5,
 });
 
-/** Era id → clip. Only keys that are uploaded to the bucket. */
+/**
+ * Era id → clip. Only keys that are uploaded to the bucket. Flat-ground,
+ * cise-and-kotan and meiji have no clip: their round-2 results showed modern
+ * buildings or the wrong era. The "meiji" prompt came out as a present-day
+ * river town, so that clip is used for "today" (key keeps its file name).
+ */
 export const ERA_CLIPS: Record<string, ClipInput> = {
   "pit-dwellings": clip("era-1-pit.mp4", "Watch: the river mouth in this era"),
-  "flat-ground": clip("era-2-flat.mp4", "Watch: the river mouth in this era"),
-  "cise-and-kotan": clip(
-    "era-3-cise.mp4",
-    "Watch: the river mouth in this era",
-  ),
-  meiji: clip("era-4-meiji.mp4", "Watch: the river mouth in this era"),
+  today: clip("era-4-meiji.mp4", "Watch: the river mouth today"),
 };
 
 /** Scene id → ambient postcard. */
