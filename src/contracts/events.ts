@@ -18,6 +18,9 @@ export const experienceEventSchema = z.discriminatedUnion("type", [
   e("scene.enter", { sceneId: idSchema }),
   e("scene.ready", { sceneId: idSchema }),
   e("scene.exit", { sceneId: idSchema }),
+  /** The scene's story film was opened / closed or ended (additive). */
+  e("film.open", { sceneId: idSchema }),
+  e("film.close", { sceneId: idSchema }),
   // Artifacts
   e("artifact.focus", { artifactId: idSchema }),
   e("artifact.inspected", { artifactId: idSchema }),

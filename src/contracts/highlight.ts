@@ -45,13 +45,19 @@ export const highlightSchema = z.object({
 export type Highlight = z.infer<typeof highlightSchema>;
 export type HighlightInput = z.input<typeof highlightSchema>;
 
-/** Done = the activity is completed, or the place was visited (film,
- *  timeline). Pure; works with any journal-like object. */
+/** Done = the activity is completed, the place's film was watched, or the
+ *  place was visited (timeline). Pure; works with any journal-like object. */
 export function highlightDone(
   h: Highlight,
-  journal: { completed: readonly string[]; visited: readonly string[] },
+  journal: {
+    completed: readonly string[];
+    visited: readonly string[];
+    filmsSeen?: readonly string[];
+  },
 ): boolean {
-  return h.open.kind === "activity"
-    ? journal.completed.includes(h.open.activityId)
-    : journal.visited.includes(h.locationId);
+  if (h.open.kind === "activity")
+    return journal.completed.includes(h.open.activityId);
+  if (h.open.kind === "film")
+    return (journal.filmsSeen ?? []).includes(h.locationId);
+  return journal.visited.includes(h.locationId);
 }

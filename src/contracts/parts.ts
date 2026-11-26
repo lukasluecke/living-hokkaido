@@ -40,6 +40,9 @@ export type DetailScenePartProps = PartContext & {
   /** Placed artifacts the visitor has already inspected (journal progress),
    *  for the tray's "N of M looked at". Optional: left out, no progress shows. */
   inspectedArtifactIds?: string[];
+  /** The story film card is open (shell state). Optional: left out, the
+   *  card opens and closes on its own. The part emits film.open/close. */
+  filmOpen?: boolean;
 };
 
 /** C2 pick-up-and-turn viewer, card and hotspots for one artifact. */
