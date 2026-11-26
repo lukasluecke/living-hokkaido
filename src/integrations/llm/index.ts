@@ -18,8 +18,15 @@ import type { ChatMessage } from "@/domain/ask";
 export type ChatModel = {
   id: string;
   model: string;
-  complete(messages: ChatMessage[], signal?: AbortSignal): Promise<string>;
+  complete(
+    messages: ChatMessage[],
+    signal?: AbortSignal,
+    options?: CompleteOptions,
+  ): Promise<string>;
 };
+
+/** Per-call overrides (ingestion needs longer replies than the owl). */
+export type CompleteOptions = { maxTokens?: number; timeoutMs?: number };
 
 type Env = Record<string, string | undefined>;
 
@@ -65,7 +72,8 @@ export function chatModel(env: Env = process.env): ChatModel | null {
   return {
     id: provider,
     model,
-    async complete(messages, signal) {
+    async complete(messages, signal, options) {
+      const ms = options?.timeoutMs ?? timeout;
       const res = await fetch(`${baseUrl}/chat/completions`, {
         method: "POST",
         headers: {
@@ -76,13 +84,13 @@ export function chatModel(env: Env = process.env): ChatModel | null {
           model,
           messages,
           temperature: 0.2,
-          max_tokens: 1200,
+          max_tokens: options?.maxTokens ?? 1200,
           stream: false,
           ...preset?.extra,
         }),
         signal: signal
-          ? AbortSignal.any([signal, AbortSignal.timeout(timeout)])
-          : AbortSignal.timeout(timeout),
+          ? AbortSignal.any([signal, AbortSignal.timeout(ms)])
+          : AbortSignal.timeout(ms),
       });
       if (!res.ok) {
         // Never echo the key; keep only a short provider message.

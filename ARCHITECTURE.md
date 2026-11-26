@@ -30,7 +30,7 @@ Seed research content is deliberately separate from approved contribution record
 
 ## State and persistence
 
-Journal: localStorage `lh-journal-v1`, validated against known activity IDs, deduplicated on completion. Storage denial/corruption cannot stop exploration. Contributions: in-memory per tab, no upload endpoint or durable storage. Source text is untrusted data and React escapes it. No raw HTML or instructions from source text are executed. No external URL fetching occurs in the contributor flow.
+Journal: localStorage `lh-journal-v1`, validated against known activity IDs, deduplicated on completion. Storage denial/corruption cannot stop exploration. Contributions: in-memory per tab, no durable storage. `/api/ingest` sends source text to the LLM only after the contributor allows it, stores nothing, and drops claims whose quote is not in the source (docs/INGEST.md). Source text is untrusted data and React escapes it. No raw HTML or instructions from source text are executed. No external URL fetching occurs in the contributor flow.
 
 The approved contribution is lifted into the root component so it survives switching visitor/studio tabs; the editor must also remain mounted to preserve withdrawal controls. Source files are limited to 10 MB at intake. Text extraction uses only `.txt`/`.md`; other media needs an explicit transcript/description. No claim is made that file metadata is a completed upload.
 
