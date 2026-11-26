@@ -351,6 +351,14 @@
   .countdown {
     animation: none;
   }
+/* Tour: the next step inside an open highlight activity. */
+button.next.tourNext {
+  margin: 12px 16px 0;
+  align-self: flex-start;
+  border: 2px solid var(--fl-edge);
+  border-radius: 999px;
+  padding: 8px 16px;
+  box-shadow: var(--fl-lift);
 }
 
 @media (max-width: 700px) {

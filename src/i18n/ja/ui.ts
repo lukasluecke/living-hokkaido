@@ -19,6 +19,7 @@ export const jaUi: Record<string, string> = {
   "Go to the {place}": "{place}へ行く",
   "Try: {title}": "やってみる: {title}",
   "Next: {label}": "次: {label}",
+  "Skip this step": "このステップをとばす",
   "Look at: {label}": "見る: {label}",
   "Open the journal": "手帳を開く",
   "Journal ({stamps}/{total})": "手帳 ({stamps}/{total})",

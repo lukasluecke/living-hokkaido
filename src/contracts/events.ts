@@ -17,6 +17,8 @@ export const experienceEventSchema = z.discriminatedUnion("type", [
   /** The island drew its first frame (or the HTML list is up), so the
    *  shell can start the tour countdown (additive, no state change). */
   e("island.ready", {}),
+  /** Skip this tour step without doing it (not counted as done). Additive. */
+  e("highlight.skip", { highlightId: idSchema }),
   // Detail scene
   e("scene.enter", { sceneId: idSchema }),
   e("scene.ready", { sceneId: idSchema }),
