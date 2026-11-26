@@ -6,7 +6,7 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { type IslandPartProps, type Location, SCALE } from "@/contracts";
 import { useT } from "@/i18n";
 import s from "../shared/Fallback.module.css";
-import { QualityGovernor, useQuality } from "../shared/Quality";
+import { QualityGovernor, useQuality } from "../shared/QualityGovernor";
 import attn from "../shared/Attention.module.css";
 import { Icon, KindIcon, UI_ICON } from "../shared/Icon";
 import {

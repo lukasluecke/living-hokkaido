@@ -2,21 +2,19 @@
 // key to everybody, a gated key only with the demo password cookie. HEAD answers the same status without
 // the body, so the viewer can ask for the password before it loads.
 import { defaultPack } from "@/content";
-import {
-  access,
-  CONTENT_TYPE,
-  findAsset,
-  validKey,
-} from "@/integrations/museum-assets";
+import { mediaType, PUBLIC_MEDIA } from "@/integrations/museum-assets/edge";
+import { access, findAsset, validKey } from "@/integrations/museum-assets";
 
 export const dynamic = "force-dynamic";
 
-/** Keys of captures whose activity is not gated (`asset.gated: false`). */
-const PUBLIC_KEYS = new Set(
-  defaultPack.activities.flatMap((a) =>
+/** Keys of captures whose activity is not gated, plus public media. On
+ *  Cloudflare, public keys are served by worker.ts before this route. */
+const PUBLIC_KEYS = new Set([
+  ...PUBLIC_MEDIA,
+  ...defaultPack.activities.flatMap((a) =>
     a.kind === "splat-look" && !a.asset.gated ? [a.asset.key] : [],
   ),
-);
+]);
 
 const HEADERS = {
   "cache-control": "private, max-age=3600",
@@ -53,7 +51,7 @@ async function serve(
     status: 200,
     headers: {
       ...HEADERS,
-      "content-type": CONTENT_TYPE,
+      "content-type": mediaType(key),
       "content-length": String(file.size),
     },
   });

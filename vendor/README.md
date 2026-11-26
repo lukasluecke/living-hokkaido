@@ -89,6 +89,7 @@ Talk and Gather are not built or served here.
 | `src/contracts/activity.ts` | `splat-look` kind: asset key, start view, spots in splat-local coordinates |
 | `src/content/bark-to-cloth/omusha.ts` | Imports `src/hotspots.json` and the names in `characters/1808/*.json`; claims are our paraphrases of museum panels 7835/7836, not Shaw's drafts |
 | `src/parts/activities/captures/` | `SplatLook.tsx` (panel, stage, spot list, password form), `splatViewer.ts` (three + Spark 2.4, the same loader and settings as Shaw), `splatLogic.ts` |
+| `worker.ts`, `src/integrations/museum-assets/edge.ts` | Custom Worker entry: public media (`PUBLIC_MEDIA`: the splat, the intro video) straight from R2 with ranges, before OpenNext (the Next route streamed ~40 KB/s) |
 | `src/integrations/museum-assets/`, `src/app/api/museum-assets/` | The splat from the R2 bucket (`MUSEUM_ASSETS`). Public while `asset.gated` is false (Lukas, 2026-11-26); a gated key needs the demo password (`MUSEUM_ASSET_PASSWORD`) |
 
 **The splat is not in Git** (here or upstream: museum material, NOTICE.md).
