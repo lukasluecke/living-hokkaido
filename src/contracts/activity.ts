@@ -97,8 +97,9 @@ export const mediaRefSchema = z.discriminatedUnion("kind", [
    * true (an AI imitation of the refrain, labelled as such; Lukas,
    * 2026-11-26), file `refrain.mp3`. Files:
    * `/audio/voice/<group>/<lineId>.mp3` plus `index.json` (VoiceIndex), made
-   * by scripts/audio/voices.ts. The UI must label it "AI voice". English
-   * only; other languages fall back to captions or the device voice.
+   * by scripts/audio/voices.ts. The UI must label it "AI voice". English, and
+   * Japanese drafts under `/audio/voice/ja/<group>` (voiceDir); a line
+   * without a file falls back to captions or the device voice.
    */
   z.object({
     kind: z.literal("ai-voice"),
@@ -124,6 +125,13 @@ export const voiceIndexSchema = z.object({
   ),
 });
 export type VoiceIndex = z.infer<typeof voiceIndexSchema>;
+
+/**
+ * Folder of one voice group for a page language: English at
+ * `/audio/voice/<group>`, Japanese drafts at `/audio/voice/ja/<group>`.
+ */
+export const voiceDir = (group: string, lang: string) =>
+  lang === "ja" ? `/audio/voice/ja/${group}` : `/audio/voice/${group}`;
 
 // ---------------------------------------------------------------- story
 

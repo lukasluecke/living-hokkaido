@@ -1,0 +1,118 @@
+{
+  "voice": "aLbEsWOUStPIYvDVdp7K",
+  "model": "eleven_v3",
+  "lines": {
+    "welcome": {
+      "hash": "4122b08bd213",
+      "duration": 9.52,
+      "words": [
+        0
+      ]
+    },
+    "arrive-lake-house": {
+      "hash": "4401c2f1924e",
+      "duration": 4.72,
+      "words": [
+        0
+      ]
+    },
+    "scene-hint": {
+      "hash": "fcd46a86d432",
+      "duration": 5.12,
+      "words": [
+        0
+      ]
+    },
+    "arrive-listening-grove": {
+      "hash": "e138b44337a7",
+      "duration": 5.76,
+      "words": [
+        0
+      ]
+    },
+    "grove-hint": {
+      "hash": "7a270cb01cf9",
+      "duration": 5.04,
+      "words": [
+        0
+      ]
+    },
+    "arrive-makers-clearing": {
+      "hash": "c60d9ec3717f",
+      "duration": 3.36,
+      "words": [
+        0
+      ]
+    },
+    "clearing-hint": {
+      "hash": "fb52cd59bb13",
+      "duration": 6.08,
+      "words": [
+        0
+      ]
+    },
+    "arrive-memory-cabin": {
+      "hash": "16dbad5384a2",
+      "duration": 4.64,
+      "words": [
+        0
+      ]
+    },
+    "cabin-hint": {
+      "hash": "066726bf4713",
+      "duration": 8.72,
+      "words": [
+        0
+      ]
+    },
+    "stamp": {
+      "hash": "620244312959",
+      "duration": 2.16,
+      "words": [
+        0
+      ]
+    },
+    "highlight-owl-film": {
+      "hash": "55154425dd2f",
+      "duration": 6.08,
+      "words": [
+        0
+      ]
+    },
+    "highlight-tonkori": {
+      "hash": "a368c1da3188",
+      "duration": 5.52,
+      "words": [
+        0
+      ]
+    },
+    "highlight-over-time": {
+      "hash": "30e2c0decb68",
+      "duration": 4.56,
+      "words": [
+        0
+      ]
+    },
+    "highlight-omusha": {
+      "hash": "c885707b3a4d",
+      "duration": 6.8,
+      "words": [
+        0
+      ]
+    },
+    "highlight-slope": {
+      "hash": "c8e128b5ccb4",
+      "duration": 4.08,
+      "words": [
+        0
+      ]
+    },
+    "highlight-out-of-place": {
+      "hash": "01088fbbb3ba",
+      "duration": 5.52,
+      "words": [
+        0
+      ]
+    }
+  }
+}
