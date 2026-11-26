@@ -75,6 +75,15 @@ for. Full prompts: project file generated-assets/PROMPTS-3.md.
 | era-2-flat-v2.mp4 | era "flat-ground" | 437320674821999 | Evening at a river mouth in Hokkaido, a few thatched houses built on flat ground with walls of grass and bark … two people in plain long robes of light brown woven plant-fibre cloth walk slowly between the houses. |
 | place-forest-night.mp4 | scene "survey-forest" (replaces place-forest.mp4) | 437320700238999 | Night in a dense Hokkaido forest of spruce and birch in winter … a straight line of wooden survey stakes … a single lantern hanging on a stake. |
 
+| era-1-pit-night-v3.mp4 | era "pit-dwellings" (replaces era-1-pit.mp4) | 437321759482509 | Night, thousands of years ago, at a river mouth in Hokkaido: a small settlement of square pit dwellings … no fences, no rails, no paths. Silhouettes of two people sit by an outdoor fire. |
+| era-4-meiji-v3.mp4 | era "meiji" | 437321753497556 | Dusk in the 1880s, before electricity or telegraph lines: … a person in plain late-19th-century work clothes walks along the dirt road. Empty sky with no poles and no lines. |
+
+Round 3b retries put the negatives inside the main prompt text. Not shipped:
+era-4-meiji-v3b 437321756421632 (good backup, fisheye edges), era-1-pit-night-v3b
+437321762500661 (utility poles), era-3-cise v3a–v3d 437321744649423,
+437321748162825, 437322099274657, 437322104186754 (fences, wires, metal
+chimneys, a cart).
+
 Not shipped: era-3-cise-v2 437320679580883 (overhead wires, fences, metal
 chimneys), era-4-meiji-v2 437320686122909 (utility poles), era-1-pit-night
 437320693628848 (rail fences, looks like a 3D render).

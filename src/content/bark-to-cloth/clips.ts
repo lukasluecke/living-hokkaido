@@ -19,18 +19,24 @@ const clip = (key: string, title: string, audio = false): ClipInput => ({
 
 /**
  * Era id → clip. Only keys that are uploaded to the bucket. Cise-and-kotan
- * and meiji have no clip: their results (rounds 2 and 3) showed wires, poles
- * or the wrong era. The round-2 "meiji" prompt came out as a present-day river
- * town, so that clip is used for "today" (key keeps its file name). Round 3
- * (owl-film look: dusk, hearth light, people in plain robes) gave flat-ground.
+ * has no clip yet: every try showed wires, fences or metal chimneys. The
+ * round-2 "meiji" prompt came out as a present-day river town, so that clip
+ * is used for "today" (key keeps its file name). Round 3
+ * (owl-film look: dusk, hearth light, people in plain robes) gave flat-ground,
+ * the night pit dwellings and Meiji.
  */
 export const ERA_CLIPS: Record<string, ClipInput> = {
-  "pit-dwellings": clip("era-1-pit.mp4", "Watch: the river mouth in this era"),
+  "pit-dwellings": clip(
+    "era-1-pit-night-v3.mp4",
+    "Watch: the river mouth in this era",
+    true,
+  ),
   "flat-ground": clip(
     "era-2-flat-v2.mp4",
     "Watch: the river mouth in this era",
     true,
   ),
+  meiji: clip("era-4-meiji-v3.mp4", "Watch: the river mouth in this era", true),
   today: clip("era-4-meiji.mp4", "Watch: the river mouth today"),
 };
 
