@@ -15,7 +15,7 @@ const story = {
   narrator: {
     character: "owl",
     credit: "Read by the owl guide · a fictional character",
-    voice: { kind: "device-voice-placeholder" },
+    voice: { kind: "ai-voice", group: "story-bark-to-cloth" },
   },
   chapters: [
     {

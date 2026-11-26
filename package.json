@@ -13,6 +13,7 @@
     "test": "tsx --test tests/*.test.ts",
     "check": "npm run typecheck && npm run lint && npm test && npm run build",
     "audio:generate": "tsx scripts/audio/generate.ts",
+    "audio:voices": "tsx scripts/audio/voices.ts",
     "demo:video": "tsx scripts/demo-video/record.ts",
     "cf:build": "opennextjs-cloudflare build",
     "cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",

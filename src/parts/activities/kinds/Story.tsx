@@ -4,7 +4,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useT } from "@/i18n";
 import { Owl } from "./Owl";
-import { Cite, complete, deviceVoice, type KindProps } from "./shared";
+import {
+  Cite,
+  complete,
+  deviceVoice,
+  type KindProps,
+  useAiVoice,
+} from "./shared";
 import k from "./kinds.module.css";
 
 const MS_PER_WORD = 340;
@@ -42,10 +48,20 @@ export function Story({
     : "";
   const words = useMemo(() => lineText.split(" "), [lineText]);
   const voice = a.narrator.voice;
+  // Pre-generated AI voice (English only); null until its index loads or
+  // when it is missing, then the story falls back to captions.
+  const ai = useAiVoice(voice.kind === "ai-voice" ? voice.group : undefined);
+  const [aiFailed, setAiFailed] = useState(false);
+  const useAi = !!ai && !aiFailed;
   const canVoiceStory =
-    voice.kind === "device-voice-placeholder" && deviceVoice.available();
-  // The device voice never reads the refrain (it is not English).
+    useAi ||
+    (voice.kind === "device-voice-placeholder" && deviceVoice.available());
+  // No voice ever reads the refrain (it is not English).
   const canVoice = canVoiceStory && line?.role !== "refrain";
+  // The AI voice starts on; the device placeholder stays opt-in.
+  useEffect(() => {
+    if (ai) setVoiceOn(true);
+  }, [ai]);
 
   const finish = useCallback(() => {
     setPlaying(false);
@@ -82,9 +98,36 @@ export function Story({
     return () => clearTimeout(t);
   }, [playing, atPause, done, voiceOn, canVoice, word, words.length, advance]);
 
+  // AI voice: the audio clock drives the caption via word start times.
+  useEffect(() => {
+    if (!playing || atPause || done || !voiceOn || !canVoice || !line) return;
+    if (!useAi || !ai) return;
+    const starts = ai.index.lines[line.id]?.words ?? [];
+    const audio = new Audio(ai.url(line.id));
+    let t: ReturnType<typeof setTimeout> | undefined;
+    audio.ontimeupdate = () =>
+      setWord(
+        Math.max(
+          0,
+          starts.findLastIndex((s) => s <= audio.currentTime),
+        ),
+      );
+    audio.onended = () => {
+      t = setTimeout(advance, LINE_GAP_MS);
+    };
+    audio.onerror = () => setAiFailed(true);
+    audio.play().catch(() => setAiFailed(true));
+    return () => {
+      clearTimeout(t);
+      audio.pause();
+      audio.src = "";
+    };
+  }, [playing, atPause, done, voiceOn, canVoice, line, useAi, ai, advance]);
+
   // Device voice placeholder: word boundaries drive the caption.
   useEffect(() => {
     if (!playing || atPause || done || !voiceOn || !canVoice || !line) return;
+    if (useAi) return;
     const starts: number[] = [];
     let i = 0;
     for (const w of words) {
@@ -108,6 +151,7 @@ export function Story({
     done,
     voiceOn,
     canVoice,
+    useAi,
     line,
     lineText,
     words,
@@ -170,9 +214,14 @@ export function Story({
               {voice.kind === "recording"
                 ? tr("Recorded voice")
                 : voiceOn && canVoiceStory
-                  ? tr("Device voice")
+                  ? useAi
+                    ? tr("AI voice")
+                    : tr("Device voice")
                   : tr("Captions")}
             </p>
+            {useAi && voice.kind === "ai-voice" && voiceOn && (
+              <p className="credit">{voice.credit}</p>
+            )}
           </div>
           <nav aria-label={tr("Chapters")}>
             <ol className="chapters">
@@ -230,7 +279,7 @@ export function Story({
                     </p>
                   )}
                   <p className="frame-note">
-                    Refrain · {refrain.credit} · not read by the device voice
+                    Refrain · {refrain.credit} · not read by any voice
                   </p>
                   <Cite
                     claim={claims[refrain.claimId]}
@@ -315,7 +364,7 @@ export function Story({
                 disabled={!canVoiceStory}
                 onChange={(e) => setVoiceOn(e.target.checked)}
               />
-              {tr("Device voice")}
+              {useAi ? tr("AI voice") : tr("Device voice")}
             </label>
             <label className="toggle">
               <input

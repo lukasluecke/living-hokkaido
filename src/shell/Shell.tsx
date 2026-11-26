@@ -20,6 +20,7 @@ import {
 } from "@/contracts";
 import { seasonInk } from "@/design/tokens";
 import { useSoundscape } from "@/audio/react";
+import { playVoiceLine, stopVoiceLine } from "@/audio/voice";
 import {
   DEFAULT_LOCALE,
   I18nProvider,
@@ -104,6 +105,21 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
   // Sound (src/audio): ambient follows view + season; events play cues.
   const sound = useSoundscape(state);
   const soundEvent = sound.onEvent;
+  // The owl reads its line in a pre-generated AI voice (labelled in the
+  // bubble) when sound is on and the bubble shows. Captions stay primary.
+  const [guideVoiced, setGuideVoiced] = useState(false);
+  const guideShown = !!guideLine && state.view !== "activity" && !state.overlay;
+  useEffect(() => {
+    setGuideVoiced(false);
+    if (!guideShown || sound.muted) return stopVoiceLine();
+    const id = source.guide.find((g) => g.text === guideLine)?.id;
+    let live = true;
+    if (id)
+      void playVoiceLine("owl", id).then((ok) => live && setGuideVoiced(ok));
+    return () => {
+      live = false;
+    };
+  }, [guideLine, guideShown, sound.muted, source.guide]);
 
   useEffect(() => {
     setState((st) => ({ ...st, prefs: detectPrefs() }));
@@ -368,6 +384,9 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
                 <span className={s.visuallyHidden}>{t("Owl: ")}</span>
                 {t(guideLine)}
               </p>
+              {guideVoiced && (
+                <p className={s.voiceNote}>{t("AI voice · ElevenLabs")}</p>
+              )}
               {next && (
                 <button
                   type="button"
