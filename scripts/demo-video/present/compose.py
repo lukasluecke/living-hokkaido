@@ -120,7 +120,7 @@ B = [
         "“Don't Fall on the Slope”: an icy Otaru street (Phaser). The things you pass are real exhibits, each with its source on the end card.",
         "“Out of Place”: hide-and-seek in the herring warehouse, with two players or against the AI."],
         tools="", sub="Owl: “To the coast! Slide down the icy street to the canal.”"),
-    dict(t=fm("Journal"), title="Heritage Journal", pts=[
+    dict(t=fm("Journal") if "Journal" in marks else None, title="Heritage Journal", pts=[
         "Places, objects, turned cards and activities give stamps.",
         "Stored in this browser only."],
         tools="", sub="Everything you do earns a stamp."),
@@ -130,6 +130,7 @@ B = [
         "Open source (MIT) · living-hokkaido.luecke.workers.dev"],
         tools="Built with Claude Code", sub="Sources first. Honest labels. A human gate."),
 ]
+B = [b for b in B if b["t"] is not None]
 for i, b in enumerate(B):
     b["end"] = B[i + 1]["t"] if i + 1 < len(B) else total
 
