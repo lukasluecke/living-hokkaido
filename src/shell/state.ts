@@ -101,6 +101,10 @@ export function reduce(
       };
     case "season.set":
       return { ...s, season: { ...s.season, value: e.value } };
+    case "models.set":
+      return { ...s, prefs: { ...s.prefs, sketchModels: e.sketch } };
+    case "models.labels":
+      return { ...s, prefs: { ...s.prefs, hideModelLabels: e.hidden } };
     case "season.play":
       return { ...s, season: { ...s.season, playing: e.playing } };
     case "nav.back":

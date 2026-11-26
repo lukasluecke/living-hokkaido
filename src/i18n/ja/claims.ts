@@ -309,4 +309,10 @@ export const jaClaims: Record<string, string> = {
     "札幌で最初の路面電車は1918年8月に走りました。その前、1909年に馬車鉄道が始まっていました。",
   "Sapporo TV Tower opened as a tourist facility in August 1957.":
     "さっぽろテレビ塔は、1957年8月に観光施設として開業しました。",
+  "This model was made by an AI tool (Hyper3D Rodin) from a short text prompt for this demo. It is not a museum object, scan or reconstruction.":
+    "このモデルは、このデモのために短い文章からAIツール（Hyper3D Rodin）でつくりました。博物館の資料でも、スキャンでも、復元でもありません。",
+  "This model was made by an AI tool (Hyper3D Rodin) from a short text prompt for this demo. It is not a museum object, scan or reconstruction. No curator has checked its shape or details.":
+    "このモデルは、このデモのために短い文章からAIツール（Hyper3D Rodin）でつくりました。博物館の資料でも、スキャンでも、復元でもありません。形や細かい部分は、まだ学芸員が確かめていません。",
+  "This model was made by an AI tool (Hyper3D Rodin) from a short text prompt for this demo. It is not a museum object, scan or reconstruction. It has no pattern on purpose: no curator has checked it, and Ainu robe patterns need a curator.":
+    "このモデルは、このデモのために短い文章からAIツール（Hyper3D Rodin）でつくりました。博物館の資料でも、スキャンでも、復元でもありません。わざと模様をつけていません。まだ学芸員が確かめておらず、アイヌの衣の模様には学芸員の確認が必要だからです。",
 };

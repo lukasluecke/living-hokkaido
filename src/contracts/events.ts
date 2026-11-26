@@ -32,6 +32,9 @@ export const experienceEventSchema = z.discriminatedUnion("type", [
   // Seasons
   e("season.set", { value: z.number().min(0).lt(4) }),
   e("season.play", { playing: z.boolean() }),
+  // Generated model or code sketch on object cards and in rooms
+  e("models.set", { sketch: z.boolean() }),
+  e("models.labels", { hidden: z.boolean() }),
   // Reveal ("how this was made")
   e("reveal.open", {
     knowledgeId: idSchema,

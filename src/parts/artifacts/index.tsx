@@ -4,8 +4,10 @@
 // hotspot rows that match the viewer dots, the activities, one primary action.
 import { useEffect, useRef, useState } from "react";
 import {
+  activeModelSource,
   type ArtifactViewerProps,
   factHotspots,
+  showsGenerated,
   memoriesForArtifact,
   modelNotes,
 } from "@/contracts";
@@ -62,7 +64,14 @@ export function ArtifactViewer({
       { title: primary.a?.title ?? t("the activity") },
     );
   const spots = factHotspots(artifact);
-  const notes = modelNotes(artifact);
+  const generated = showsGenerated(artifact, prefs);
+  // Generated model: its own "About this model" note replaces the sketch note.
+  const labels = !prefs.hideModelLabels;
+  const notes = !labels
+    ? []
+    : generated && artifact.generated
+      ? [{ id: "about-generated", claimId: artifact.generated.noteClaimId }]
+      : modelNotes(artifact);
   const readCount = spots.filter((h) => read.includes(h.id)).length;
   const start = (id: string) =>
     emit({ type: "activity.start", activityId: id });
@@ -72,9 +81,14 @@ export function ArtifactViewer({
       <div className={c.head}>
         <h2 className={c.title}>{artifact.title}</h2>
         <div className={c.meta}>
-          <span className={c.chip}>
-            <RepresentationBadge value={artifact.model.representation} />
-          </span>
+          {labels && (
+            <span className={c.chip}>
+              <RepresentationBadge
+                value={artifact.model.representation}
+                generated={generated}
+              />
+            </span>
+          )}
           {summary && (
             <span
               className={
@@ -101,7 +115,43 @@ export function ArtifactViewer({
         </div>
       </div>
 
-      {prefs.webgl && <Viewer3D artifact={artifact} read={read} emit={emit} />}
+      {prefs.webgl && (
+        <Viewer3D
+          artifact={artifact}
+          source={activeModelSource(artifact, prefs)}
+          read={read}
+          emit={emit}
+        />
+      )}
+      <div className={c.modelToggle}>
+        {prefs.webgl && artifact.generated && (
+          <fieldset className={c.toggleGroup}>
+            <legend className={c.cap}>{t("Model")}</legend>
+            {[
+              { sketch: false, label: t("AI-generated") },
+              { sketch: true, label: t("Sketch") },
+            ].map((o) => (
+              <button
+                key={o.label}
+                type="button"
+                aria-pressed={!!prefs.sketchModels === o.sketch}
+                className={c.modelOption}
+                onClick={() => emit({ type: "models.set", sketch: o.sketch })}
+              >
+                {o.label}
+              </button>
+            ))}
+          </fieldset>
+        )}
+        <button
+          type="button"
+          aria-pressed={labels}
+          className={c.modelOption}
+          onClick={() => emit({ type: "models.labels", hidden: labels })}
+        >
+          {t("Model labels")}
+        </button>
+      </div>
 
       {summary && <p className={c.summary}>{summary.claim.text}</p>}
 

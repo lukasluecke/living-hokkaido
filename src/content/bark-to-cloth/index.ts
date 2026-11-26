@@ -6,6 +6,7 @@ import {
 import { activities } from "./activities";
 import { areaActivities, areaArtifacts, areaScenes } from "./area-scenes";
 import { artifacts } from "./artifacts";
+import { withGenerated } from "./generated-models";
 import { gameActivities, gameActivityIdsByScene, gameKnowledge } from "./games";
 import { guide } from "./guide";
 import { locations, overview, owlHome } from "./island";
@@ -50,7 +51,7 @@ export const barkToClothRaw = {
       ],
     })),
   ],
-  artifacts: [...artifacts, ...areaArtifacts, ...placeArtifacts],
+  artifacts: withGenerated([...artifacts, ...areaArtifacts, ...placeArtifacts]),
   activities: [
     ...activities,
     ...areaActivities,

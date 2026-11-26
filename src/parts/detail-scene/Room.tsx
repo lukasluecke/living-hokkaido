@@ -12,7 +12,12 @@ import {
 import { ToneMappingMode } from "postprocessing";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-import { type CameraView, type DetailScenePartProps, SCALE } from "@/contracts";
+import {
+  activeModelSource,
+  type CameraView,
+  type DetailScenePartProps,
+  SCALE,
+} from "@/contracts";
 import { useQuality } from "../shared/Quality";
 import { createToonUniforms, toonifyTree } from "../shared/toon";
 import { AreaStatic, isAreaSetting } from "./room/AreaSets";
@@ -149,7 +154,7 @@ function Projector({
 }
 
 export function Room(props: RoomProps) {
-  const { scene, focusedArtifactId, emit, hovered, setHovered } = props;
+  const { scene, focusedArtifactId, emit, hovered, setHovered, prefs } = props;
   const { extraFx } = useQuality(SCALE.maxDpr);
   const controls = useRef<CameraControls>(null);
   const lift = useRef(0);
@@ -173,9 +178,10 @@ export function Room(props: RoomProps) {
         >
           <RoomObject
             artifactId={p.artifactId}
-            source={
-              props.artifacts.find((a) => a.id === p.artifactId)?.model.source
-            }
+            source={(() => {
+              const a = props.artifacts.find((x) => x.id === p.artifactId);
+              return a && activeModelSource(a, prefs);
+            })()}
           />
         </ArtifactShell>
       ))}

@@ -94,8 +94,30 @@ export const artifactSchema = z
       .default({ restRotation: [0, 0, 0], inspectScale: 1, pitchLimit: 0.5 }),
     hotspots: z.array(hotspotSchema).default([]),
     activityIds: z.array(idSchema).default([]),
+    /**
+     * Optional AI-generated model (for example Hyper3D Rodin from a text
+     * prompt) shown instead of the sketch unless the visitor picks "Sketch".
+     * Never a scan or a reconstruction: noteClaimId says so on the card.
+     */
+    generated: z
+      .object({
+        source: z.object({ kind: z.literal("glb"), url: z.string().min(1) }),
+        /** Tool and input, for example "Hyper3D Rodin Gen-2.5, text prompt". */
+        tool: z.string().min(1),
+        license: z.string().min(1),
+        /** Claim shown as the "About this model" note for this model. */
+        noteClaimId: idSchema,
+        bytes: z.number().int().positive().optional(),
+      })
+      .optional(),
   })
   .superRefine((o, ctx) => {
+    if (o.generated && !o.claimIds.includes(o.generated.noteClaimId))
+      ctx.addIssue({
+        code: "custom",
+        path: ["generated", "noteClaimId"],
+        message: `Claim ${o.generated.noteClaimId} is not linked to the artifact`,
+      });
     if (!o.claimIds.includes(o.summaryClaimId))
       ctx.addIssue({
         code: "custom",
@@ -131,3 +153,21 @@ export const artifactSchema = z
   });
 export type Artifact = z.infer<typeof artifactSchema>;
 export type ArtifactInput = z.input<typeof artifactSchema>;
+
+/** True when the generated model is shown (it exists, visitor did not pick "Sketch"). */
+export function showsGenerated(
+  a: Pick<Artifact, "generated">,
+  prefs: { sketchModels?: boolean },
+): boolean {
+  return !!a.generated && !prefs.sketchModels;
+}
+
+/** The model the viewer and the room load for this artifact. */
+export function activeModelSource(
+  a: Pick<Artifact, "generated" | "model">,
+  prefs: { sketchModels?: boolean },
+): ModelAsset["source"] {
+  return a.generated && !prefs.sketchModels
+    ? a.generated.source
+    : a.model.source;
+}

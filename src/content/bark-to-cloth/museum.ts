@@ -133,6 +133,11 @@ export const hokkaidoMuseum: KnowledgeEntry = {
       ],
     ),
     c(
+      "object-generated",
+      "This model was made by an AI tool (Hyper3D Rodin) from a short text prompt for this demo. It is not a museum object, scan or reconstruction. No curator has checked its shape or details.",
+      ["museum-visit-notes", "public/models/ATTRIBUTION.md, generated models"],
+    ),
+    c(
       "map-sketch",
       "The map and the plan are sketches made for this demo. Places on them are approximate.",
       ["museum-visit-notes", "README.md, Most useful for the demo"],

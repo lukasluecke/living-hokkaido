@@ -106,6 +106,16 @@ export const landAndSea: KnowledgeEntry = {
       "The coast, forest, hills and mountain scenes on this island are toy sketches after museum dioramas. They are not reconstructions of real places.",
       ["area-notes", "src/content/bark-to-cloth/land-and-sea.ts, header"],
     ),
+    c(
+      "area-generated",
+      "This model was made by an AI tool (Hyper3D Rodin) from a short text prompt for this demo. It is not a museum object, scan or reconstruction.",
+      ["area-notes", "public/models/ATTRIBUTION.md, generated models"],
+    ),
+    c(
+      "set-bow-generated",
+      "This model was made by an AI tool (Hyper3D Rodin) from a short text prompt for this demo. It is not a museum object, scan or reconstruction. No curator has checked its shape or details.",
+      ["area-notes", "public/models/ATTRIBUTION.md, generated models"],
+    ),
     // ------------------------------------------------ coast
     c(
       "sea-catch-ainu",
