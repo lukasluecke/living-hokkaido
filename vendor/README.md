@@ -104,6 +104,10 @@ the diff):
    ancestor has `data-rotate="90"` (living-hokkaido's GameStage on a phone
    held upright), `embed.ts` sizes and centres the game from the layout box
    and maps pointer positions into the turned canvas (`turnable`).
+16. Out of Place, Lukas's phone feedback, one commit: a phone panel
+   (`buildCompactPanel`, when the game shows under 1000 css px wide) with
+   big buttons in two and three columns (about 48 px on a phone); a
+   ResizeObserver refreshes the turned game when its layout box changes.
 
 ## Sapporo Omusha (Shaw)
 

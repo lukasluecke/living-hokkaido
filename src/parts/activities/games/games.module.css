@@ -155,7 +155,26 @@
   padding: 0 10px;
 }
 .turned .host.wide {
-  width: min(100%, calc((100vw - 38px) * 16 / 9));
+  width: min(100%, calc(100vw * 16 / 9));
+}
+/* The bar floats in the empty band at the side, so the game gets the full
+   height; only the close button stays. */
+.turned .bar {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 3;
+  padding: 0;
+}
+.turned .barTitle {
+  display: none;
+}
+.turned .closeGame {
+  font-size: 12px;
+  max-width: 76px;
+  white-space: normal;
+  line-height: 1.1;
+  padding: 4px 6px;
 }
 /* A phone on its side: a thin bar, and the 16:9 game uses the full height. */
 @media (orientation: landscape) and (max-height: 500px) {

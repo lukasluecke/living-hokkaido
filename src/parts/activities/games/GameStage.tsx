@@ -36,6 +36,9 @@ export type MountGame = (host: HTMLElement, emit: Emit) => GameHandle;
  * is ready when the code has loaded and the game is ready. Destroy before
  * the load ends destroys the game as soon as it arrives.
  */
+/** A phone held upright: a landscape game's stage turns a quarter turn. */
+const TURN_QUERY = "(orientation: portrait) and (max-width: 600px)";
+
 export function deferMount(load: Promise<GameHandle>): GameHandle {
   let handle: GameHandle | null = null;
   let dead = false;
@@ -106,9 +109,7 @@ export function GameStage({
   const [turned, setTurned] = useState(false);
   useEffect(() => {
     if (!landscape || !open) return;
-    const mq = window.matchMedia(
-      "(orientation: portrait) and (max-width: 600px)",
-    );
+    const mq = window.matchMedia(TURN_QUERY);
     const sync = () => setTurned(mq.matches);
     sync();
     mq.addEventListener("change", sync);
@@ -204,7 +205,11 @@ export function GameStage({
           ref={play}
           type="button"
           className="btn primary"
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            // Turn before the game mounts, so it measures the turned stage.
+            setTurned(landscape && window.matchMedia(TURN_QUERY).matches);
+            setOpen(true);
+          }}
         >
           {done ? tr("Play again") : tr("Play")}
         </button>

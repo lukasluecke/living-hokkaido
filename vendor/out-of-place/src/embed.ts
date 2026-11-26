@@ -195,4 +195,13 @@ function turnable(game: Phaser.Game, parent: HTMLElement) {
     pointer.position.y = ((r.right - cx) / r.width) * game.scale.height;
   };
   game.scale.refresh();
+  // Layout size changes (turning, the browser bars) do not always reach
+  // Phaser's own checks inside a turned box: refresh on every change.
+  if (typeof ResizeObserver !== "undefined") {
+    const ro = new ResizeObserver(() => {
+      if (scale.getParentBounds()) game.scale.refresh();
+    });
+    ro.observe(parent);
+    game.events.once("destroy", () => ro.disconnect());
+  }
 }
