@@ -159,3 +159,75 @@ export function remindersOf(pack: ContentPack, stamp: Stamp): Reminder[] {
       : [];
   });
 }
+
+/**
+ * Where a stamp is found, for the "Go there" link: an open place. For
+ * objects and activities it is the place that holds the most of the ones
+ * still to do (all of them, once earned); on a tie the place with the
+ * fewest activities (the most specific), then pack order. Seasons and card
+ * backs have no single place: null.
+ */
+export function placeOf(
+  pack: ContentPack,
+  j: JournalState,
+  stamp: Stamp,
+): { id: string; title: string } | null {
+  const open = pack.island.locations.filter((l) => l.status === "open");
+  const scenesAt = (locationId: string) =>
+    pack.scenes.filter((x) => x.locationId === locationId);
+  const size = (locationId: string) =>
+    new Set(scenesAt(locationId).flatMap((x) => x.activityIds)).size;
+  const best = (score: (locationId: string) => number) => {
+    let home: { id: string; title: string; n: number } | undefined;
+    for (const l of open) {
+      const n = score(l.id);
+      if (
+        n > 0 &&
+        (!home || n > home.n || (n === home.n && size(l.id) < size(home.id)))
+      )
+        home = { id: l.id, title: l.title, n };
+    }
+    return home ? { id: home.id, title: home.title } : null;
+  };
+  const todo = (ids: string[], done: (id: string) => boolean) => {
+    const left = ids.filter((id) => !done(id));
+    return left.length ? left : ids;
+  };
+  const u = stamp.unlock;
+  switch (u.on) {
+    case "location-visited":
+      return best((id) => (id === u.locationId ? 1 : 0));
+    case "artifacts-inspected":
+    case "hotspots-read": {
+      const done = (a: string) => {
+        if (u.on === "artifacts-inspected") return j.inspected.includes(a);
+        const p = progressOf(pack, j, {
+          ...stamp,
+          unlock: { on: "hotspots-read", artifactIds: [a] },
+        });
+        return p.have === p.need;
+      };
+      const left = todo(u.artifactIds, done);
+      return best(
+        (id) =>
+          left.filter((a) =>
+            scenesAt(id).some((x) =>
+              x.placements.some((p) => p.artifactId === a),
+            ),
+          ).length,
+      );
+    }
+    case "activities-completed": {
+      const left = todo(u.activityIds, (a) => j.completed.includes(a));
+      return best(
+        (id) =>
+          left.filter((a) =>
+            scenesAt(id).some((x) => x.activityIds.includes(a)),
+          ).length,
+      );
+    }
+    case "seasons-seen":
+    case "reveal-opened":
+      return null;
+  }
+}

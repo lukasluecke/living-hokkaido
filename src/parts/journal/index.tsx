@@ -8,7 +8,14 @@ import type { JournalPartProps } from "@/contracts";
 import { type Locale, useI18n } from "@/i18n";
 import { material, type as font, ui } from "@/design/tokens";
 import { PresentationBadge } from "../shared/Badges";
-import { hintOf, progressOf, remindersOf, SECTIONS, sectionOf } from "./book";
+import {
+  hintOf,
+  placeOf,
+  progressOf,
+  remindersOf,
+  SECTIONS,
+  sectionOf,
+} from "./book";
 import s from "./Journal.module.css";
 import { StampIcon } from "./StampIcon";
 
@@ -59,6 +66,9 @@ export function JournalPart({
   );
   const selected = content.stamps.find((st) => st.id === selectedId) ?? null;
   const closeRef = useRef<HTMLButtonElement>(null);
+  // Set once the visitor picks a stamp: then the detail (with its hint)
+  // scrolls into view, which on a phone is below the stamp grid.
+  const picked = useRef(false);
   const { t } = useI18n();
 
   useEffect(() => {
@@ -117,7 +127,10 @@ export function JournalPart({
                         type="button"
                         className={`${s.stamp} ${earned ? s.earned : s.locked}`}
                         aria-pressed={st.id === selectedId}
-                        onClick={() => setSelectedId(st.id)}
+                        onClick={() => {
+                          picked.current = true;
+                          setSelectedId(st.id);
+                        }}
                       >
                         <StampIcon icon={st.icon} earned={earned} />
                         <span className={s.stampTitle}>{st.title}</span>
@@ -142,6 +155,8 @@ export function JournalPart({
           stamp={selected}
           earnedAt={earnedAt.get(selected.id) ?? null}
           emit={emit}
+          reveal={picked.current}
+          reducedMotion={prefs.reducedMotion}
         />
       )}
     </section>
@@ -154,16 +169,31 @@ function StampDetail({
   stamp,
   earnedAt,
   emit,
+  reveal,
+  reducedMotion,
 }: Pick<JournalPartProps, "content" | "journal" | "emit"> & {
   stamp: JournalPartProps["content"]["stamps"][number];
   earnedAt: string | null;
+  /** Scroll the detail into view when it mounts (a stamp was picked). */
+  reveal: boolean;
+  reducedMotion: boolean;
 }) {
+  const box = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (reveal)
+      box.current?.scrollIntoView({
+        block: "nearest",
+        behavior: reducedMotion ? "auto" : "smooth",
+      });
+  }, [reveal, reducedMotion]);
   const { t, locale } = useI18n();
   const earned = earnedAt !== null;
   const p = progressOf(content, journal, stamp);
   const reminders = earned ? remindersOf(content, stamp) : [];
+  const place = placeOf(content, journal, stamp);
   return (
     <aside
+      ref={box}
       className={s.detail}
       aria-live="polite"
       aria-label={t("Selected stamp")}
@@ -191,6 +221,24 @@ function StampDetail({
               </p>
             )}
           </>
+        )}
+        {place && (
+          <p className={s.where}>
+            <span>
+              {earned
+                ? t("Found at the {place}.", { place: place.title })
+                : t("Where: the {place}.", { place: place.title })}
+            </span>{" "}
+            <button
+              type="button"
+              className={s.link}
+              onClick={() =>
+                emit({ type: "location.select", locationId: place.id })
+              }
+            >
+              {earned ? t("Go back there") : t("Go there")}
+            </button>
+          </p>
         )}
         {reminders.map((r) => (
           <div key={r.claimId} className={s.reminder}>
