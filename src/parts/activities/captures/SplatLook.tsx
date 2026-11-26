@@ -100,10 +100,6 @@ export function SplatLookActivity({
   return (
     <div className={p.root}>
       <p>{a.prompt}</p>
-      <p className="small-note">
-        Drag to turn, scroll or pinch to zoom, right-drag or two fingers to
-        move. Every spot is also in the list next to the capture.
-      </p>
       <div className={g.labels}>
         {labels.map((l) => (
           <span key={l} className={g.label}>
@@ -341,6 +337,10 @@ function Stage({
           )}
         </div>
         <aside className={c.side} aria-label="Spots in the diorama">
+          <p className="small-note">
+            Drag to turn, pinch or scroll to zoom, two fingers or right-drag to
+            move.
+          </p>
           <p className={c.progress} role="status">
             {done
               ? "Done. Close to go on, or keep looking."
