@@ -18,7 +18,10 @@ import c from "./Viewer.module.css";
 
 /** Centre a model on its base so every object frames the same way. */
 function frame(g: THREE.Object3D) {
+  g.updateMatrixWorld(true);
   const box = new THREE.Box3().setFromObject(g);
+  // Bounds in the model's own space, where hotspot positions live.
+  const local = box.clone().applyMatrix4(g.matrix.clone().invert());
   const size = box.getSize(new THREE.Vector3());
   const centre = box.getCenter(new THREE.Vector3());
   const wrap = new THREE.Group();
@@ -26,6 +29,7 @@ function frame(g: THREE.Object3D) {
   wrap.add(g);
   wrap.userData.radius = Math.max(size.x, size.y, size.z) / 2;
   wrap.userData.halfHeight = size.y / 2;
+  wrap.userData.localBox = local;
   return wrap;
 }
 
@@ -39,6 +43,25 @@ type ModelProps = {
   hotspots: React.RefObject<HTMLDivElement | null>;
 };
 
+/**
+ * Hotspot positions are authored on the sketch. A generated GLB has other
+ * bounds (origin on its base, other proportions), so map each position from
+ * the sketch's box to the same relative place in the GLB's box. Without this,
+ * low hotspots (the garment's "patterns") land outside the viewer frame.
+ */
+function boxMapper(from: THREE.Box3, to: THREE.Box3) {
+  const fs = from.getSize(new THREE.Vector3());
+  const ts = to.getSize(new THREE.Vector3());
+  const axis = (v: number, f0: number, fl: number, t0: number, tl: number) =>
+    fl > 1e-6 ? t0 + ((v - f0) / fl) * tl : t0 + tl / 2;
+  return (v: THREE.Vector3) =>
+    v.set(
+      axis(v.x, from.min.x, fs.x, to.min.x, ts.x),
+      axis(v.y, from.min.y, fs.y, to.min.y, ts.y),
+      axis(v.z, from.min.z, fs.z, to.min.z, ts.z),
+    );
+}
+
 function ProceduralModel(p: ModelProps & { builder: string }) {
   const obj = useMemo(() => {
     const build = builders[p.builder as ObjectId];
@@ -51,7 +74,14 @@ function ProceduralModel(p: ModelProps & { builder: string }) {
 
 function GlbModel(p: ModelProps & { url: string }) {
   const obj = useGlbClone(p.url, toonFrame);
-  return <Model {...p} obj={obj} />;
+  const builder = sketchBuilder(p.artifact);
+  const map = useMemo(() => {
+    const build = builders[builder as ObjectId];
+    if (!build) return undefined;
+    const sketch = frame(build()).userData.localBox as THREE.Box3;
+    return boxMapper(sketch, obj.userData.localBox as THREE.Box3);
+  }, [builder, obj]);
+  return <Model {...p} obj={obj} map={map} />;
 }
 
 /** The sketch builder, shown while a generated GLB loads. */
@@ -80,7 +110,11 @@ function Model({
   yaw,
   hotspots,
   obj,
-}: ModelProps & { obj: THREE.Object3D }) {
+  map,
+}: ModelProps & {
+  obj: THREE.Object3D;
+  map?: (v: THREE.Vector3) => THREE.Vector3;
+}) {
   const turn = useRef<THREE.Group>(null);
   const tmp = useMemo(
     () => ({
@@ -108,6 +142,7 @@ function Model({
       const h = artifact.hotspots.find((x) => x.id === el.dataset.hotspot);
       if (!h || !inner) continue;
       tmp.p.set(...h.position);
+      map?.(tmp.p);
       inner.localToWorld(tmp.p);
       tmp.n.set(...h.normal).transformDirection(inner.matrixWorld);
       tmp.v.copy(camera.position).sub(tmp.p).normalize();
