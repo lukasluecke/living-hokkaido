@@ -21,6 +21,7 @@ import { PluckActivity } from "./play/Pluck";
 import { Sequence } from "./Sequence";
 import { themeVars } from "./theme";
 import { Weave } from "./Weave";
+import { SHOW_DISCLAIMERS } from "@/design/disclaimers";
 
 const KIND_LABEL: Record<ActivityPartProps["activity"]["kind"], string> = {
   quiz: "Quiz",
@@ -64,6 +65,9 @@ export function ActivityPart({
 
   return (
     <section
+      // Number keys belong to the activity while it is open (tonkori
+      // strings, pose sheet): the scene skips its object shortcuts.
+      data-own-keys=""
       className={`${s.panel} ${prefs.reducedMotion ? s.still : ""}`}
       style={themeVars(seasonWeights(season.value))}
       aria-labelledby={`${activity.id}-title`}
@@ -72,14 +76,16 @@ export function ActivityPart({
         <div className={s.badges}>
           <span className={s.kind}>{t(KIND_LABEL[activity.kind])}</span>
           {presentation && <PresentationBadge value={presentation} />}
-          {activity.kind === "place" && (
+          {SHOW_DISCLAIMERS && activity.kind === "place" && (
             <span className={s.illustrative}>{t("Illustrative sketch")}</span>
           )}
-          {activity.kind === "weave" && activity.illustrative && (
-            <span className={s.illustrative}>
-              {t("Playful illustration · not a real technique")}
-            </span>
-          )}
+          {SHOW_DISCLAIMERS &&
+            activity.kind === "weave" &&
+            activity.illustrative && (
+              <span className={s.illustrative}>
+                {t("Playful illustration · not a real technique")}
+              </span>
+            )}
         </div>
         <button
           type="button"

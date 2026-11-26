@@ -12,6 +12,7 @@ import {
   type VoiceMemory,
 } from "@/contracts";
 import s from "../shared/Fallback.module.css";
+import { SHOW_DISCLAIMERS } from "@/design/disclaimers";
 
 const ORIGINAL = "original";
 
@@ -100,16 +101,18 @@ export function MemoryCard({
       <p className={s.muted}>
         {m.curator.name} · {m.curator.role}
       </p>
-      <p>
-        <span className={s.badge}>
-          {m.placeholder ? "Sample · no real curator yet" : "Curator memory"}
-        </span>
-        <span className={s.badge}>
-          {m.review.status === "approved"
-            ? `Reviewed by ${m.review.reviewer}`
-            : "Review pending"}
-        </span>
-      </p>
+      {SHOW_DISCLAIMERS && (
+        <p>
+          <span className={s.badge}>
+            {m.placeholder ? "Sample · no real curator yet" : "Curator memory"}
+          </span>
+          <span className={s.badge}>
+            {m.review.status === "approved"
+              ? `Reviewed by ${m.review.reviewer}`
+              : "Review pending"}
+          </span>
+        </p>
+      )}
       <p>
         <strong>Original · {original}</strong>
       </p>
@@ -127,9 +130,13 @@ export function MemoryCard({
         <section aria-label={`Translation, ${langName(t.lang, uiLang)}`}>
           <p>
             <strong>{langName(t.lang, uiLang)}</strong>{" "}
-            <span className={s.badge}>{modeLabel(t)}</span>
-            <span className={s.badge}>{voiceLabel(t, m.curator.name)}</span>
-            {needsReview(m, t) && <span className={s.badge}>Draft</span>}
+            {SHOW_DISCLAIMERS && (
+              <>
+                <span className={s.badge}>{modeLabel(t)}</span>
+                <span className={s.badge}>{voiceLabel(t, m.curator.name)}</span>
+                {needsReview(m, t) && <span className={s.badge}>Draft</span>}
+              </>
+            )}
           </p>
           <Audio
             audio={t.audio}

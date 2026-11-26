@@ -8,6 +8,7 @@ import { useState } from "react";
 import type { Film } from "@/contracts";
 import { useT } from "@/i18n";
 import s from "./Film.module.css";
+import { SHOW_DISCLAIMERS } from "@/design/disclaimers";
 
 export function FilmPlayer({
   film,
@@ -72,7 +73,7 @@ export function FilmPlayer({
         />
       )}
       <p className={s.note}>
-        ⓘ {t(film.credit)}. {t(film.note)}
+        ⓘ {t(film.credit)}.{SHOW_DISCLAIMERS && ` ${t(film.note)}`}
       </p>
     </section>
   );

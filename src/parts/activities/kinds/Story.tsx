@@ -6,6 +6,7 @@ import { useT } from "@/i18n";
 import { Owl } from "./Owl";
 import { Cite, complete, deviceVoice, type KindProps } from "./shared";
 import k from "./kinds.module.css";
+import { SHOW_DISCLAIMERS } from "@/design/disclaimers";
 
 const MS_PER_WORD = 340;
 const LINE_GAP_MS = 650;
@@ -165,7 +166,7 @@ export function Story({
             <div className={prefs.reducedMotion ? "still" : ""}>
               <Owl speaking={speaking} size={96} />
             </div>
-            <p className="credit">{a.narrator.credit}</p>
+            {SHOW_DISCLAIMERS && <p className="credit">{a.narrator.credit}</p>}
             <p className="voice-label">
               {voice.kind === "recording"
                 ? tr("Recorded voice")
