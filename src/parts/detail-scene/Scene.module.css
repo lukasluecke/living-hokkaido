@@ -91,3 +91,14 @@
   font-family: var(--fl-body);
   z-index: 1;
 }
+/* Story film (scene.film): same card; wider while the film plays. */
+.film:has([data-open]) {
+  width: min(640px, calc(100% - 32px));
+}
+/* Phone: the owl's tip uses the top, so the film sits above the tray. */
+@media (max-width: 700px) {
+  .film {
+    top: auto;
+    bottom: 128px;
+  }
+}

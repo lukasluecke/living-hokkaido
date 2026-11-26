@@ -488,3 +488,41 @@ test("media ranges: start-end, open end, suffix, bad", async () => {
   assert.equal(parseRange("bytes=200-", 100), "bad");
   assert.equal(parseRange("items=0-1", 100), "bad");
 });
+
+test("films: source from one config value; grove has the owl film", async () => {
+  const { filmSourceFrom, filmSchema } = await import("@/contracts");
+  const { PUBLIC_MEDIA } = await import("@/integrations/museum-assets/edge");
+  assert.deepEqual(filmSourceFrom(""), { kind: "none" });
+  assert.deepEqual(filmSourceFrom("owl-story.mp4"), {
+    kind: "r2",
+    key: "owl-story.mp4",
+  });
+  for (const url of [
+    "https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=3",
+    "https://youtu.be/dQw4w9WgXcQ?si=x",
+    "https://youtube.com/shorts/dQw4w9WgXcQ",
+    "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+    "dQw4w9WgXcQ",
+  ])
+    assert.deepEqual(filmSourceFrom(url), {
+      kind: "youtube",
+      id: "dQw4w9WgXcQ",
+    });
+  assert.deepEqual(filmSourceFrom("https://example.com/x.mp4"), {
+    kind: "none",
+  });
+  assert.deepEqual(filmSourceFrom("../x.mp4"), { kind: "none" });
+  const f = filmSchema.parse({
+    title: "a",
+    teaser: "b",
+    credit: "c",
+    note: "d",
+  });
+  assert.equal(f.source.kind, "none");
+  const grove = barkToClothPack.scenes.find((s) => s.id === "listening-grove");
+  assert.ok(grove?.film);
+  assert.match(grove.film.note, /not a museum source/);
+  if (grove.film.source.kind === "r2")
+    assert.ok(PUBLIC_MEDIA.has(grove.film.source.key));
+  assert.ok(PUBLIC_MEDIA.has("owl-story.mp4"));
+});
