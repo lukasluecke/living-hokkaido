@@ -369,9 +369,18 @@ async function runStep(c: Ctx, s: Step): Promise<void> {
       return;
     }
     case "drag": {
-      const start = s.target
+      let start = s.target
         ? await centreOf(c, s.target, tmo(5000))
         : { x: width / 2, y: height / 2 };
+      if (s.target && s.at) {
+        const box = await locate(c.page, s.target).first().boundingBox();
+        if (box)
+          start = {
+            ...start,
+            x: box.x + box.width * s.at[0],
+            y: box.y + box.height * s.at[1],
+          };
+      }
       await glide(c, start.x, start.y, 500);
       // No text selection while dragging over HTML (the stub parts).
       const noSelect = await page.addStyleTag({
@@ -517,6 +526,15 @@ function startPump(page: Page) {
         }
         const t = Date.now();
         vclock.now = await advance(frameMs);
+        await page.evaluate(
+          (d) =>
+            (
+              window as {
+                __vclock?: { media: (n: number) => Promise<number> };
+              }
+            ).__vclock?.media(d),
+          frameMs,
+        );
         const shot = await page.screenshot({ type: "jpeg", quality: 92 });
         const ok = out.stdin?.write(shot);
         if (!ok) await new Promise((r) => out.stdin?.once("drain", r));

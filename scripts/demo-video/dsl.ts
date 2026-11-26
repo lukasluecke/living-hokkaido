@@ -40,7 +40,14 @@ export type Step = Common &
     /** Click a text field, then type like a person (charMs per key). */
     | { do: "type"; target: Target; text: string; charMs?: number }
     /** Drag from the target centre (or viewport centre) by dx/dy pixels. */
-    | { do: "drag"; target?: Target; by: [number, number]; ms?: number }
+    | {
+        do: "drag";
+        target?: Target;
+        by: [number, number];
+        ms?: number;
+        /** Start point inside the target, as fractions (default centre). */
+        at?: [number, number];
+      }
     | { do: "wheel"; dy: number; ms?: number }
     | {
         do: "waitFor";
@@ -141,7 +148,11 @@ export const emit = (
 });
 export const drag = (
   by: [number, number],
-  opts: Partial<Common> & { target?: Target; ms?: number } = {},
+  opts: Partial<Common> & {
+    target?: Target;
+    ms?: number;
+    at?: [number, number];
+  } = {},
 ): Step => ({
   do: "drag",
   by,

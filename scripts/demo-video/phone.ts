@@ -190,15 +190,18 @@ export const phoneShots: Shot[] = [
         { state: "hidden", optional: true, timeoutMs: 60000 },
       ),
       hold(2000),
-      drag([200, 0], {
+      // Start above the house: the figure markers take the pointer.
+      drag([90, 0], {
         target: { css: "canvas:visible >> nth=-1" },
-        ms: 3500,
+        at: [0.5, 0.2],
+        ms: 3000,
         optional: true,
       }),
       hold(800),
-      drag([-120, 40], {
+      drag([-90, 0], {
         target: { css: "canvas:visible >> nth=-1" },
-        ms: 2500,
+        at: [0.5, 0.2],
+        ms: 3000,
         optional: true,
       }),
       hold(1500),

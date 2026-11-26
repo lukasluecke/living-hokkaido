@@ -19,10 +19,16 @@ export function installVirtualClock() {
     every?: number;
   };
   const w = window as Window & {
-    __vclock?: { advance: (ms: number) => number; now: () => number };
+    __vclock?: {
+      advance: (ms: number) => number;
+      now: () => number;
+      media: (ms: number) => Promise<number>;
+    };
   };
   if (w.__vclock) return;
   const realNow = performance.now.bind(performance);
+  const setTimeoutReal = window.setTimeout.bind(window);
+  const clearTimeoutReal = window.clearTimeout.bind(window);
   let vt = realNow();
   const dateBase = Date.now() - vt;
   const timers = new Map<number, Timer>();
@@ -77,8 +83,91 @@ export function installVirtualClock() {
     }
   };
 
+  // Media: <video>/<audio> would play on the real clock (fast-forward in a
+  // slow capture). play() only marks the element; media() steps its
+  // currentTime by one frame and waits for the seek.
+  type Media = HTMLMediaElement & { __vplay?: boolean };
+  const playing = new Set<Media>();
+  const proto = HTMLMediaElement.prototype;
+  const realPause = proto.pause;
+  proto.play = function (this: Media) {
+    if (!this.__vplay) {
+      this.__vplay = true;
+      playing.add(this);
+      this.dispatchEvent(new Event("play"));
+      this.dispatchEvent(new Event("playing"));
+    }
+    return Promise.resolve();
+  };
+  proto.pause = function (this: Media) {
+    realPause.call(this);
+    if (this.__vplay) {
+      this.__vplay = false;
+      playing.delete(this);
+      this.dispatchEvent(new Event("pause"));
+    }
+  };
+  Object.defineProperty(proto, "paused", {
+    configurable: true,
+    get(this: Media) {
+      return !this.__vplay;
+    },
+  });
+
+  // autoplay would start on the real clock: take it off and call play().
+  const tame = (m: HTMLMediaElement) => {
+    if (!m.autoplay) return;
+    m.autoplay = false;
+    m.removeAttribute("autoplay");
+    realPause.call(m);
+    m.play();
+  };
+  new MutationObserver((list) => {
+    for (const r of list)
+      for (const n of r.addedNodes)
+        if (n instanceof HTMLElement) {
+          if (n instanceof HTMLMediaElement) tame(n);
+          for (const m of n.querySelectorAll("video, audio"))
+            tame(m as HTMLMediaElement);
+        }
+  }).observe(document, { childList: true, subtree: true });
+
   w.__vclock = {
     now: () => vt,
+    async media(ms: number) {
+      const steps: Promise<unknown>[] = [];
+      for (const m of playing) {
+        if (!m.isConnected) {
+          playing.delete(m);
+          continue;
+        }
+        const d = Number.isFinite(m.duration) ? m.duration : Infinity;
+        const next = m.currentTime + ms / 1000;
+        if (next >= d) {
+          m.__vplay = false;
+          playing.delete(m);
+          m.currentTime = d;
+          m.dispatchEvent(new Event("ended"));
+          continue;
+        }
+        steps.push(
+          new Promise((r) => {
+            const t = setTimeoutReal(r, 400);
+            m.addEventListener(
+              "seeked",
+              () => {
+                clearTimeoutReal(t);
+                r(null);
+              },
+              { once: true },
+            );
+            m.currentTime = next;
+          }),
+        );
+      }
+      await Promise.all(steps);
+      return playing.size;
+    },
     /** Move the clock by ms: run due timers in order, then one rAF batch. */
     advance(ms: number) {
       const end = vt + ms;
