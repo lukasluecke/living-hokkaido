@@ -134,6 +134,10 @@ gated keys. Setup on a new account:
 ```bash
 npx wrangler r2 bucket create living-hokkaido-museum   # once
 npx wrangler r2 object put living-hokkaido-museum/omusha.sog --file omusha.sog --remote
+# Lighter file for iPhone/iPad (45 % of the splats, SH band 1):
+#   npx @playcanvas/splat-transform@3.12.0 omusha.sog -H 1 -d 45% mid.ply
+#   npx @playcanvas/splat-transform@3.12.0 mid.ply omusha-mobile.sog
+npx wrangler r2 object put living-hokkaido-museum/omusha-mobile.sog --file omusha-mobile.sog --remote
 npx wrangler secret put MUSEUM_ASSET_PASSWORD
 ```
 

@@ -272,6 +272,8 @@ export const omushaLook: ActivityInput = {
     "You looked closer. The museum panels tell of about 700 Aizu soldiers, a show of military authority, seven elders in robes the Wajin gave them, and laws read out through an interpreter before the goods were handed out. Open more spots, or go on with the tour.",
   asset: {
     key: "omusha.sog",
+    // 45 % of the splats, SH band 1 (splat-transform 3.12: -H 1 -d 45%).
+    lightKey: "omusha-mobile.sog",
     label: "Capture of a museum diorama",
     gated: false,
     flip: true,

@@ -113,3 +113,8 @@
   font-size: 14px;
   font-weight: 600;
 }
+.unlock button.alt {
+  background: transparent;
+  border-color: transparent;
+  text-decoration: underline;
+}

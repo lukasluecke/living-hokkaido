@@ -49,7 +49,6 @@ const STATUS: Partial<Record<Phase, string>> = {
   off: "Splat not available on this server. You can still open every spot in the list.",
   "no-webgl":
     "This device cannot show the 3D capture. You can still open every spot in the list.",
-  lost: "This device could not keep the 3D capture open (not enough memory). You can still open every spot in the list.",
 };
 
 export function SplatLookActivity({
@@ -190,12 +189,16 @@ function Stage({
   const [ios] = useState(() =>
     isIOS(navigator.userAgent, navigator.maxTouchPoints ?? 0),
   );
-  const [tryIOS, setTryIOS] = useState(false);
+  // Which file the visitor chose on iPhone/iPad, or after a GPU loss.
+  const [choice, setChoice] = useState<"full" | "light" | null>(null);
   const host = useRef<HTMLDivElement>(null);
   const viewer = useRef<SplatViewer | null>(null);
   const pickRef = useRef(onPick);
   pickRef.current = onPick;
   const url = `/api/museum-assets/${a.asset.key}`;
+  const lightUrl = a.asset.lightKey
+    ? `/api/museum-assets/${a.asset.lightKey}`
+    : null;
 
   // Esc closes the stage, not the activity (same as GameStage).
   useEffect(() => {
@@ -221,7 +224,15 @@ function Stage({
       if (!live) return;
       const next = phaseForStatus(status);
       if (next !== "ready") return setPhase(next);
-      if (ios && !tryIOS) return setPhase("ask-ios");
+      if (ios && !choice) return setPhase("ask-ios");
+      // The lighter file only on request, and only if the server has it.
+      const src =
+        choice === "light" && lightUrl
+          ? await fetch(lightUrl, { method: "HEAD" })
+              .then((r) => (r.ok ? lightUrl : url))
+              .catch(() => url)
+          : url;
+      if (!live) return;
       const mod = await import("./splatViewer");
       if (!live) return;
       if (!prefs.webgl || !mod.canRenderSplats() || !host.current)
@@ -229,7 +240,7 @@ function Stage({
       setPhase("loading");
       try {
         v = await mod.mountSplatViewer(host.current, {
-          url,
+          url: src,
           flip: a.asset.flip,
           view: a.view,
           spots: a.spots,
@@ -264,7 +275,7 @@ function Stage({
       v?.destroy();
       viewer.current = null;
     };
-  }, [attempt, tryIOS]);
+  }, [attempt, choice]);
 
   useEffect(() => {
     viewer.current?.select(current);
@@ -312,16 +323,47 @@ function Stage({
               <form
                 onSubmit={(ev) => {
                   ev.preventDefault();
-                  setTryIOS(true);
+                  setChoice("full");
                 }}
               >
                 <strong>3D capture on iPhone and iPad</strong>
                 <span>
-                  The capture is large (32 MB). On some iPhones and iPads,
+                  The capture is large (33 MB). On some iPhones and iPads,
                   Safari closes the page when it loads. Every spot also works in
                   the list.
                 </span>
                 <button type="submit">Try the 3D capture</button>
+                {lightUrl && (
+                  <button
+                    type="button"
+                    className={c.alt}
+                    onClick={() => setChoice("light")}
+                  >
+                    Use the lighter version (14.5 MB)
+                  </button>
+                )}
+              </form>
+            </div>
+          )}
+          {phase === "lost" && (
+            <div className={c.unlock}>
+              <form
+                onSubmit={(ev) => {
+                  ev.preventDefault();
+                  setChoice("light");
+                  setAttempt((n) => n + 1);
+                }}
+              >
+                <strong>The 3D capture stopped</strong>
+                <span>
+                  This device could not keep the capture open (not enough
+                  memory). You can still open every spot in the list.
+                </span>
+                {lightUrl && choice !== "light" && (
+                  <button type="submit">
+                    Use the lighter version (14.5 MB)
+                  </button>
+                )}
               </form>
             </div>
           )}

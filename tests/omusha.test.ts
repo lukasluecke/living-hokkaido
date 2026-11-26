@@ -121,7 +121,8 @@ test("museum asset gate: keys, password cookie, shut without a password", async 
 test("public media list covers every non-gated capture", () => {
   for (const a of barkToClothPack.activities)
     if (a.kind === "splat-look" && !a.asset.gated)
-      assert.ok(PUBLIC_MEDIA.has(a.asset.key), a.asset.key);
+      for (const k of [a.asset.key, a.asset.lightKey ?? a.asset.key])
+        assert.ok(PUBLIC_MEDIA.has(k), k);
 });
 
 test("edge media: ranges, HEAD, 404 and fall-through", async () => {
