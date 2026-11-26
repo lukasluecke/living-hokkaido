@@ -111,6 +111,11 @@ export const landAndSea: KnowledgeEntry = {
       "This model was made by an AI tool (Hyper3D Rodin) from a short text prompt for this demo. It is not a museum object, scan or reconstruction.",
       ["area-notes", "public/models/ATTRIBUTION.md, generated models"],
     ),
+    c(
+      "set-bow-generated",
+      "This model was made by an AI tool (Hyper3D Rodin) from a short text prompt for this demo. It is not a museum object, scan or reconstruction. No curator has checked its shape or details.",
+      ["area-notes", "public/models/ATTRIBUTION.md, generated models"],
+    ),
     // ------------------------------------------------ coast
     c(
       "sea-catch-ainu",

@@ -1,3 +1,7 @@
+// 2026-11-26: the shipped models were made through the Hyper3D MCP connector
+// and the clip through the PixVerse Claude Code plugin (see
+// public/models/ATTRIBUTION.md); this script is the API route for later runs.
+//
 // Generates the few AI assets in public/: original props with Hyper3D Rodin
 // (text prompt only, never museum photos) and one intro clip with PixVerse
 // (image-to-video from our own island render). Keys come from the

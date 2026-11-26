@@ -11,12 +11,18 @@ const NOTE: Record<string, string> = {
   "bark-to-cloth": "garment-generated",
 };
 
+/** Ainu objects outside "hokkaido-museum" that need the curator line. */
+const NOTE_BY_ID: Record<string, string> = { "set-bow": "set-bow-generated" };
+
 /** Artifact ids with a GLB in public/models/<id>.glb, and its size. */
 const GENERATED: Record<string, number> = {
   herring: 324_088,
   saw: 235_216,
   shovel: 163_460,
   "set-bow": 202_320,
+  deer: 161_396,
+  tonkori: 157_096,
+  canoe: 178_968,
   garment: 170_720,
   "lacquer-vessel": 275_992,
 };
@@ -24,7 +30,7 @@ const GENERATED: Record<string, number> = {
 export function withGenerated(list: ArtifactInput[]): ArtifactInput[] {
   return list.map((a) => {
     const bytes = GENERATED[a.id];
-    const noteClaimId = NOTE[a.knowledgeId];
+    const noteClaimId = NOTE_BY_ID[a.id] ?? NOTE[a.knowledgeId];
     if (!bytes || !noteClaimId) return a;
     return {
       ...a,
