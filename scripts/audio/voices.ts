@@ -20,6 +20,7 @@ import { z } from "zod";
 import type { ActivityOf, VoiceIndex } from "@/contracts";
 import { activityKinds } from "../../src/content/bark-to-cloth/activity-kinds";
 import { guide } from "../../src/content/bark-to-cloth/guide";
+import { highlights } from "../../src/content/bark-to-cloth/highlights";
 import { owlStory } from "../../src/content/bark-to-cloth/museum-activities";
 
 try {
@@ -67,7 +68,12 @@ function storyLines(a: unknown): Line[] {
 
 const story = activityKinds.find((a) => a.kind === "story");
 const groups: Record<string, Line[]> = {
-  owl: guide.map((g) => ({ id: g.id, text: g.text })),
+  owl: [
+    ...guide.map((g) => ({ id: g.id, text: g.text })),
+    ...highlights.flatMap((h) =>
+      h.owl ? [{ id: `highlight-${h.id}`, text: h.owl }] : [],
+    ),
+  ],
   ...(story ? { [story.id]: storyLines(story) } : {}),
   [owlStory.id]: storyLines(owlStory),
 };

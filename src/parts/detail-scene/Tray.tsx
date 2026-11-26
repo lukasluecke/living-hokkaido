@@ -1,12 +1,17 @@
 "use client";
 // Object tray ("field label" style): a small label panel docked at the bottom
 // with one card per placed object and a "Try here" card that opens the
-// room's own activities, grouped by kind. Keyboard path of the room.
+// room's own activities: highlights first, then by kind, quick questions
+// folded. Keyboard path of the room.
 import { useEffect, useId, useRef, useState } from "react";
-import type { ActivityDefinition, DetailScenePartProps } from "@/contracts";
+import type {
+  ActivityDefinition,
+  DetailScenePartProps,
+  Highlight,
+} from "@/contracts";
 import { useT } from "@/i18n";
-import { groupActivities, kindCaption } from "../shared/activityGroups";
-import { Icon, KindIcon, UI_ICON } from "../shared/Icon";
+import { kindCaption, tierActivities } from "../shared/activityGroups";
+import { highlightIcon, Icon, KindIcon, UI_ICON } from "../shared/Icon";
 import t from "./Tray.module.css";
 
 /** Scene activities not attached to a placed object (those start from the
@@ -32,12 +37,17 @@ export function roomActivities({
 function TryHere({
   title,
   activities,
+  highlights,
   onStart,
+  onHighlight,
   onClose,
 }: {
   title: string;
   activities: ActivityDefinition[];
+  /** This place's highlights (not the film: it is already on screen). */
+  highlights: Highlight[];
   onStart: (id: string) => void;
+  onHighlight: (id: string) => void;
   onClose: () => void;
 }) {
   const tx = useT();
@@ -46,7 +56,35 @@ function TryHere({
   useEffect(() => {
     root.current?.querySelector<HTMLButtonElement>("[data-row]")?.focus();
   }, []);
-  const groups = groupActivities(activities);
+  const tiers = tierActivities(
+    activities.filter(
+      (a) =>
+        !highlights.some(
+          (h) => h.open.kind === "activity" && h.open.activityId === a.id,
+        ),
+    ),
+  );
+  const row = (a: ActivityDefinition) => (
+    <li key={a.id}>
+      <button
+        type="button"
+        className={t.row}
+        data-row=""
+        onClick={() => onStart(a.id)}
+      >
+        <span className={t.iconWrap} title={tx(kindCaption(a.kind))}>
+          <KindIcon kind={a.kind} className={t.icon} />
+        </span>
+        <span className={t.rowText}>
+          <span className={t.srOnly}>{tx(kindCaption(a.kind))}: </span>
+          <span className={t.rowTitle}>{a.title}</span>
+        </span>
+        <span className={t.chev} aria-hidden="true">
+          ›
+        </span>
+      </button>
+    </li>
+  );
   return (
     // biome-ignore lint/a11y/useSemanticElements: non-modal panel, not <dialog>
     <div
@@ -91,31 +129,26 @@ function TryHere({
         {tx("Activities about one object are on its card.")}
       </p>
       <div className={t.groups}>
-        {groups.map((g) => (
-          <section key={g.id} aria-label={tx(g.label)}>
+        {highlights.length > 0 && (
+          <section aria-label={tx("Highlights")} className={t.hero}>
             <h3 className={t.cap}>
-              {tx(g.label)} · {g.items.length}
+              <Icon d={UI_ICON.star} size={14} /> {tx("Highlights")}
             </h3>
             <ul className={t.rows}>
-              {g.items.map((a) => (
-                <li key={a.id}>
+              {highlights.map((h) => (
+                <li key={h.id}>
                   <button
                     type="button"
-                    className={t.row}
+                    className={`${t.row} ${t.heroRow}`}
                     data-row=""
-                    onClick={() => onStart(a.id)}
+                    onClick={() => onHighlight(h.id)}
                   >
-                    <span
-                      className={t.iconWrap}
-                      title={tx(kindCaption(a.kind))}
-                    >
-                      <KindIcon kind={a.kind} className={t.icon} />
+                    <span className={t.iconWrap}>
+                      <Icon d={highlightIcon(h.icon)} className={t.icon} />
                     </span>
                     <span className={t.rowText}>
-                      <span className={t.srOnly}>
-                        {tx(kindCaption(a.kind))}:{" "}
-                      </span>
-                      <span className={t.rowTitle}>{a.title}</span>
+                      <span className={t.rowTitle}>{tx(h.title)}</span>
+                      <span className={t.heroTeaser}>{tx(h.teaser)}</span>
                     </span>
                     <span className={t.chev} aria-hidden="true">
                       ›
@@ -125,7 +158,23 @@ function TryHere({
               ))}
             </ul>
           </section>
+        )}
+        {tiers.groups.map((g) => (
+          <section key={g.id} aria-label={tx(g.label)}>
+            <h3 className={t.cap}>
+              {tx(g.label)} · {g.items.length}
+            </h3>
+            <ul className={t.rows}>{g.items.map(row)}</ul>
+          </section>
         ))}
+        {tiers.quick.length > 0 && (
+          <details className={t.quick}>
+            <summary className={t.cap}>
+              {tx("Quick questions")} · {tiers.quick.length}
+            </summary>
+            <ul className={t.rows}>{tiers.quick.map(row)}</ul>
+          </details>
+        )}
       </div>
     </div>
   );
@@ -136,6 +185,7 @@ export function Tray({
   focusedArtifactId,
   inspectedArtifactIds,
   emit,
+  content,
   label,
   activities,
 }: DetailScenePartProps & {
@@ -204,6 +254,14 @@ export function Tray({
           <TryHere
             title={scene.title}
             activities={activities}
+            highlights={content.highlights.filter(
+              (h) =>
+                h.locationId === scene.locationId && h.open.kind !== "film",
+            )}
+            onHighlight={(id) => {
+              setOpen(false);
+              emit({ type: "highlight.open", highlightId: id });
+            }}
             onClose={close}
             onStart={(id) => {
               setOpen(false);

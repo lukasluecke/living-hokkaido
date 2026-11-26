@@ -19,7 +19,17 @@ import { showModelLabels } from "@/design/disclaimers";
 function useKeys({ scene, emit }: DetailScenePartProps) {
   useEffect(() => {
     const onKey = (ev: KeyboardEvent) => {
-      if (ev.target instanceof HTMLInputElement) return;
+      const t = ev.target;
+      if (
+        t instanceof HTMLInputElement ||
+        t instanceof HTMLTextAreaElement ||
+        (t instanceof HTMLElement && t.isContentEditable)
+      )
+        return;
+      // An open activity (or other panel) that uses number keys marks
+      // itself with data-own-keys; then 1–9 do not jump to an object.
+      if (ev.defaultPrevented || document.querySelector("[data-own-keys]"))
+        return;
       const p = scene.placements.find((x) => String(x.key) === ev.key);
       if (p) emit({ type: "artifact.focus", artifactId: p.artifactId });
     };

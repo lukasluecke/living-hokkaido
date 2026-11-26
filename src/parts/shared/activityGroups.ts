@@ -73,3 +73,33 @@ export function groupActivities<A extends GroupableActivity>(
   }
   return out.filter((g) => g.items.length > 0);
 }
+
+/** Short, repeatable kinds (quiz questions, put-in-order). Lists fold them
+ *  under "Quick questions" so the bigger experiences stand out. */
+export const QUICK_KINDS: readonly string[] = ["quiz", "sequence"];
+
+export type ActivityTiers<A extends GroupableActivity> = {
+  /** Highlight activities, in the order of `highlightIds`. */
+  highlights: A[];
+  /** Everything else that is not quick, grouped as `groupActivities`. */
+  groups: ActivityGroup<A>[];
+  /** Quiz and order questions, input order. */
+  quick: A[];
+};
+
+/** Highlights first, then the grouped rest, then the quick ones apart. */
+export function tierActivities<A extends GroupableActivity>(
+  activities: readonly A[],
+  highlightIds: readonly string[] = [],
+): ActivityTiers<A> {
+  const highlights = highlightIds.flatMap((id) => {
+    const a = activities.find((x) => x.id === id);
+    return a ? [a] : [];
+  });
+  const rest = activities.filter((a) => !highlightIds.includes(a.id));
+  return {
+    highlights,
+    groups: groupActivities(rest.filter((a) => !QUICK_KINDS.includes(a.kind))),
+    quick: rest.filter((a) => QUICK_KINDS.includes(a.kind)),
+  };
+}

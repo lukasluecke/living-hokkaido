@@ -7,7 +7,7 @@ export const guide: GuideInput[] = [
   {
     id: "welcome",
     on: "start",
-    text: "Hello! Pick a glowing place and I will fly you there.",
+    text: "Welcome to the island! I am the owl. Follow me through the highlights, or pick any glowing place to explore.",
   },
   {
     id: "arrive-lake-house",

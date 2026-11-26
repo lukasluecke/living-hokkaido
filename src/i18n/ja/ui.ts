@@ -97,6 +97,10 @@ export const jaUi: Record<string, string> = {
   Explore: "探検",
   "Finish: {items}.": "終える: {items}。",
   "Follow the owl to the {place}.": "フクロウについて{place}へ行こう。",
+  "Where: the {place}.": "場所：{place}",
+  "Found at the {place}.": "{place}で見つけた。",
+  "Go there": "行ってみる",
+  "Go back there": "もう一度行く",
   "Follow the thread": "糸をたどる",
   "From the Living Hokkaido knowledge platform":
     "リビング北海道の知識プラットフォームから",
@@ -410,4 +414,9 @@ export const jaUi: Record<string, string> = {
   "{title}: eras": "{title}: 時代",
   "Off with reduced motion": "動きを減らす設定ではオフ",
   Time: "時代",
+  Highlights: "見どころ",
+  "Start with a highlight": "まずは見どころから",
+  "Highlight: {title}": "見どころ：{title}",
+  "Quick questions": "かんたんな問題",
+  done: "済み",
 };

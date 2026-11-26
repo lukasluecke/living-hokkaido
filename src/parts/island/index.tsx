@@ -8,7 +8,7 @@ import { useT } from "@/i18n";
 import s from "../shared/Fallback.module.css";
 import { QualityGovernor, useQuality } from "../shared/QualityGovernor";
 import attn from "../shared/Attention.module.css";
-import { Icon, KindIcon, UI_ICON } from "../shared/Icon";
+import { highlightIcon, Icon, KindIcon, UI_ICON } from "../shared/Icon";
 import {
   ActivitySheet,
   kindSummary,
@@ -77,7 +77,16 @@ export function IslandPart(props: IslandPartProps) {
           </button>
         ))}
       </div>
-      {view === "island" && <PlaceTray {...props} onSelect={select} />}
+      {view === "island" && (
+        <PlaceTray
+          {...props}
+          onSelect={select}
+          onHighlight={(id) =>
+            view === "island" &&
+            emit({ type: "highlight.open", highlightId: id })
+          }
+        />
+      )}
       <LoadScreen drawn={drawn} />
     </div>
   );
@@ -88,8 +97,13 @@ export function IslandPart(props: IslandPartProps) {
 function PlaceTray({
   content,
   locationId,
+  doneHighlightIds = [],
   onSelect,
-}: IslandPartProps & { onSelect: (l: Location) => void }) {
+  onHighlight,
+}: IslandPartProps & {
+  onSelect: (l: Location) => void;
+  onHighlight: (id: string) => void;
+}) {
   const t = useT();
   const [sheet, setSheet] = useState(false);
   const opener = useRef<HTMLButtonElement>(null);
@@ -112,6 +126,14 @@ function PlaceTray({
     (a, b) => Number(b.status === "open") - Number(a.status === "open"),
   );
   const open = locations.filter((l) => l.status === "open").length;
+  const openIds = new Set(
+    locations.filter((l) => l.status === "open").map((l) => l.id),
+  );
+  const highlights = content.highlights.filter((h) =>
+    openIds.has(h.locationId),
+  );
+  const placeTitle = (id: string) =>
+    content.island.locations.find((l) => l.id === id)?.title ?? "";
   const closeSheet = () => {
     setSheet(false);
     opener.current?.focus();
@@ -121,19 +143,27 @@ function PlaceTray({
       {sheet && (
         <ActivitySheet
           content={content}
+          done={doneHighlightIds}
+          onHighlight={onHighlight}
           onSelect={onSelect}
           onClose={closeSheet}
         />
       )}
       <nav ref={tray} className={c.tray} aria-label={t("Places on the island")}>
         <div className={c.trayHead}>
-          <span className={c.cap}>{t("Places on the island")}</span>
-          <span className={c.count}>
-            {t("{n} open", { n: open })}
-            {locations.length > open
-              ? ` · ${t("{n} soon", { n: locations.length - open })}`
-              : ""}
+          <span className={c.cap}>
+            {highlights.length > 0
+              ? t("Start with a highlight")
+              : t("Places on the island")}
           </span>
+          {highlights.length === 0 && (
+            <span className={c.count}>
+              {t("{n} open", { n: open })}
+              {locations.length > open
+                ? ` · ${t("{n} soon", { n: locations.length - open })}`
+                : ""}
+            </span>
+          )}
           <button
             ref={opener}
             type="button"
@@ -145,11 +175,49 @@ function PlaceTray({
             {t("All activities")}
           </button>
         </div>
+        {highlights.length > 0 && (
+          <ul className={c.heroes} aria-label={t("Highlights")}>
+            {highlights.map((h) => {
+              const done = doneHighlightIds.includes(h.id);
+              return (
+                <li key={h.id}>
+                  <button
+                    type="button"
+                    className={c.hero}
+                    data-done={done || undefined}
+                    aria-label={`${t(h.title)}, ${placeTitle(h.locationId)}${done ? `, ${t("done")}` : ""}`}
+                    onClick={() => onHighlight(h.id)}
+                  >
+                    <span className={c.heroIcon} aria-hidden="true">
+                      <Icon d={highlightIcon(h.icon)} size={20} />
+                      {done && (
+                        <span className={c.heroDone}>
+                          <Icon d={UI_ICON.check} size={11} />
+                        </span>
+                      )}
+                    </span>
+                    <span className={c.heroText} aria-hidden="true">
+                      <span className={c.heroTitle}>{t(h.title)}</span>
+                      <span className={c.heroPlace}>
+                        {placeTitle(h.locationId)}
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
         <ul className={c.cards}>
           {locations.map((l) => {
             const acts = placeActivities(content, l.id);
-            const kinds = placeKinds(acts);
-            const shown = kinds.slice(0, 4);
+            const heroIcons = highlights
+              .filter((h) => h.locationId === l.id)
+              .map((h) => h.icon);
+            const kinds = placeKinds(acts).filter(
+              (k) => !heroIcons.includes(k),
+            );
+            const shown = kinds.slice(0, Math.max(0, 3 - heroIcons.length));
             return (
               <li key={l.id}>
                 <button
@@ -169,6 +237,14 @@ function PlaceTray({
                   {l.status === "open" && acts.length > 0 ? (
                     <span className={c.cardActs} aria-hidden="true">
                       <span className={c.kinds}>
+                        {heroIcons.map((k) => (
+                          <span
+                            key={k}
+                            className={`${c.kindChip} ${c.heroChip}`}
+                          >
+                            <Icon d={highlightIcon(k)} size={16} />
+                          </span>
+                        ))}
                         {shown.map((k) => (
                           <span key={k} className={c.kindChip}>
                             <KindIcon kind={k} size={16} />

@@ -5,6 +5,11 @@
   max-width: 920px;
   width: 100%;
   margin: 0 auto;
+  /* The shell overlay centres the book; a tall book scrolls inside
+     itself so Objects and Skills stay reachable. */
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 20px 22px 22px;
   background: var(--paper);
   color: var(--ink);
@@ -235,6 +240,13 @@ li:nth-child(even) > .earned svg {
 .progress progress {
   accent-color: var(--seal);
   width: 140px;
+}
+.where {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin: 6px 0 0;
 }
 .reminder {
   margin-top: 8px;

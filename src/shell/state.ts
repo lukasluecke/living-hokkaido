@@ -8,6 +8,9 @@ import {
   type Prefs,
 } from "@/contracts";
 
+/** Season value of winter (0 spring … 3 winter). */
+export const WINTER = 3;
+
 export function initialState(prefs: Prefs): ExperienceState {
   return {
     view: "island",
@@ -17,7 +20,9 @@ export function initialState(prefs: Prefs): ExperienceState {
     artifactId: null,
     activityId: null,
     reveal: null,
-    season: { ...DEFAULT_SEASON, playing: false },
+    // Start in winter: Hokkaido is known as a snowy island (Lukas). The
+    // shell plays a short intro timelapse up to it (Shell.tsx).
+    season: { ...DEFAULT_SEASON, value: WINTER, playing: false },
     prefs,
   };
 }
@@ -31,14 +36,48 @@ export function reduce(
     case "location.select": {
       const loc = pack.island.locations.find((l) => l.id === e.locationId);
       if (!loc || loc.status !== "open") return s;
-      return { ...s, view: "travel", locationId: loc.id, overlay: null };
+      return {
+        ...s,
+        view: "travel",
+        locationId: loc.id,
+        overlay: null,
+        pendingHighlightId: null,
+      };
+    }
+    case "highlight.open": {
+      const h = pack.highlights.find((x) => x.id === e.highlightId);
+      const loc = pack.island.locations.find((l) => l.id === h?.locationId);
+      if (!h || !loc || loc.status !== "open") return s;
+      const here = s.sceneId !== null && s.locationId === loc.id;
+      const inScene = s.view === "scene" || s.view === "focus";
+      // Already in that place: open it now, without a flight.
+      if (here && inScene) return openHighlight(pack, s, h.id);
+      if (s.view !== "island" && !inScene) return s;
+      return {
+        ...s,
+        view: "travel",
+        overlay: null,
+        locationId: loc.id,
+        sceneId: null,
+        artifactId: null,
+        activityId: null,
+        pendingHighlightId: h.id,
+      };
     }
     case "owl.arrived": {
       if (s.view !== "travel" || s.locationId !== e.locationId) return s;
       const loc = pack.island.locations.find((l) => l.id === e.locationId);
-      return loc?.sceneId
-        ? { ...s, view: "scene", sceneId: loc.sceneId }
-        : { ...s, view: "island" };
+      if (!loc?.sceneId)
+        return { ...s, view: "island", pendingHighlightId: null };
+      const landed: ExperienceState = {
+        ...s,
+        view: "scene",
+        sceneId: loc.sceneId,
+        pendingHighlightId: null,
+      };
+      return s.pendingHighlightId
+        ? openHighlight(pack, landed, s.pendingHighlightId)
+        : landed;
     }
     case "scene.enter":
       if (!pack.scenes.some((x) => x.id === e.sceneId)) return s;
@@ -46,6 +85,7 @@ export function reduce(
     case "scene.exit":
       return {
         ...s,
+        pendingHighlightId: null,
         view: "island",
         sceneId: null,
         artifactId: null,
@@ -120,9 +160,35 @@ export function reduce(
         };
       if (s.view === "focus") return { ...s, view: "scene", artifactId: null };
       if (s.view === "scene" || s.view === "travel")
-        return { ...s, view: "island", sceneId: null };
+        return {
+          ...s,
+          view: "island",
+          sceneId: null,
+          pendingHighlightId: null,
+        };
       return s;
     default:
       return s;
   }
+}
+
+/** In a scene: start the highlight's activity or open its timeline. A film
+ *  is already on the scene, so the scene itself is the answer. */
+function openHighlight(
+  pack: ContentPack,
+  s: ExperienceState,
+  highlightId: string,
+): ExperienceState {
+  const h = pack.highlights.find((x) => x.id === highlightId);
+  const scene = pack.scenes.find((x) => x.id === s.sceneId);
+  if (!h || !scene) return s;
+  const base = { ...s, view: "scene" as const, artifactId: null };
+  if (
+    h.open.kind === "activity" &&
+    scene.activityIds.includes(h.open.activityId)
+  )
+    return { ...base, view: "activity", activityId: h.open.activityId };
+  if (h.open.kind === "timeline")
+    return { ...base, overlay: "timeline", timelineId: h.open.timelineId };
+  return base;
 }

@@ -1,11 +1,12 @@
 // The visitor's route: five stations on the line rail and the one next step
 // the owl offers. Pure functions of pack, state and journal, so the rail, the
 // owl button and the tray always agree on what is "current".
-import type {
-  ContentPack,
-  ExperienceEvent,
-  ExperienceState,
-  JournalState,
+import {
+  type ContentPack,
+  type ExperienceEvent,
+  type ExperienceState,
+  highlightDone,
+  type JournalState,
 } from "@/contracts";
 import { english, type Translate } from "@/i18n/core";
 
@@ -105,6 +106,43 @@ export function route(
   };
 }
 
+/**
+ * The owl's first-visit tour: the next highlight not done yet, in pack
+ * order. In a place, its own open highlight comes first; a film highlight
+ * is already on screen there, so it is skipped while you are in its place.
+ * When every highlight is done, the normal look / try route takes over.
+ */
+export function tourStep(
+  pack: ContentPack,
+  state: ExperienceState,
+  journal: JournalState,
+  t: Translate = english,
+): NextStep | null {
+  if (state.overlay) return null;
+  if (
+    state.view !== "island" &&
+    state.view !== "scene" &&
+    state.view !== "focus"
+  )
+    return null;
+  const here = state.view === "island" ? null : state.locationId;
+  const todo = pack.highlights.filter(
+    (h) =>
+      !highlightDone(h, journal) &&
+      !(h.open.kind === "film" && h.locationId === here) &&
+      pack.island.locations.some(
+        (l) => l.id === h.locationId && l.status === "open",
+      ),
+  );
+  const h = todo.find((x) => x.locationId === here) ?? todo[0];
+  if (!h) return null;
+  return {
+    label: t("Highlight: {title}", { title: t(h.title) }),
+    name: t(h.title),
+    event: { type: "highlight.open", highlightId: h.id },
+  };
+}
+
 function nextStep(
   pack: ContentPack,
   state: ExperienceState,
@@ -117,6 +155,8 @@ function nextStep(
   const art = (id: string) => pack.artifacts.find((a) => a.id === id);
   const act = (id: string) => pack.activities.find((a) => a.id === id);
   const unlooked = placed.filter((id) => !journal.inspected.includes(id));
+  const tour = tourStep(pack, state, journal, t);
+  if (tour) return tour;
   if (state.view === "island") {
     return location
       ? {

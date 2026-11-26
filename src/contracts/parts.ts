@@ -27,6 +27,8 @@ export type IslandPartProps = PartContext & {
   view: ExperienceState["view"];
   /** Location the owl flies to / perches at. null = owl at home. */
   locationId: string | null;
+  /** Highlights already done (journal), for the tick on each. Optional. */
+  doneHighlightIds?: string[];
 };
 
 /** One detail scene: entry, dollhouse view, artifact placement and focus. */

@@ -6,6 +6,7 @@ import {
   type ContentPack,
   type Emit,
   EMPTY_JOURNAL,
+  highlightDone,
   type ExperienceEvent,
   type ExperienceState,
   JOURNAL_STORAGE_KEY,
@@ -34,11 +35,16 @@ import {
 import { Hud } from "./Hud";
 import { record } from "./progress";
 import { parts, preloadParts } from "./registry";
-import { Icon, kindIconPath, UI_ICON } from "@/parts/shared/Icon";
+import {
+  highlightIcon,
+  Icon,
+  kindIconPath,
+  UI_ICON,
+} from "@/parts/shared/Icon";
 import { route } from "./route";
 import s from "./Shell.module.css";
 import { SidePanel } from "./SidePanel";
-import { initialState, reduce } from "./state";
+import { initialState, reduce, WINTER } from "./state";
 
 function detectPrefs() {
   if (typeof window === "undefined")
@@ -109,18 +115,6 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
   // The owl reads its line in a pre-generated AI voice (labelled in the
   // bubble) when sound is on and the bubble shows. Captions stay primary.
   const [guideVoiced, setGuideVoiced] = useState(false);
-  const guideShown = !!guideLine && state.view !== "activity" && !state.overlay;
-  useEffect(() => {
-    setGuideVoiced(false);
-    if (!guideShown || sound.muted) return stopVoiceLine();
-    const id = source.guide.find((g) => g.text === guideLine)?.id;
-    let live = true;
-    if (id)
-      void playVoiceLine("owl", id).then((ok) => live && setGuideVoiced(ok));
-    return () => {
-      live = false;
-    };
-  }, [guideLine, guideShown, sound.muted, source.guide]);
 
   useEffect(() => {
     setState((st) => ({ ...st, prefs: detectPrefs() }));
@@ -130,6 +124,54 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
       if (j) setJournal(j);
     } catch {}
   }, [pack]);
+
+  // Intro: a short timelapse through the year that lands on winter. It
+  // changes only the shell's season value (no season.set event), so it
+  // earns no stamp and plays no cue. A click, tap or key skips to winter;
+  // reduced motion starts in winter at once.
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const setValue = (value: number) =>
+      setState((st) => ({ ...st, season: { ...st.season, value } }));
+    const DELAY = 700;
+    const LENGTH = 3600;
+    const t0 = performance.now();
+    let raf = 0;
+    let last = 0;
+    let done = false;
+    const end = (value: number | null) => {
+      if (done) return;
+      done = true;
+      cancelAnimationFrame(raf);
+      window.removeEventListener("pointerdown", skip, true);
+      window.removeEventListener("keydown", skip, true);
+      window.removeEventListener("lh:event", onEvent);
+      if (value !== null) setValue(value);
+    };
+    const skip = () => end(WINTER);
+    // A season the visitor (or a script) picks wins over the intro.
+    const onEvent = (e: Event) => {
+      const type = (e as CustomEvent<{ type?: string }>).detail?.type;
+      if (type === "season.set" || type === "season.play") end(null);
+    };
+    const tick = (now: number) => {
+      const k = Math.min(1, Math.max(0, (now - t0 - DELAY) / LENGTH));
+      if (k >= 1) return skip();
+      // About 20 updates a second (the Play clock uses 10), eased in and
+      // out so each season holds a moment.
+      if (now - last > 50) {
+        last = now;
+        setValue(WINTER * (k * k * (3 - 2 * k)));
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    setValue(0);
+    raf = requestAnimationFrame(tick);
+    window.addEventListener("pointerdown", skip, true);
+    window.addEventListener("keydown", skip, true);
+    window.addEventListener("lh:event", onEvent);
+    return skip;
+  }, []);
 
   // Lazy parts (registry.ts): fetch them once the island had time to draw.
   useEffect(() => {
@@ -322,16 +364,56 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
           pack.activities.find((a) => a.id === nextEvent.activityId)?.kind ??
             "",
         )
-      : nextEvent?.type === "artifact.focus"
-        ? UI_ICON.look
-        : nextEvent?.type === "journal.open"
-          ? UI_ICON.journal
-          : UI_ICON.place;
+      : nextEvent?.type === "highlight.open"
+        ? highlightIcon(
+            pack.highlights.find((h) => h.id === nextEvent.highlightId)?.icon,
+          )
+        : nextEvent?.type === "artifact.focus"
+          ? UI_ICON.look
+          : nextEvent?.type === "journal.open"
+            ? UI_ICON.journal
+            : UI_ICON.place;
+  // Owl tour: the owl says the next highlight's line; the first island
+  // visit keeps the welcome.
+  const tourHighlight =
+    nextEvent?.type === "highlight.open"
+      ? pack.highlights.find((h) => h.id === nextEvent.highlightId)
+      : undefined;
+  const owlLine =
+    tourHighlight?.owl &&
+    (state.view !== "island" || journal.visited.length > 0)
+      ? tourHighlight.owl
+      : guideLine;
+  const owlShown = !!owlLine && state.view !== "activity" && !state.overlay;
+  // Voice file ids (scripts/audio/voices.ts): guide ids, "highlight-<id>".
+  const owlVoiceId =
+    source.guide.find((g) => g.text === owlLine)?.id ??
+    (tourHighlight?.owl === owlLine && tourHighlight
+      ? `highlight-${tourHighlight.id}`
+      : undefined);
+  useEffect(() => {
+    setGuideVoiced(false);
+    if (!owlShown || sound.muted || !owlVoiceId) return stopVoiceLine();
+    let live = true;
+    void playVoiceLine("owl", owlVoiceId).then(
+      (ok) => live && setGuideVoiced(ok),
+    );
+    return () => {
+      live = false;
+    };
+  }, [owlVoiceId, owlShown, sound.muted]);
   const ink = seasonInk[SEASON_IDS.indexOf(seasonAt(state.season.value))];
 
   const stage =
     state.view === "island" || state.view === "travel" ? (
-      <Island {...ctx} view={state.view} locationId={state.locationId} />
+      <Island
+        {...ctx}
+        view={state.view}
+        locationId={state.locationId}
+        doneHighlightIds={pack.highlights
+          .filter((h) => highlightDone(h, journal))
+          .map((h) => h.id)}
+      />
     ) : scene ? (
       <Scene
         {...ctx}
@@ -372,18 +454,18 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
               : undefined
           }
         />
-        {guideLine && state.view !== "activity" && !state.overlay && (
+        {owlLine && state.view !== "activity" && !state.overlay && (
           <section className={s.owl} aria-label={t("Owl guide")}>
             <OwlMark />
             <div className={s.bubble}>
               <p
-                key={guideLine}
+                key={owlLine}
                 className={s.line}
                 aria-live="polite"
                 data-still={state.prefs.reducedMotion || undefined}
               >
                 <span className={s.visuallyHidden}>{t("Owl: ")}</span>
-                {t(guideLine)}
+                {t(owlLine)}
               </p>
               {SHOW_DISCLAIMERS && guideVoiced && (
                 <p className={s.voiceNote}>{t("AI voice · ElevenLabs")}</p>

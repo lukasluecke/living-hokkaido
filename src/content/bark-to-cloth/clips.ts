@@ -18,20 +18,35 @@ const clip = (key: string, title: string, audio = false): ClipInput => ({
 });
 
 /**
- * Era id → clip. Only keys that are uploaded to the bucket. Flat-ground,
- * cise-and-kotan and meiji have no clip: their round-2 results showed modern
- * buildings or the wrong era. The "meiji" prompt came out as a present-day
- * river town, so that clip is used for "today" (key keeps its file name).
+ * Era id → clip. Only keys that are uploaded to the bucket. The round-2 "meiji" prompt came out as a present-day river town, so that clip
+ * is used for "today" (key keeps its file name). Round 3
+ * (owl-film look: dusk, hearth light, people in plain robes) gave flat-ground,
+ * the night pit dwellings, cise-and-kotan and Meiji.
  */
 export const ERA_CLIPS: Record<string, ClipInput> = {
-  "pit-dwellings": clip("era-1-pit.mp4", "Watch: the river mouth in this era"),
+  "pit-dwellings": clip(
+    "era-1-pit-night-v3.mp4",
+    "Watch: the river mouth in this era",
+    true,
+  ),
+  "flat-ground": clip(
+    "era-2-flat-v2.mp4",
+    "Watch: the river mouth in this era",
+    true,
+  ),
+  "cise-and-kotan": clip(
+    "era-3-cise-v3.mp4",
+    "Watch: the river mouth in this era",
+    true,
+  ),
+  meiji: clip("era-4-meiji-v3.mp4", "Watch: the river mouth in this era", true),
   today: clip("era-4-meiji.mp4", "Watch: the river mouth today"),
 };
 
 /** Scene id → ambient postcard. */
 export const SCENE_CLIPS: Record<string, ClipInput> = {
   "herring-coast": clip("place-coast.mp4", "Watch: the coast", true),
-  "survey-forest": clip("place-forest.mp4", "Watch: the forest", true),
+  "survey-forest": clip("place-forest-night.mp4", "Watch: the forest", true),
   "animal-hills": clip("place-hills.mp4", "Watch: the hills", true),
   "coal-mountain": clip("place-mine.mp4", "Watch: the mountain", true),
 };

@@ -146,18 +146,24 @@
   font-weight: 700;
   line-height: 1.25;
 }
+/* "Try here" is an action, not an object: a gold button with an ink edge
+   and the storybook lift, like the owl's "Go to" button. */
 .tryCard {
   gap: 8px;
-  background: var(--fl-season-soft);
-  border-color: color-mix(in srgb, var(--fl-season) 30%, var(--fl-line));
+  background: var(--fl-gold);
+  border: 2px solid var(--fl-edge);
+  box-shadow: var(--fl-lift);
+  color: var(--fl-ink);
+  font-weight: 700;
 }
 .tryCard[aria-expanded="true"] {
-  border-color: var(--fl-season);
-  box-shadow: inset 0 0 0 1px var(--fl-season);
+  background: var(--fl-gold-deep);
+  box-shadow: inset 0 2px 0 rgb(43 33 24 / 25%);
+  transform: translateY(2px);
 }
 .tryIcon {
   flex: none;
-  color: var(--fl-season-text);
+  color: var(--fl-ink);
 }
 .tryCount {
   margin-left: auto;
@@ -167,8 +173,8 @@
   height: 22px;
   padding: 0 5px;
   border-radius: 999px;
-  background: var(--fl-season);
-  color: #fff;
+  background: var(--fl-ink);
+  color: var(--fl-paper);
   font-size: 12px;
   font-weight: 700;
 }
@@ -309,6 +315,10 @@
   .card:hover {
     border-color: color-mix(in srgb, var(--fl-ink) 35%, var(--fl-line));
   }
+  .tryCard:hover {
+    border-color: var(--fl-edge);
+    background: var(--fl-gold-deep);
+  }
 }
 @media (hover: hover) {
   .close:hover {
@@ -404,4 +414,36 @@
   .wrap[data-open] {
     z-index: 6;
   }
+}
+
+/* Highlights first (gold edge), quick questions folded away. */
+.hero h3 {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--fl-season-text, var(--fl-ink));
+}
+.heroRow {
+  border-color: var(--fl-gold) !important;
+  box-shadow: inset 0 0 0 1px var(--fl-gold);
+}
+.heroTeaser {
+  display: block;
+  font-size: 12px;
+  color: var(--fl-ink-soft);
+}
+.quick summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 4px 0;
+}
+.quick summary::before {
+  content: "▸ ";
+}
+.quick[open] summary::before {
+  content: "▾ ";
+}
+.quick summary:focus-visible {
+  outline: 3px solid var(--fl-gold);
+  outline-offset: 2px;
 }

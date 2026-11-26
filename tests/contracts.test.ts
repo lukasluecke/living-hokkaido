@@ -259,7 +259,7 @@ test("timeline: eras must be in time order; packs without timelines parse", () =
   const p = clone();
   p.timelines[0].eras[2].year = 100;
   assert.ok(validateContentPack(p).some((e) => e.includes("time order")));
-  const { timelines: _drop, ...old } = clone();
+  const { timelines: _drop, highlights: _h, ...old } = clone();
   old.scenes = old.scenes.map(({ timelineIds: _t, ...s }) => s);
   assert.deepEqual(validateContentPack(old), []);
 });
