@@ -27,17 +27,37 @@ export const highlightSchema = z.object({
   open: highlightTargetSchema,
   /** What the owl says when the tour offers this highlight. */
   owl: z.string().optional(),
+  /**
+   * A prop in the place's scene that opens the highlight, for experiences
+   * with no object there (games, timelines). Scene space, metres. `prop`
+   * names a code-built sign prop; `model` an optional GLB that replaces it.
+   * Illustrative signposts only: they carry no facts (additive).
+   */
+  marker: z
+    .object({
+      position: z.tuple([z.number(), z.number(), z.number()]),
+      rotationY: z.number().default(0),
+      prop: z.enum(["sled", "crates", "hourglass"]),
+      model: z.string().optional(),
+    })
+    .optional(),
 });
 export type Highlight = z.infer<typeof highlightSchema>;
 export type HighlightInput = z.input<typeof highlightSchema>;
 
-/** Done = the activity is completed, or the place was visited (film,
- *  timeline). Pure; works with any journal-like object. */
+/** Done = the activity is completed, the place's film was watched, or the
+ *  place was visited (timeline). Pure; works with any journal-like object. */
 export function highlightDone(
   h: Highlight,
-  journal: { completed: readonly string[]; visited: readonly string[] },
+  journal: {
+    completed: readonly string[];
+    visited: readonly string[];
+    filmsSeen?: readonly string[];
+  },
 ): boolean {
-  return h.open.kind === "activity"
-    ? journal.completed.includes(h.open.activityId)
-    : journal.visited.includes(h.locationId);
+  if (h.open.kind === "activity")
+    return journal.completed.includes(h.open.activityId);
+  if (h.open.kind === "film")
+    return (journal.filmsSeen ?? []).includes(h.locationId);
+  return journal.visited.includes(h.locationId);
 }

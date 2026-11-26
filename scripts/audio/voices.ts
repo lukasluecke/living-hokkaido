@@ -17,6 +17,7 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
+import { dictionary } from "../../src/i18n/core";
 import type { ActivityOf, VoiceIndex } from "@/contracts";
 import { activityKinds } from "../../src/content/bark-to-cloth/activity-kinds";
 import { placeActivities } from "../../src/content/bark-to-cloth/place-activities";
@@ -36,9 +37,33 @@ const KEY = process.env.ELEVENLABS_API_KEY?.trim();
 // intimate, close to the microphone." No cloned person.
 // Override with ELEVENLABS_OWL_VOICE.
 const VOICE = process.env.ELEVENLABS_OWL_VOICE ?? "aLbEsWOUStPIYvDVdp7K";
-const MODEL = process.env.ELEVENLABS_TTS_MODEL ?? "eleven_multilingual_v2";
+// `-- --lang ja`: Japanese lines from the draft dictionary (src/i18n/ja) into
+// public/audio/voice/ja/<group>/. eleven_v3 reads Japanese best (the
+// sapporo-omusha check); lines without a Japanese draft are skipped.
+const LANG =
+  process.argv.includes("--lang=ja") ||
+  process.argv.slice(process.argv.indexOf("--lang") + 1)[0] === "ja"
+    ? "ja"
+    : "en";
+const MODEL =
+  process.env.ELEVENLABS_TTS_MODEL ??
+  (LANG === "ja" ? "eleven_v3" : "eleven_multilingual_v2");
 const FORMAT = "mp3_22050_32";
-const OUT = join(process.cwd(), "public", "audio", "voice");
+const OUT = join(
+  process.cwd(),
+  "public",
+  "audio",
+  "voice",
+  ...(LANG === "ja" ? ["ja"] : []),
+);
+const JA = dictionary("ja");
+/** The text to speak in LANG, or null when there is no translation. */
+const inLang = (text: string) =>
+  LANG === "en"
+    ? text
+    : /[ァ-ヶー]/.test(text) && !/[a-z]/i.test(text)
+      ? text
+      : (JA[text] ?? null);
 
 const responseSchema = z.object({
   audio_base64: z.string().min(1),
@@ -51,7 +76,8 @@ const responseSchema = z.object({
     .nullable(),
 });
 
-type Line = { id: string; text: string };
+/** `parts`: translated one by one (a place step is say + ask). */
+type Line = { id: string; text: string; parts?: string[] };
 
 function storyLines(a: unknown): Line[] {
   const s = a as ActivityOf<"story">;
@@ -86,6 +112,7 @@ const groups: Record<string, Line[]> = {
         p.steps.map((s) => ({
           id: s.id,
           text: s.ask ? `${s.say} ${s.ask}` : s.say,
+          parts: s.ask ? [s.say, s.ask] : [s.say],
         })),
       ];
     }),
@@ -115,6 +142,9 @@ async function speak(text: string) {
       body: JSON.stringify({
         text,
         model_id: MODEL,
+        ...(LANG === "ja" && MODEL !== "eleven_multilingual_v2"
+          ? { language_code: "ja" }
+          : {}),
         voice_settings: { stability: 0.55, similarity_boost: 0.75 },
       }),
       signal: AbortSignal.timeout(60_000),
@@ -130,7 +160,9 @@ async function main() {
     console.error("ELEVENLABS_API_KEY is missing (put it in .env.local).");
     process.exit(1);
   }
-  const only = process.argv.slice(2);
+  const only = process.argv
+    .slice(2)
+    .filter((a) => !a.startsWith("--lang") && a !== "ja");
   for (const [group, lines] of Object.entries(groups)) {
     if (only.length && !only.includes(group)) continue;
     const dir = join(OUT, group);
@@ -141,7 +173,16 @@ async function main() {
       : { voice: "", model: "", lines: {} };
     index.voice = VOICE;
     index.model = MODEL;
-    for (const line of lines) {
+    for (const source of lines) {
+      const parts = (source.parts ?? [source.text]).map(inLang);
+      const text = parts.every((x) => x !== null)
+        ? parts.join(LANG === "ja" ? "" : " ")
+        : null;
+      if (!text) {
+        console.warn(`skip ${group}/${source.id}: no ${LANG} text`);
+        continue;
+      }
+      const line = { id: source.id, text };
       const hash = createHash("sha256")
         .update(`${VOICE}|${MODEL}|${line.text}`)
         .digest("hex")

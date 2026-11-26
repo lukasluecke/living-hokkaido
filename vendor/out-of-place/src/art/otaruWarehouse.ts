@@ -201,7 +201,7 @@ function drawWarehouse(ctx: Ctx) {
     poly(
       ctx,
       [P(x, y1, 84), P(x + 22, y1, 84), P(x + 22, y1, 100), P(x, y1, 100)],
-      "tile",
+      "windowLit",
       2.5,
     );
     for (let i = 1; i < 4; i++)
@@ -260,6 +260,35 @@ function drawWarehouse(ctx: Ctx) {
     2.5,
   );
   line(ctx, P(x0 - 10, ym, ridge + 2), P(x1 + 10, ym, ridge + 2), "outline", 6);
+  // Winter: a snow cap along the ridge and the eave, icicles under the eave.
+  poly(
+    ctx,
+    [
+      P(x0 - 8, ym, ridge + 2),
+      P(x1 + 8, ym, ridge + 2),
+      P(x1 + 8, ym + 10, ridge - 3),
+      P(x0 - 8, ym + 10, ridge - 3),
+    ],
+    "snow",
+    2,
+  );
+  line(
+    ctx,
+    P(x0 - 8, y1 + 10, wall - 6),
+    P(x1 + 8, y1 + 10, wall - 6),
+    "snowShade",
+    5,
+  );
+  for (let x = x0; x <= x1; x += 14) {
+    const len = 6 + ((x * 7) % 9);
+    line(
+      ctx,
+      P(x, y1 + 10, wall - 7),
+      P(x, y1 + 10, wall - 7 - len),
+      "icicle",
+      2.5,
+    );
+  }
   // A pair of shachihoko on the ridge ends (fish ornaments against fire, facts #1).
   for (const [x, flip] of [
     [x0 - 4, -1],

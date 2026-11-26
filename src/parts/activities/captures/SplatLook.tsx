@@ -15,10 +15,12 @@ import p from "../play/play.module.css";
 import c from "./captures.module.css";
 import {
   type AssetPhase,
-  goalClaims,
   initialLook,
   isComplete,
+  isIOS,
   type LookState,
+  notesNeeded,
+  notesRead,
   openSpot,
   phaseForStatus,
 } from "./splatLogic";
@@ -31,7 +33,14 @@ const stageVars = {
   "--lh-gold": ui.gold,
 } as CSSProperties;
 
-type Phase = "checking" | AssetPhase | "loading" | "shown" | "no-webgl";
+type Phase =
+  | "checking"
+  | AssetPhase
+  | "ask-ios"
+  | "loading"
+  | "shown"
+  | "no-webgl"
+  | "lost";
 
 const STATUS: Partial<Record<Phase, string>> = {
   checking: "Checking access to the capture…",
@@ -40,6 +49,7 @@ const STATUS: Partial<Record<Phase, string>> = {
   off: "Splat not available on this server. You can still open every spot in the list.",
   "no-webgl":
     "This device cannot show the 3D capture. You can still open every spot in the list.",
+  lost: "This device could not keep the 3D capture open (not enough memory). You can still open every spot in the list.",
 };
 
 export function SplatLookActivity({
@@ -54,8 +64,8 @@ export function SplatLookActivity({
   const [done, setDone] = useState(false);
   const button = useRef<HTMLButtonElement>(null);
   const known = (id: string) => !!claims[id];
-  const goal = goalClaims(a, known);
-  const readCount = goal.filter((id) => look.read.includes(id)).length;
+  const need = notesNeeded(a, known);
+  const readCount = Math.min(notesRead(a, look, known), need);
 
   const reveal = (claimId: string) =>
     emit({ type: "reveal.open", knowledgeId: a.knowledgeId, claimId });
@@ -90,10 +100,6 @@ export function SplatLookActivity({
   return (
     <div className={p.root}>
       <p>{a.prompt}</p>
-      <p className="small-note">
-        Drag to turn, scroll or pinch to zoom, right-drag or two fingers to
-        move. Every spot is also in the list next to the capture.
-      </p>
       <div className={g.labels}>
         {labels.map((l) => (
           <span key={l} className={g.label}>
@@ -112,7 +118,7 @@ export function SplatLookActivity({
         </button>
       </div>
       <p className="small-note">
-        Read {readCount} of {goal.length} panel notes.
+        Read {readCount} of {need} panel notes to go on.
       </p>
       {done && <p className="feedback">{a.completion}</p>}
       <details className={g.facts}>
@@ -139,6 +145,9 @@ export function SplatLookActivity({
             labels={labels}
             current={current}
             look={look}
+            done={done}
+            readCount={readCount}
+            need={need}
             onPick={pick}
             onReveal={reveal}
             onClose={close}
@@ -156,6 +165,9 @@ function Stage({
   labels,
   current,
   look,
+  done,
+  readCount,
+  need,
   onPick,
   onReveal,
   onClose,
@@ -163,6 +175,9 @@ function Stage({
   labels: string[];
   current: string | null;
   look: LookState;
+  done: boolean;
+  readCount: number;
+  need: number;
   onPick: (id: string) => void;
   onReveal: (claimId: string) => void;
   onClose: () => void;
@@ -170,6 +185,12 @@ function Stage({
   const [phase, setPhase] = useState<Phase>("checking");
   const [progress, setProgress] = useState<string>("");
   const [attempt, setAttempt] = useState(0);
+  // iPhone/iPad: Safari can close the whole page when the splat needs too
+  // much memory, so ask first and load a lighter version.
+  const [ios] = useState(() =>
+    isIOS(navigator.userAgent, navigator.maxTouchPoints ?? 0),
+  );
+  const [tryIOS, setTryIOS] = useState(false);
   const host = useRef<HTMLDivElement>(null);
   const viewer = useRef<SplatViewer | null>(null);
   const pickRef = useRef(onPick);
@@ -200,6 +221,7 @@ function Stage({
       if (!live) return;
       const next = phaseForStatus(status);
       if (next !== "ready") return setPhase(next);
+      if (ios && !tryIOS) return setPhase("ask-ios");
       const mod = await import("./splatViewer");
       if (!live) return;
       if (!prefs.webgl || !mod.canRenderSplats() || !host.current)
@@ -212,6 +234,14 @@ function Stage({
           view: a.view,
           spots: a.spots,
           reducedMotion: prefs.reducedMotion,
+          safe: ios,
+          onLost: () => {
+            if (!live) return;
+            live = false;
+            v?.destroy();
+            viewer.current = null;
+            setPhase("lost");
+          },
           onPick: (id) => pickRef.current(id),
           onProgress: (l, t) =>
             setProgress(
@@ -234,7 +264,7 @@ function Stage({
       v?.destroy();
       viewer.current = null;
     };
-  }, [attempt]);
+  }, [attempt, tryIOS]);
 
   useEffect(() => {
     viewer.current?.select(current);
@@ -277,6 +307,24 @@ function Stage({
           {phase === "locked" && (
             <Unlock onDone={() => setAttempt((n) => n + 1)} />
           )}
+          {phase === "ask-ios" && (
+            <div className={c.unlock}>
+              <form
+                onSubmit={(ev) => {
+                  ev.preventDefault();
+                  setTryIOS(true);
+                }}
+              >
+                <strong>3D capture on iPhone and iPad</strong>
+                <span>
+                  The capture is large (32 MB). On some iPhones and iPads,
+                  Safari closes the page when it loads. Every spot also works in
+                  the list.
+                </span>
+                <button type="submit">Try the 3D capture</button>
+              </form>
+            </div>
+          )}
           {phase === "loading" && (
             <p className={c.status} role="status">
               Loading the capture… {progress}
@@ -289,6 +337,15 @@ function Stage({
           )}
         </div>
         <aside className={c.side} aria-label="Spots in the diorama">
+          <p className="small-note">
+            Drag to turn, pinch or scroll to zoom, two fingers or right-drag to
+            move.
+          </p>
+          <p className={c.progress} role="status">
+            {done
+              ? "Done. Close to go on, or keep looking."
+              : `Read ${readCount} of ${need} panel notes to go on.`}
+          </p>
           {spot && (
             <div className={c.card} aria-live="polite">
               <strong>{spot.label}</strong>

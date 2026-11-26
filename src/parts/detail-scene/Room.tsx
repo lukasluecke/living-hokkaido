@@ -1,6 +1,7 @@
 "use client";
 // The 3D detail scene. Ported from labs/detail-scene (variant A, low-poly):
 // roof-lift entry, dollhouse home view, hover glow, focus camera move-in.
+import { HighlightProps } from "./room/HighlightProps";
 import { CameraControls, ContactShadows } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import {
@@ -147,7 +148,23 @@ function Director({
     if (!entered.current && focusedArtifactId) finish.current?.();
     if (!entered.current) return;
     const p = scene.placements.find((x) => x.artifactId === focusedArtifactId);
-    look(c, p ? p.focusView : scene.views.home, !prefs.reducedMotion);
+    // Phones: the card is a bottom sheet over most of the screen, so look a
+    // little lower; the object then sits in the free area above the sheet.
+    const sheet =
+      p && matchMedia("(max-width: 700px) and (orientation: portrait)").matches;
+    const v = p
+      ? sheet
+        ? {
+            eye: p.focusView.eye,
+            target: [
+              p.focusView.target[0],
+              p.focusView.target[1] - 0.45,
+              p.focusView.target[2],
+            ] as V3,
+          }
+        : p.focusView
+      : scene.views.home;
+    look(c, v, !prefs.reducedMotion);
   }, [focusedArtifactId, scene, controls, prefs.reducedMotion, finish]);
   return null;
 }
@@ -209,6 +226,12 @@ export function Room(props: RoomProps) {
           />
         </ArtifactShell>
       ))}
+      <HighlightProps
+        highlights={props.content.highlights.filter(
+          (h) => h.locationId === scene.locationId && h.marker,
+        )}
+        emit={emit}
+      />
       <ContactShadows
         position={[0, 0.015, 0]}
         scale={8}

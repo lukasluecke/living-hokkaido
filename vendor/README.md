@@ -77,6 +77,22 @@ the diff):
 10. Out of Place, Erina's open M7 task, one commit: Save card (I) saves
    the reveal history card as a 9:16 PNG (`cardImage` in `game/clip.ts`);
    long facts shrink to fit above the honesty footer.
+11. Out of Place, Lukas's feedback, one commit: no contact shadow under
+   Nuri (the brush could not paint it, so it gave Nuri away); Move keeps
+   the grab point under the finger, and a blocked target (a wall, the
+   water) slides Nuri along the edge instead of freezing (`tryMove`,
+   `game/nuri.ts`); a missed release ends the drag.
+12. Out of Place, Lukas's request, one commit: Play with the AI. While the
+   scene is shown, pick 2 players, AI hides or AI seeks (buttons, or M).
+   The AI hider tries 12 open spots and poses, paints Nuri with the scene
+   pattern at each, and takes one of the best blends. The AI seeker
+   guesses every ~2.7 s; a guess lands on Nuri more often when the blend
+   score is low, clay is bare, or time runs on. A local heuristic, no
+   server or model. One-player modes skip the handoff cover.
+13. Out of Place, Lukas's request, one commit: a first step toward the
+   slope game's look. Backdrop and UI in its winter-dusk blue, its lamp
+   gold and roof red (`style/palette.ts`, `index.html`); on the Otaru
+   warehouse, warm-lit windows, snow on the ridge and eave, icicles.
 
 ## Sapporo Omusha (Shaw)
 
@@ -118,6 +134,14 @@ Pull:
 git subtree pull --prefix=vendor/sapporo-omusha \
   https://github.com/xjets/sapporo-omusha.git main --squash
 ```
+
+Synced back: Erina pulled patches 1–10 into her repo (`194f4bf`), added
+steps 5–8, Japanese text, Otaru obstacles and a canal ending, and we pulled
+her `b794383` back (her tree as is). See her `HANDBACK.md`. The adapter
+passes the app's language as `lang` (no in-game language button).
+Patch 11 (vendor, one commit): optional `honesty` prop (default true) hides
+the score card's "Illustrative · research preview" line; the adapter passes
+`SHOW_DISCLAIMERS`.
 
 ## Pull new upstream changes
 

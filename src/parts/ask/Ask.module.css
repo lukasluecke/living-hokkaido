@@ -277,3 +277,25 @@
 .form button.mic[data-on] {
   background: #b3261e;
 }
+
+/* "Back to the tour": closes the box; the owl's tour step is under it. */
+.back {
+  display: inline-flex;
+  align-self: flex-start;
+  margin-top: 4px;
+  min-height: 36px;
+  padding: 6px 2px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  border: 0;
+  background: none;
+  color: var(--fl-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.back:focus-visible {
+  outline: 3px solid var(--fl-ink);
+  outline-offset: 2px;
+}

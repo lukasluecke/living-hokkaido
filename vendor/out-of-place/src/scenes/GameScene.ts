@@ -7,6 +7,7 @@ import { type SceneArt, WORLD_H, WORLD_W } from "../art/common";
 import { SCENE_ART } from "../art/scenes";
 import {
   createRound,
+  hitTest,
   type Hider,
   type Phase,
   POSE_HITBOX,
@@ -40,6 +41,24 @@ export type GameSceneData = OutOfPlaceProps & {
 };
 
 type Tool = "move" | "brush" | "eyedrop";
+/** Who plays: two people on one device, or one person with the AI. */
+type Mode = "duo" | "aiHides" | "aiSeeks";
+const MODES: Mode[] = ["duo", "aiHides", "aiSeeks"];
+const MODE_LABEL: Record<Mode, string> = {
+  duo: "2 players",
+  aiHides: "AI hides",
+  aiSeeks: "AI seeks",
+};
+const MODE_SAY: Record<Mode, string> = {
+  duo: "Two players: one hides, one seeks.",
+  aiHides: "The AI hides Nuri. You seek.",
+  aiSeeks: "You hide Nuri. The AI seeks.",
+};
+/** AI hider: open spots it tries before it picks one of the best. */
+const AI_HIDE_TRIES = 12;
+/** AI seeker: ms to move the ring to a guess, and ms between guesses. */
+const AI_AIM_MS = 900;
+const AI_THINK_MS = 1800;
 const BRUSH_RADIUS = { S: 2, M: 5, L: 10 } as const;
 type BrushSize = keyof typeof BRUSH_RADIUS;
 const SIZES: BrushSize[] = ["S", "M", "L"];
@@ -131,6 +150,11 @@ export class GameScene extends Phaser.Scene {
   private zoomed = false;
   private stroking = false;
   private dragging = false;
+  /** Kept across rounds and scene restarts (Phaser reuses the scene object). */
+  private mode: Mode = "duo";
+  private modeBtns!: Record<Mode, Button>;
+  /** Feet minus pointer when a drag starts on Nuri, so Nuri does not jump. */
+  private grab = { x: 0, y: 0 };
   private lastDab: { x: number; y: number } | null = null;
   private lastShownSeconds = -1;
   private lastHider: Hider | null = null;
@@ -425,6 +449,23 @@ export class GameScene extends Phaser.Scene {
     );
     add(this.scenesBtn.root);
 
+    // Who plays, chosen while the scene is shown (M cycles).
+    this.modeBtns = {} as Record<Mode, Button>;
+    MODES.forEach((m, i) => {
+      const b = makeButton(
+        this,
+        130 + i * 220,
+        MAIN_BTN.y,
+        200,
+        70,
+        MODE_LABEL[m],
+        () => this.setMode(m),
+        24,
+      );
+      this.modeBtns[m] = b;
+      add(b.root);
+    });
+
     // Handoff cover: hides the scene completely while the device changes hands.
     this.handoff = add(this.add.container(0, 0));
     const cover = this.add
@@ -572,7 +613,13 @@ export class GameScene extends Phaser.Scene {
         if (this.state.phase === "disguise") {
           if (this.tool === "move") {
             this.dragging = true;
-            this.tryMove(w.x, w.y);
+            const h = this.state.hider;
+            // Grabbed Nuri: keep the grab point under the finger. Tapped
+            // elsewhere: walk Nuri's feet to the tap.
+            this.grab = hitTest(h, w.x, w.y)
+              ? { x: h.x - w.x, y: h.y - w.y }
+              : { x: 0, y: 0 };
+            this.tryMove(w.x + this.grab.x, w.y + this.grab.y);
           } else if (this.tool === "brush") {
             this.nuri.beginStroke();
             this.stroking = true;
@@ -582,7 +629,7 @@ export class GameScene extends Phaser.Scene {
           } else {
             this.pickColor(w.x, w.y);
           }
-        } else if (this.state.phase === "seek") {
+        } else if (this.state.phase === "seek" && this.mode !== "aiSeeks") {
           this.seekTap(w.x, w.y);
         }
       },
@@ -591,8 +638,13 @@ export class GameScene extends Phaser.Scene {
       if (this.state.phase !== "disguise") return;
       const w = cam.getWorldPoint(p.x, p.y);
       this.drawBrushPreview(w.x, w.y);
-      if (!p.isDown) return;
-      if (this.dragging) this.tryMove(w.x, w.y);
+      if (!p.isDown) {
+        // A release we missed (outside the window, or a cancelled touch).
+        this.dragging = this.stroking = false;
+        this.lastDab = null;
+        return;
+      }
+      if (this.dragging) this.tryMove(w.x + this.grab.x, w.y + this.grab.y);
       if (this.stroking && this.lastDab) {
         // Fill the gap between pointer events so fast strokes stay continuous.
         const r = BRUSH_RADIUS[this.brushSize];
@@ -632,6 +684,18 @@ export class GameScene extends Phaser.Scene {
     this.input.keyboard?.on("keydown", (ev: KeyboardEvent) => {
       if (this.recording) return;
       const phase = this.state.phase;
+      // The AI seeks: the person watches (G still gives up).
+      if (
+        phase === "seek" &&
+        this.mode === "aiSeeks" &&
+        ev.key.toLowerCase() !== "g"
+      )
+        return;
+      if (phase === "sceneReveal" && ev.key.toLowerCase() === "m") {
+        this.setMode(MODES[(MODES.indexOf(this.mode) + 1) % MODES.length]);
+        ev.preventDefault();
+        return;
+      }
       const base = phase === "seek" ? FINDER_STEP : KEY_STEP;
       const step = ev.shiftKey ? base * 3 : base;
       const arrow: Record<string, [number, number]> = {
@@ -749,20 +813,32 @@ export class GameScene extends Phaser.Scene {
         `${a.title}. ${a.captionClaimIds.map((id) => this.claimText(id)).join(" ")} Look closely.`,
       );
     }
-    if (phase === "disguise") {
+    if (phase === "disguise" && this.mode === "aiHides") {
+      this.cfg.announce("The AI is hiding Nuri. No peeking!");
+      this.time.delayedCall(0, () => this.aiHide());
+    } else if (phase === "disguise") {
       this.cfg.announce(
         `Disguise, ${a.durations.disguise} seconds. Hider: arrow keys move Nuri, E picks the colour behind Nuri, F fills, 1 to 4 change pose (stand, sit, kneel, lie), Enter when hidden.`,
       );
     }
-    if (phase === "handoff")
+    if (phase === "handoff" && this.mode !== "duo")
+      // One person: nobody to pass the device to.
+      this.time.delayedCall(0, () => this.dispatch({ type: "ready" }));
+    else if (phase === "handoff")
       this.cfg.announce(
         "All hidden. Pass the device to the seeker, then press Enter.",
       );
     if (phase === "seek") {
       this.seekCursor = { ...this.art.spawn, shown: false };
-      this.cfg.announce(
-        `Seek, ${a.durations.seek} seconds. Arrow keys move the finder ring, Space taps. Wrong taps cost ${this.penaltySeconds} seconds.`,
-      );
+      if (this.mode === "aiSeeks") {
+        this.cfg.announce(
+          `The AI seeks for ${a.durations.seek} seconds. Each wrong tap costs it ${this.penaltySeconds} seconds. G gives up.`,
+        );
+        this.aiSeek();
+      } else
+        this.cfg.announce(
+          `${this.mode === "aiHides" ? "The AI hid Nuri. " : ""}Seek, ${a.durations.seek} seconds. Arrow keys move the finder ring, Space taps. Wrong taps cost ${this.penaltySeconds} seconds.`,
+        );
     }
     if (phase === "reveal") this.showReveal();
     if (phase === "roundOver") {
@@ -792,7 +868,9 @@ export class GameScene extends Phaser.Scene {
         b.setSelected(pose === s.hider.pose);
     }
     this.nuri.container.setVisible(
-      phase !== "sceneReveal" && phase !== "handoff",
+      phase !== "sceneReveal" &&
+        phase !== "handoff" &&
+        !(phase === "disguise" && this.mode === "aiHides"),
     );
 
     if (secs !== this.lastShownSeconds || phase === "handoff") {
@@ -808,6 +886,7 @@ export class GameScene extends Phaser.Scene {
         a.title,
         ...a.captionClaimIds.map((id) => this.claimText(id)),
         this.honestyLabels(),
+        `Play: ${MODES.map((m) => (m === this.mode ? `[${MODE_LABEL[m]}]` : MODE_LABEL[m])).join(" · ")} (M changes)`,
       ]
         .filter(Boolean)
         .join("\n"),
@@ -816,14 +895,21 @@ export class GameScene extends Phaser.Scene {
         ? "Paint near where you picked: the pattern lines up with the scene. Move zooms out."
         : "Hider: move Nuri to a spot, then paint to blend in and pick a pose. The eyedropper picks up colour and pattern.\nKeys: arrows move · E pick paint · [ ] brush size · F fill · 1–4 pose · Enter done",
       handoff: "",
-      seek: `Seeker: tap whoever looks out of place. Wrong taps cost ${this.penaltySeconds} seconds.\nKeys: arrows move the ring · Space taps · G gives up`,
+      seek:
+        this.mode === "aiSeeks"
+          ? `The AI is looking for Nuri. Each wrong tap costs it ${this.penaltySeconds} seconds.`
+          : `${this.mode === "aiHides" ? "The AI hid Nuri somewhere. " : ""}Seeker: tap whoever looks out of place. Wrong taps cost ${this.penaltySeconds} seconds.\nKeys: arrows move the ring · Space taps · G gives up`,
       reveal: "",
       roundOver: a.completion,
     };
     this.hintText.setText(hints[phase]);
     this.drawBanner();
 
-    this.panel.setVisible(phase === "disguise");
+    this.panel.setVisible(phase === "disguise" && this.mode !== "aiHides");
+    for (const [m, b] of Object.entries(this.modeBtns) as [Mode, Button][]) {
+      b.setSelected(m === this.mode);
+      b.root.setVisible(phase === "sceneReveal");
+    }
     this.handoff.setVisible(phase === "handoff");
     const revealing = phase === "reveal" || phase === "roundOver";
     const cardUp = revealing && this.revealCardShown && !this.recording;
@@ -1017,15 +1103,45 @@ export class GameScene extends Phaser.Scene {
     );
   }
 
+  /**
+   * Moves Nuri toward (x, y). When the target is blocked (a wall, the water),
+   * Nuri slides along the edge or goes to the open spot closest to it on the way,
+   * instead of freezing until the pointer is back on open ground.
+   */
   private tryMove(x: number, y: number) {
-    if (this.art.walkable(x, y))
-      this.dispatch({ type: "moveHider", x: Math.round(x), y: Math.round(y) });
+    const { x: hx, y: hy } = this.state.hider;
+    const go = (tx: number, ty: number) =>
+      this.dispatch({
+        type: "moveHider",
+        x: Math.round(tx),
+        y: Math.round(ty),
+      });
+    if (this.art.walkable(x, y)) return go(x, y);
+    if (this.art.walkable(x, hy)) return go(x, hy);
+    if (this.art.walkable(hx, y)) return go(hx, y);
+    const steps = Math.ceil(Math.hypot(x - hx, y - hy) / 4);
+    let best: [number, number] | null = null;
+    for (let i = 1; i <= steps; i++) {
+      const t = i / steps;
+      const px = hx + (x - hx) * t;
+      const py = hy + (y - hy) * t;
+      if (this.art.walkable(px, py)) best = [px, py];
+    }
+    if (best) go(best[0], best[1]);
   }
 
   private pickColor(x: number, y: number) {
+    const p = this.scenePaint(x, y);
+    if (!p) return;
+    this.setPaint(p, true);
+    this.setTool("brush");
+  }
+
+  /** The scene's colour at (x, y), and the small patch of pattern around it. */
+  private scenePaint(x: number, y: number): Paint | null {
     const px = Math.round(x);
     const py = Math.round(y);
-    if (px < 0 || py < 0 || px >= WORLD_W || py >= WORLD_H) return;
+    if (px < 0 || py < 0 || px >= WORLD_W || py >= WORLD_H) return null;
     const [r, g, b, alpha] = this.compositeCtx.getImageData(px, py, 1, 1).data;
     const color = alpha > 0 ? (r << 16) | (g << 8) | b : PALETTE.backdrop;
     // Take a small square of the scene too, so the brush can copy its
@@ -1046,11 +1162,99 @@ export class GameScene extends Phaser.Scene {
       PATCH,
       PATCH,
     );
-    this.setPaint(
-      { color, patch, at: { x: px - PATCH / 2, y: py - PATCH / 2 } },
-      true,
+    return { color, patch, at: { x: px - PATCH / 2, y: py - PATCH / 2 } };
+  }
+
+  private setMode(mode: Mode) {
+    if (this.state.phase !== "sceneReveal") return;
+    this.mode = mode;
+    this.cfg.announce(MODE_SAY[mode]);
+    this.lastShownSeconds = -1;
+    this.render();
+  }
+
+  // ---------- play with the AI ----------
+
+  /**
+   * AI hider: tries open spots and poses, paints Nuri all over with the
+   * scene's pattern at each, and takes one of the best-blended spots.
+   */
+  private aiHide() {
+    if (this.state.phase !== "disguise") return;
+    const tries: { x: number; y: number; pose: Pose; blend: number }[] = [];
+    const place = (x: number, y: number, pose: Pose) => {
+      this.dispatch({ type: "moveHider", x, y });
+      this.dispatch({ type: "setPose", pose });
+      const p = this.scenePaint(x, this.hiderMidY);
+      if (!p) return;
+      const pattern = p.patch ? this.nuri.pattern(p.patch) : null;
+      this.nuri.fill(
+        pattern && p.at ? { pattern, x0: p.at.x, y0: p.at.y } : p.color,
+      );
+    };
+    for (let i = 0; i < 400 && tries.length < AI_HIDE_TRIES; i++) {
+      const x = Phaser.Math.Between(40, PANEL_X0 - 40);
+      const y = Phaser.Math.Between(200, WORLD_H - 30);
+      if (!this.art.walkable(x, y)) continue;
+      const pose = POSES[Phaser.Math.Between(0, POSES.length - 1)];
+      place(x, y, pose);
+      const blend = analyse(this.nuri.sampleParts(this.compositeCtx)).blend;
+      tries.push({ x, y, pose, blend });
+    }
+    tries.sort((a, b) => b.blend - a.blend);
+    const pick = tries[Phaser.Math.Between(0, Math.min(2, tries.length - 1))];
+    if (pick) place(pick.x, pick.y, pick.pose);
+    this.dispatch({ type: "skipPhase" });
+  }
+
+  /**
+   * AI seeker: a guess every couple of seconds. The worse Nuri blends in
+   * (low blend score, bare clay), and the longer the seek runs, the likelier
+   * a guess lands on Nuri; other guesses tap open ground, and cost time.
+   */
+  private aiSeek() {
+    const a = analyse(this.nuri.sampleParts(this.compositeCtx));
+    const visibility = Phaser.Math.Clamp(
+      (100 - a.blend) / 35 + a.bare,
+      0.05,
+      0.9,
     );
-    this.setTool("brush");
+    const guess = () => {
+      const s = this.state;
+      if (s.phase !== "seek" || this.mode !== "aiSeeks") return;
+      const h = s.hider;
+      const box = POSE_HITBOX[h.pose];
+      const late = s.seekElapsedMs / s.durations.seek;
+      let tx = h.x + Phaser.Math.Between(-box.w / 4, box.w / 4);
+      let ty = h.y - box.h / 2 + Phaser.Math.Between(-box.h / 4, box.h / 4);
+      if (Math.random() >= visibility * (0.4 + 0.6 * late)) {
+        for (let i = 0; i < 80; i++) {
+          const x = Phaser.Math.Between(40, PANEL_X0 - 40);
+          const y = Phaser.Math.Between(200, WORLD_H - 30);
+          if (!this.art.walkable(x, y) || hitTest(h, x, y - 60)) continue;
+          tx = x;
+          ty = y - 60; // about where a body would be
+          break;
+        }
+      }
+      this.seekCursor.shown = true;
+      this.tweens.add({
+        targets: this.seekCursor,
+        x: tx,
+        y: ty,
+        duration: this.still ? 1 : AI_AIM_MS,
+        ease: "Sine.easeInOut",
+        onUpdate: () => this.drawSeekCursor(),
+        onComplete: () => {
+          if (this.state.phase !== "seek") return;
+          this.drawSeekCursor();
+          this.seekTap(tx, ty);
+          if (this.state.phase === "seek")
+            this.time.delayedCall(AI_THINK_MS, guess);
+        },
+      });
+    };
+    this.time.delayedCall(AI_THINK_MS, guess);
   }
 
   /** Brush paint: the scene patch when there is one, else the colour. */

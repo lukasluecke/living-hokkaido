@@ -112,7 +112,7 @@ describe("physics", () => {
     const p = createPhysics(R, track);
     p.slip();
     let maxH = 0;
-    for (let i = 0; i < 25 * 60; i++) {
+    for (let i = 0; i < 60 * 60; i++) {
       const at = p.local();
       // Steer to the middle so the curve doesn't carry us into a wall.
       const lean = Math.max(-1, Math.min(1, -at.x * 0.8));
@@ -125,6 +125,34 @@ describe("physics", () => {
     // Never flew off or sank through the ice.
     expect(maxH).toBeLessThan(1.6);
     expect(p.local().h).toBeGreaterThan(0.5);
+    p.free();
+  });
+
+  it("flies off the canal edge, splashes down and floats", () => {
+    const track = { ...generateTrack(1), obstacles: [] };
+    const p = createPhysics(R, track, 1, track.length - 30);
+    p.slip();
+    let launched = false;
+    let flew = false;
+    for (let i = 0; i < 25 * 60; i++) {
+      p.step(none, STEP);
+      if (!launched && p.local().s >= track.length) {
+        p.flyOff();
+        launched = true;
+      }
+      if (p.flying()) flew = true;
+      if (p.floating()) break;
+    }
+    expect(launched).toBe(true);
+    expect(flew).toBe(true);
+    expect(p.floating()).toBe(true);
+    expect(p.local().s).toBeGreaterThan(track.length + 7);
+    // Floats: stays put at the water line.
+    const y = p.position()[1];
+    for (let i = 0; i < 60; i++) p.step(none, STEP);
+    expect(p.position()[1]).toBeCloseTo(y, 2);
+    p.reset();
+    expect(p.floating()).toBe(false);
     p.free();
   });
 

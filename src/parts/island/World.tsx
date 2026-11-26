@@ -138,6 +138,7 @@ export function World(props: WorldProps) {
         field={field}
         cut={prefs.reducedMotion}
         overview={island.overview}
+        closeUp={props.closeUp ? home : null}
       />
       {props.fx && (
         <EffectComposer multisampling={0} enableNormalPass={false}>
@@ -185,7 +186,10 @@ function Rig({
   field,
   cut,
   overview,
+  closeUp,
 }: {
+  /** Owl home to frame before the tour starts; null = overview. */
+  closeUp: Vector3 | null;
   owl: React.RefObject<OwlApi | null>;
   loc: Location | null;
   field: Field;
@@ -201,8 +205,27 @@ function Rig({
     const c = cc.current;
     if (!c) return;
     c.smoothTime = 0.9;
+    if (!loc && closeUp) {
+      // Close on the owl, seen from the overview side (a cut: the load
+      // screen or the countdown is in front).
+      const [ex, ey, ez] = overview.eye;
+      const d = tmp.back.set(ex, ey, ez).sub(closeUp).normalize();
+      tmp.p.copy(closeUp).addScaledVector(d, 7);
+      c.setLookAt(
+        tmp.p.x,
+        tmp.p.y,
+        tmp.p.z,
+        closeUp.x,
+        closeUp.y + 0.4,
+        closeUp.z,
+        false,
+      );
+      return;
+    }
     if (!loc) {
-      c.setLookAt(...overview.eye, ...overview.target, true);
+      // About 2 s pull-out to the island (a cut with reduced motion).
+      c.smoothTime = 0.6;
+      c.setLookAt(...overview.eye, ...overview.target, !cut);
       return;
     }
     if (cut) {
@@ -218,7 +241,7 @@ function Rig({
         false,
       );
     }
-  }, [loc, cut, field, overview]);
+  }, [loc, cut, field, overview, closeUp, tmp]);
   useFrame(() => {
     const c = cc.current;
     const o = owl.current;

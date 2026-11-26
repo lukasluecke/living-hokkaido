@@ -148,6 +148,132 @@ export function PlaceActivity({
         ))}
       </ol>
 
+      {/* The guide comes first, above the stage, so the step line, the
+          voice controls, the figure to place and the next action are seen
+          without scrolling (desktop side panel and phone sheet). */}
+      <div className="stepcard">
+        <div className="stepno">
+          <span>
+            {tr("Step {n} of {total}", {
+              n: st.step + 1,
+              total: a.steps.length,
+            })}
+          </span>
+          <span className="voice">
+            <button
+              type="button"
+              className="toggle listen"
+              onClick={() => speak(st.step)}
+            >
+              <span aria-hidden="true">▶ </span>
+              {tr("Listen")}
+            </button>
+            <button
+              type="button"
+              className="toggle"
+              aria-pressed={voice}
+              onClick={() => {
+                if (voice) narrator.stop();
+                setVoice(!voice);
+              }}
+            >
+              {voice ? tr("Voice on") : tr("Voice off")}
+            </button>
+          </span>
+        </div>
+        <div className="caption">
+          {step.say}
+          {step.observed && (
+            <small>
+              {tr(
+                "Seen in the museum diorama, not in the panel text · weaker source",
+              )}
+            </small>
+          )}
+        </div>
+
+        {fig && st.phase === "place" ? (
+          <div className="hand">
+            <button
+              type="button"
+              className="card"
+              aria-label={tr("{label}: drag to a ring, or press a ring", {
+                label: fig.label,
+              })}
+              onPointerDown={onDown}
+              onPointerMove={onMove}
+              onPointerUp={onUp}
+              onPointerCancel={onUp}
+            >
+              {figureArt("stand")}
+            </button>
+            <div>
+              <p className="ask">{step.ask}</p>
+              <p className="small">
+                <b>{fig.label}</b>
+                {fig.note ? tr("{note}. ", { note: fig.note }) : ""}
+                {tr("Drag to a ring, or press a ring.")}
+              </p>
+            </div>
+          </div>
+        ) : (
+          fig && <p className="ask">{step.ask}</p>
+        )}
+        {/* Screen readers hear the hint and the result as they change. */}
+        <div aria-live="polite">
+          {st.hint && <p className="msg no">{tr(st.hint)}</p>}
+          {fig && st.phase === "pose" && !st.hint && (
+            <p className="msg ok">{tr("Good place. Now pick a pose.")}</p>
+          )}
+          {fig && done && step.why && <p className="msg ok">{step.why}</p>}
+        </div>
+
+        {((!done && st.tries >= 2) || (done && !st.finished)) && (
+          <div className="row">
+            {!done && st.tries >= 2 && (
+              <button
+                type="button"
+                className="btn"
+                onClick={() => act({ type: "show" })}
+              >
+                {tr("Show me")}
+              </button>
+            )}
+            {done && !last && (
+              <button type="button" className="btn primary" onClick={next}>
+                {tr("Next step")}
+              </button>
+            )}
+            {done && last && !st.finished && (
+              <button
+                type="button"
+                className="btn primary"
+                onClick={() => act({ type: "finish" })}
+              >
+                {tr("See the whole scene")}
+              </button>
+            )}
+          </div>
+        )}
+        {st.finished && (
+          <div className="recap">
+            <p>
+              <b>{tr("Scene rebuilt.")}</b> {a.completion}
+            </p>
+            <ol>
+              {a.steps
+                .filter((s) => s.why)
+                .map((s) => (
+                  <li key={s.id}>
+                    {s.why}
+                    {s.observed ? tr(" (seen in the diorama)") : ""}
+                  </li>
+                ))}
+            </ol>
+          </div>
+        )}
+      </div>
+
       <div className="stage">
         <StageArt stage={a.stage} winter={st.season === "winter"} />
         {st.placed.map((pl, i) => {
@@ -231,121 +357,14 @@ export function PlaceActivity({
         </div>
       )}
 
-      <div className="stepcard">
-        <div className="stepno">
-          <span>
-            {tr("Step {n} of {total}", {
-              n: st.step + 1,
-              total: a.steps.length,
-            })}
-          </span>
-          <button
-            type="button"
-            className="toggle"
-            aria-pressed={voice}
-            onClick={() => {
-              if (voice) narrator.stop();
-              setVoice(!voice);
-            }}
-          >
-            {voice ? tr("Voice on") : tr("Voice off")}
-          </button>
-        </div>
-        <div className="caption">
-          {step.say}
-          {step.observed && (
-            <small>
-              {tr(
-                "Seen in the museum diorama, not in the panel text · weaker source",
-              )}
-            </small>
-          )}
-        </div>
+      <div className="source">
         <Cite claim={stepClaim} onReveal={() => reveal(step.claimIds[0])} />
-
-        {fig && <p className="ask">{step.ask}</p>}
-        {fig && st.phase === "place" && (
-          <div className="hand">
-            <button
-              type="button"
-              className="card"
-              aria-label={tr("{label}: drag to a ring, or press a ring", {
-                label: fig.label,
-              })}
-              onPointerDown={onDown}
-              onPointerMove={onMove}
-              onPointerUp={onUp}
-              onPointerCancel={onUp}
-            >
-              {figureArt("stand")}
-            </button>
-            <p>
-              <b>{fig.label}</b>
-              {fig.note ? tr("{note}. ", { note: fig.note }) : ""}
-              {tr("Drag to a ring, or press a ring.")}
-            </p>
-          </div>
-        )}
-        {/* Screen readers hear the hint and the result as they change. */}
-        <div aria-live="polite">
-          {st.hint && <p className="msg no">{tr(st.hint)}</p>}
-          {fig && st.phase === "pose" && !st.hint && (
-            <p className="msg ok">{tr("Good place. Now pick a pose.")}</p>
-          )}
-          {fig && done && step.why && <p className="msg ok">{step.why}</p>}
-        </div>
-
-        <div className="row">
-          <button type="button" className="btn" onClick={() => speak(st.step)}>
-            {tr("Listen")}
-          </button>
-          {!done && st.tries >= 2 && (
-            <button
-              type="button"
-              className="btn"
-              onClick={() => act({ type: "show" })}
-            >
-              {tr("Show me")}
-            </button>
-          )}
-          {done && !last && (
-            <button type="button" className="btn primary" onClick={next}>
-              {tr("Next step")}
-            </button>
-          )}
-          {done && last && !st.finished && (
-            <button
-              type="button"
-              className="btn primary"
-              onClick={() => act({ type: "finish" })}
-            >
-              {tr("See the whole scene")}
-            </button>
-          )}
-        </div>
         {SHOW_DISCLAIMERS && (
           <p className="muted small">
             {tr(
               "Device voice · placeholder. Figures and scenes are illustrative sketches after museum dioramas.",
             )}
           </p>
-        )}
-        {st.finished && (
-          <div className="recap">
-            <p>
-              <b>{tr("Scene rebuilt.")}</b> {a.completion}
-            </p>
-            <ol>
-              {a.steps
-                .filter((s) => s.why)
-                .map((s) => (
-                  <li key={s.id}>
-                    {s.why}
-                    {s.observed ? tr(" (seen in the diorama)") : ""}
-                  </li>
-                ))}
-            </ol>
-          </div>
         )}
       </div>
 

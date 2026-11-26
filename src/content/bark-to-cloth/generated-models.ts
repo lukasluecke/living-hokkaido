@@ -12,7 +12,11 @@ const NOTE: Record<string, string> = {
 };
 
 /** Ainu objects outside "hokkaido-museum" that need the curator line. */
-const NOTE_BY_ID: Record<string, string> = { "set-bow": "set-bow-generated" };
+const NOTE_BY_ID: Record<string, string> = {
+  "set-bow": "set-bow-generated",
+  fiber: "material-generated",
+  cloth: "material-generated",
+};
 
 /** Artifact ids with a GLB in public/models/<id>.glb, and its size. */
 const GENERATED: Record<string, number> = {
@@ -25,6 +29,8 @@ const GENERATED: Record<string, number> = {
   canoe: 178_968,
   garment: 170_720,
   "lacquer-vessel": 275_992,
+  fiber: 241_596,
+  cloth: 482_256,
 };
 
 export function withGenerated(list: ArtifactInput[]): ArtifactInput[] {

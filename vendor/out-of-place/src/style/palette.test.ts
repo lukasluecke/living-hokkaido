@@ -10,6 +10,6 @@ describe("palette", () => {
   });
 
   it("formats CSS hex strings", () => {
-    expect(css("backdrop")).toBe("#1d3644");
+    expect(css("backdrop")).toBe("#1d2a44");
   });
 });

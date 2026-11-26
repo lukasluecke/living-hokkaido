@@ -23,11 +23,22 @@ export type FindInfo = {
   label: string;
   /** What the street shows for it. */
   look: ExhibitLook;
-  /** The cited claim text, shown on the end card. */
+  /** The cited claim text, shown on the end card. Empty: the card shows
+   *  only the label. */
   text: string;
   /** Source title (and locator), shown under the text. */
   source?: string;
+  /** A real photo of the thing, shown on the end card. The host supplies
+   *  it with rights cleared; `credit` (author, licence) is always shown. */
+  image?: { src: string; alt: string; credit: string };
 };
+
+/** How a label is shown: words, first letter capitalised
+ *  ("herring-boxes" → "Herring boxes", "shachihoko" → "Shachihoko"). */
+export function displayLabel(label: string): string {
+  const t = label.replace(/[-_]+/g, " ").trim();
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
 
 /** Where an exhibit is on this street. */
 export type ExhibitSpot = {

@@ -3,23 +3,27 @@
 //
 // Files live in public/audio/. Every file needs a row in
 // public/audio/ATTRIBUTION.md, and `credit` names that row.
-// Current files are original placeholders from scripts/audio/generate.ts
-// (`npm run audio:generate`). Replace one by dropping a new file with the
-// same name, or point `src` at a new file.
+// The ambient loops and the owl-hoot, owl-takeoff and pick-up sounds are AI
+// sound effects (ElevenLabs, `elevenlabs-sfx`); the other interface sounds
+// are original placeholders from scripts/audio/generate.ts
+// (`npm run audio:generate`, which would overwrite the AI files too).
+// Replace one by dropping a new file with the same name, or point `src` at a
+// new file.
 import type { SoundManifest } from "./types";
 
 const ORIGINAL = "original-synth";
+const AI_SFX = "elevenlabs-sfx";
 const files = (path: string) => [`/audio/${path}.ogg`, `/audio/${path}.m4a`];
 const amb = (name: string, volume = 1) => ({
   src: files(`ambient/${name}`),
   volume,
-  credit: ORIGINAL,
+  credit: AI_SFX,
 });
-const ui = (name: string, volume = 1, detuneJitter = 0) => ({
+const ui = (name: string, volume = 1, detuneJitter = 0, credit = ORIGINAL) => ({
   src: files(`ui/${name}`),
   volume,
   detuneJitter,
-  credit: ORIGINAL,
+  credit,
 });
 
 export const soundManifest = {
@@ -29,7 +33,7 @@ export const soundManifest = {
   overlayDuck: 0.45,
 
   sounds: {
-    // Ambient loops (seamless, about 24 s each).
+    // Ambient loops (seamless, 22 s each).
     "island-wind": amb("island-wind"),
     "island-winter-wind": amb("island-winter-wind"),
     "island-birds": amb("island-birds"),
@@ -48,12 +52,12 @@ export const soundManifest = {
     stamp: ui("stamp", 1),
     "weave-step": ui("weave-step", 0.7, 300),
     hotspot: ui("hotspot", 0.6, 100),
-    "pick-up": ui("pick-up", 0.7, 100),
+    "pick-up": ui("pick-up", 0.7, 100, AI_SFX),
     "put-down": ui("put-down", 0.7, 100),
     complete: ui("complete", 0.8),
     season: ui("season", 0.6),
-    "owl-hoot": ui("owl-hoot", 0.8),
-    "owl-takeoff": ui("owl-takeoff", 0.8),
+    "owl-hoot": ui("owl-hoot", 0.8, 0, AI_SFX),
+    "owl-takeoff": ui("owl-takeoff", 0.8, 0, AI_SFX),
     "scene-enter": ui("scene-enter", 0.7),
   },
 

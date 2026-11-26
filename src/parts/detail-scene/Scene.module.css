@@ -95,10 +95,17 @@
 .film:has([data-open]) {
   width: min(640px, calc(100% - 32px));
 }
-/* Phone: the owl's tip uses the top, so the film sits above the tray. */
+/* Phone: the owl's bubble uses the top, so the film and the clip card sit
+   above the tray (one card at the top only). */
 @media (max-width: 700px) {
-  .film {
+  .clip {
     top: auto;
     bottom: 128px;
   }
+}
+/* Highlight signpost label: gold, always shown while the markers show. */
+.heroMarker .markerLabel {
+  background: var(--fl-gold, #e8c27a);
+  font-weight: 700;
+  opacity: 1;
 }

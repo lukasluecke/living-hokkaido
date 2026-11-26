@@ -5,7 +5,6 @@ import Phaser from "phaser";
 import { hex } from "../art/iso";
 import type { Pose, RGB } from "../core/round";
 import type { PartSample } from "./giveaway";
-import { PALETTE } from "../style/palette";
 
 type PartName = "legL" | "legR" | "body" | "armL" | "armR" | "head";
 const DRAW_ORDER: PartName[] = ["legL", "legR", "body", "armL", "armR", "head"];
@@ -148,9 +147,8 @@ export class Nuri {
         PARTS[name].frame.h,
       );
 
+    // No contact shadow: the brush cannot paint it, so it gave Nuri away.
     this.container = scene.add.container(0, 0);
-    const shadow = scene.add.ellipse(0, 0, 58, 16, PALETTE.coolShadow, 0.45);
-    this.container.add(shadow);
     for (const name of DRAW_ORDER) {
       const img = scene.add
         .image(0, 0, key, name)

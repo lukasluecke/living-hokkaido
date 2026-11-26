@@ -58,6 +58,9 @@ export const journalStateSchema = z.object({
   /** "<activityId>/<foundId>": things found in activities (slope-run
    *  exhibits). Additive: older saved journals parse with []. */
   found: z.array(z.string()).default([]),
+  /** Places whose story film was watched (opened, then closed or ended).
+   *  Additive: older saved journals parse with []. */
+  filmsSeen: z.array(idSchema).default([]),
 });
 export type JournalState = z.infer<typeof journalStateSchema>;
 
@@ -71,4 +74,5 @@ export const EMPTY_JOURNAL: JournalState = {
   revealOpened: false,
   stamps: [],
   found: [],
+  filmsSeen: [],
 };

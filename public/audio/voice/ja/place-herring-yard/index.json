@@ -1,0 +1,41 @@
+{
+  "voice": "aLbEsWOUStPIYvDVdp7K",
+  "model": "eleven_v3",
+  "lines": {
+    "sea": {
+      "hash": "350ef6e56321",
+      "duration": 8.56,
+      "words": [
+        0
+      ]
+    },
+    "net": {
+      "hash": "c32a2d731552",
+      "duration": 14.88,
+      "words": [
+        0
+      ]
+    },
+    "carry": {
+      "hash": "e1a74256288b",
+      "duration": 16.64,
+      "words": [
+        0
+      ]
+    },
+    "dry": {
+      "hash": "53191699ea56",
+      "duration": 16.72,
+      "words": [
+        0
+      ]
+    },
+    "products": {
+      "hash": "a6ffa87de7e0",
+      "duration": 6.48,
+      "words": [
+        0
+      ]
+    }
+  }
+}

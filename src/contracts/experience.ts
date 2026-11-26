@@ -43,6 +43,8 @@ export type ExperienceState = {
   /** On the owl's highlights tour (set by highlight.open). Picking a place
    *  yourself pauses it until you are back on the island. */
   touring?: boolean;
+  /** The scene's story film is open (film.open; a tour film step). */
+  filmOpen?: boolean;
   season: SeasonState;
   prefs: Prefs;
 };

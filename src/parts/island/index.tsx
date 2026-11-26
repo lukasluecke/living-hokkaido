@@ -25,6 +25,10 @@ export function IslandPart(props: IslandPartProps) {
   const t = useT();
   const q = useQuality(SCALE.maxDpr);
   const [drawn, setDrawn] = useState(false);
+  // Tell the shell once the first frame is there (tour countdown).
+  useEffect(() => {
+    if (drawn || !prefs.webgl) emit({ type: "island.ready" });
+  }, [drawn, prefs.webgl, emit]);
   if (!prefs.webgl) return <IslandList {...props} />;
   const select = (l: Location) => {
     if (l.status === "open" && view === "island")
@@ -58,7 +62,7 @@ export function IslandPart(props: IslandPartProps) {
         </Suspense>
         <QualityGovernor />
       </Canvas>
-      <div className={c.pins}>
+      <div className={c.pins} data-calm={props.calm || undefined}>
         {content.island.locations.map((l) => (
           <button
             key={l.id}
@@ -77,7 +81,7 @@ export function IslandPart(props: IslandPartProps) {
           </button>
         ))}
       </div>
-      {view === "island" && (
+      {view === "island" && !props.calm && (
         <PlaceTray
           {...props}
           onSelect={select}

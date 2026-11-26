@@ -28,6 +28,8 @@ scaled to the sketch's size (metres, origin on the base), then
 | canoe.glb | b4a03e89-168c-4897-8dd2-7430d99adfc8 | A narrow dugout canoe made from one single hollowed-out tree log, no seats, no ribs, no planks, a single wooden pole inside. |
 | set-bow.glb | 8f2ad0ab-5afd-43ce-af99-a111f9ee4cfa | A simple plain wooden hunting bow set low on two short wooden stakes beside a path, with a thin cord stretched across the path, no decoration. |
 | lacquer-vessel.glb | 5efd8b26-48c2-4bc3-a9cf-ffedf4d935b2 | A round lidded lacquered wooden vessel, glossy black body with plain red bands, no motifs. |
+| fiber.glb | c9807ea0-1981-4ceb-9487-618f1b623210 | A loose bundle of long pale cream inner tree-bark fibre strands, tied in the middle with a thin cord, lying on a curled strip of rough brown outer tree bark. (241 KB) |
+| cloth.glb | f633c910-660a-47fd-a84e-2116e9ca716d | A small plain rectangular wooden frame lying flat, holding a piece of plain undecorated light-brown woven plant-fibre cloth, the lower half woven and the upper half loose parallel threads, one simple flat wooden stick resting on it. No patterns, no motifs. (Came out upright; 482 KB; not a real technique, claim material-generated.) |
 | owl.glb | 22ae6567-8320-444c-b423-01b5e34d9dc9 | A cute round stylised snow-white owl spirit standing upright, wings folded tight against its body, big round friendly eyes, small grey beak, two small ear tufts, soft feather shapes (Gen-2.5 Medium, 20k faces; our own fictional guide, not a kamuy, no patterns; docs/STYLE.md § owl look). Island body only: the code wings flap in flight. 138 KB, texture 512 px. |
 
 Rejected first tries (not shipped): deer 2d83d342… (two heads), tonkori
@@ -90,3 +92,32 @@ chimneys, a cart).
 Not shipped: era-3-cise-v2 437320679580883 (overhead wires, fences, metal
 chimneys), era-4-meiji-v2 437320686122909 (utility poles), era-1-pit-night
 437320693628848 (rail fences, looks like a 3D render).
+| prop-sled.glb | cb0402b4-c7ee-4408-9ccf-97f2198f1ca6 | A small old wooden snow sled with two curved wooden runners and a flat slatted seat, a little snow on it. |
+| prop-crates.glb | 68e54233-af15-49da-b737-5b90d8fe30e1 | A stack of three plain old wooden fish crates made of rough boards, slightly uneven. |
+| prop-hourglass.glb | 37daa3ca-c59c-4b63-9652-baf28985571b | A large old hourglass with a plain wooden frame of two round plates and three turned posts, clear glass with pale sand. |
+
+The three `prop-*.glb` files are highlight signposts in the scenes (sled: the
+slope game, crates: Out of Place, hourglass: the house over time). They carry
+no facts. Generated 2026-11-26 with the same settings and style suffix (about
+20k faces), then `gltf-transform optimize --compress meshopt
+--texture-compress webp --texture-size 512 --simplify true
+--simplify-ratio 0.5`; the scene scales them to size at load.
+
+
+## Round 4 (owl-film look, today and night postcards)
+
+Same settings and style suffix as round 3 (for "today", modern houses and
+street lights were allowed; for the mine, poles and wires).
+
+| Key | Shown for | PixVerse video id | Prompt (start) |
+|---|---|---|---|
+| era-5-today-v3.mp4 | era "today" (replaces era-4-meiji.mp4) | 437336738241660 | Present day, blue hour at a quiet river mouth in Hokkaido: a small calm town of ordinary low houses … a rebuilt traditional house of thatched grass and bark in a small museum park … a person in an ordinary winter coat walks along the river path. |
+| place-mine-night.mp4 | scene "coal-mountain" (replaces place-mine.mp4) | 437336757732910 | Night in a coal mining town in snowy mountains in the mid 20th century, a tall wooden mine headframe, heaps of coal, warm lit windows, smoke from chimneys. |
+| place-coast-night.mp4 | scene "herring-coast" (replaces place-coast.mp4) | 437337291430806 | Night on a cold northern sea coast in early spring, wild and empty, before electricity, no poles, antennas or wires: moonlight on waves, pebble beach, wooden fishing boats, nets drying on wooden racks, a lantern-lit wooden shed. |
+| place-hills-night.mp4 | scene "animal-hills" (replaces place-hills.mp4) | 437337298264161 | Blue hour over rolling grassy hills in Hokkaido, wild and empty, no poles or wires, low mist, a few sika deer with small antlers and pale spots grazing at the forest edge, moonlight. |
+
+Not shipped: era-5-today v3a 437336735133104 (sign board, car), place-mine-night
+v3a 437336755064313 (backup, CG look), place-coast-night 437336742036221 (TV
+antenna), 437336744712747 (pole, tyres), 437337294614206 (pole),
+place-hills-night 437336748094187 (poles), 437336752144567 (pole, CG look),
+437337300952363 (distant poles).

@@ -15,6 +15,7 @@ import t from "./Tray.module.css";
 import { groupActivities, kindCaption } from "../shared/activityGroups";
 import { roomActivities, Tray } from "./Tray";
 import { showModelLabels } from "@/design/disclaimers";
+import { useT } from "@/i18n";
 
 function useKeys({ scene, emit }: DetailScenePartProps) {
   useEffect(() => {
@@ -39,7 +40,8 @@ function useKeys({ scene, emit }: DetailScenePartProps) {
 }
 
 export function DetailScenePart(props: DetailScenePartProps) {
-  const { scene, artifacts, focusedArtifactId, emit, prefs } = props;
+  const { scene, artifacts, focusedArtifactId, emit, prefs, content } = props;
+  const tx = useT();
   const overlay = useRef<HTMLDivElement>(null);
   // Tap outside the objects puts the focused object back; a drag (look
   // around) does not.
@@ -126,6 +128,30 @@ export function DetailScenePart(props: DetailScenePartProps) {
               <span className={c.markerLabel}>{label(p.artifactId)}</span>
             </button>
           ))}
+        {/* Highlight signposts: a gold label over each prop. */}
+        {markers &&
+          content.highlights
+            .filter((h) => h.locationId === scene.locationId && h.marker)
+            .map((h) => (
+              <button
+                key={h.id}
+                type="button"
+                tabIndex={-1}
+                className={`${c.marker} ${c.heroMarker}`}
+                data-x={h.marker?.position[0]}
+                data-y={(h.marker?.position[1] ?? 0) + 1.0}
+                data-z={h.marker?.position[2]}
+                onClick={() =>
+                  emit({ type: "highlight.open", highlightId: h.id })
+                }
+              >
+                <span
+                  className={`${c.dot} ${attn.pulse}`}
+                  data-still={prefs.reducedMotion || undefined}
+                />
+                <span className={c.markerLabel}>★ {tx(h.title)}</span>
+              </button>
+            ))}
         {/* One label per object: while the tap markers show, a hovered
             object lights its own marker label instead of a second label. */}
         {!markers &&
@@ -147,6 +173,10 @@ export function DetailScenePart(props: DetailScenePartProps) {
             key={scene.id}
             film={scene.film}
             reducedMotion={prefs.reducedMotion}
+            open={props.filmOpen}
+            onOpenChange={(o) =>
+              emit({ type: o ? "film.open" : "film.close", sceneId: scene.id })
+            }
           />
         </div>
       )}
@@ -172,6 +202,7 @@ function SceneList({
   focusedArtifactId,
   prefs,
   emit,
+  filmOpen,
 }: DetailScenePartProps) {
   useEffect(() => {
     emit({ type: "scene.ready", sceneId: scene.id });
@@ -182,7 +213,14 @@ function SceneList({
     <section className={s.panel} aria-label={scene.title}>
       <h2>{scene.title}</h2>
       {scene.film && (
-        <FilmPlayer film={scene.film} reducedMotion={prefs.reducedMotion} />
+        <FilmPlayer
+          film={scene.film}
+          reducedMotion={prefs.reducedMotion}
+          open={filmOpen}
+          onOpenChange={(o) =>
+            emit({ type: o ? "film.open" : "film.close", sceneId: scene.id })
+          }
+        />
       )}
       <div className={s.row}>
         {scene.placements.map((p) => (

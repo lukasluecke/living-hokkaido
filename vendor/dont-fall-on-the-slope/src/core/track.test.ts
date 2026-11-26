@@ -62,7 +62,17 @@ describe("generateTrack", () => {
 
   it("has street furniture: bikes, tourists, lamp posts", () => {
     const kinds = new Set(track.obstacles.map((o) => o.kind));
-    for (const k of ["bicycle", "tourist", "lamp-post", "snow-pile", "crate"])
+    for (const k of [
+      "bicycle",
+      "tourist",
+      "lamp-post",
+      "snow-pile",
+      "crate",
+      "rickshaw",
+      "herring-crates",
+      "sled",
+      "snowman",
+    ])
       expect(kinds).toContain(k);
   });
 

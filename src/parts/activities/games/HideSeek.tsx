@@ -33,7 +33,7 @@ export function HideSeekActivity({
     [a],
   );
   const labels = [
-    "Two players · one device",
+    "Two players, or play with the AI",
     ...(SHOW_DISCLAIMERS && a.illustrative ? ["Illustrative scene"] : []),
   ];
   return (
@@ -61,7 +61,7 @@ export function HideSeekActivity({
       controls={
         <>
           {tr(
-            "Mouse, touch or keyboard. Hide: arrows move, E picks a colour, F fills, Z undoes, 1–3 pose. Seek: arrows and Space. Enter goes on.",
+            "Mouse, touch or keyboard. Hide: arrows move, E picks a colour, F fills, Z undoes, 1–4 pose. Seek: arrows and Space. Enter goes on.",
           )}
         </>
       }

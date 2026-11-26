@@ -9,6 +9,7 @@ Two layers:
 
 | File | Contract | Key rules |
 |---|---|---|
+| 1 (additive) | `Highlight.marker` (optional): `{ position, rotationY (default 0), prop: sled \| crates \| hourglass, model? }`, a signpost prop in the place's scene that opens the highlight. |
 | 1 (additive) | `ExperienceState.touring` (optional): true after `highlight.open`, false after `location.select`; the owl tour pauses in a place you picked yourself. |
 | `ids.ts` | id rules, `PART_IDS` | kebab-case, stable; never rename a used id |
 | `space.ts` | `Vec3`, `CameraView`, `ISLAND`, `SCENE`, `SCALE` | three spaces: island (du), scene (m), artifact (m); Y-up |
@@ -38,6 +39,8 @@ Two layers:
 | Version | Change |
 |---|---|
 | 1 (additive) | `MediaRef` kind `ai-voice` (`group`, `credit` default "AI voice (ElevenLabs) · illustrative") and `VoiceIndex` (`public/audio/voice/<group>/index.json`, word start times). Pre-generated TTS for the fictional owl only; English only, else captions. `refrain` (default `false`) also voices the story refrain as a labelled AI imitation. |
+| 1 (additive) | Event `island.ready {}` (island drew its first frame; no state or journal change) and `IslandPartProps.closeUp` (optional, default false: camera on the owl until the tour starts) (Lukas, 2026-11-26). |
+| 1 (additive) | `IslandPartProps.calm` (optional, default false): first look, the island hides its place tray and its labels (Lukas, 2026-11-26). `AskPartProps.openSignal`, `hideTrigger`, `backLabel` (optional): the owl bubble opens Ask the owl, and answers end with a back link. |
 | 1 (additive) | Highlights (Lukas, 2026-11-26): `ContentPack.highlights` (default `[]`): `{ id, title, teaser, icon, locationId, open, owl? }`, `open` = `activity` (offered at that place), `timeline` or `film` (the place's scene has one); checked in `validateContentPack`. `highlightDone(h, journal)`. Event `highlight.open { highlightId }`. `ExperienceState.pendingHighlightId` (optional; opened on `owl.arrived`). `IslandPartProps.doneHighlightIds` (optional). |
 | 1 (additive) | `place`: stage `hills` (Animal hills) and things `deer`, `bear`, `hare`, `salmon`, `set-bow`, `pelt`, `fish-owl`. New enum values only, so old content still parses. |
 | 1 (additive) | `factHotspots(artifact)` and `modelNotes(artifact)` helpers in `artifact.ts`: hotspots of kind `disclaimer` ("About this model") are a footnote on the card, not a Look closer row, a viewer dot or a journal count (Lukas, 2026-11-26). |

@@ -14,10 +14,16 @@ export const experienceEventSchema = z.discriminatedUnion("type", [
   e("owl.arrived", { locationId: idSchema }),
   /** Fly to a highlight's place and open it on arrival (additive). */
   e("highlight.open", { highlightId: idSchema }),
+  /** The island drew its first frame (or the HTML list is up), so the
+   *  shell can start the tour countdown (additive, no state change). */
+  e("island.ready", {}),
   // Detail scene
   e("scene.enter", { sceneId: idSchema }),
   e("scene.ready", { sceneId: idSchema }),
   e("scene.exit", { sceneId: idSchema }),
+  /** The scene's story film was opened / closed or ended (additive). */
+  e("film.open", { sceneId: idSchema }),
+  e("film.close", { sceneId: idSchema }),
   // Artifacts
   e("artifact.focus", { artifactId: idSchema }),
   e("artifact.inspected", { artifactId: idSchema }),

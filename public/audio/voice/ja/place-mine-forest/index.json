@@ -1,0 +1,41 @@
+{
+  "voice": "aLbEsWOUStPIYvDVdp7K",
+  "model": "eleven_v3",
+  "lines": {
+    "coal": {
+      "hash": "d913cb968c1e",
+      "duration": 12,
+      "words": [
+        0
+      ]
+    },
+    "drill": {
+      "hash": "43a6d7cdb225",
+      "duration": 16.08,
+      "words": [
+        0
+      ]
+    },
+    "shovel": {
+      "hash": "f33d5fc82160",
+      "duration": 12.72,
+      "words": [
+        0
+      ]
+    },
+    "saw": {
+      "hash": "d24bfab1c009",
+      "duration": 16.96,
+      "words": [
+        0
+      ]
+    },
+    "sleigh": {
+      "hash": "e7e91ae1d23a",
+      "duration": 10.96,
+      "words": [
+        0
+      ]
+    }
+  }
+}

@@ -4,6 +4,7 @@ import {
   EMPTY_JOURNAL,
   type ExperienceState,
   highlightDone,
+  journalStateSchema,
   validateContentPack,
 } from "@/contracts";
 import {
@@ -11,6 +12,7 @@ import {
   barkToClothRaw,
 } from "@/content/bark-to-cloth";
 import { tierActivities } from "@/parts/shared/activityGroups";
+import { record } from "@/shell/progress";
 import { tourStep } from "@/shell/route";
 import { initialState, reduce } from "@/shell/state";
 
@@ -99,7 +101,7 @@ test("owl tour: walks the highlights in order, skipping what is done", () => {
     type: "highlight.open",
     highlightId: pack.highlights[0]?.id,
   });
-  // In the grove the film is on screen, so the tour offers the tonkori.
+  // In the grove the film comes first; once watched, the tonkori.
   let st = reduce(pack, island, {
     type: "location.select",
     locationId: "listening-grove",
@@ -108,12 +110,17 @@ test("owl tour: walks the highlights in order, skipping what is done", () => {
   const j = { ...EMPTY_JOURNAL, visited: ["listening-grove"] };
   assert.deepEqual(tourStep(pack, st, j)?.event, {
     type: "highlight.open",
-    highlightId: "tonkori",
+    highlightId: "owl-film",
   });
+  assert.deepEqual(
+    tourStep(pack, st, { ...j, filmsSeen: ["listening-grove"] })?.event,
+    { type: "highlight.open", highlightId: "tonkori" },
+  );
   // Every highlight done: no tour step, the normal route takes over.
   const all = {
     ...EMPTY_JOURNAL,
     visited: pack.highlights.map((x) => x.locationId),
+    filmsSeen: ["listening-grove"],
     completed: pack.highlights.flatMap((x) =>
       x.open.kind === "activity" ? [x.open.activityId] : [],
     ),
@@ -143,7 +150,11 @@ test("tiers: highlights first, quiz and order questions apart", () => {
 });
 
 test("owl tour: a place you pick yourself pauses the tour there", () => {
-  const j = { ...EMPTY_JOURNAL, visited: ["listening-grove"] };
+  const j = {
+    ...EMPTY_JOURNAL,
+    visited: ["listening-grove"],
+    filmsSeen: ["listening-grove"],
+  };
   let st = reduce(pack, initialState(prefs), {
     type: "location.select",
     locationId: "makers-clearing",
@@ -166,4 +177,31 @@ test("owl tour: a place you pick yourself pauses the tour there", () => {
     type: "highlight.open",
     highlightId: "over-time",
   });
+});
+
+test("owl tour: the film step opens the film; closing it marks it watched", () => {
+  let st = reduce(pack, initialState(prefs), {
+    type: "highlight.open",
+    highlightId: "owl-film",
+  });
+  st = reduce(pack, st, { type: "owl.arrived", locationId: "listening-grove" });
+  assert.equal(st.view, "scene");
+  assert.equal(st.filmOpen, true);
+  const sceneId = st.sceneId ?? "";
+  st = reduce(pack, st, { type: "film.close", sceneId });
+  assert.equal(st.filmOpen, false);
+  const { journal } = record(pack, EMPTY_JOURNAL, {
+    type: "film.close",
+    sceneId,
+  });
+  assert.deepEqual(journal.filmsSeen, ["listening-grove"]);
+  assert.ok(highlightDone(h("owl-film"), journal));
+  assert.ok(!highlightDone(h("owl-film"), EMPTY_JOURNAL));
+  // Older saved journals have no filmsSeen and still parse.
+  const { filmsSeen: _, ...old } = EMPTY_JOURNAL;
+  assert.deepEqual(journalStateSchema.parse(old).filmsSeen, []);
+  // Leaving the scene closes the film.
+  st = reduce(pack, st, { type: "film.open", sceneId });
+  st = reduce(pack, st, { type: "nav.back" });
+  assert.equal(st.filmOpen, false);
 });

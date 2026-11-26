@@ -1,0 +1,55 @@
+{
+  "voice": "aLbEsWOUStPIYvDVdp7K",
+  "model": "eleven_v3",
+  "lines": {
+    "door": {
+      "hash": "9aeda78eb852",
+      "duration": 8.16,
+      "words": [
+        0
+      ]
+    },
+    "cattail": {
+      "hash": "aea2127d298b",
+      "duration": 5.6,
+      "words": [
+        0
+      ]
+    },
+    "bark": {
+      "hash": "f73a35950b05",
+      "duration": 6.16,
+      "words": [
+        0
+      ]
+    },
+    "mortar": {
+      "hash": "0879a0ece498",
+      "duration": 7.52,
+      "words": [
+        0
+      ]
+    },
+    "pot": {
+      "hash": "af8bc4e98427",
+      "duration": 6.72,
+      "words": [
+        0
+      ]
+    },
+    "weave": {
+      "hash": "df4f6949e6c9",
+      "duration": 11.12,
+      "words": [
+        0
+      ]
+    },
+    "fish": {
+      "hash": "c86586c51bfc",
+      "duration": 11.36,
+      "words": [
+        0
+      ]
+    }
+  }
+}

@@ -29,6 +29,15 @@ export type IslandPartProps = PartContext & {
   locationId: string | null;
   /** Highlights already done (journal), for the tick on each. Optional. */
   doneHighlightIds?: string[];
+  /** First look (progressive disclosure): hide the place tray and the
+   *  place labels, so the owl's first step stands alone. The
+   *  shell sets it until the visitor goes somewhere or picks "Explore
+   *  freely". Optional, default false. */
+  calm?: boolean;
+  /** Tour start (Lukas): the camera frames the owl at its home; when this
+   *  turns false the camera pulls out to the overview (a cut with reduced
+   *  motion). Optional, default false. */
+  closeUp?: boolean;
 };
 
 /** One detail scene: entry, dollhouse view, artifact placement and focus. */
@@ -40,6 +49,9 @@ export type DetailScenePartProps = PartContext & {
   /** Placed artifacts the visitor has already inspected (journal progress),
    *  for the tray's "N of M looked at". Optional: left out, no progress shows. */
   inspectedArtifactIds?: string[];
+  /** The story film card is open (shell state). Optional: left out, the
+   *  card opens and closes on its own. The part emits film.open/close. */
+  filmOpen?: boolean;
 };
 
 /** C2 pick-up-and-turn viewer, card and hotspots for one artifact. */
@@ -95,6 +107,15 @@ export type AskPartProps = PartContext & {
   artifactId: string | null;
   /** True while an overlay (journal, reveal, timeline) covers the stage. */
   covered: boolean;
+  /** One owl (Lukas, 2026-11-26): the shell opens the box from the owl's
+   *  tour bubble. Each change of this number opens it. Optional. */
+  openSignal?: number;
+  /** Leave out the own "Ask the owl" button (the owl bubble has the link).
+   *  Optional, default false. */
+  hideTrigger?: boolean;
+  /** When set, the box ends with this link; it closes the box so the owl's
+   *  tour step is there again (for example "Back to the tour"). Optional. */
+  backLabel?: string;
 };
 
 export type PartPropsMap = {

@@ -7,6 +7,7 @@
 //   region live inside it; destroy() removes them again.
 // - Without WebGL it shows an HTML card instead of a blank canvas.
 import type { SlopeProps } from "./integration/contracts";
+import { type Strings, strings } from "./i18n";
 import { css } from "./style/palette";
 
 export type SlopeHandle = {
@@ -25,7 +26,7 @@ function webglAvailable(): boolean {
   }
 }
 
-function fallback(parent: HTMLElement): HTMLElement {
+function fallback(parent: HTMLElement, t: Strings): HTMLElement {
   const box = document.createElement("div");
   Object.assign(box.style, {
     position: "absolute",
@@ -40,8 +41,7 @@ function fallback(parent: HTMLElement): HTMLElement {
   });
   const p = document.createElement("p");
   p.style.maxWidth = "28em";
-  p.textContent =
-    "Don't Fall on the Slope needs 3D graphics (WebGL), which aren't available here. The street and its captions will be listed here in a later version.";
+  p.textContent = t.noWebgl;
   box.append(p);
   parent.append(box);
   return box;
@@ -57,18 +57,24 @@ export function mountSlope(
 
   const hadTabIndex = parent.hasAttribute("tabindex");
   const hadLabel = parent.getAttribute("aria-label");
+  const hadLang = parent.getAttribute("lang");
+  const t = strings(props.lang);
+  // Screen readers pronounce the game's text in its language, and browser
+  // auto-translate stays out: the game has its own EN / 日本語 button (a
+  // machine-translated Japanese page looked like a broken English one).
+  parent.setAttribute("lang", t.lang);
+  const hadTranslate = parent.getAttribute("translate");
+  parent.setAttribute("translate", "no");
+  parent.classList.add("notranslate");
   const hadPosition = parent.style.position;
   if (getComputedStyle(parent).position === "static")
     parent.style.position = "relative";
   if (!hadTabIndex) parent.tabIndex = 0;
-  parent.setAttribute(
-    "aria-label",
-    "Don't Fall on the Slope. Slide down an icy street without touching anything.",
-  );
+  parent.setAttribute("aria-label", t.hostLabel);
 
   const ready = (async () => {
     if (!props.prefs.webgl || !webglAvailable()) {
-      fb = fallback(parent);
+      fb = fallback(parent, t);
       return;
     }
     const [{ default: R }, { startGame }] = await Promise.all([
@@ -90,6 +96,11 @@ export function mountSlope(
       game = null;
       fb?.remove();
       if (!hadTabIndex) parent.removeAttribute("tabindex");
+      if (hadTranslate === null) parent.removeAttribute("translate");
+      else parent.setAttribute("translate", hadTranslate);
+      parent.classList.remove("notranslate");
+      if (hadLang === null) parent.removeAttribute("lang");
+      else parent.setAttribute("lang", hadLang);
       if (hadLabel === null) parent.removeAttribute("aria-label");
       else parent.setAttribute("aria-label", hadLabel);
       parent.style.position = hadPosition;

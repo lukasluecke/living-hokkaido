@@ -57,3 +57,4 @@ stamp, `<SoundToggle>` in the HUD. Keep these when the shell changes.
 - No recordings of people, ceremonies or music without documented consent
   and rights. The placeholders are generic and do not represent Ainu sound.
 - Sound never carries information alone (captions/visuals stay primary).
+- 2026-11-26: owl voice lines queue (Lukas: a line was cut halfway by the next one). `playVoiceLine` waits until the line now playing has ended (max 12 s); only the newest waiting line plays; `stopVoiceLine` drops waiting lines. A line the browser blocks on page load plays on the first tap or key, if it is still the newest line.

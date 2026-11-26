@@ -315,4 +315,6 @@ export const jaClaims: Record<string, string> = {
     "このモデルは、このデモのために短い文章からAIツール（Hyper3D Rodin）でつくりました。博物館の資料でも、スキャンでも、復元でもありません。形や細かい部分は、まだ学芸員が確かめていません。",
   "This model was made by an AI tool (Hyper3D Rodin) from a short text prompt for this demo. It is not a museum object, scan or reconstruction. It has no pattern on purpose: no curator has checked it, and Ainu robe patterns need a curator.":
     "このモデルは、このデモのために短い文章からAIツール（Hyper3D Rodin）でつくりました。博物館の資料でも、スキャンでも、復元でもありません。わざと模様をつけていません。まだ学芸員が確かめておらず、アイヌの衣の模様には学芸員の確認が必要だからです。",
+  "This model was made by an AI tool (Hyper3D Rodin) from a short text prompt for this demo. It is not a museum object, scan or reconstruction, and it does not show a real technique. In the finished product a curator would check and approve it.":
+    "このモデルは、このデモのために短い文章からAIツール（Hyper3D Rodin）でつくりました。博物館の資料でも、スキャンでも、復元でもなく、本当の技法を示すものでもありません。完成版では、学芸員が確かめて承認します。",
 };
