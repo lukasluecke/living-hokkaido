@@ -26,7 +26,6 @@ export const ERA_CLIPS: Record<string, ClipInput> = {
     "Watch: the river mouth in this era",
   ),
   meiji: clip("era-4-meiji.mp4", "Watch: the river mouth in this era"),
-  today: clip("era-5-today.mp4", "Watch: the river mouth in this era"),
 };
 
 /** Scene id → ambient postcard. */
