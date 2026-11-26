@@ -256,3 +256,14 @@ test("owl tour: skip a step without doing it", () => {
     st,
   );
 });
+
+test("owl tour: ends with the slope; Out of Place stays a highlight", () => {
+  assert.equal(h("out-of-place").tour, false);
+  const j = {
+    ...EMPTY_JOURNAL,
+    visited: ["listening-grove", "lake-house", "memory-cabin"],
+    filmsSeen: ["listening-grove"],
+    completed: ["pluck-tonkori", "omusha-look", "slope-run-otaru"],
+  };
+  assert.equal(tourStep(pack, initialState(prefs), j), null);
+});

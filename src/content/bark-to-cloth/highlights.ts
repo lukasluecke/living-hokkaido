@@ -71,6 +71,8 @@ export const highlights: HighlightInput[] = [
     icon: "hide-seek",
     locationId: "herring-coast",
     open: { kind: "activity", activityId: "hide-seek-otaru-warehouse" },
+    // Lukas: the tour ends with the slide game; this stays a highlight.
+    tour: false,
     marker: {
       position: [-0.5, 0, 1.7],
       rotationY: 0.3,
