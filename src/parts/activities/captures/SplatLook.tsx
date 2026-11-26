@@ -23,6 +23,7 @@ import {
   phaseForStatus,
 } from "./splatLogic";
 import type { SplatViewer } from "./splatViewer";
+import { SHOW_DISCLAIMERS } from "@/design/disclaimers";
 
 const stageVars = {
   "--lh-paper": ui.paper,
@@ -265,7 +266,7 @@ function Stage({
             {l}
           </span>
         ))}
-        <span className={g.barLabel}>Draft</span>
+        {SHOW_DISCLAIMERS && <span className={g.barLabel}>Draft</span>}
         <button type="button" className={g.closeGame} onClick={onClose}>
           Close <kbd>Esc</kbd>
         </button>

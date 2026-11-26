@@ -6,6 +6,7 @@ import { useState } from "react";
 import type { Clip } from "@/contracts";
 import { useT } from "@/i18n";
 import s from "./Clip.module.css";
+import { SHOW_DISCLAIMERS } from "@/design/disclaimers";
 
 export function ClipPlayer({
   clip,
@@ -43,7 +44,9 @@ export function ClipPlayer({
           aria-label={t(clip.title)}
         />
       )}
-      {open && !hideLabels && <p className={s.note}>ⓘ {t(clip.note)}</p>}
+      {open && SHOW_DISCLAIMERS && !hideLabels && (
+        <p className={s.note}>ⓘ {t(clip.note)}</p>
+      )}
     </div>
   );
 }

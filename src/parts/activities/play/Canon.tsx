@@ -8,6 +8,7 @@ import { Cite, complete, type KindProps } from "../kinds/shared";
 import { CANON_PATTERN, canonOffBy, ON_MARK, patternNote } from "./musicLogic";
 import p from "./play.module.css";
 import { hum, tick } from "./synth";
+import { SHOW_DISCLAIMERS } from "@/design/disclaimers";
 
 const BEAT_MS = 600;
 
@@ -187,11 +188,13 @@ export function CanonActivity({
                   "Start the first voice, then bring in the others on their marks.",
                 ))}
       </p>
-      <p className="small-note">
-        {tr(
-          "Synthetic tones that show the structure only. They are not the song, and no recording is used.",
-        )}
-      </p>
+      {SHOW_DISCLAIMERS && (
+        <p className="small-note">
+          {tr(
+            "Synthetic tones that show the structure only. They are not the song, and no recording is used.",
+          )}
+        </p>
+      )}
       <Cite
         claim={claims[a.structureClaimId]}
         onReveal={() => reveal(a.structureClaimId)}

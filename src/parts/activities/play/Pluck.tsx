@@ -9,6 +9,7 @@ import { Cite, complete, type KindProps } from "../kinds/shared";
 import { pluckPhase, pluckString, startPluck } from "./musicLogic";
 import p from "./play.module.css";
 import { pluck } from "./synth";
+import { SHOW_DISCLAIMERS } from "@/design/disclaimers";
 
 /** Illustrative pitches (semitones) by gauge, so strings are not in order. */
 const PITCH = { thick: [0, 2], medium: [5, 3], thin: [12, 10] } as const;
@@ -184,11 +185,13 @@ export function PluckActivity({
             />
             {tr("Sound")}
           </label>
-          <p className="small-note">
-            {tr(
-              "Synthetic tones. The strings are not in order of pitch, as on a tonkori, but these pitches are not its tuning.",
-            )}
-          </p>
+          {SHOW_DISCLAIMERS && (
+            <p className="small-note">
+              {tr(
+                "Synthetic tones. The strings are not in order of pitch, as on a tonkori, but these pitches are not its tuning.",
+              )}
+            </p>
+          )}
           <Cite
             claim={claims[a.stringsClaimId]}
             onReveal={() => reveal(a.stringsClaimId)}

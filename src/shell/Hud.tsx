@@ -10,6 +10,7 @@ import { Icon as LineIcon, UI_ICON } from "@/parts/shared/Icon";
 import { type Locale, LOCALE_NAMES, useI18n } from "@/i18n";
 import s from "./Hud.module.css";
 import type { Station } from "./route";
+import { DEMO_NOTE, SHOW_DISCLAIMERS } from "@/design/disclaimers";
 
 const P = {
   spring:
@@ -93,7 +94,7 @@ export function Hud({
     <header className={s.hud} inert={inert}>
       <strong className={s.title}>
         {t("Living Hokkaido")}
-        {draft && (
+        {SHOW_DISCLAIMERS && draft && (
           <small className={s.draft} title={t("Draft translation note")}>
             {t("Draft translation")}
           </small>
@@ -242,6 +243,7 @@ export function Hud({
                 {t("Contribute a story")}
               </a>
             </div>
+            <p className={s.about}>{t(DEMO_NOTE)}</p>
           </div>
         )}
       </div>
