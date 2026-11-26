@@ -241,6 +241,13 @@ li:nth-child(even) > .earned svg {
   accent-color: var(--seal);
   width: 140px;
 }
+.where {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin: 6px 0 0;
+}
 .reminder {
   margin-top: 8px;
   padding-top: 8px;

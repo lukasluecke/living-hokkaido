@@ -22,3 +22,4 @@ event, proposed in docs/CONTRACTS.md first.
 ## Decisions
 
 - 2026-11-24: E1 stamp book (Lukas).
+- 2026-11-26: tester feedback (Lukas): each stamp detail names its place (`placeOf` in `book.ts`: the open place that holds most of what is left, then the most specific) with a "Go there" / "Go back there" link that sends `location.select`. Seasons and card backs have no place. Picking a stamp scrolls its detail into view; the book scrolls inside the overlay.
