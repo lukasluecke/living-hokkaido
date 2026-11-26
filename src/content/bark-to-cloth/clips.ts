@@ -45,9 +45,9 @@ export const ERA_CLIPS: Record<string, ClipInput> = {
 
 /** Scene id → ambient postcard. */
 export const SCENE_CLIPS: Record<string, ClipInput> = {
-  "herring-coast": clip("place-coast.mp4", "Watch: the coast", true),
+  "herring-coast": clip("place-coast-night.mp4", "Watch: the coast", true),
   "survey-forest": clip("place-forest-night.mp4", "Watch: the forest", true),
-  "animal-hills": clip("place-hills.mp4", "Watch: the hills", true),
+  "animal-hills": clip("place-hills-night.mp4", "Watch: the hills", true),
   "coal-mountain": clip("place-mine-night.mp4", "Watch: the mountain", true),
 };
 
