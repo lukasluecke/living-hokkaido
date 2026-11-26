@@ -24,7 +24,7 @@ export const jaUi: Record<string, string> = {
   "Journal ({stamps}/{total})": "手帳 ({stamps}/{total})",
   "Heritage Journal": "ヘリテージ手帳",
   "of {total} stamps": "/ {total} スタンプ",
-  "Menu: seasons, sound and more": "メニュー: 季節、音など",
+  "Menu: seasons and timelapse": "メニュー: 季節とタイムラプス",
   Season: "季節",
   "Season: {season}": "季節: {season}",
   spring: "春",
@@ -146,6 +146,7 @@ export const jaUi: Record<string, string> = {
   "Look closer · {read} of {total}": "よく見る · {read}/{total}",
   Map: "地図",
   More: "そのほか",
+  "More: contribute and about": "そのほか: 物語を寄せる・この展示について",
   "Museum record": "博物館の記録",
   "No single claim is selected. These are the sources for this story.":
     "記述はひとつに選ばれていません。これはこの物語の出典です。",

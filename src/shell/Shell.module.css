@@ -171,10 +171,11 @@
 }
 .side {
   position: absolute;
-  top: calc(56px + env(safe-area-inset-top, 0px));
+  /* Below the HUD row (the route rail is about 58 px tall at 10 px). */
+  top: calc(76px + env(safe-area-inset-top, 0px));
   right: 16px;
   width: min(420px, calc(100% - 32px));
-  max-height: calc(100% - 140px);
+  max-height: calc(100% - 160px);
   display: flex;
   flex-direction: column;
   gap: 12px;

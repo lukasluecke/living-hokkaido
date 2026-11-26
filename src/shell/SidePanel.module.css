@@ -33,7 +33,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 10px 8px 6px;
+  padding: 8px;
   color: var(--fl-ink);
   border-bottom: 1px solid var(--fl-line);
   touch-action: none;
@@ -51,6 +51,7 @@
 }
 .title {
   flex: 1;
+  line-height: 1.2;
   min-width: 0;
   padding: 0 6px;
   font-size: 12px;
@@ -67,9 +68,14 @@
   opacity: 0.6;
   font-size: 0.9em;
 }
+/* Icons centred in the button box, so the arrows, the title and × share
+   one centre line (text glyphs sat on the baseline, below the title). */
 .nav,
 .close {
   flex: none;
+  display: grid;
+  place-items: center;
+  padding: 0;
   width: 36px;
   height: 36px;
   border-radius: 999px;

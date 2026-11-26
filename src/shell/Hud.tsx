@@ -1,7 +1,8 @@
 "use client";
 // Field-label HUD: brand, the line rail (route stations), a stamp counter
-// that opens the journal, and one menu for seasons, timelapse, over time,
-// sound and contribute. Accessible names keep the old words ("spring",
+// that opens the journal, a sound button, a season menu (seasons,
+// timelapse, over time) and a ☰ menu (contribute, about). Testers missed
+// sound and contribute inside the season menu, so they have their own place. Accessible names keep the old words ("spring",
 // "Timelapse", "Journal (n/m)", "Sound on") so scripts and tests still work.
 import { useEffect, useRef, useState } from "react";
 import { type Emit, SEASON_IDS, type SeasonState, seasonAt } from "@/contracts";
@@ -64,9 +65,11 @@ export function Hud({
   const now = seasonAt(season.value);
   const { t, draft } = useI18n();
   const other: Locale = locale === "ja" ? "en" : "ja";
-  const [menu, setMenu] = useState(false);
+  const [menu, setMenu] = useState<"season" | "more" | null>(null);
   const menuBtn = useRef<HTMLButtonElement>(null);
+  const moreBtn = useRef<HTMLButtonElement>(null);
   const menuBox = useRef<HTMLDivElement>(null);
+  const opener = menu === "more" ? moreBtn : menuBtn;
 
   // Close the menu on Esc (before the shell steps back) or an outside click.
   useEffect(() => {
@@ -74,13 +77,13 @@ export function Hud({
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
       e.stopImmediatePropagation();
-      setMenu(false);
-      menuBtn.current?.focus();
+      setMenu(null);
+      opener.current?.focus();
     };
     const onDown = (e: PointerEvent) => {
       const t = e.target as Node;
-      if (!menuBox.current?.contains(t) && !menuBtn.current?.contains(t))
-        setMenu(false);
+      if (!menuBox.current?.contains(t) && !opener.current?.contains(t))
+        setMenu(null);
     };
     window.addEventListener("keydown", onKey, true);
     window.addEventListener("pointerdown", onDown);
@@ -88,7 +91,7 @@ export function Hud({
       window.removeEventListener("keydown", onKey, true);
       window.removeEventListener("pointerdown", onDown);
     };
-  }, [menu]);
+  }, [menu, opener]);
 
   return (
     <header className={s.hud} inert={inert}>
@@ -160,14 +163,25 @@ export function Hud({
             {t("of {total} stamps", { total })}
           </span>
         </button>
+        <SoundToggle sound={sound} className={`${s.round} ${s.wideOnly}`}>
+          {(muted) => (
+            <Icon
+              d={
+                muted
+                  ? "M4 9h4l5-4v14l-5-4H4V9Zm13 1 4 4m0-4-4 4"
+                  : "M4 9h4l5-4v14l-5-4H4V9Zm12 0a4 4 0 0 1 0 6m2-9a8 8 0 0 1 0 12"
+              }
+            />
+          )}
+        </SoundToggle>
         <button
           ref={menuBtn}
           type="button"
           className={`${s.round} ${s.seasonBtn}`}
-          aria-label={t("Menu: seasons, sound and more")}
-          aria-expanded={menu}
+          aria-label={t("Menu: seasons and timelapse")}
+          aria-expanded={menu === "season"}
           aria-controls="hud-menu"
-          onClick={() => setMenu((m) => !m)}
+          onClick={() => setMenu((m) => (m === "season" ? null : "season"))}
         >
           <Icon d={P[now]} fill={now === "spring"} />
           {/* The season name says what the button changes (testers missed
@@ -179,7 +193,45 @@ export function Hud({
             ▾
           </span>
         </button>
-        {menu && (
+        <button
+          ref={moreBtn}
+          type="button"
+          className={s.round}
+          aria-label={t("More: contribute and about")}
+          title={t("More")}
+          aria-expanded={menu === "more"}
+          aria-controls="hud-more"
+          onClick={() => setMenu((m) => (m === "more" ? null : "more"))}
+        >
+          <Icon d="M4 7h16M4 12h16M4 17h16" />
+        </button>
+        {menu === "more" && (
+          <div id="hud-more" ref={menuBox} className={s.menu}>
+            <div className={s.items}>
+              {/* Phones have no room for the sound button in the bar. */}
+              <SoundToggle sound={sound} className={`${s.item} ${s.phoneOnly}`}>
+                {(muted) => (
+                  <>
+                    <Icon
+                      d={
+                        muted
+                          ? "M4 9h4l5-4v14l-5-4H4V9Zm13 1 4 4m0-4-4 4"
+                          : "M4 9h4l5-4v14l-5-4H4V9Zm12 0a4 4 0 0 1 0 6m2-9a8 8 0 0 1 0 12"
+                      }
+                    />
+                    {muted ? t("Sound off") : t("Sound on")}
+                  </>
+                )}
+              </SoundToggle>
+              <a className={s.item} href="/contribute">
+                <Icon d="M4 20l4-1 11-11-3-3L5 16l-1 4Zm10-13 3 3" />
+                {t("Contribute a story")}
+              </a>
+            </div>
+            <p className={s.about}>{t(DEMO_NOTE)}</p>
+          </div>
+        )}
+        {menu === "season" && (
           <div id="hud-menu" ref={menuBox} className={s.menu}>
             <p className={s.cap}>{t("Season")}</p>
             <div
@@ -218,40 +270,21 @@ export function Hud({
                 />
               </button>
             </div>
-            <div className={s.items}>
-              {onOverTime && (
+            {onOverTime && (
+              <div className={s.items}>
                 <button
                   type="button"
                   className={s.item}
                   onClick={() => {
-                    setMenu(false);
+                    setMenu(null);
                     onOverTime();
                   }}
                 >
                   <Icon d="M7 3h10M7 21h10M8 3c0 5 8 6 8 9s-8 4-8 9M16 3c0 5-8 6-8 9s8 4 8 9" />
                   {t("Over time")}
                 </button>
-              )}
-              <SoundToggle sound={sound} className={s.item}>
-                {(muted) => (
-                  <>
-                    <Icon
-                      d={
-                        muted
-                          ? "M4 9h4l5-4v14l-5-4H4V9Zm13 1 4 4m0-4-4 4"
-                          : "M4 9h4l5-4v14l-5-4H4V9Zm12 0a4 4 0 0 1 0 6m2-9a8 8 0 0 1 0 12"
-                      }
-                    />
-                    {muted ? t("Sound off") : t("Sound on")}
-                  </>
-                )}
-              </SoundToggle>
-              <a className={s.item} href="/contribute">
-                <Icon d="M4 20l4-1 11-11-3-3L5 16l-1 4Zm10-13 3 3" />
-                {t("Contribute a story")}
-              </a>
-            </div>
-            <p className={s.about}>{t(DEMO_NOTE)}</p>
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -4,6 +4,7 @@
 // handle: drag down to close, swipe sideways for the previous / next object.
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useT } from "@/i18n";
+import { Icon } from "@/parts/shared/Icon";
 import s from "./SidePanel.module.css";
 
 const CLOSE_PX = 90;
@@ -103,7 +104,7 @@ export function SidePanel({
             title={t("Previous object")}
             onClick={onPrev}
           >
-            ‹
+            <Icon d="M15 5l-7 7 7 7" size={20} />
           </button>
         )}
         {header && (
@@ -125,7 +126,7 @@ export function SidePanel({
             title={t("Next object")}
             onClick={onNext}
           >
-            ›
+            <Icon d="M9 5l7 7-7 7" size={20} />
           </button>
         )}
         {header && (
@@ -136,7 +137,7 @@ export function SidePanel({
             title={`${closeLabel} (Esc)`}
             onClick={onClose}
           >
-            ×
+            <Icon d="M6 6l12 12M18 6L6 18" size={20} />
           </button>
         )}
       </div>
