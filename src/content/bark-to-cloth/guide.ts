@@ -1,7 +1,29 @@
 // Owl lines. Navigation and invitation only; no cultural facts.
 import type { GuideLine } from "@/contracts";
+import { lakeHouse } from "./scene";
 
 type GuideInput = Omit<GuideLine, "claimIds"> & { claimIds?: string[] };
+
+const COUNT = [
+  "One",
+  "Two",
+  "Three",
+  "Four",
+  "Five",
+  "Six",
+  "Seven",
+  "Eight",
+  "Nine",
+];
+
+/** "Four objects are waiting…", counted from the scene's placements so the
+ *  line stays true when objects are added (src/i18n/ja/places.ts has each). */
+export function objectsWaiting(n: number): string {
+  const word = COUNT[n - 1] ?? String(n);
+  return n === 1
+    ? "One object is waiting. Pick it up and turn it."
+    : `${word} objects are waiting. Pick one up and turn it.`;
+}
 
 export const guide: GuideInput[] = [
   {
@@ -19,7 +41,7 @@ export const guide: GuideInput[] = [
     id: "scene-hint",
     on: "scene.ready",
     targetId: "lake-house",
-    text: "Three objects are waiting. Pick one up and turn it.",
+    text: objectsWaiting(lakeHouse.placements.length),
   },
   {
     id: "arrive-listening-grove",
