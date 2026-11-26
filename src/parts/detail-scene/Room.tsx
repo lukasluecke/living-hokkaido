@@ -1,6 +1,7 @@
 "use client";
 // The 3D detail scene. Ported from labs/detail-scene (variant A, low-poly):
 // roof-lift entry, dollhouse home view, hover glow, focus camera move-in.
+import { HighlightProps } from "./room/HighlightProps";
 import { CameraControls, ContactShadows } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import {
@@ -209,6 +210,12 @@ export function Room(props: RoomProps) {
           />
         </ArtifactShell>
       ))}
+      <HighlightProps
+        highlights={props.content.highlights.filter(
+          (h) => h.locationId === scene.locationId && h.marker,
+        )}
+        emit={emit}
+      />
       <ContactShadows
         position={[0, 0.015, 0]}
         scale={8}

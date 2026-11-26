@@ -32,6 +32,7 @@ export const highlights: HighlightInput[] = [
     icon: "timeline",
     locationId: "lake-house",
     open: { kind: "timeline", timelineId: "house-over-time" },
+    marker: { position: [2.0, 0, 0.9], rotationY: -0.4, prop: "hourglass" },
     owl: "Let us fly to the lake house and watch it change over time.",
   },
   {
@@ -50,6 +51,7 @@ export const highlights: HighlightInput[] = [
     icon: "slope-run",
     locationId: "herring-coast",
     open: { kind: "activity", activityId: "slope-run-otaru" },
+    marker: { position: [2.7, 0, 1.9], rotationY: -0.6, prop: "sled" },
     owl: "To the coast! Slide down the icy street to the canal.",
   },
   {
@@ -59,6 +61,7 @@ export const highlights: HighlightInput[] = [
     icon: "hide-seek",
     locationId: "herring-coast",
     open: { kind: "activity", activityId: "hide-seek-otaru-warehouse" },
+    marker: { position: [-0.5, 0, 1.7], rotationY: 0.3, prop: "crates" },
     owl: "One more game here: find what does not belong in the warehouse.",
   },
 ];

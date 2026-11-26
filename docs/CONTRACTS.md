@@ -9,6 +9,7 @@ Two layers:
 
 | File | Contract | Key rules |
 |---|---|---|
+| 1 (additive) | `Highlight.marker` (optional): `{ position, rotationY (default 0), prop: sled \| crates \| hourglass, model? }`, a signpost prop in the place's scene that opens the highlight. |
 | 1 (additive) | `ExperienceState.touring` (optional): true after `highlight.open`, false after `location.select`; the owl tour pauses in a place you picked yourself. |
 | `ids.ts` | id rules, `PART_IDS` | kebab-case, stable; never rename a used id |
 | `space.ts` | `Vec3`, `CameraView`, `ISLAND`, `SCENE`, `SCALE` | three spaces: island (du), scene (m), artifact (m); Y-up |
