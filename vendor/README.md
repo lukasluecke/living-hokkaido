@@ -119,6 +119,11 @@ git subtree pull --prefix=vendor/sapporo-omusha \
   https://github.com/xjets/sapporo-omusha.git main --squash
 ```
 
+Synced back: Erina pulled patches 1–10 into her repo (`194f4bf`), added
+steps 5–8, Japanese text, Otaru obstacles and a canal ending, and we pulled
+her `b794383` back (her tree as is). See her `HANDBACK.md`. The adapter
+passes the app's language as `lang` (no in-game language button).
+
 ## Pull new upstream changes
 
 You need read access to the upstream repo (Lukas is a collaborator). From

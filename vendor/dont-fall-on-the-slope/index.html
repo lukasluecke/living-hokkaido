@@ -7,6 +7,9 @@
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
     <title>Don't Fall on the Slope</title>
+    <!-- The game translates itself (EN / 日本語 button); no browser
+         auto-translate on top of it. -->
+    <meta name="google" content="notranslate" />
     <style>
       html,
       body {
@@ -20,6 +23,11 @@
         position: fixed;
         inset: 0;
         outline: none;
+        /* No double-tap zoom or text selection while playing on a phone. */
+        touch-action: manipulation;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
       }
     </style>
   </head>

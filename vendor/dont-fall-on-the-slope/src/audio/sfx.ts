@@ -75,6 +75,31 @@ export function createSfx(muted = false) {
       tone(880, 0, 0.35, "triangle", 0.25);
       tone(1320, 0.09, 0.45, "triangle", 0.2);
     },
+    /** A gentle wind-chime shatter (crashing into a glass workshop). */
+    chime() {
+      tone(4200, 0, 0.12, "square", 0.03, 1400);
+      const bells = [2093, 2637, 3136, 2349, 3520, 2794, 2093];
+      bells.forEach((f, i) =>
+        tone(f, 0.04 + i * 0.07, 0.7 + (i % 3) * 0.2, "triangle", 0.07),
+      );
+    },
+    /** Falling into the canal: a deep plunge and a fizz of droplets. */
+    splash() {
+      tone(260, 0, 0.5, "sine", 0.6, 55);
+      tone(900, 0.03, 0.35, "triangle", 0.12, 200);
+      for (let i = 0; i < 6; i++)
+        tone(1400 + i * 260, 0.08 + i * 0.05, 0.12, "sine", 0.05);
+    },
+    /** Skates digging into the ice (start of a brace). */
+    scrape() {
+      tone(420, 0, 0.35, "sawtooth", 0.035, 140);
+      tone(900, 0, 0.2, "square", 0.012, 300);
+    },
+    /** A soft camera shutter (a tourist's photo). */
+    shutter() {
+      tone(2400, 0, 0.025, "square", 0.025);
+      tone(1800, 0.05, 0.03, "square", 0.02);
+    },
     closeCall() {
       tone(1600, 0, 0.08, "square", 0.05);
     },

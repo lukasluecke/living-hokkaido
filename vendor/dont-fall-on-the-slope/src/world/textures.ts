@@ -39,20 +39,20 @@ export function iceTexture(THREE: Three): T.CanvasTexture {
   return t;
 }
 
-/** Stone blocks for the warehouses. */
+/** Otaru soft-stone blocks in courses, with pale mortar (as in photos of
+ *  the warehouses: rectangular blocks, light joints). */
 export function stoneTexture(THREE: Three): T.CanvasTexture {
   const [c, g] = canvas(128);
   const r = rng(11);
-  g.fillStyle = css("stoneDark");
+  g.fillStyle = css("plaster");
   g.fillRect(0, 0, 128, 128);
-  const rows = 6;
+  const rows = 5;
   const h = 128 / rows;
   for (let y = 0; y < rows; y++) {
-    const off = (y % 2) * 16;
-    for (let x = -32; x < 128; x += 32) {
-      const shade = 0.82 + r() * 0.18;
-      g.fillStyle = css("stone", shade);
-      g.fillRect(x + off + 1, y * h + 1, 30, h - 2);
+    const off = (y % 2) * 21;
+    for (let x = -42; x < 128; x += 42) {
+      g.fillStyle = css("stone", 0.82 + r() * 0.18);
+      g.fillRect(x + off + 1.5, y * h + 1.5, 39, h - 3);
     }
   }
   const t = new THREE.CanvasTexture(c);
@@ -70,6 +70,59 @@ export function woodTexture(THREE: Three): T.CanvasTexture {
   for (let x = 0; x < 128; x += 16) {
     g.fillStyle = css("wood", 0.85 + r() * 0.15);
     g.fillRect(x + 1, 0, 14, 128);
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
+/** Japanese roof tiles (kawara): rows of dark grey tiles with rounded
+ *  ribs. About one texture per metre on extruded roofs. */
+export function kawaraTexture(THREE: Three): T.CanvasTexture {
+  const [c, g] = canvas(64);
+  g.fillStyle = css("roofTile");
+  g.fillRect(0, 0, 64, 64);
+  for (let y = 0; y < 64; y += 16) {
+    g.fillStyle = css("iron", 0.55);
+    g.fillRect(0, y, 64, 3);
+  }
+  for (let x = 0; x < 64; x += 8) {
+    g.fillStyle = css("cream", 0.12);
+    g.fillRect(x + 2, 0, 2, 64);
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
+/** Red brick in running bond with pale mortar. */
+export function brickTexture(THREE: Three): T.CanvasTexture {
+  const [c, g] = canvas(64);
+  g.fillStyle = css("plaster");
+  g.fillRect(0, 0, 64, 64);
+  for (let y = 0; y < 8; y++) {
+    const off = (y % 2) * 8;
+    for (let x = -16; x < 64; x += 16) {
+      g.fillStyle = css("brick", 0.85 + ((x + y * 7) % 3) * 0.05);
+      g.fillRect(x + off + 1, y * 8 + 1, 14, 6);
+    }
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
+/** Horizontal painted clapboard siding. */
+export function clapboardTexture(THREE: Three): T.CanvasTexture {
+  const [c, g] = canvas(64);
+  g.fillStyle = css("clapboard");
+  g.fillRect(0, 0, 64, 64);
+  for (let y = 0; y < 64; y += 8) {
+    g.fillStyle = css("stoneDark", 0.35);
+    g.fillRect(0, y + 6, 64, 2);
   }
   const t = new THREE.CanvasTexture(c);
   t.wrapS = t.wrapT = THREE.RepeatWrapping;

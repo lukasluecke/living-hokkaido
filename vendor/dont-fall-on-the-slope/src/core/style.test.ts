@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CLOSE_GAP, closeCalls } from "./style";
+import { CLOSE_GAP, COMMENT_GAP, closeCalls, shouldComment } from "./style";
 import type { Obstacle } from "./track";
 
 const post: Obstacle = {
@@ -26,5 +26,13 @@ describe("closeCalls", () => {
     expect(closeCalls([post], new Set(), 50, 1.7, 0.3)).toEqual([]);
     expect(closeCalls([post], new Set(), 52, 1.3, 0.3)).toEqual([]);
     expect(closeCalls([pile], new Set(), 50, 0.6, 0.3)).toEqual([]);
+  });
+});
+
+describe("close-call comments", () => {
+  it("comment on the first, then at most every COMMENT_GAP seconds", () => {
+    expect(shouldComment(1, -Infinity, 3)).toBe(true);
+    expect(shouldComment(2, 3, 10)).toBe(false);
+    expect(shouldComment(3, 3, 3 + COMMENT_GAP)).toBe(true);
   });
 });

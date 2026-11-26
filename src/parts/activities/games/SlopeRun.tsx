@@ -7,7 +7,7 @@
 // own HTML card.
 import { useCallback, useRef, useState } from "react";
 import type { Emit } from "@/contracts";
-import { useT } from "@/i18n";
+import { useI18n, useT } from "@/i18n";
 import type { KindProps } from "../kinds/shared";
 import g from "./games.module.css";
 import { deferMount, GameStage, type MountGame } from "./GameStage";
@@ -21,6 +21,9 @@ export function SlopeRunActivity({
   found = [],
 }: KindProps<"slope-run">) {
   const tr = useT();
+  // The game has its own English and Japanese text; it follows the app's
+  // language (the shell's switcher, so no in-game language button).
+  const { locale } = useI18n();
   const [done, setDone] = useState(false);
   // Read at mount (each Play): the journal's list of exhibits seen before.
   const foundRef = useRef(found);
@@ -56,10 +59,11 @@ export function SlopeRunActivity({
               ];
             }),
             seen: foundRef.current,
+            lang: locale,
           }),
         ),
       ),
-    [a],
+    [a, locale],
   );
   const seenIds = new Set(found);
   const notebook = a.finds.filter((f) => seenIds.has(f.id));

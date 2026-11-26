@@ -18,13 +18,36 @@ export function controlsFrom(held: Held, dragPx: number | null): Controls {
   return { lean: Math.max(-1, Math.min(1, lean)), brace: held.brace };
 }
 
-/** Lean change per second from keys and buttons: full lean in ~0.15 s, so a
- *  tap gives a small correction and a hold a full one. */
-export const LEAN_RATE = 7;
+/** How the applied lean follows the keys: it eases toward the wanted lean
+ *  (about 63 % of the way in 1/LEAN_RESPONSE s) and never changes faster
+ *  than LEAN_MAX_RATE per second. Playtest: a straight linear ramp felt
+ *  twitchy, especially switching A ↔ D. */
+export const LEAN_RESPONSE = 8;
+export const LEAN_MAX_RATE = 5;
 
-/** Moves the applied lean toward the wanted lean at LEAN_RATE. */
+/** Moves the applied lean smoothly toward the wanted lean. */
 export function easeLean(current: number, target: number, dt: number): number {
-  const step = LEAN_RATE * dt;
-  if (Math.abs(target - current) <= step) return target;
-  return current + Math.sign(target - current) * step;
+  const want = (target - current) * (1 - Math.exp(-LEAN_RESPONSE * dt));
+  const cap = LEAN_MAX_RATE * dt;
+  const next = current + Math.max(-cap, Math.min(cap, want));
+  return Math.abs(target - next) < 0.01 ? target : next;
+}
+
+/** Two-finger trackpad swipes steer: this much sideways scroll (px) is a
+ *  full lean. Fingers moving right lean right (with macOS natural
+ *  scrolling that is a negative deltaX). */
+export const SWIPE_FULL = 140;
+/** A swipe keeps its lean this long (s) after the last scroll event. */
+export const SWIPE_HOLD = 0.12;
+
+/** Add one sideways scroll event to the swipe lean (-1..1). */
+export function swipeLean(current: number, deltaX: number): number {
+  return Math.max(-1, Math.min(1, current - deltaX / SWIPE_FULL));
+}
+
+/** Let a swipe lean fade once the scrolling stops. */
+export function swipeDecay(current: number, idle: number, dt: number) {
+  if (idle <= SWIPE_HOLD) return current;
+  const next = current * Math.exp(-dt * 10);
+  return Math.abs(next) < 0.02 ? 0 : next;
 }

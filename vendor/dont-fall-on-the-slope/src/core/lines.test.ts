@@ -10,6 +10,10 @@ describe("crashLine", () => {
       "crate",
       "bicycle",
       "tourist",
+      "rickshaw",
+      "herring-crates",
+      "sled",
+      "snowman",
     ])
       expect(crashLine(k)).not.toMatch(/an exhibit\./);
     expect(crashLine("pigeon")).toMatch(/an exhibit\./);
