@@ -12,7 +12,7 @@ import {
 } from "react";
 import type { PlacePose } from "@/contracts";
 import { useT } from "@/i18n";
-import { Cite, complete, deviceVoice, type KindProps } from "../kinds/shared";
+import { Cite, complete, type KindProps, narrator } from "../kinds/shared";
 import { Person, POSES, StageArt, ThingArt } from "./PlaceArt";
 import { placeScore, startPlace, stepPlace } from "./placeLogic";
 import p from "./play.module.css";
@@ -46,10 +46,10 @@ export function PlaceActivity({
 
   const speak = (i: number) => {
     const s = a.steps[i];
-    deviceVoice.speak(s.ask ? `${s.say} ${s.ask}` : s.say);
+    narrator.speak(a.id, s.id, s.ask ? `${s.say} ${s.ask}` : s.say);
   };
 
-  useEffect(() => () => deviceVoice.stop(), []);
+  useEffect(() => () => narrator.stop(), []);
 
   useEffect(() => {
     if (!st.finished || sent.current) return;
@@ -244,7 +244,7 @@ export function PlaceActivity({
             className="toggle"
             aria-pressed={voice}
             onClick={() => {
-              if (voice) deviceVoice.stop();
+              if (voice) narrator.stop();
               setVoice(!voice);
             }}
           >

@@ -114,3 +114,39 @@ export function useAiVoice(group: string | undefined) {
     [group, index],
   );
 }
+
+let narrating: HTMLAudioElement | null = null;
+
+/**
+ * Read one line aloud: the pre-generated AI owl voice
+ * (`/audio/voice/<group>/<lineId>.mp3`, scripts/audio/voices.ts) when it
+ * exists and the page is in English, else the device voice placeholder.
+ */
+export const narrator = {
+  speak(group: string, lineId: string, text: string) {
+    narrator.stop();
+    const fallback = () => deviceVoice.speak(text);
+    if (document.documentElement.lang === "ja") return fallback();
+    let p = voiceIndexes.get(group);
+    if (!p) {
+      p = fetch(`/audio/voice/${group}/index.json`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((j) => voiceIndexSchema.safeParse(j).data ?? null)
+        .catch(() => null);
+      voiceIndexes.set(group, p);
+    }
+    const audio = new Audio();
+    narrating = audio;
+    void p.then((index) => {
+      if (narrating !== audio) return;
+      if (!index?.lines[lineId]) return fallback();
+      audio.src = `/audio/voice/${group}/${lineId}.mp3`;
+      audio.play().catch(() => narrating === audio && fallback());
+    });
+  },
+  stop() {
+    narrating?.pause();
+    narrating = null;
+    deviceVoice.stop();
+  },
+};
