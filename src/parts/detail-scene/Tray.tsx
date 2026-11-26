@@ -334,6 +334,27 @@ export function Tray({
               </li>
             );
           })}
+          {/* This place's highlights, so games and timelines with no object
+              in the scene are visible in its own bar. */}
+          {content.highlights
+            .filter(
+              (h) =>
+                h.locationId === scene.locationId && h.open.kind !== "film",
+            )
+            .map((h) => (
+              <li key={h.id}>
+                <button
+                  type="button"
+                  className={`${t.card} ${t.heroCard}`}
+                  onClick={() =>
+                    emit({ type: "highlight.open", highlightId: h.id })
+                  }
+                >
+                  <Icon d={highlightIcon(h.icon)} size={20} />
+                  <span className={t.cardLabel}>{tx(h.title)}</span>
+                </button>
+              </li>
+            ))}
           {activities.length > 0 && (
             <li>
               <button
