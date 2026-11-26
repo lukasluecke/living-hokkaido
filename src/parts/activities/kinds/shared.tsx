@@ -8,7 +8,7 @@ import type {
   ResolvedClaim,
   VoiceIndex,
 } from "@/contracts";
-import { voiceIndexSchema } from "@/contracts";
+import { voiceDir, voiceIndexSchema } from "@/contracts";
 import { useEffect, useMemo, useState } from "react";
 
 export type KindProps<K extends ActivityKind> = {
@@ -80,38 +80,47 @@ export const deviceVoice = {
 
 const voiceIndexes = new Map<string, Promise<VoiceIndex | null>>();
 
+/** Index of one voice group in the page language (English or Japanese). */
+function loadVoiceIndex(group: string) {
+  const dir = voiceDir(group, document.documentElement.lang);
+  let p = voiceIndexes.get(dir);
+  if (!p) {
+    p = fetch(`${dir}/index.json`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => voiceIndexSchema.safeParse(j).data ?? null)
+      .catch(() => null);
+    voiceIndexes.set(dir, p);
+  }
+  return { dir, index: p };
+}
+
 /**
- * Pre-generated AI voice lines of one group (scripts/audio/voices.ts).
- * Null while loading, when the files are missing, or when the page is not
- * in English (the voices are English only).
+ * Pre-generated AI voice lines of one group (scripts/audio/voices.ts), in
+ * the page language. Null while loading or when the files are missing.
  */
 export function useAiVoice(group: string | undefined) {
-  const [index, setIndex] = useState<VoiceIndex | null>(null);
+  const [loaded, setLoaded] = useState<{
+    dir: string;
+    index: VoiceIndex;
+  } | null>(null);
   useEffect(() => {
-    if (!group || document.documentElement.lang === "ja") return;
+    if (!group) return;
     let live = true;
-    let p = voiceIndexes.get(group);
-    if (!p) {
-      p = fetch(`/audio/voice/${group}/index.json`)
-        .then((r) => (r.ok ? r.json() : null))
-        .then((j) => voiceIndexSchema.safeParse(j).data ?? null)
-        .catch(() => null);
-      voiceIndexes.set(group, p);
-    }
-    p.then((i) => live && setIndex(i));
+    const { dir, index } = loadVoiceIndex(group);
+    index.then((i) => live && setLoaded(i ? { dir, index: i } : null));
     return () => {
       live = false;
     };
   }, [group]);
   return useMemo(
     () =>
-      group && index
+      group && loaded
         ? {
-            index,
-            url: (lineId: string) => `/audio/voice/${group}/${lineId}.mp3`,
+            index: loaded.index,
+            url: (lineId: string) => `${loaded.dir}/${lineId}.mp3`,
           }
         : null,
-    [group, index],
+    [group, loaded],
   );
 }
 
@@ -119,28 +128,20 @@ let narrating: HTMLAudioElement | null = null;
 
 /**
  * Read one line aloud: the pre-generated AI owl voice
- * (`/audio/voice/<group>/<lineId>.mp3`, scripts/audio/voices.ts) when it
- * exists and the page is in English, else the device voice placeholder.
+ * (`voiceDir(group, lang)/<lineId>.mp3`, scripts/audio/voices.ts) when it
+ * exists in the page language, else the device voice placeholder.
  */
 export const narrator = {
   speak(group: string, lineId: string, text: string) {
     narrator.stop();
     const fallback = () => deviceVoice.speak(text);
-    if (document.documentElement.lang === "ja") return fallback();
-    let p = voiceIndexes.get(group);
-    if (!p) {
-      p = fetch(`/audio/voice/${group}/index.json`)
-        .then((r) => (r.ok ? r.json() : null))
-        .then((j) => voiceIndexSchema.safeParse(j).data ?? null)
-        .catch(() => null);
-      voiceIndexes.set(group, p);
-    }
+    const { dir, index: p } = loadVoiceIndex(group);
     const audio = new Audio();
     narrating = audio;
     void p.then((index) => {
       if (narrating !== audio) return;
       if (!index?.lines[lineId]) return fallback();
-      audio.src = `/audio/voice/${group}/${lineId}.mp3`;
+      audio.src = `${dir}/${lineId}.mp3`;
       audio.play().catch(() => narrating === audio && fallback());
     });
   },

@@ -1,0 +1,79 @@
+{
+  "voice": "aLbEsWOUStPIYvDVdp7K",
+  "model": "eleven_v3",
+  "lines": {
+    "intro": {
+      "hash": "32623595794f",
+      "duration": 10.8,
+      "words": [
+        0
+      ]
+    },
+    "deer": {
+      "hash": "3294b340858e",
+      "duration": 11.6,
+      "words": [
+        0
+      ]
+    },
+    "bear": {
+      "hash": "6f96673b6a24",
+      "duration": 6.48,
+      "words": [
+        0
+      ]
+    },
+    "hare": {
+      "hash": "74fc3248358a",
+      "duration": 11.04,
+      "words": [
+        0
+      ]
+    },
+    "salmon": {
+      "hash": "630825a7c26c",
+      "duration": 9.36,
+      "words": [
+        0
+      ]
+    },
+    "set-bow": {
+      "hash": "b5844defa95d",
+      "duration": 11.76,
+      "words": [
+        0
+      ]
+    },
+    "pelt": {
+      "hash": "cf59bdebfe7d",
+      "duration": 14.48,
+      "words": [
+        0
+      ]
+    },
+    "fish-owl": {
+      "hash": "87e705e37573",
+      "duration": 21.04,
+      "words": [
+        0,
+        1.02,
+        1.48,
+        13.1,
+        13.52
+      ]
+    },
+    "kamuy": {
+      "hash": "eac5d6d03715",
+      "duration": 17.36,
+      "words": [
+        0,
+        5.66,
+        6.08,
+        8.86,
+        9.28,
+        11.42,
+        11.84
+      ]
+    }
+  }
+}

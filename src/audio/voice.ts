@@ -1,19 +1,23 @@
 // Pre-generated AI voice lines (scripts/audio/voices.ts): the owl guide's
 // lines, read by an ElevenLabs voice. The owl is a fictional guide; the UI
-// labels these "AI voice". English only. Missing files fail quietly.
-import { type VoiceIndex, voiceIndexSchema } from "@/contracts";
+// labels these "AI voice". English, plus Japanese drafts in /audio/voice/ja.
+// Missing files fail quietly.
+import { type VoiceIndex, voiceDir, voiceIndexSchema } from "@/contracts";
 
 const indexes = new Map<string, Promise<VoiceIndex | null>>();
 let current: HTMLAudioElement | null = null;
 
+const pageLang = () => document.documentElement.lang;
+
 function loadIndex(group: string) {
-  let p = indexes.get(group);
+  const dir = voiceDir(group, pageLang());
+  let p = indexes.get(dir);
   if (!p) {
-    p = fetch(`/audio/voice/${group}/index.json`)
+    p = fetch(`${dir}/index.json`)
       .then((r) => (r.ok ? r.json() : null))
       .then((j) => voiceIndexSchema.safeParse(j).data ?? null)
       .catch(() => null);
-    indexes.set(group, p);
+    indexes.set(dir, p);
   }
   return p;
 }
@@ -34,11 +38,10 @@ export async function playVoiceLine(
   volume = 0.9,
 ): Promise<boolean> {
   if (typeof window === "undefined") return false;
-  if (document.documentElement.lang === "ja") return false;
   const index = await loadIndex(group);
   if (!index?.lines[lineId]) return false;
   stopVoiceLine();
-  const audio = new Audio(`/audio/voice/${group}/${lineId}.mp3`);
+  const audio = new Audio(`${voiceDir(group, pageLang())}/${lineId}.mp3`);
   audio.volume = volume;
   current = audio;
   try {

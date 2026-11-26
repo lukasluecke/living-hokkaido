@@ -1,0 +1,55 @@
+{
+  "voice": "aLbEsWOUStPIYvDVdp7K",
+  "model": "eleven_v3",
+  "lines": {
+    "m1": {
+      "hash": "d14aa069b502",
+      "duration": 5.28,
+      "words": [
+        0
+      ]
+    },
+    "m2": {
+      "hash": "45c5cd663652",
+      "duration": 6.4,
+      "words": [
+        0
+      ]
+    },
+    "v1": {
+      "hash": "969097b49eda",
+      "duration": 5.2,
+      "words": [
+        0
+      ]
+    },
+    "v2": {
+      "hash": "7fc9bde2f6fc",
+      "duration": 4.32,
+      "words": [
+        0
+      ]
+    },
+    "k1": {
+      "hash": "b05f9b4dd2e2",
+      "duration": 6.24,
+      "words": [
+        0
+      ]
+    },
+    "k2": {
+      "hash": "53e896350e68",
+      "duration": 7.2,
+      "words": [
+        0
+      ]
+    },
+    "k3": {
+      "hash": "f47e94805bf2",
+      "duration": 7.2,
+      "words": [
+        0
+      ]
+    }
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "voice": "aLbEsWOUStPIYvDVdp7K",
+  "model": "eleven_v3",
+  "lines": {
+    "w1": {
+      "hash": "d18163d173cb",
+      "duration": 5.04,
+      "words": [
+        0
+      ]
+    },
+    "w2": {
+      "hash": "2e6e05e43f2b",
+      "duration": 7.76,
+      "words": [
+        0,
+        4.86,
+        5.48
+      ]
+    },
+    "w3": {
+      "hash": "0a37a29dcbe2",
+      "duration": 12.32,
+      "words": [
+        0,
+        0.84
+      ]
+    },
+    "w4": {
+      "hash": "ec9836cf4622",
+      "duration": 7.28,
+      "words": [
+        0,
+        1.26,
+        1.84
+      ]
+    },
+    "r1": {
+      "hash": "6e335350e276",
+      "duration": 19.2,
+      "words": [
+        0,
+        0.52,
+        2.14,
+        2.64,
+        3.12,
+        9.02,
+        9.52,
+        12.04
+      ]
+    },
+    "r2": {
+      "hash": "c846a1d71681",
+      "duration": 12.32,
+      "words": [
+        0,
+        2.48,
+        3.12,
+        10.4,
+        10.78,
+        11.4
+      ]
+    },
+    "r3": {
+      "hash": "2d7d545c6fa2",
+      "duration": 3.6,
+      "words": [
+        0
+      ]
+    },
+    "t1": {
+      "hash": "3806455c2163",
+      "duration": 5.76,
+      "words": [
+        0
+      ]
+    },
+    "t2": {
+      "hash": "454e69522d19",
+      "duration": 10.8,
+      "words": [
+        0,
+        4.62,
+        5.08,
+        5.48
+      ]
+    },
+    "t3": {
+      "hash": "20d5665430cb",
+      "duration": 10.96,
+      "words": [
+        0
+      ]
+    },
+    "refrain": {
+      "hash": "009a31cbafbe",
+      "duration": 6.4,
+      "words": [
+        0,
+        0.92,
+        1.88,
+        3,
+        4.24,
+        5.56,
+        6
+      ]
+    }
+  }
+}

@@ -49,7 +49,7 @@ export function Story({
     : "";
   const words = useMemo(() => lineText.split(" "), [lineText]);
   const voice = a.narrator.voice;
-  // Pre-generated AI voice (English only); null until its index loads or
+  // Pre-generated AI voice (page language); null until its index loads or
   // when it is missing, then the story falls back to captions.
   const ai = useAiVoice(voice.kind === "ai-voice" ? voice.group : undefined);
   const [aiFailed, setAiFailed] = useState(false);

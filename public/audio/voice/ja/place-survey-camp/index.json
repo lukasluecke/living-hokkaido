@@ -1,0 +1,48 @@
+{
+  "voice": "aLbEsWOUStPIYvDVdp7K",
+  "model": "eleven_v3",
+  "lines": {
+    "intro": {
+      "hash": "1d347d543450",
+      "duration": 12.08,
+      "words": [
+        0
+      ]
+    },
+    "survey": {
+      "hash": "d0d605c4c9ca",
+      "duration": 21.2,
+      "words": [
+        0
+      ]
+    },
+    "carry": {
+      "hash": "44c2dd8b6987",
+      "duration": 17.52,
+      "words": [
+        0
+      ]
+    },
+    "cut": {
+      "hash": "b99e0887b441",
+      "duration": 15.76,
+      "words": [
+        0
+      ]
+    },
+    "guide": {
+      "hash": "4c9952682770",
+      "duration": 14.88,
+      "words": [
+        0
+      ]
+    },
+    "tent": {
+      "hash": "6a08a41fc935",
+      "duration": 11.84,
+      "words": [
+        0
+      ]
+    }
+  }
+}
