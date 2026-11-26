@@ -12,7 +12,13 @@
 // it from the R2 bucket. Public without a password (Lukas, 2026-11-26:
 // "skip the demo password"); written museum permission is still open
 // (docs/REVIEW.md). Set `gated: true` to put it behind the password again.
-import type { ActivityInput, KnowledgeEntry, Source, Vec3 } from "@/contracts";
+import type {
+  ActivityInput,
+  ArtifactInput,
+  KnowledgeEntry,
+  Source,
+  Vec3,
+} from "@/contracts";
 import ainuChild from "@vendor/sapporo-omusha/characters/1808/ainu-child.json";
 import ainuElder from "@vendor/sapporo-omusha/characters/1808/ainu-elder.json";
 import ainuWoman from "@vendor/sapporo-omusha/characters/1808/ainu-woman.json";
@@ -41,6 +47,15 @@ const panel = (id: string, title: string, photo: string): Source => ({
 });
 
 const sources: Source[] = [
+  {
+    id: "omusha-case-sketch",
+    title: "Living Hokkaido · display case sketch",
+    kind: "document",
+    rights: "approved",
+    consent: "granted",
+    attribution: "Living Hokkaido team, original sketch geometry (MIT)",
+    placeholder: false,
+  },
   panel(
     "hm-panel-omusha-diorama",
     "ジオラマの中をのぞいてみよう (Look inside the diorama)",
@@ -113,6 +128,11 @@ export const omushaKnowledge: KnowledgeEntry = {
       "omusha-crowd",
       "Many Ainu people sit on the right, among piles of rice bales and sake barrels. These goods are handed out after the ceremony, and a feast follows.",
       ["hm-panel-omusha-diorama", "paragraph 2, sentences 3–4 (photo 7835)"],
+    ),
+    c(
+      "omusha-case",
+      "The glass case in this room is a sketch made for this demo. The shapes inside only mark where the diorama's parts are; they are not the museum's figures.",
+      ["omusha-case-sketch", "src/parts/shared/areaObjects.ts, omushaCase"],
     ),
     c(
       "omusha-capture",
@@ -206,10 +226,44 @@ const spots = [
   }),
 ];
 
+/** The case in the memory cabin: click it to find the diorama. */
+export const omushaCase: ArtifactInput = {
+  id: "omusha-case",
+  knowledgeId: K,
+  title: "The Omusha diorama",
+  label: "A museum case: look closer",
+  summaryClaimId: "omusha-1808",
+  claimIds: ["omusha-1808", "omusha-display", "omusha-capture", "omusha-case"],
+  model: {
+    representation: "illustrative",
+    license: "MIT (original)",
+    rights: "approved",
+    consent: "not-required",
+    attribution: "Living Hokkaido team, original sketch geometry",
+    assetId: "omusha-case-sketch",
+    source: { kind: "procedural", builder: "omusha-case" },
+    nodes: ["plinth", "glass", "building"],
+  },
+  display: { restRotation: [0.35, 0.4, 0], inspectScale: 0.9, pitchLimit: 0.8 },
+  hotspots: [
+    {
+      id: "about-model",
+      position: [0.3, 0.95, 0.2],
+      normal: [0, 0.8, 0.6],
+      node: "glass",
+      title: "About this case",
+      claimId: "omusha-case",
+      kind: "disclaimer",
+    },
+  ],
+  activityIds: ["omusha-look"],
+};
+
 export const omushaLook: ActivityInput = {
   kind: "splat-look",
   id: "omusha-look",
   knowledgeId: K,
+  artifactId: "omusha-case",
   title: "The Omusha diorama, up close",
   claimIds: omushaKnowledge.claims.map((x) => x.id),
   prompt:
