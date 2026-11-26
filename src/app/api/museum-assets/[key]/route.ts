@@ -12,7 +12,9 @@ export const dynamic = "force-dynamic";
 const PUBLIC_KEYS = new Set([
   ...PUBLIC_MEDIA,
   ...defaultPack.activities.flatMap((a) =>
-    a.kind === "splat-look" && !a.asset.gated ? [a.asset.key] : [],
+    a.kind === "splat-look" && !a.asset.gated
+      ? [a.asset.key, ...(a.asset.lightKey ? [a.asset.lightKey] : [])]
+      : [],
   ),
 ]);
 

@@ -643,6 +643,12 @@ export const splatLookActivitySchema = z
     asset: z.object({
       /** File name in the museum asset store (`/api/museum-assets/<key>`). */
       key: z.string().regex(/^[a-z0-9-]+\.(sog|spz)$/),
+      /** Lighter file for iPhone/iPad (fewer splats, fewer SH bands). If it
+       * is missing on the server, the stage loads `key`. */
+      lightKey: z
+        .string()
+        .regex(/^[a-z0-9-]+\.(sog|spz)$/)
+        .optional(),
       /** What the capture records, shown on the stage bar. */
       label: z.string().min(1),
       /** True while the file is only for people with the demo password. */

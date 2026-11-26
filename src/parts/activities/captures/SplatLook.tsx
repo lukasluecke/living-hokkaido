@@ -196,6 +196,9 @@ function Stage({
   const pickRef = useRef(onPick);
   pickRef.current = onPick;
   const url = `/api/museum-assets/${a.asset.key}`;
+  const lightUrl = a.asset.lightKey
+    ? `/api/museum-assets/${a.asset.lightKey}`
+    : null;
 
   // Esc closes the stage, not the activity (same as GameStage).
   useEffect(() => {
@@ -222,6 +225,14 @@ function Stage({
       const next = phaseForStatus(status);
       if (next !== "ready") return setPhase(next);
       if (ios && !tryIOS) return setPhase("ask-ios");
+      // iPhone/iPad: the lighter file, if the server has it.
+      const src =
+        ios && lightUrl
+          ? await fetch(lightUrl, { method: "HEAD" })
+              .then((r) => (r.ok ? lightUrl : url))
+              .catch(() => url)
+          : url;
+      if (!live) return;
       const mod = await import("./splatViewer");
       if (!live) return;
       if (!prefs.webgl || !mod.canRenderSplats() || !host.current)
@@ -229,7 +240,7 @@ function Stage({
       setPhase("loading");
       try {
         v = await mod.mountSplatViewer(host.current, {
-          url,
+          url: src,
           flip: a.asset.flip,
           view: a.view,
           spots: a.spots,
@@ -317,9 +328,8 @@ function Stage({
               >
                 <strong>3D capture on iPhone and iPad</strong>
                 <span>
-                  The capture is large (32 MB). On some iPhones and iPads,
-                  Safari closes the page when it loads. Every spot also works in
-                  the list.
+                  The capture is large. On some iPhones and iPads, Safari closes
+                  the page when it loads. Every spot also works in the list.
                 </span>
                 <button type="submit">Try the 3D capture</button>
               </form>

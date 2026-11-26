@@ -11,6 +11,7 @@
 /** Keys served here without a password. Keep in sync with the pack. */
 export const PUBLIC_MEDIA: ReadonlySet<string> = new Set([
   "omusha.sog",
+  "omusha-mobile.sog",
   "intro.mp4",
   "intro.webm",
   // Story film for the Listening grove (content/bark-to-cloth/films.ts).
