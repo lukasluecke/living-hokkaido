@@ -363,3 +363,44 @@
     stroke-dashoffset: -18;
   }
 }
+/* Quiz: the "Learn first" note from the cited claims, shown before the question. */
+.lesson {
+  background: color-mix(in srgb, var(--lh-gold) 12%, var(--lh-paper));
+  border: 2px solid var(--lh-paper-edge);
+  border-radius: 12px;
+  padding: 6px 14px;
+  margin: 4px 0 12px;
+  animation: rise 220ms ease-out;
+}
+.lessonHead {
+  margin: 6px 0 2px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--lh-ink-soft);
+}
+.lessonList {
+  margin: 6px 0;
+  padding-left: 20px;
+}
+.lessonList li {
+  margin: 6px 0;
+}
+.lessonAgain {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+.lessonAgain summary {
+  cursor: pointer;
+  color: var(--lh-ink-soft);
+}
+.lessonAgain[open] {
+  background: color-mix(in srgb, var(--lh-gold) 12%, var(--lh-paper));
+  border-radius: 10px;
+  padding: 4px 10px;
+}
+.lessonAgain summary:focus-visible {
+  outline: 3px solid var(--lh-gold);
+  outline-offset: 2px;
+}

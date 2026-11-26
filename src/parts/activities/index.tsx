@@ -101,13 +101,19 @@ export function ActivityPart({
         {activity.title}
       </h2>
       {activity.kind === "quiz" && (
-        <Quiz a={activity} title={activity.title} claims={claims} emit={emit} />
+        <Quiz
+          key={activity.id}
+          a={activity}
+          title={activity.title}
+          claims={claims}
+          emit={emit}
+        />
       )}
       {activity.kind === "weave" && (
         <Weave a={activity} claims={claims} emit={emit} />
       )}
       {activity.kind === "sequence" && (
-        <Sequence a={activity} claims={claims} emit={emit} />
+        <Sequence key={activity.id} a={activity} claims={claims} emit={emit} />
       )}
       {activity.kind === "story" && (
         <Story activity={activity} claims={claims} prefs={prefs} emit={emit} />

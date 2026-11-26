@@ -82,6 +82,13 @@ export const jaUi: Record<string, string> = {
   "By kind": "種類別",
   "By place": "場所別",
   "Choose one answer.": "答えをひとつ選ぼう。",
+  "Learn first": "まず読もう",
+  "I'm ready: ask me": "読んだよ、問題へ",
+  "Read the note again": "メモをもう一度読む",
+  "Not this one yet. Read the note again and try another step.":
+    "それはまだです。メモをもう一度読んで、ほかの手順を選んでみよう。",
+  "Not quite. Read the note again and try another one.":
+    "おしい。メモをもう一度読んで、ほかのものを選んでみよう。",
   Claim: "記述",
   "Close (Esc)": "閉じる (Esc)",
   "Close Try here": "「ここでやってみる」を閉じる",

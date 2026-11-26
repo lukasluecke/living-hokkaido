@@ -48,3 +48,42 @@ export function quizScore(wrongTries: number, options: number): number {
   if (options <= 1) return 1;
   return Math.max(0, 1 - wrongTries / (options - 1));
 }
+
+/**
+ * What the visitor reads before a quiz: the text of the claims the quiz
+ * cites, in order, once each. Every quiz answer must follow from these lines,
+ * so the visitor is taught first and then asked (Lukas, 2026-11-26).
+ */
+export function quizLesson(
+  claimIds: readonly string[],
+  claims: Readonly<Record<string, { claim: { text: string } } | undefined>>,
+): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const id of claimIds) {
+    const text = claims[id]?.claim.text.trim();
+    if (!text || seen.has(text)) continue;
+    seen.add(text);
+    out.push(text);
+  }
+  return out;
+}
+
+/**
+ * The note before an order task: each step's claim in the right order, so
+ * the order can be learned first, then the activity's other claims.
+ */
+export function sequenceLesson(
+  a: {
+    claimIds: readonly string[];
+    order: readonly string[];
+    steps: readonly { id: string; claimId: string }[];
+  },
+  claims: Readonly<Record<string, { claim: { text: string } } | undefined>>,
+): string[] {
+  const stepClaims = a.order.flatMap((id) => {
+    const st = a.steps.find((x) => x.id === id);
+    return st ? [st.claimId] : [];
+  });
+  return quizLesson([...stepClaims, ...a.claimIds], claims);
+}

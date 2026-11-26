@@ -159,3 +159,63 @@ test("pluck: explore every string, then play the tab in order", () => {
     "done",
   );
 });
+
+test("every quiz teaches first: its cited claims give a note to read", async () => {
+  const { quizLesson } = await import("@/parts/activities/logic");
+  const { barkToClothPack: pack } = await import("@/content/bark-to-cloth");
+  const { resolveClaim } = await import("@/contracts");
+  for (const a of pack.activities) {
+    if (a.kind !== "quiz") continue;
+    const claims = Object.fromEntries(
+      a.claimIds.map((id) => [
+        id,
+        resolveClaim(pack, a.knowledgeId, id) ?? undefined,
+      ]),
+    );
+    const lesson = quizLesson(a.claimIds, claims);
+    assert.ok(lesson.length > 0, `${a.id} has no note to learn from`);
+  }
+});
+
+test("quiz note: claim text in order, once each, missing claims skipped", async () => {
+  const { quizLesson } = await import("@/parts/activities/logic");
+  const c = (text: string) => ({ claim: { text } });
+  assert.deepEqual(
+    quizLesson(["a", "b", "x", "c"], {
+      a: c("One."),
+      b: c(" Two. "),
+      c: c("One."),
+    }),
+    ["One.", "Two."],
+  );
+});
+
+test("every order task teaches first: step claims in order, then the rest", async () => {
+  const { sequenceLesson } = await import("@/parts/activities/logic");
+  const { barkToClothPack: pack } = await import("@/content/bark-to-cloth");
+  const { resolveClaim } = await import("@/contracts");
+  for (const a of pack.activities) {
+    if (a.kind !== "sequence") continue;
+    const ids = [...a.claimIds, ...a.steps.map((x) => x.claimId)];
+    const claims = Object.fromEntries(
+      ids.map((id) => [id, resolveClaim(pack, a.knowledgeId, id) ?? undefined]),
+    );
+    const lesson = sequenceLesson(a, claims);
+    assert.ok(lesson.length > 0, `${a.id} has no note to learn from`);
+  }
+  const c = (text: string) => ({ claim: { text } });
+  assert.deepEqual(
+    sequenceLesson(
+      {
+        claimIds: ["k"],
+        order: ["b", "a"],
+        steps: [
+          { id: "a", claimId: "ca" },
+          { id: "b", claimId: "cb" },
+        ],
+      },
+      { k: c("Key."), ca: c("A."), cb: c("B.") },
+    ),
+    ["B.", "A.", "Key."],
+  );
+});
