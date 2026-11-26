@@ -11,6 +11,7 @@ import {
 import { artifactSchema } from "./artifact";
 import { askContentSchema } from "./ask";
 import { guideLineSchema } from "./guide";
+import { highlightSchema } from "./highlight";
 import { journalStateSchema, stampSchema, type JournalState } from "./journal";
 import {
   knowledgeEntrySchema,
@@ -38,6 +39,9 @@ export const contentPackSchema = z.object({
   memories: z.array(voiceMemorySchema).default([]),
   /** "Over time" timelines (additive; old packs parse with none). */
   timelines: z.array(timelineSchema).default([]),
+  /** Signature experiences, shown first and toured by the owl, in order
+   *  (additive; default none). */
+  highlights: z.array(highlightSchema).default([]),
   /** "Ask the owl" box: example questions (additive; default none). */
   ask: askContentSchema.default({
     suggestions: [],
@@ -231,6 +235,11 @@ export function validateContentPack(input: unknown): string[] {
     errors,
   );
   dupes(
+    "highlight",
+    p.highlights.map((h) => h.id),
+    errors,
+  );
+  dupes(
     "guide line",
     p.guide.map((g) => g.id),
     errors,
@@ -273,6 +282,32 @@ export function validateContentPack(input: unknown): string[] {
     for (const t of s.timelineIds)
       if (!p.timelines.some((x) => x.id === t))
         errors.push(`scene ${s.id}: unknown timeline "${t}"`);
+  }
+  for (const h of p.highlights) {
+    const loc = p.island.locations.find((l) => l.id === h.locationId);
+    if (!loc) {
+      errors.push(`highlight ${h.id}: unknown location "${h.locationId}"`);
+      continue;
+    }
+    const here = p.scenes.filter((s) => s.locationId === loc.id);
+    if (
+      h.open.kind === "activity" &&
+      !here.some((s) =>
+        s.activityIds.includes((h.open as { activityId: string }).activityId),
+      )
+    )
+      errors.push(
+        `highlight ${h.id}: activity "${h.open.activityId}" not offered at ${loc.id}`,
+      );
+    if (
+      h.open.kind === "timeline" &&
+      !p.timelines.some(
+        (t) => t.id === (h.open as { timelineId: string }).timelineId,
+      )
+    )
+      errors.push(`highlight ${h.id}: unknown timeline "${h.open.timelineId}"`);
+    if (h.open.kind === "film" && !here.some((s) => s.film))
+      errors.push(`highlight ${h.id}: no film at ${loc.id}`);
   }
   for (const a of p.artifacts) {
     visible(a.knowledgeId, `artifact ${a.id}`);

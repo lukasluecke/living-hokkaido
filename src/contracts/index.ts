@@ -7,6 +7,7 @@ export * from "./content";
 export * from "./events";
 export * from "./experience";
 export * from "./guide";
+export * from "./highlight";
 export * from "./ids";
 export * from "./journal";
 export * from "./knowledge";

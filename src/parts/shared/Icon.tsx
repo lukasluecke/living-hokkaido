@@ -35,6 +35,12 @@ export const KIND_ICON: Record<string, string> = {
   "slope-run": "M3 20h18M3 20 14 8l7 12M7 13l4 2",
   // A small house.
   place: "M4 11l8-6 8 6v9H4zM10 20v-5h4v5",
+  // Cube with a view line (a 3D capture to look around in).
+  "splat-look": "M12 3l8 4.5v9L12 21l-8-4.5v-9zM4 7.5l8 4.5 8-4.5M12 12v9",
+  // Film frame with a play mark.
+  film: "M4 5h16v14H4zM4 9h16M4 15h16M10.5 10.5v3l2.5-1.5z",
+  // Hourglass.
+  timeline: "M7 3h10M7 21h10M8 3c0 5 8 5 8 9s-8 4-8 9M16 3c0 5-8 5-8 9s8 4 8 9",
 };
 
 /** Route and action glyphs. */
@@ -49,6 +55,7 @@ export const UI_ICON = {
   go: "M5 12h14M13 6l6 6-6 6",
   back: "M15 6l-6 6 6 6",
   check: "M5 12.5l4.5 4.5L19 7",
+  star: "M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z",
   info: "M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18zM12 11v6M12 7.5h.01",
 } as const;
 
@@ -56,6 +63,11 @@ export type UiIconId = keyof typeof UI_ICON;
 
 export function kindIconPath(kind: string): string {
   return KIND_ICON[kind] ?? UI_ICON.try;
+}
+
+/** Icon for a highlight: its `icon` kind, or a star. */
+export function highlightIcon(icon: string | undefined): string {
+  return (icon && KIND_ICON[icon]) || UI_ICON.star;
 }
 
 /** A decorative line icon. The visible word or an aria-label names it. */

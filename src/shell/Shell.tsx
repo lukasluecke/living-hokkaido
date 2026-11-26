@@ -6,6 +6,7 @@ import {
   type ContentPack,
   type Emit,
   EMPTY_JOURNAL,
+  highlightDone,
   type ExperienceEvent,
   type ExperienceState,
   JOURNAL_STORAGE_KEY,
@@ -32,7 +33,12 @@ import {
 import { Hud } from "./Hud";
 import { record } from "./progress";
 import { parts, preloadParts } from "./registry";
-import { Icon, kindIconPath, UI_ICON } from "@/parts/shared/Icon";
+import {
+  highlightIcon,
+  Icon,
+  kindIconPath,
+  UI_ICON,
+} from "@/parts/shared/Icon";
 import { route } from "./route";
 import s from "./Shell.module.css";
 import { SidePanel } from "./SidePanel";
@@ -305,16 +311,38 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
           pack.activities.find((a) => a.id === nextEvent.activityId)?.kind ??
             "",
         )
-      : nextEvent?.type === "artifact.focus"
-        ? UI_ICON.look
-        : nextEvent?.type === "journal.open"
-          ? UI_ICON.journal
-          : UI_ICON.place;
+      : nextEvent?.type === "highlight.open"
+        ? highlightIcon(
+            pack.highlights.find((h) => h.id === nextEvent.highlightId)?.icon,
+          )
+        : nextEvent?.type === "artifact.focus"
+          ? UI_ICON.look
+          : nextEvent?.type === "journal.open"
+            ? UI_ICON.journal
+            : UI_ICON.place;
+  // Owl tour: the owl says the next highlight's line; the first island
+  // visit keeps the welcome.
+  const tourHighlight =
+    nextEvent?.type === "highlight.open"
+      ? pack.highlights.find((h) => h.id === nextEvent.highlightId)
+      : undefined;
+  const owlLine =
+    tourHighlight?.owl &&
+    (state.view !== "island" || journal.visited.length > 0)
+      ? tourHighlight.owl
+      : guideLine;
   const ink = seasonInk[SEASON_IDS.indexOf(seasonAt(state.season.value))];
 
   const stage =
     state.view === "island" || state.view === "travel" ? (
-      <Island {...ctx} view={state.view} locationId={state.locationId} />
+      <Island
+        {...ctx}
+        view={state.view}
+        locationId={state.locationId}
+        doneHighlightIds={pack.highlights
+          .filter((h) => highlightDone(h, journal))
+          .map((h) => h.id)}
+      />
     ) : scene ? (
       <Scene
         {...ctx}
@@ -355,18 +383,18 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
               : undefined
           }
         />
-        {guideLine && state.view !== "activity" && !state.overlay && (
+        {owlLine && state.view !== "activity" && !state.overlay && (
           <section className={s.owl} aria-label={t("Owl guide")}>
             <OwlMark />
             <div className={s.bubble}>
               <p
-                key={guideLine}
+                key={owlLine}
                 className={s.line}
                 aria-live="polite"
                 data-still={state.prefs.reducedMotion || undefined}
               >
                 <span className={s.visuallyHidden}>{t("Owl: ")}</span>
-                {t(guideLine)}
+                {t(owlLine)}
               </p>
               {next && (
                 <button

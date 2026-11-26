@@ -38,6 +38,8 @@ export type ExperienceState = {
   reveal: { knowledgeId: string; claimId?: string; artifactId?: string } | null;
   /** Open "Over time" timeline (overlay "timeline", or under a reveal). */
   timelineId?: string | null;
+  /** Highlight to open when the owl lands (set by highlight.open). */
+  pendingHighlightId?: string | null;
   season: SeasonState;
   prefs: Prefs;
 };

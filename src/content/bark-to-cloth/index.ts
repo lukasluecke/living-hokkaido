@@ -11,6 +11,7 @@ import { owlFilm } from "./films";
 import { withGenerated } from "./generated-models";
 import { gameActivities, gameActivityIdsByScene, gameKnowledge } from "./games";
 import { guide } from "./guide";
+import { highlights } from "./highlights";
 import { locations, overview, owlHome } from "./island";
 import { stamps } from "./journal";
 import { barkToCloth } from "./knowledge";
@@ -64,6 +65,7 @@ export const barkToClothRaw = {
   ],
   stamps,
   guide,
+  highlights,
   memories,
   timelines: [withEraClips(houseTimeline)],
   // "Ask the owl" example questions, by where the visitor is. Questions
