@@ -77,11 +77,13 @@ for. Full prompts: project file generated-assets/PROMPTS-3.md.
 
 | era-1-pit-night-v3.mp4 | era "pit-dwellings" (replaces era-1-pit.mp4) | 437321759482509 | Night, thousands of years ago, at a river mouth in Hokkaido: a small settlement of square pit dwellings … no fences, no rails, no paths. Silhouettes of two people sit by an outdoor fire. |
 | era-4-meiji-v3.mp4 | era "meiji" | 437321753497556 | Dusk in the 1880s, before electricity or telegraph lines: … a person in plain late-19th-century work clothes walks along the dirt road. Empty sky with no poles and no lines. |
+| era-3-cise-v3.mp4 | era "cise-and-kotan" | 437322509934574 | Ground-level camera passes under one small raised storehouse on four wooden posts towards a single thatched house at dusk, smoke through the roof hole, a person in a plain long robe in the lit doorway; no fences, carts, metal or chimneys. (Flaw: the house reads as a log cabin, not grass and bark.) |
 
 Round 3b retries put the negatives inside the main prompt text. Not shipped:
 era-4-meiji-v3b 437321756421632 (good backup, fisheye edges), era-1-pit-night-v3b
-437321762500661 (utility poles), era-3-cise v3a–v3d 437321744649423,
-437321748162825, 437322099274657, 437322104186754 (fences, wires, metal
+437321762500661 (utility poles), era-3-cise v3a–v3f and v3h 437321744649423,
+437321748162825, 437322099274657, 437322104186754, 437322503611301,
+437322506699680, 437322512751544 (fences, wires, poles, metal or brick
 chimneys, a cart).
 
 Not shipped: era-3-cise-v2 437320679580883 (overhead wires, fences, metal
