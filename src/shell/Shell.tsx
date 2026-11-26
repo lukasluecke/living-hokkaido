@@ -157,9 +157,9 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
     const tick = (now: number) => {
       const k = Math.min(1, Math.max(0, (now - t0 - DELAY) / LENGTH));
       if (k >= 1) return skip();
-      // About 20 updates a second (the Play clock uses 10), eased in and
-      // out so each season holds a moment.
-      if (now - last > 50) {
+      // 10 updates a second, like the Play clock (each one re-renders the
+      // scene's seasonal look), eased in and out so each season holds.
+      if (now - last > 100) {
         last = now;
         setValue(WINTER * (k * k * (3 - 2 * k)));
       }

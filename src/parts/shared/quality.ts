@@ -67,13 +67,17 @@ export type MonitorOptions = {
   maxGapMs: number;
 };
 
+// Tuned after "the island looks worse" (Lukas): laptops dropped a tier
+// during the first seconds (shader compile, model loads, the 3.6 s intro
+// season timelapse). The warm-up now covers the intro, a step needs three
+// slow windows in a row, and only under 32 fps.
 export const MONITOR: MonitorOptions = {
-  warmupMs: 2500,
-  rewarmMs: 1000,
+  warmupMs: 6000,
+  rewarmMs: 1500,
   windowMs: 1500,
-  minFps: 40,
-  veryLowFps: 20,
-  slowWindows: 2,
+  minFps: 32,
+  veryLowFps: 15,
+  slowWindows: 3,
   maxGapMs: 2000,
 };
 

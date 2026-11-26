@@ -31,7 +31,7 @@ test("a 60 fps canvas never steps down", () => {
   assert.equal(run(createMonitor(), 1000 / 60, 60_000), 0);
 });
 
-test("a 30 fps canvas steps down one tier after warm-up and two slow windows", () => {
+test("a 30 fps canvas steps down one tier after warm-up and the slow windows", () => {
   const m = createMonitor();
   const until = MONITOR.warmupMs + MONITOR.windowMs * MONITOR.slowWindows + 100;
   assert.equal(run(m, 1000 / 30, MONITOR.warmupMs + MONITOR.windowMs), 0);
