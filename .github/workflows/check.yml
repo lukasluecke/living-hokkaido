@@ -1,5 +1,9 @@
 name: Check
-on: [push, pull_request]
+# Paused (Lukas, 2026-11-26): Actions minutes ran out too fast. Run
+# `npm run check` locally before each merge. To turn CI back on, set
+#   on: [push, pull_request]
+# again. It can still be started by hand from the Actions tab.
+on: [workflow_dispatch]
 permissions:
   contents: read
 jobs:
