@@ -183,7 +183,8 @@ for i, (k, at) in enumerate(voice):
 amix = "".join(f"[a{i}]" for i in range(len(voice))) + f"amix=inputs={len(voice)}:normalize=0[aout]"
 
 out = OUT / "present.mp4"
-sh("ffmpeg", "-loglevel", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(OUT / "bg.txt"), "-i", str(phone), *ins,
+sh("ffmpeg", "-loglevel", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(OUT / "bg.txt"), "-vf", f"fps={FPS},format=yuv420p", "-c:v", "libx264", "-preset", "veryfast", str(OUT / "bg.mp4"))
+sh("ffmpeg", "-loglevel", "error", "-y", "-i", str(OUT / "bg.mp4"), "-i", str(phone), *ins,
    "-filter_complex",
    f"[0:v]fps={FPS},format=yuv420p[bg];[1:v]scale=452:978[ph];"
    f"[bg][ph]overlay=170:51:shortest=1[v];" + ";".join(flt) + ";" + amix,

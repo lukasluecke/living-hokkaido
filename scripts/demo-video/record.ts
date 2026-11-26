@@ -162,7 +162,7 @@ let server: ChildProcess | null = null;
 
 async function isUp(url: string) {
   try {
-    const r = await fetch(url, { signal: AbortSignal.timeout(2000) });
+    const r = await fetch(url, { signal: AbortSignal.timeout(15000) });
     return r.status < 500;
   } catch {
     return false;
