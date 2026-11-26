@@ -11,6 +11,7 @@ import { useT } from "@/i18n";
 import type { KindProps } from "../kinds/shared";
 import g from "./games.module.css";
 import { deferMount, GameStage, type MountGame } from "./GameStage";
+import { SHOW_DISCLAIMERS } from "@/design/disclaimers";
 
 export function SlopeRunActivity({
   activity: a,
@@ -70,7 +71,7 @@ export function SlopeRunActivity({
       prompt={a.prompt}
       claimIds={a.claimIds}
       claims={claims}
-      labels={a.illustrative ? ["Illustrative street"] : []}
+      labels={SHOW_DISCLAIMERS && a.illustrative ? ["Illustrative street"] : []}
       completion={a.completion}
       done={done}
       emit={report}

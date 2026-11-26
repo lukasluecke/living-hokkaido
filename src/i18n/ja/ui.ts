@@ -7,6 +7,8 @@ export const jaUi: Record<string, string> = {
   "Draft translation": "翻訳は下書き",
   "Draft translation note":
     "日本語の文は機械翻訳の下書きです。まだ人が確認していません。",
+  "Hackathon demo. Some models, films, voices and texts are AI-assisted or illustrative, and a curator has not checked all of them yet.":
+    "ハッカソンのデモです。一部のモデル、映像、声、文章はAIを使って作ったもの、または説明のためのもので、まだすべてを学芸員が確認してはいません。",
   "Your route": "あなたの道のり",
   ", done": "、済み",
   Island: "島",

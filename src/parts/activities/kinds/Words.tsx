@@ -9,6 +9,7 @@ import { useT } from "@/i18n";
 import { ObjectIcon } from "./icons";
 import { Cite, complete, deviceVoice, type KindProps } from "./shared";
 import k from "./kinds.module.css";
+import { SHOW_DISCLAIMERS } from "@/design/disclaimers";
 
 /** Stable shuffle so the match columns differ but do not jump on re-render. */
 const shuffled = <T,>(xs: T[]) =>
@@ -80,7 +81,7 @@ export function Words({ activity: a, claims, emit }: KindProps<"words">) {
                 <ObjectIcon id={t.artifactId} />
                 <p className="term" lang={t.lang}>
                   {t.text}
-                  {!termReviewed(t.review) && (
+                  {SHOW_DISCLAIMERS && !termReviewed(t.review) && (
                     <span className="draft">{tr("Draft")}</span>
                   )}
                 </p>
@@ -160,7 +161,9 @@ export function Words({ activity: a, claims, emit }: KindProps<"words">) {
             </div>
             <p className="feedback" aria-live="polite">
               {matched.size === a.terms.length
-                ? tr("All matched. Illustrative shapes, not museum objects.")
+                ? SHOW_DISCLAIMERS
+                  ? tr("All matched. Illustrative shapes, not museum objects.")
+                  : tr("All matched.")
                 : note ||
                   (pick
                     ? tr("Now pick the object.")

@@ -16,6 +16,7 @@ import { Cite, complete, deviceVoice, type KindProps } from "../kinds/shared";
 import { Person, POSES, StageArt, ThingArt } from "./PlaceArt";
 import { placeScore, startPlace, stepPlace } from "./placeLogic";
 import p from "./play.module.css";
+import { SHOW_DISCLAIMERS } from "@/design/disclaimers";
 
 export function PlaceActivity({
   activity: a,
@@ -322,11 +323,13 @@ export function PlaceActivity({
             </button>
           )}
         </div>
-        <p className="muted small">
-          {tr(
-            "Device voice · placeholder. Figures and scenes are illustrative sketches after museum dioramas.",
-          )}
-        </p>
+        {SHOW_DISCLAIMERS && (
+          <p className="muted small">
+            {tr(
+              "Device voice · placeholder. Figures and scenes are illustrative sketches after museum dioramas.",
+            )}
+          </p>
+        )}
         {st.finished && (
           <div className="recap">
             <p>

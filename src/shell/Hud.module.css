@@ -356,3 +356,14 @@ li:not([data-status="now"]) .stationLabel {
     white-space: nowrap;
   }
 }
+
+/* The one global demo note (src/design/disclaimers.ts). */
+.about {
+  max-width: 260px;
+  margin: 6px 0 0;
+  padding: 8px 6px 2px;
+  border-top: 1px solid var(--fl-stock2);
+  font-size: 11px;
+  line-height: 1.4;
+  opacity: 0.75;
+}

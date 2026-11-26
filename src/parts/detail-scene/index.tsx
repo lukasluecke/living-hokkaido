@@ -14,6 +14,7 @@ import c from "./Scene.module.css";
 import t from "./Tray.module.css";
 import { groupActivities, kindCaption } from "../shared/activityGroups";
 import { roomActivities, Tray } from "./Tray";
+import { showModelLabels } from "@/design/disclaimers";
 
 function useKeys({ scene, emit }: DetailScenePartProps) {
   useEffect(() => {
@@ -145,7 +146,7 @@ export function DetailScenePart(props: DetailScenePartProps) {
             key={scene.id}
             clip={scene.clip}
             reducedMotion={prefs.reducedMotion}
-            hideLabels={prefs.hideModelLabels}
+            hideLabels={!showModelLabels(prefs)}
           />
         </div>
       )}

@@ -18,6 +18,7 @@ import { Icon, KindIcon, UI_ICON } from "../shared/Icon";
 import { kindLabel, primaryActivityId } from "./kinds";
 import { Memories } from "./Memories";
 import { Viewer3D } from "./Viewer3D";
+import { SHOW_DISCLAIMERS, showModelLabels } from "@/design/disclaimers";
 
 export function ArtifactViewer({
   artifact,
@@ -66,7 +67,7 @@ export function ArtifactViewer({
   const spots = factHotspots(artifact);
   const generated = showsGenerated(artifact, prefs);
   // Generated model: its own "About this model" note replaces the sketch note.
-  const labels = !prefs.hideModelLabels;
+  const labels = showModelLabels(prefs);
   const notes = !labels
     ? []
     : generated && artifact.generated
@@ -89,15 +90,16 @@ export function ArtifactViewer({
               />
             </span>
           )}
-          {summary && (
-            <span
-              className={
-                summary.presentation === "approved" ? c.chip : c.chipDraft
-              }
-            >
-              <PresentationBadge value={summary.presentation} />
-            </span>
-          )}
+          {summary &&
+            (SHOW_DISCLAIMERS || summary.presentation === "approved") && (
+              <span
+                className={
+                  summary.presentation === "approved" ? c.chip : c.chipDraft
+                }
+              >
+                <PresentationBadge value={summary.presentation} />
+              </span>
+            )}
           <button
             type="button"
             className={c.how}
@@ -143,14 +145,16 @@ export function ArtifactViewer({
             ))}
           </fieldset>
         )}
-        <button
-          type="button"
-          aria-pressed={labels}
-          className={c.modelOption}
-          onClick={() => emit({ type: "models.labels", hidden: labels })}
-        >
-          {t("Model labels")}
-        </button>
+        {SHOW_DISCLAIMERS && (
+          <button
+            type="button"
+            aria-pressed={labels}
+            className={c.modelOption}
+            onClick={() => emit({ type: "models.labels", hidden: labels })}
+          >
+            {t("Model labels")}
+          </button>
+        )}
       </div>
 
       {summary && <p className={c.summary}>{summary.claim.text}</p>}
