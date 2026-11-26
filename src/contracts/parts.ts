@@ -34,6 +34,10 @@ export type IslandPartProps = PartContext & {
    *  shell sets it until the visitor goes somewhere or picks "Explore
    *  freely". Optional, default false. */
   calm?: boolean;
+  /** Tour start (Lukas): the camera frames the owl at its home; when this
+   *  turns false the camera pulls out to the overview (a cut with reduced
+   *  motion). Optional, default false. */
+  closeUp?: boolean;
 };
 
 /** One detail scene: entry, dollhouse view, artifact placement and focus. */

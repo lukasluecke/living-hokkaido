@@ -1,5 +1,5 @@
 // Pure state for the splat-look kind: which spots and claims the visitor
-// has opened, and when the look is complete (every spot claim read).
+// has opened, and when the look is complete (enough spot claims read).
 import type { ActivityOf } from "@/contracts";
 
 type Look = ActivityOf<"splat-look">;
@@ -22,13 +22,34 @@ export function openSpot(a: Look, st: LookState, spotId: string): LookState {
   };
 }
 
+/** Panel notes to read before the look counts as done (the tour goes on). */
+export const NOTES_TO_READ = 3;
+
+export function notesNeeded(a: Look, known: (id: string) => boolean): number {
+  return Math.min(NOTES_TO_READ, goalClaims(a, known).length);
+}
+
+export function notesRead(
+  a: Look,
+  st: LookState,
+  known: (id: string) => boolean,
+): number {
+  return goalClaims(a, known).filter((c) => st.read.includes(c)).length;
+}
+
 export function isComplete(
   a: Look,
   st: LookState,
   known: (id: string) => boolean,
 ): boolean {
-  const goal = goalClaims(a, known);
-  return goal.length > 0 && goal.every((c) => st.read.includes(c));
+  const need = notesNeeded(a, known);
+  return need > 0 && notesRead(a, st, known) >= need;
+}
+
+/** iPhone and iPad (also iPadOS that says it is a Mac). Safari there closes
+ * the page when a large splat uses too much memory. */
+export function isIOS(ua: string, touchPoints: number): boolean {
+  return /iP(hone|ad|od)/.test(ua) || (/Macintosh/.test(ua) && touchPoints > 1);
 }
 
 /** What the asset check answered, as a viewer phase. */

@@ -169,9 +169,11 @@
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+/* The stamp toast sits low, above the tray, so it never covers the owl's
+   bubble at the top (Lukas, herring coast on a phone). */
 .toast {
   position: absolute;
-  top: calc(64px + env(safe-area-inset-top, 0px));
+  bottom: calc(230px + env(safe-area-inset-bottom, 0px));
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -253,4 +255,111 @@
 .timelineClose:focus-visible {
   outline: 2px solid var(--fl-gold);
   outline-offset: 2px;
+}
+
+/* Calm first look (Lukas): nothing else is on screen, so the tour bubble
+   is larger and its one step is the clear first action. */
+.owl[data-calm] {
+  max-width: min(540px, calc(100% - 24px));
+}
+.owl[data-calm] .owlMark {
+  width: 80px;
+  height: 80px;
+}
+.owl[data-calm] .bubble {
+  padding: 16px 20px 18px;
+}
+.owl[data-calm] .line {
+  font-size: 19px;
+  line-height: 1.45;
+}
+.owl[data-calm] .next {
+  font-size: 17px;
+  padding: 12px 22px;
+  margin-top: 14px;
+}
+@media (max-width: 700px) {
+  .owl[data-calm] .owlMark {
+    width: 56px;
+    height: 56px;
+  }
+  .owl[data-calm] .bubble {
+    padding: 12px 14px 14px;
+  }
+  .owl[data-calm] .line {
+    font-size: 17px;
+  }
+  .owl[data-calm] .next {
+    font-size: 16px;
+    padding: 10px 16px;
+  }
+}
+
+/* Pause / resume the owl's voice-over. */
+.pause {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 10px 0 0 4px;
+  min-height: 40px;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  border: 2px solid var(--fl-edge);
+  border-radius: 999px;
+  background: var(--fl-paper);
+  color: var(--fl-ink);
+  cursor: pointer;
+}
+.pause:focus-visible {
+  outline: 3px solid var(--fl-ink);
+  outline-offset: 2px;
+}
+
+/* "Starting the tour in 3…": a short card while the camera is on the owl. */
+.countdown {
+  position: absolute;
+  left: 50%;
+  bottom: calc(14% + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  z-index: 2;
+  width: max-content;
+  max-width: calc(100% - 32px);
+  text-align: center;
+  background: var(--fl-paper);
+  color: var(--fl-ink);
+  border: 2px solid var(--fl-edge);
+  border-radius: 14px;
+  padding: 14px 20px 12px;
+  box-shadow: var(--fl-shadow);
+  animation: owlIn 240ms ease-out;
+}
+.countdown p {
+  margin: 0;
+  color: inherit;
+  font-size: 18px;
+  font-weight: 700;
+}
+.countdownActions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .countdown {
+    animation: none;
+  }
+}
+
+@media (max-width: 700px) {
+  /* Above the tray and the place's clip / film card. */
+  .toast {
+    bottom: calc(290px + env(safe-area-inset-bottom, 0px));
+    width: max-content;
+    max-width: calc(100% - 32px);
+    white-space: normal;
+    text-align: center;
+  }
 }

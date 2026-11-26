@@ -269,7 +269,7 @@ export const omushaLook: ActivityInput = {
   prompt:
     "A diorama in the Hokkaido Museum shows an Omusha in Sakhalin. Turn the capture, zoom in, and open the figures and parts of the scene to read what the museum panels say about them.",
   completion:
-    "You read every panel note: about 700 Aizu soldiers, a show of military authority, seven elders in robes the Wajin gave them, and laws read out through an interpreter before the goods were handed out.",
+    "You looked closer. The museum panels tell of about 700 Aizu soldiers, a show of military authority, seven elders in robes the Wajin gave them, and laws read out through an interpreter before the goods were handed out. Open more spots, or go on with the tour.",
   asset: {
     key: "omusha.sog",
     label: "Capture of a museum diorama",
