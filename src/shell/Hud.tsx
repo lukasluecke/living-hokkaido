@@ -163,13 +163,21 @@ export function Hud({
         <button
           ref={menuBtn}
           type="button"
-          className={s.round}
+          className={`${s.round} ${s.seasonBtn}`}
           aria-label={t("Menu: seasons, sound and more")}
           aria-expanded={menu}
           aria-controls="hud-menu"
           onClick={() => setMenu((m) => !m)}
         >
           <Icon d={P[now]} fill={now === "spring"} />
+          {/* The season name says what the button changes (testers missed
+              the bare icon). Hidden on phones, where the HUD is tight. */}
+          <span className={s.seasonName} aria-hidden="true">
+            {t(now)}
+          </span>
+          <span className={s.caret} aria-hidden="true">
+            ▾
+          </span>
         </button>
         {menu && (
           <div id="hud-menu" ref={menuBox} className={s.menu}>
