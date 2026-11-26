@@ -1,7 +1,14 @@
 // Keyboard, touch buttons and drag → Held + drag, scoped to the host
 // element. Keys only reach the game while the host has focus; Esc is left
 // to the host app.
-import { type Controls, controlsFrom, type Held } from "./controls";
+import {
+  type Controls,
+  controlsFrom,
+  DRAG_FULL,
+  type Held,
+  swipeDecay,
+  swipeLean,
+} from "./controls";
 
 export type InputButtons = {
   left: HTMLElement;
@@ -51,12 +58,18 @@ export function attachInput(
     }
     const k = KEY[e.code];
     if (k) keys[k] = true;
-    if (k || e.code === "Enter") e.preventDefault();
+    if (k || e.code === "Enter") {
+      e.preventDefault();
+      // Keep keys on the game even if a button had focus.
+      if (document.activeElement !== host) host.focus({ preventScroll: true });
+    }
     sync();
   });
   on<KeyboardEvent>(host, "keyup", (e) => {
     const k = KEY[e.code];
     if (k) keys[k] = false;
+    // Space must only brace: never press a focused button (mute, share).
+    if (e.code === "Space") e.preventDefault();
     sync();
   });
   on(host, "blur", () => {
@@ -101,9 +114,33 @@ export function attachInput(
   on(surface, "pointerup", up);
   on(surface, "pointercancel", up);
 
+  // Two-finger trackpad swipes steer too (most players try the trackpad
+  // first). Sideways scrolling is captured so it never swipes the browser
+  // back a page; vertical scrolling is left alone.
+  let swipe = 0;
+  let lastSwipe = 0;
+  let lastPoll = performance.now();
+  const onWheel = (e: WheelEvent) => {
+    if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+    e.preventDefault();
+    const px = e.deltaMode === 1 ? e.deltaX * 16 : e.deltaX;
+    swipe = swipeLean(swipe, px);
+    lastSwipe = performance.now();
+  };
+  host.addEventListener("wheel", onWheel, { passive: false });
+  off.push(() => host.removeEventListener("wheel", onWheel));
+
   return {
     controls(): Controls {
-      return controlsFrom(held, dragPx);
+      const now = performance.now();
+      swipe = swipeDecay(
+        swipe,
+        (now - lastSwipe) / 1000,
+        (now - lastPoll) / 1000,
+      );
+      lastPoll = now;
+      const px = dragPx ?? (swipe !== 0 ? swipe * DRAG_FULL : null);
+      return controlsFrom(held, px);
     },
     destroy() {
       for (const f of off) f();

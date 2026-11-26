@@ -82,12 +82,37 @@ describe("physics", () => {
     p.free();
   });
 
+  it("ploughs through a snow pile: slower, but no crash", () => {
+    const track = generateTrack(1);
+    const pile = {
+      id: "p",
+      kind: "snow-pile" as const,
+      x: 0,
+      s: 25,
+      w: 1.6,
+      d: 1.4,
+      h: 0.8,
+      turn: 0,
+      look: 0,
+    };
+    const p = createPhysics(R, { ...track, obstacles: [pile] });
+    const r = run(p, 10);
+    expect(r.hit).toBe("snow-pile");
+    const before = p.speed();
+    // The body keeps going past the pile.
+    for (let i = 0; i < 120; i++) p.step(none, STEP);
+    expect(p.crashed()).toBe(false);
+    expect(p.distance()).toBeGreaterThan(r.d + 2);
+    expect(before).toBeGreaterThan(0);
+    p.free();
+  });
+
   it("stays on the ice through curves and steep sections", () => {
     const track = { ...generateTrack(3), obstacles: [] };
     const p = createPhysics(R, track);
     p.slip();
     let maxH = 0;
-    for (let i = 0; i < 25 * 60; i++) {
+    for (let i = 0; i < 60 * 60; i++) {
       const at = p.local();
       // Steer to the middle so the curve doesn't carry us into a wall.
       const lean = Math.max(-1, Math.min(1, -at.x * 0.8));
@@ -100,6 +125,34 @@ describe("physics", () => {
     // Never flew off or sank through the ice.
     expect(maxH).toBeLessThan(1.6);
     expect(p.local().h).toBeGreaterThan(0.5);
+    p.free();
+  });
+
+  it("flies off the canal edge, splashes down and floats", () => {
+    const track = { ...generateTrack(1), obstacles: [] };
+    const p = createPhysics(R, track, 1, track.length - 30);
+    p.slip();
+    let launched = false;
+    let flew = false;
+    for (let i = 0; i < 25 * 60; i++) {
+      p.step(none, STEP);
+      if (!launched && p.local().s >= track.length) {
+        p.flyOff();
+        launched = true;
+      }
+      if (p.flying()) flew = true;
+      if (p.floating()) break;
+    }
+    expect(launched).toBe(true);
+    expect(flew).toBe(true);
+    expect(p.floating()).toBe(true);
+    expect(p.local().s).toBeGreaterThan(track.length + 7);
+    // Floats: stays put at the water line.
+    const y = p.position()[1];
+    for (let i = 0; i < 60; i++) p.step(none, STEP);
+    expect(p.position()[1]).toBeCloseTo(y, 2);
+    p.reset();
+    expect(p.floating()).toBe(false);
     p.free();
   });
 

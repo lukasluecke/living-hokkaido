@@ -135,11 +135,29 @@ The game is meant to be integrated into github.com/lukasluecke/living-hokkaido
   (`src/core/balance.ts`). The figure faces down the street and sways with
   lean and wobble. Static geometry is merged by material (~25 draw calls).
   Dev: `?at=N` starts N metres down the street.
-- **M3 Captions and score:** gallery captions from cited claims per clean
-  shopfront pass, near misses, spins, streaks, score breakdown.
+- **Step 5 gallery captions (done 2026-11-26):** `core/captions.ts`, the 12
+  types from content/otaru-slope.md with their sources; wall-label card in
+  `render/hud.ts`.
+- **Step 6 real street (done 2026-11-26):** `core/facades.ts` (pure, tested)
+  picks per-building features; `world/street.ts` draws them, plus gas lamps,
+  footprints and ice patches. Meshes only, never colliders.
+- **Step 7 make it funny (done 2026-11-26):** windmilling arms (view),
+  close-call guide lines in the caption card, glass-workshop crash chime and
+  "Do not touch the art.", tourists photographing the slider. Physics
+  unchanged.
+- **Step 8 shareable score (done 2026-11-26):** `core/score.ts`,
+  `render/scorecard.ts`; daily seed and local best live in `main.ts` only.
+  Details and open points: HANDBACK.md.
+- **M3 Captions and score (partly done in living-hokkaido):** exhibits from
+  cited claims replace captions (`core/exhibits.ts`); close calls within
+  0.45 m count on the stats line (`core/style.ts`). Still to do: spins,
+  streaks, a score breakdown.
 - **M4 Active ragdoll:** jointed body with motors replaces the capsule
   (keep the capsule behind a flag); crash slow motion and flailing.
-- **M5 Atmosphere:** falling snow, gas-lamp lighting, sounds, narrator.
+- **M5 Atmosphere (mostly done in living-hokkaido):** falling snow (off
+  with reduced motion), side lights on both facades, lamp halos, WebAudio
+  sounds (`audio/sfx.ts`: wind, crash, notice, close call, finish) with a
+  mute button and M key. Still to do: narrator lines.
 - **M6 Phone:** opt-in tilt, perf on a mid-range phone.
 - **M7 Canal ending and polish:** special ending, accessibility pass, the
   no-WebGL captions list.

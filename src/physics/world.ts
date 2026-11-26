@@ -26,16 +26,30 @@ export const TUNING = {
   iceFriction: 0.02,
   /** Sideways push from a full lean (m/s²). */
   lean: 6,
-  /** Lean authority while bracing. */
-  braceLean: 0.5,
+  /** Lean authority while bracing. Raised from 0.5 after playtesting:
+   *  bracing felt like the steering broke. */
+  braceLean: 0.7,
   /** Deceleration while bracing (m/s²); gravity along the slope ≈ 1.5–3. */
-  brace: 3.4,
-  /** Sideways damping so a lean can be caught (1/s). */
-  sideDamping: 0.8,
-  /** Quadratic air drag (1/m); top speed ≈ 20–27 m/s by steepness. */
-  drag: 0.004,
+  // Raised from 3.4 after playtesting: at the slower top speed the old
+  // brace barely beat gravity, so it felt like nothing happened.
+  brace: 5,
+  /** Sideways damping so a lean can be caught (1/s). Raised from 0.8
+   *  after playtesting: less sideways drift, so taps don't zigzag. */
+  sideDamping: 1.2,
+  /** Quadratic air drag (1/m); top speed ≈ 9–17 m/s by steepness.
+   *  Tuned over four playtests: 0.004 → 0.0058 → 0.008 → 0.012 → 0.010
+   *  (slow enough to read the signs, then a touch faster again). */
+  drag: 0.01,
   /** Push when the player slips at the start (m/s). */
   slip: 1.5,
+};
+
+/**
+ * Soft obstacles: the body ploughs through and slows down instead of
+ * crashing. `keep` is the share of speed left after one.
+ */
+export const SOFT: Record<string, { keep: number }> = {
+  "snow-pile": { keep: 0.62 },
 };
 
 /** Wall-label sizes: how far shopfront colliders sink below the ice. */
@@ -189,6 +203,7 @@ export function createPhysics(R: R, track: Track, seed = 1, startAt = 0) {
         : o.kind === "tourist"
           ? R.ColliderDesc.capsule(o.h / 2 - o.w / 2, o.w / 2)
           : R.ColliderDesc.cuboid(o.w / 2, o.h / 2, o.d / 2);
+    if (SOFT[o.kind]) shape.setSensor(true);
     fixed(pos, rot, shape, o.kind);
   }
 
@@ -215,6 +230,12 @@ export function createPhysics(R: R, track: Track, seed = 1, startAt = 0) {
   const phase = [seed * 0.37, seed * 1.91 + 1, seed * 2.73 + 2] as const;
   let crashed = false;
   let stopped = false;
+  /** The canal ending: slide to the edge, fly off it, splash, float. */
+  let ending: "none" | "sliding" | "flying" | "floating" = "none";
+  // Water level (the canal's surface is drawn at h -2.5 past the edge).
+  const waterY = pointAt(track.path, 0, -2.5, track.length + 30)[1];
+  /** Where the embankment edge is (the ice ends a little after it). */
+  const EDGE = track.length + 6.8;
   let time = 0;
   let s: number = startS;
   let lastWobble = 0;
@@ -264,6 +285,40 @@ export function createPhysics(R: R, track: Track, seed = 1, startAt = 0) {
         h1 === collider.handle ? h2 : h2 === collider.handle ? h1 : -1;
       hit = labels.get(other) ?? null;
     });
+    if (ending === "sliding" && local().s > EDGE) {
+      // Off the embankment: a hop up and forward, and a comic forward flip.
+      ending = "flying";
+      const m = body.mass();
+      const f = frameAt(track.path, s);
+      body.lockRotations(false, true);
+      body.setAngularDamping(0.3);
+      body.applyImpulse(
+        { x: f.forward[0] * 1.5 * m, y: 4.5 * m, z: f.forward[2] * 1.5 * m },
+        true,
+      );
+      body.applyTorqueImpulse(
+        { x: f.right[0] * 0.9 * m, y: 0, z: f.right[2] * 0.9 * m },
+        true,
+      );
+    } else if (ending === "flying" && body.translation().y < waterY + 0.1) {
+      // Splash down, then float upright with the head above the water.
+      ending = "floating";
+      const t = body.translation();
+      body.setGravityScale(0, true);
+      body.setLinvel({ x: 0, y: 0, z: 0 }, true);
+      body.setAngvel({ x: 0, y: 0, z: 0 }, true);
+      body.setRotation({ x: 0, y: 0, z: 0, w: 1 }, true);
+      body.lockRotations(true, true);
+      body.setTranslation({ x: t.x, y: waterY + 0.1, z: t.z }, true);
+    }
+    const soft = hit ? SOFT[hit] : undefined;
+    if (soft && !crashed) {
+      const v = body.linvel();
+      body.setLinvel(
+        { x: v.x * soft.keep, y: v.y * soft.keep, z: v.z * soft.keep },
+        true,
+      );
+    }
     return hit;
   }
 
@@ -297,14 +352,41 @@ export function createPhysics(R: R, track: Track, seed = 1, startAt = 0) {
         true,
       );
     },
-    /** Reached the canal: glide to a stop. */
+    /** Reached the canal: no more steering; keep sliding to the edge and
+     *  fly off it into the water (see step). */
+    flyOff() {
+      stopped = true;
+      ending = "sliding";
+      const v = body.linvel();
+      const f = frameAt(track.path, s);
+      const down = v.x * f.forward[0] + v.y * f.forward[1] + v.z * f.forward[2];
+      if (down < 5) {
+        const m = body.mass();
+        const add = (5 - down) * m;
+        body.applyImpulse(
+          {
+            x: f.forward[0] * add,
+            y: f.forward[1] * add,
+            z: f.forward[2] * add,
+          },
+          true,
+        );
+      }
+    },
+    /** Glide to a stop (kept for hosts or tests that want no splash). */
     stop() {
       stopped = true;
       body.setLinearDamping(5);
     },
+    /** In the air over the canal (rotation is free). */
+    flying: () => ending === "flying",
+    /** In the water after the splash. */
+    floating: () => ending === "floating",
     reset() {
       crashed = false;
       stopped = false;
+      ending = "none";
+      body.setGravityScale(1, true);
       time = 0;
       s = startS;
       lastWobble = 0;

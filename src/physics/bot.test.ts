@@ -35,7 +35,9 @@ function botRun(seed: number) {
     prevX = x;
     const target = laneAt(track, s + 2);
     const lean = Math.max(-1, Math.min(1, (target - x) * 2 - vx * 0.9));
-    const hit = p.step({ lean, brace: p.speed() > 15 }, 1 / 60);
+    // A careful player brakes on the steep stretches: above 13 m/s the
+    // wobble is near full strength (core/balance.ts).
+    const hit = p.step({ lean, brace: p.speed() > 13 }, 1 / 60);
     if (hit) return { seed, finished: false, d: Math.round(p.distance()), hit };
     if (p.distance() >= finish) return { seed, finished: true };
   }
@@ -45,4 +47,4 @@ function botRun(seed: number) {
 it("a bot following the guaranteed lane reaches the canal", () => {
   for (const seed of [1, 2, 3, 4, 5, 6, 7, 8])
     expect(botRun(seed)).toEqual({ seed, finished: true });
-});
+}, 30_000); // 8 whole runs of real physics
