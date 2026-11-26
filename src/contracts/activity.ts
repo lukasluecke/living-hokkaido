@@ -532,7 +532,7 @@ export type PlacePose = z.infer<typeof placePoseSchema>;
 export const placeStepSchema = z
   .object({
     id: idSchema,
-    /** One fact, restating the claims below. Read aloud by the device voice. */
+    /** One fact, restating the claims below. Read aloud by the AI owl voice (scripts/audio/voices.ts), else the device voice. */
     say: z.string().min(1),
     claimIds: z.array(idSchema).min(1),
     observed: z.boolean().default(false),

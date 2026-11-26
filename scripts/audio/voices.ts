@@ -19,6 +19,7 @@ import { join } from "node:path";
 import { z } from "zod";
 import type { ActivityOf, VoiceIndex } from "@/contracts";
 import { activityKinds } from "../../src/content/bark-to-cloth/activity-kinds";
+import { placeActivities } from "../../src/content/bark-to-cloth/place-activities";
 import { guide } from "../../src/content/bark-to-cloth/guide";
 import { highlights } from "../../src/content/bark-to-cloth/highlights";
 import { owlStory } from "../../src/content/bark-to-cloth/museum-activities";
@@ -76,6 +77,19 @@ const groups: Record<string, Line[]> = {
   ],
   ...(story ? { [story.id]: storyLines(story) } : {}),
   [owlStory.id]: storyLines(owlStory),
+  // "Build the scene" walkthroughs: one line per step (say + ask).
+  ...Object.fromEntries(
+    placeActivities.map((a) => {
+      const p = a as ActivityOf<"place">;
+      return [
+        p.id,
+        p.steps.map((s) => ({
+          id: s.id,
+          text: s.ask ? `${s.say} ${s.ask}` : s.say,
+        })),
+      ];
+    }),
+  ),
 };
 
 /** Start time (s) of each space-separated word, as the captions split them. */
