@@ -173,6 +173,10 @@ export function DetailScenePart(props: DetailScenePartProps) {
             key={scene.id}
             film={scene.film}
             reducedMotion={prefs.reducedMotion}
+            open={props.filmOpen}
+            onOpenChange={(o) =>
+              emit({ type: o ? "film.open" : "film.close", sceneId: scene.id })
+            }
           />
         </div>
       )}
@@ -198,6 +202,7 @@ function SceneList({
   focusedArtifactId,
   prefs,
   emit,
+  filmOpen,
 }: DetailScenePartProps) {
   useEffect(() => {
     emit({ type: "scene.ready", sceneId: scene.id });
@@ -208,7 +213,14 @@ function SceneList({
     <section className={s.panel} aria-label={scene.title}>
       <h2>{scene.title}</h2>
       {scene.film && (
-        <FilmPlayer film={scene.film} reducedMotion={prefs.reducedMotion} />
+        <FilmPlayer
+          film={scene.film}
+          reducedMotion={prefs.reducedMotion}
+          open={filmOpen}
+          onOpenChange={(o) =>
+            emit({ type: o ? "film.open" : "film.close", sceneId: scene.id })
+          }
+        />
       )}
       <div className={s.row}>
         {scene.placements.map((p) => (

@@ -77,6 +77,7 @@ export function reduce(
         view: "scene",
         sceneId: loc.sceneId,
         pendingHighlightId: null,
+        filmOpen: false,
       };
       return s.pendingHighlightId
         ? openHighlight(pack, landed, s.pendingHighlightId)
@@ -85,9 +86,15 @@ export function reduce(
     case "scene.enter":
       if (!pack.scenes.some((x) => x.id === e.sceneId)) return s;
       return { ...s, view: "scene", sceneId: e.sceneId };
+    case "film.open":
+      if (s.sceneId !== e.sceneId) return s;
+      return { ...s, filmOpen: true };
+    case "film.close":
+      return { ...s, filmOpen: false };
     case "scene.exit":
       return {
         ...s,
+        filmOpen: false,
         pendingHighlightId: null,
         view: "island",
         sceneId: null,
@@ -168,6 +175,7 @@ export function reduce(
           view: "island",
           sceneId: null,
           pendingHighlightId: null,
+          filmOpen: false,
         };
       return s;
     default:
@@ -175,8 +183,8 @@ export function reduce(
   }
 }
 
-/** In a scene: start the highlight's activity or open its timeline. A film
- *  is already on the scene, so the scene itself is the answer. */
+/** In a scene: start the highlight's activity, open its timeline, or open
+ *  the scene's film. */
 function openHighlight(
   pack: ContentPack,
   s: ExperienceState,
@@ -186,6 +194,9 @@ function openHighlight(
   const scene = pack.scenes.find((x) => x.id === s.sceneId);
   if (!h || !scene) return s;
   const base = { ...s, view: "scene" as const, artifactId: null };
+  // The tour's film step opens the scene's film card.
+  if (h.open.kind === "film")
+    return scene.film ? { ...base, filmOpen: true } : base;
   if (
     h.open.kind === "activity" &&
     scene.activityIds.includes(h.open.activityId)

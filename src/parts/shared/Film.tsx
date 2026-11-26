@@ -13,12 +13,23 @@ import { SHOW_DISCLAIMERS } from "@/design/disclaimers";
 export function FilmPlayer({
   film,
   reducedMotion,
+  open: openProp,
+  onOpenChange,
 }: {
   film: Film;
   reducedMotion: boolean;
+  /** Controlled open state (the shell's tour opens the film). */
+  open?: boolean;
+  /** Play / close pressed (true / false), and false when the film ends. */
+  onOpenChange?: (open: boolean) => void;
 }) {
   const t = useT();
-  const [open, setOpen] = useState(false);
+  const [own, setOwn] = useState(false);
+  const open = openProp ?? own;
+  const setOpen = (o: boolean) => {
+    setOwn(o);
+    onOpenChange?.(o);
+  };
   const ready = film.source.kind !== "none";
   return (
     <section
@@ -42,7 +53,7 @@ export function FilmPlayer({
             aria-expanded={open}
             aria-label={open ? t("Close the film") : t("Play the film")}
             title={open ? t("Close the film") : t("Play the film")}
-            onClick={() => setOpen((x) => !x)}
+            onClick={() => setOpen(!open)}
           >
             <span aria-hidden="true">{open ? "■" : "▶"}</span>
           </button>
@@ -59,6 +70,7 @@ export function FilmPlayer({
           playsInline
           preload="metadata"
           autoPlay={!reducedMotion}
+          onEnded={() => setOpen(false)}
           aria-label={t(film.title)}
         />
       )}

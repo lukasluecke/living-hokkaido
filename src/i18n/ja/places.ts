@@ -33,8 +33,8 @@ export const jaPlaces: Record<string, string> = {
     "まずは森でいっしょに座ろう。お話の映画があるよ。",
   "Play the tonkori": "トンコリを弾く",
   "Pluck the five open strings": "5本の開放弦をはじく",
-  "Here is my story film. Watch it, then try the tonkori: pluck the strings and listen.":
-    "これがわたしのお話の映画だよ。見たら、トンコリも弾いてみて。弦をはじいて、音を聞いてね。",
+  "Now try the tonkori. Pluck the strings and listen.":
+    "次はトンコリ。弦をはじいて、音を聞いてみて。",
   "See the house over time": "家の移り変わりを見る",
   "Pit dwellings to today, in one place": "竪穴住居から今まで、同じ場所で",
   "Let us fly to the lake house and watch it change over time.":

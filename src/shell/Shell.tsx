@@ -348,7 +348,9 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
     !!owlLine &&
     state.view !== "activity" &&
     state.view !== "travel" &&
-    !state.overlay;
+    !state.overlay &&
+    // The film has the stage; the owl speaks again once it closes or ends.
+    !state.filmOpen;
   // Voice file ids (scripts/audio/voices.ts): guide ids, "highlight-<id>".
   const owlVoiceId =
     source.guide.find((g) => g.text === owlLine)?.id ??
@@ -390,6 +392,7 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
         )}
         focusedArtifactId={state.artifactId}
         inspectedArtifactIds={journal.inspected}
+        filmOpen={!!state.filmOpen}
       />
     ) : null;
 

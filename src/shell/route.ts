@@ -108,8 +108,8 @@ export function route(
 
 /**
  * The owl's first-visit tour: the next highlight not done yet, in pack
- * order. In a place, its own open highlight comes first; a film highlight
- * is already on screen there, so it is skipped while you are in its place.
+ * order. In a place, its own open highlight comes first (a film counts as
+ * done once it was opened and closed, or ended).
  * In a place you picked yourself, the tour pauses there (only that place's
  * own highlight); it goes on from the island or the highlight row.
  * When every highlight is done, the normal look / try route takes over.
@@ -131,7 +131,6 @@ export function tourStep(
   const todo = pack.highlights.filter(
     (h) =>
       !highlightDone(h, journal) &&
-      !(h.open.kind === "film" && h.locationId === here) &&
       pack.island.locations.some(
         (l) => l.id === h.locationId && l.status === "open",
       ),

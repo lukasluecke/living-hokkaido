@@ -23,7 +23,7 @@ export const highlights: HighlightInput[] = [
     icon: "pluck",
     locationId: "listening-grove",
     open: { kind: "activity", activityId: "pluck-tonkori" },
-    owl: "Here is my story film. Watch it, then try the tonkori: pluck the strings and listen.",
+    owl: "Now try the tonkori. Pluck the strings and listen.",
   },
   {
     id: "over-time",

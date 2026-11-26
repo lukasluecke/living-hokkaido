@@ -72,6 +72,11 @@ export function record(
     case "reveal.open":
       next = { ...j, revealOpened: true };
       break;
+    case "film.close": {
+      const loc = pack.island.locations.find((l) => l.sceneId === e.sceneId);
+      if (loc) next = { ...j, filmsSeen: add(j.filmsSeen ?? [], loc.id) };
+      break;
+    }
     default:
       return { journal: j, earned: [] };
   }
