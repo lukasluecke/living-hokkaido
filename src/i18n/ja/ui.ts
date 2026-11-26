@@ -404,7 +404,7 @@ export const jaUi: Record<string, string> = {
   granted: "あり",
   "not-required": "不要",
   withdrawn: "取り下げ",
-  "Two players · one device": "二人で · 一台の端末",
+  "Two players, or play with the AI": "二人で、またはAIと遊ぶ",
   "Illustrative scene": "イメージの場面",
   "Illustrative street": "イメージの通り",
   "Not there. Read the clue again.": "そこではないよ。ヒントをもう一度読もう。",

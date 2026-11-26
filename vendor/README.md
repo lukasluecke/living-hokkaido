@@ -82,6 +82,13 @@ the diff):
    the grab point under the finger, and a blocked target (a wall, the
    water) slides Nuri along the edge instead of freezing (`tryMove`,
    `game/nuri.ts`); a missed release ends the drag.
+12. Out of Place, Lukas's request, one commit: Play with the AI. While the
+   scene is shown, pick 2 players, AI hides or AI seeks (buttons, or M).
+   The AI hider tries 12 open spots and poses, paints Nuri with the scene
+   pattern at each, and takes one of the best blends. The AI seeker
+   guesses every ~2.7 s; a guess lands on Nuri more often when the blend
+   score is low, clay is bare, or time runs on. A local heuristic, no
+   server or model. One-player modes skip the handoff cover.
 
 ## Sapporo Omusha (Shaw)
 
