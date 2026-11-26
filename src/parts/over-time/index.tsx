@@ -8,7 +8,7 @@ import { MathUtils } from "three";
 import { eraAt, SCALE, type TimelinePartProps } from "@/contracts";
 import { useT } from "@/i18n";
 import { PresentationBadge, RepresentationBadge } from "../shared/Badges";
-import { QualityGovernor, useQuality } from "../shared/Quality";
+import { QualityGovernor, useQuality } from "../shared/QualityGovernor";
 import { Diorama } from "./Diorama";
 import c from "./OverTime.module.css";
 

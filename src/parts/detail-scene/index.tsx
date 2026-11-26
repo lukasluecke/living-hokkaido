@@ -5,7 +5,7 @@ import { Canvas } from "@react-three/fiber";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { type DetailScenePartProps, SCALE } from "@/contracts";
 import s from "../shared/Fallback.module.css";
-import { QualityGovernor, useQuality } from "../shared/Quality";
+import { QualityGovernor, useQuality } from "../shared/QualityGovernor";
 import { Room } from "./Room";
 import attn from "../shared/Attention.module.css";
 import c from "./Scene.module.css";
