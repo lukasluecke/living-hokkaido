@@ -332,14 +332,15 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
     nextEvent?.type === "highlight.open"
       ? pack.highlights.find((h) => h.id === nextEvent.highlightId)
       : undefined;
-  // One line per moment: on the island (after the first visit) and in the
-  // highlight's own place the owl says the highlight's line; in any other
-  // place it keeps that place's own line, and the button offers the tour.
+  // One line per moment: on the island (after the first visit), in the
+  // highlight's own place, and on the tour once this place's highlights are
+  // done, the owl says the highlight's line, so the tour reads as one story
+  // (Lukas). In a place you picked yourself it keeps that place's own line.
   const owlLine =
     tourHighlight?.owl &&
     (state.view === "island"
       ? journal.visited.length > 0
-      : tourHighlight.locationId === state.locationId)
+      : tourHighlight.locationId === state.locationId || state.touring)
       ? tourHighlight.owl
       : guideLine;
   // No bubble while the owl flies: the arrival line follows on landing.
@@ -358,7 +359,10 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
     setGuideVoiced(false);
     if (!owlShown || sound.muted || !owlVoiceId) return stopVoiceLine();
     let live = true;
-    void playVoiceLine("owl", owlVoiceId).then(
+    // Highlight lines are checked against their text (in the page's
+    // language), so a file made from an older line stays silent.
+    const said = owlVoiceId.startsWith("highlight-") ? t(owlLine) : undefined;
+    void playVoiceLine("owl", owlVoiceId, 0.9, said).then(
       (ok) => live && setGuideVoiced(ok),
     );
     return () => {
