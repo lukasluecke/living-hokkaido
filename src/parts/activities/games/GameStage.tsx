@@ -72,6 +72,7 @@ export function GameStage({
   controls,
   notes,
   preload,
+  landscape = false,
 }: {
   activityId: string;
   knowledgeId: string;
@@ -95,10 +96,24 @@ export function GameStage({
   /** Fetch the game's code (engine, physics) while the panel is open, so
    *  Play starts quickly. Called once, in idle time. */
   preload?: () => Promise<unknown>;
+  /** A landscape game: on a phone held upright, the stage turns a quarter
+   *  turn to fill the screen (data-rotate="90"; the game maps the pointer). */
+  landscape?: boolean;
 }) {
   const tr = useT();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [turned, setTurned] = useState(false);
+  useEffect(() => {
+    if (!landscape || !open) return;
+    const mq = window.matchMedia(
+      "(orientation: portrait) and (max-width: 600px)",
+    );
+    const sync = () => setTurned(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, [landscape, open]);
   const [loading, setLoading] = useState(false);
   const host = useRef<HTMLDivElement>(null);
   const play = useRef<HTMLButtonElement>(null);
@@ -216,8 +231,9 @@ export function GameStage({
       {open &&
         createPortal(
           <div
-            className={g.stage}
+            className={`${g.stage} ${turned ? g.turned : ""}`}
             style={stageVars}
+            data-rotate={turned ? "90" : undefined}
             role="dialog"
             aria-modal="true"
             aria-label={title}

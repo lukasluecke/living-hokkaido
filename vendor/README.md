@@ -100,6 +100,10 @@ the diff):
    snow, icicles), and a game control panel: Tools, Paint and Pose trays
    with icon buttons (`makeIconButton`, `drawIcon` in `style/ui.ts`), brush
    sizes as dots, recent paints in the Paint tray, a gold "I'm hidden".
+15. Out of Place, Lukas's request, one commit: a turned stage. When an
+   ancestor has `data-rotate="90"` (living-hokkaido's GameStage on a phone
+   held upright), `embed.ts` sizes and centres the game from the layout box
+   and maps pointer positions into the turned canvas (`turnable`).
 
 ## Sapporo Omusha (Shaw)
 
