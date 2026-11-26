@@ -28,6 +28,7 @@ scaled to the sketch's size (metres, origin on the base), then
 | canoe.glb | b4a03e89-168c-4897-8dd2-7430d99adfc8 | A narrow dugout canoe made from one single hollowed-out tree log, no seats, no ribs, no planks, a single wooden pole inside. |
 | set-bow.glb | 8f2ad0ab-5afd-43ce-af99-a111f9ee4cfa | A simple plain wooden hunting bow set low on two short wooden stakes beside a path, with a thin cord stretched across the path, no decoration. |
 | lacquer-vessel.glb | 5efd8b26-48c2-4bc3-a9cf-ffedf4d935b2 | A round lidded lacquered wooden vessel, glossy black body with plain red bands, no motifs. |
+| owl.glb | 22ae6567-8320-444c-b423-01b5e34d9dc9 | A cute round stylised snow-white owl spirit standing upright, wings folded tight against its body, big round friendly eyes, small grey beak, two small ear tufts, soft feather shapes (Gen-2.5 Medium, 20k faces; our own fictional guide, not a kamuy, no patterns; docs/STYLE.md § owl look). Island body only: the code wings flap in flight. 138 KB, texture 512 px. |
 
 Rejected first tries (not shipped): deer 2d83d342… (two heads), tonkori
 1d31bd50… (lute-like bowl body), canoe 54d05ac8… (plank rowboat with seats).

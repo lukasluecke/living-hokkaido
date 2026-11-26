@@ -1,18 +1,41 @@
 // Spirit-like owl guide + flight along a curve that clears the real terrain.
 import { useFrame } from "@react-three/fiber";
-import { forwardRef, useImperativeHandle, useMemo, useRef } from "react";
+import {
+  Component,
+  forwardRef,
+  type ReactNode,
+  Suspense,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+} from "react";
 import {
   AdditiveBlending,
+  Box3,
   CanvasTexture,
+  Color,
+  Group as GroupClass,
   CatmullRomCurve3,
   type Group,
   type InstancedMesh,
   Matrix4,
+  type Mesh,
+  type MeshStandardMaterial,
+  MeshToonMaterial,
+  type Object3D,
   Quaternion,
   Vector3,
 } from "three";
 import { ISLAND } from "@/contracts";
+import { useGlbClone } from "../../shared/Glb";
 import type { Field } from "./field";
+
+/**
+ * Generated body (Hyper3D Rodin, text prompt only; public/models/ATTRIBUTION.md).
+ * Loaded lazily; the code-built body shows while it loads or if it fails.
+ * The code wings, glow halo and trail stay, so the flap still works.
+ */
+const OWL_GLB = "/models/owl.glb";
 
 export type OwlApi = { group: Group | null; flying: boolean; dir: Vector3 };
 
@@ -104,6 +127,9 @@ export const Owl = forwardRef<
       s.t < 1
         ? Math.sin(state.clock.elapsedTime * 14) * 0.9
         : Math.sin(state.clock.elapsedTime * 1.5) * 0.05 - 0.1;
+    // The generated body has folded wings: its code wings show only in flight.
+    for (const w of [wl.current, wr.current])
+      if (w) w.visible = !w.userData.flyOnly || s.t < 1;
     if (wl.current) wl.current.rotation.z = 0.2 + flap;
     if (wr.current) wr.current.rotation.z = -0.2 - flap;
     if (!s.curve || s.t >= 1) {
@@ -133,7 +159,7 @@ export const Owl = forwardRef<
   return (
     <>
       <group ref={g} scale={scale}>
-        <SpiritOwlBody wl={wl} wr={wr} />
+        <OwlBody wl={wl} wr={wr} />
       </group>
       <Trail owl={g} api={api} enabled={trail} />
     </>
@@ -146,6 +172,117 @@ const SNOW = "#f7fbff";
 const FROST = "#d6e6f5";
 const GLOW = "#bfe0ff";
 const INK = "#3b4a5e";
+
+type Wings = {
+  wl: React.RefObject<Group | null>;
+  wr: React.RefObject<Group | null>;
+};
+
+class Fallback extends Component<
+  { fallback: ReactNode; children: ReactNode },
+  { failed: boolean }
+> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  render() {
+    return this.state.failed ? this.props.fallback : this.props.children;
+  }
+}
+
+function OwlBody(p: Wings) {
+  const code = <SpiritOwlBody {...p} />;
+  return (
+    <Fallback fallback={code}>
+      <Suspense fallback={code}>
+        <GlbOwlBody {...p} />
+      </Suspense>
+    </Fallback>
+  );
+}
+
+/** Snow-white toon look with a soft blue glow, like the code body. */
+function glow(o: Object3D) {
+  o.traverse((c) => {
+    const m = c as Mesh;
+    if (!m.isMesh) return;
+    const src = m.material as MeshStandardMaterial;
+    m.material = new MeshToonMaterial({
+      color: src?.color ?? new Color(SNOW),
+      map: src?.map ?? null,
+      emissive: new Color(GLOW),
+      emissiveIntensity: 0.3,
+    });
+    m.castShadow = true;
+  });
+  // Fit: base on y=0, about 1 unit tall (the code body is ~0.95 tall).
+  const box = new Box3().setFromObject(o);
+  const size = box.getSize(new Vector3());
+  const k = 0.95 / (size.y || 1);
+  const wrap = new GroupClass();
+  o.scale.setScalar(k);
+  o.position.set(
+    -((box.min.x + box.max.x) / 2) * k,
+    -box.min.y * k - 0.05,
+    -((box.min.z + box.max.z) / 2) * k,
+  );
+  wrap.add(o);
+  return wrap;
+}
+
+function GlbOwlBody({ wl, wr }: Wings) {
+  const obj = useGlbClone(OWL_GLB, glow);
+  const halo = useMemo(() => glowTexture(), []);
+  return (
+    <>
+      <primitive object={obj} />
+      <CodeWings wl={wl} wr={wr} flyOnly />
+      <sprite position={[0, 0.42, 0]} scale={2.4}>
+        <spriteMaterial
+          map={halo}
+          color={GLOW}
+          transparent
+          opacity={0.45}
+          depthWrite={false}
+          blending={AdditiveBlending}
+          toneMapped={false}
+        />
+      </sprite>
+    </>
+  );
+}
+
+function CodeWings({ wl, wr, flyOnly = false }: Wings & { flyOnly?: boolean }) {
+  return (
+    <>
+      {[
+        [wl, 1],
+        [wr, -1],
+      ].map(([ref, s]) => (
+        <group
+          key={s as number}
+          ref={ref as React.RefObject<Group>}
+          position={[(s as number) * 0.36, 0.45, -0.04]}
+          userData={{ flyOnly }}
+        >
+          <mesh
+            position={[(s as number) * 0.3, -0.04, 0]}
+            scale={[0.36, 0.06, 0.24]}
+            castShadow
+          >
+            <sphereGeometry args={[1, 14, 8]} />
+            <meshToonMaterial
+              color={SNOW}
+              emissive={GLOW}
+              emissiveIntensity={0.4}
+            />
+          </mesh>
+        </group>
+      ))}
+    </>
+  );
+}
 
 function SpiritOwlBody({
   wl,
@@ -209,29 +346,7 @@ function SpiritOwlBody({
         <coneGeometry args={[1, 1, 8]} />
         <meshToonMaterial color="#9fb4c8" />
       </mesh>
-      {[
-        [wl, 1],
-        [wr, -1],
-      ].map(([ref, s]) => (
-        <group
-          key={s as number}
-          ref={ref as React.RefObject<Group>}
-          position={[(s as number) * 0.36, 0.45, -0.04]}
-        >
-          <mesh
-            position={[(s as number) * 0.3, -0.04, 0]}
-            scale={[0.36, 0.06, 0.24]}
-            castShadow
-          >
-            <sphereGeometry args={[1, 14, 8]} />
-            <meshToonMaterial
-              color={SNOW}
-              emissive={GLOW}
-              emissiveIntensity={0.4}
-            />
-          </mesh>
-        </group>
-      ))}
+      <CodeWings wl={wl} wr={wr} />
       <sprite position={[0, 0.42, 0]} scale={2.4}>
         <spriteMaterial
           map={halo}
