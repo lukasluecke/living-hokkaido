@@ -41,7 +41,7 @@ parts = []
 def clip(src, a, b, name):
     p = OUT / f"{name}.mp4"
     sh("ffmpeg", "-loglevel", "error", "-y", "-ss", f"{a:.3f}", "-i", src, "-t", f"{b-a:.3f}",
-       "-vf", f"fps={FPS},scale=780:1688,setsar=1", "-an", "-c:v", "libx264", "-crf", "16", "-pix_fmt", "yuv420p", str(p))
+       "-vf", f"fps={FPS},scale=780:1688,setsar=1", "-an", "-c:v", "libx264", "-crf", "16", "-preset", "veryfast", "-pix_fmt", "yuv420p", str(p))
     parts.append(p)
     return b - a
 
@@ -49,7 +49,7 @@ def still(src, at, length, name):
     p = OUT / f"{name}.mp4"
     sh("ffmpeg", "-loglevel", "error", "-y", "-ss", f"{at:.3f}", "-i", src, "-frames:v", "1", str(OUT / f"{name}.png"))
     sh("ffmpeg", "-loglevel", "error", "-y", "-loop", "1", "-framerate", str(FPS), "-t", f"{length}", "-i", str(OUT / f"{name}.png"),
-       "-vf", "scale=780:1688,setsar=1", "-c:v", "libx264", "-crf", "16", "-pix_fmt", "yuv420p", str(p))
+       "-vf", "scale=780:1688,setsar=1", "-c:v", "libx264", "-crf", "16", "-preset", "veryfast", "-pix_fmt", "yuv420p", str(p))
     parts.append(p)
 
 still(MAIN, 0.05, TITLE_S, "p0")
@@ -184,10 +184,9 @@ amix = "".join(f"[a{i}]" for i in range(len(voice))) + f"amix=inputs={len(voice)
 out = OUT / "present.mp4"
 sh("ffmpeg", "-loglevel", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(OUT / "bg.txt"), "-i", str(phone), *ins,
    "-filter_complex",
-   f"[0:v]fps={FPS},format=yuv420p[bg];[1:v]scale=452:978,format=yuva420p,"
-   f"geq=lum='p(X,Y)':a='if(gt(abs(X-226)-182,0)*gt(abs(Y-489)-445,0)*gt(hypot(abs(X-226)-182,abs(Y-489)-445),44),0,255)'[ph];"
+   f"[0:v]fps={FPS},format=yuv420p[bg];[1:v]scale=452:978[ph];"
    f"[bg][ph]overlay=170:51:shortest=1[v];" + ";".join(flt) + ";" + amix,
-   "-map", "[v]", "-map", "[aout]", "-t", f"{total:.3f}", "-c:v", "libx264", "-crf", "18", "-preset", "medium",
+   "-map", "[v]", "-map", "[aout]", "-t", f"{total:.3f}", "-c:v", "libx264", "-crf", "20", "-preset", "veryfast",
    "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart", str(out))
 
 def ts(x):
