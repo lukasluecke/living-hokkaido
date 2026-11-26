@@ -169,9 +169,11 @@
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+/* The stamp toast sits low, above the tray, so it never covers the owl's
+   bubble at the top (Lukas, herring coast on a phone). */
 .toast {
   position: absolute;
-  top: calc(64px + env(safe-area-inset-top, 0px));
+  bottom: calc(230px + env(safe-area-inset-bottom, 0px));
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -348,5 +350,16 @@
 @media (prefers-reduced-motion: reduce) {
   .countdown {
     animation: none;
+  }
+}
+
+@media (max-width: 700px) {
+  /* Above the tray and the place's clip / film card. */
+  .toast {
+    bottom: calc(290px + env(safe-area-inset-bottom, 0px));
+    width: max-content;
+    max-width: calc(100% - 32px);
+    white-space: normal;
+    text-align: center;
   }
 }
