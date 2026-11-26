@@ -489,6 +489,35 @@ test("media ranges: start-end, open end, suffix, bad", async () => {
   assert.equal(parseRange("items=0-1", 100), "bad");
 });
 
+test("ai-voice media ref: default label, owl stories use it", async () => {
+  const { mediaRefSchema, voiceIndexSchema } = await import("@/contracts");
+  const m = mediaRefSchema.parse({ kind: "ai-voice", group: "owl" });
+  assert.equal(
+    m.kind === "ai-voice" && m.credit,
+    "AI voice (ElevenLabs) · illustrative",
+  );
+  assert.equal(mediaRefSchema.safeParse({ kind: "ai-voice" }).success, false);
+  assert.equal(
+    voiceIndexSchema.safeParse({
+      voice: "v",
+      model: "m",
+      lines: { a: { hash: "h", duration: 1.2, words: [0, 0.4] } },
+    }).success,
+    true,
+  );
+  const stories = barkToClothPack.activities.filter((a) => a.kind === "story");
+  assert.ok(stories.length > 0);
+  for (const a of stories)
+    if (a.kind === "story") assert.equal(a.narrator.voice.kind, "ai-voice");
+  assert.equal(m.kind === "ai-voice" && m.refrain, false);
+  const owl = stories.find((a) => a.id === "story-owl");
+  assert.ok(
+    owl?.kind === "story" &&
+      owl.narrator.voice.kind === "ai-voice" &&
+      owl.narrator.voice.refrain,
+  );
+});
+
 test("films: source from one config value; grove has the owl film", async () => {
   const { filmSourceFrom, filmSchema } = await import("@/contracts");
   const { PUBLIC_MEDIA } = await import("@/integrations/museum-assets/edge");

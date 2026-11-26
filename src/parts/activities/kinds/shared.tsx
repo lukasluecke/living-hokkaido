@@ -6,7 +6,10 @@ import type {
   Emit,
   Prefs,
   ResolvedClaim,
+  VoiceIndex,
 } from "@/contracts";
+import { voiceIndexSchema } from "@/contracts";
+import { useEffect, useMemo, useState } from "react";
 
 export type KindProps<K extends ActivityKind> = {
   activity: ActivityOf<K>;
@@ -74,3 +77,40 @@ export const deviceVoice = {
     if ("speechSynthesis" in window) window.speechSynthesis.cancel();
   },
 };
+
+const voiceIndexes = new Map<string, Promise<VoiceIndex | null>>();
+
+/**
+ * Pre-generated AI voice lines of one group (scripts/audio/voices.ts).
+ * Null while loading, when the files are missing, or when the page is not
+ * in English (the voices are English only).
+ */
+export function useAiVoice(group: string | undefined) {
+  const [index, setIndex] = useState<VoiceIndex | null>(null);
+  useEffect(() => {
+    if (!group || document.documentElement.lang === "ja") return;
+    let live = true;
+    let p = voiceIndexes.get(group);
+    if (!p) {
+      p = fetch(`/audio/voice/${group}/index.json`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((j) => voiceIndexSchema.safeParse(j).data ?? null)
+        .catch(() => null);
+      voiceIndexes.set(group, p);
+    }
+    p.then((i) => live && setIndex(i));
+    return () => {
+      live = false;
+    };
+  }, [group]);
+  return useMemo(
+    () =>
+      group && index
+        ? {
+            index,
+            url: (lineId: string) => `/audio/voice/${group}/${lineId}.mp3`,
+          }
+        : null,
+    [group, index],
+  );
+}

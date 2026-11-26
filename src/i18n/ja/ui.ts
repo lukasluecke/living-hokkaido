@@ -249,6 +249,8 @@ export const jaUi: Record<string, string> = {
   Chapters: "章",
   "Close game": "ゲームを閉じる",
   "Device voice": "端末の音声",
+  "AI voice": "AI音声",
+  "AI voice · ElevenLabs": "AI音声 · ElevenLabs",
   "Device voice · placeholder. Figures and scenes are illustrative sketches after museum dioramas.":
     "端末の音声 · 仮のものです。人物や場面は、博物館のジオラマをもとにしたイメージのスケッチです。",
   "Draft · spelling not yet reviewed": "下書き · つづりは未確認",

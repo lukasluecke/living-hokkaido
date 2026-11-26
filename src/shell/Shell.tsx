@@ -19,8 +19,10 @@ import {
   seasonAt,
   wrapSeason,
 } from "@/contracts";
+import { SHOW_DISCLAIMERS } from "@/design/disclaimers";
 import { seasonInk } from "@/design/tokens";
 import { useSoundscape } from "@/audio/react";
+import { playVoiceLine, stopVoiceLine } from "@/audio/voice";
 import {
   DEFAULT_LOCALE,
   I18nProvider,
@@ -110,6 +112,9 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
   // Sound (src/audio): ambient follows view + season; events play cues.
   const sound = useSoundscape(state);
   const soundEvent = sound.onEvent;
+  // The owl reads its line in a pre-generated AI voice (labelled in the
+  // bubble) when sound is on and the bubble shows. Captions stay primary.
+  const [guideVoiced, setGuideVoiced] = useState(false);
 
   useEffect(() => {
     setState((st) => ({ ...st, prefs: detectPrefs() }));
@@ -379,6 +384,24 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
     (state.view !== "island" || journal.visited.length > 0)
       ? tourHighlight.owl
       : guideLine;
+  const owlShown = !!owlLine && state.view !== "activity" && !state.overlay;
+  // Voice file ids (scripts/audio/voices.ts): guide ids, "highlight-<id>".
+  const owlVoiceId =
+    source.guide.find((g) => g.text === owlLine)?.id ??
+    (tourHighlight?.owl === owlLine && tourHighlight
+      ? `highlight-${tourHighlight.id}`
+      : undefined);
+  useEffect(() => {
+    setGuideVoiced(false);
+    if (!owlShown || sound.muted || !owlVoiceId) return stopVoiceLine();
+    let live = true;
+    void playVoiceLine("owl", owlVoiceId).then(
+      (ok) => live && setGuideVoiced(ok),
+    );
+    return () => {
+      live = false;
+    };
+  }, [owlVoiceId, owlShown, sound.muted]);
   const ink = seasonInk[SEASON_IDS.indexOf(seasonAt(state.season.value))];
 
   const stage =
@@ -444,6 +467,9 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
                 <span className={s.visuallyHidden}>{t("Owl: ")}</span>
                 {t(owlLine)}
               </p>
+              {SHOW_DISCLAIMERS && guideVoiced && (
+                <p className={s.voiceNote}>{t("AI voice · ElevenLabs")}</p>
+              )}
               {next && (
                 <button
                   type="button"
