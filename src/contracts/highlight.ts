@@ -27,6 +27,20 @@ export const highlightSchema = z.object({
   open: highlightTargetSchema,
   /** What the owl says when the tour offers this highlight. */
   owl: z.string().optional(),
+  /**
+   * A prop in the place's scene that opens the highlight, for experiences
+   * with no object there (games, timelines). Scene space, metres. `prop`
+   * names a code-built sign prop; `model` an optional GLB that replaces it.
+   * Illustrative signposts only: they carry no facts (additive).
+   */
+  marker: z
+    .object({
+      position: z.tuple([z.number(), z.number(), z.number()]),
+      rotationY: z.number().default(0),
+      prop: z.enum(["sled", "crates", "hourglass"]),
+      model: z.string().optional(),
+    })
+    .optional(),
 });
 export type Highlight = z.infer<typeof highlightSchema>;
 export type HighlightInput = z.input<typeof highlightSchema>;

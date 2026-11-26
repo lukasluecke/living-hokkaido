@@ -102,3 +102,9 @@
     bottom: 128px;
   }
 }
+/* Highlight signpost label: gold, always shown while the markers show. */
+.heroMarker .markerLabel {
+  background: var(--fl-gold, #e8c27a);
+  font-weight: 700;
+  opacity: 1;
+}
