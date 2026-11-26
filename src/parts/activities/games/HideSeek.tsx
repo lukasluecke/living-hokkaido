@@ -33,7 +33,7 @@ export function HideSeekActivity({
     [a],
   );
   const labels = [
-    "Two players · one device",
+    "Two players, or play with the AI",
     ...(SHOW_DISCLAIMERS && a.illustrative ? ["Illustrative scene"] : []),
   ];
   return (
