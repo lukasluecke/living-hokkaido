@@ -196,25 +196,98 @@ function drawWarehouse(ctx: Ctx) {
     2,
   );
   for (const z of [20, 52]) line(ctx, P(134, y1, z), P(196, y1, z), "tile", 3);
-  // Small barred windows high on the walls.
-  for (const x of [60, 250]) {
+  // Slope-game style front (illustrative): a stone plinth, lit lattice
+  // windows in plaster frames with their fire shutters swung open, a
+  // tiled pent eave over the doors, and plastered fire walls at both ends.
+  poly(
+    ctx,
+    [P(x0, y1, 0), P(x1, y1, 0), P(x1, y1, 10), P(x0, y1, 10)],
+    "tuffDark",
+    2,
+  );
+  for (const x of [52, 94, 266]) {
     poly(
       ctx,
-      [P(x, y1, 84), P(x + 22, y1, 84), P(x + 22, y1, 100), P(x, y1, 100)],
-      "windowLit",
-      2.5,
+      [
+        P(x - 3, y1, 28),
+        P(x + 25, y1, 28),
+        P(x + 25, y1, 64),
+        P(x - 3, y1, 64),
+      ],
+      "stucco",
+      2,
     );
-    for (let i = 1; i < 4; i++)
-      line(
+    poly(
+      ctx,
+      [P(x, y1, 32), P(x + 22, y1, 32), P(x + 22, y1, 60), P(x, y1, 60)],
+      "windowLit",
+      2,
+    );
+    for (const dx of [7.3, 14.6])
+      line(ctx, P(x + dx, y1, 32), P(x + dx, y1, 60), "barkDark", 1.5);
+    line(ctx, P(x, y1, 46), P(x + 22, y1, 46), "barkDark", 1.5);
+    for (const [a, b] of [
+      [x - 10, x - 3],
+      [x + 25, x + 32],
+    ])
+      poly(
         ctx,
-        P(x + i * 5.5, y1, 85),
-        P(x + i * 5.5, y1, 99),
-        "tuffShade",
-        1.5,
+        [P(a, y1 + 3, 31), P(b, y1, 31), P(b, y1, 61), P(a, y1 + 3, 61)],
+        "stuccoShade",
+        2,
       );
   }
+  // Pent eave over the doors: tiles, snow on top, icicles under the edge.
+  poly(
+    ctx,
+    [
+      P(x0 - 4, y1, 86),
+      P(x1 + 4, y1, 86),
+      P(x1 + 4, y1 + 14, 77),
+      P(x0 - 4, y1 + 14, 77),
+    ],
+    "tileLight",
+    2.5,
+  );
+  for (let x = x0 + 6; x < x1; x += 12)
+    line(ctx, P(x, y1 + 1, 85.5), P(x, y1 + 13, 77.5), "tile", 1.5);
+  line(ctx, P(x0 - 4, y1 + 2, 86), P(x1 + 4, y1 + 2, 86), "snow", 4);
+  line(ctx, P(x0 - 4, y1 + 14, 77), P(x1 + 4, y1 + 14, 77), "tile", 3);
+  for (let x = x0 + 4; x <= x1; x += 11) {
+    const len = 4 + ((x * 5) % 7);
+    line(ctx, P(x, y1 + 14, 76), P(x, y1 + 14, 76 - len), "icicle", 2);
+  }
+  // Udatsu: plastered fire walls at both ends of the front, tile-capped.
+  for (const x of [x0 + 2, x1 - 2]) {
+    poly(
+      ctx,
+      [
+        P(x - 6, y1 + 4, 10),
+        P(x + 6, y1 + 4, 10),
+        P(x + 6, y1 + 4, 92),
+        P(x - 6, y1 + 4, 92),
+      ],
+      "stucco",
+      2.5,
+    );
+    poly(
+      ctx,
+      [
+        P(x - 9, y1 + 4, 92),
+        P(x + 9, y1 + 4, 92),
+        P(x + 7, y1 + 4, 98),
+        P(x - 7, y1 + 4, 98),
+      ],
+      "tile",
+      2,
+    );
+    line(ctx, P(x - 8, y1 + 4, 98), P(x + 8, y1 + 4, 98), "snow", 3);
+  }
+  // A painted mark on the gable (made up, not a real family's mark).
   const [gx, gy] = P(x1, ym, wall + 18);
-  ellipse(ctx, gx, gy, 9, 9, "tile");
+  ellipse(ctx, gx, gy, 11, 11, "stucco");
+  ellipse(ctx, gx, gy, 6, 6, "tile", 0);
+  line(ctx, [gx - 9, gy], [gx + 9, gy], "stucco", 2.5);
   // A ladder leaning on the front wall.
   line(ctx, P(232, y1 + 18, 0), P(232, y1, 92), "bark", 4);
   line(ctx, P(252, y1 + 18, 0), P(252, y1, 92), "bark", 4);
