@@ -20,6 +20,11 @@ export type ObstacleKind =
   | "crate"
   | "bicycle"
   | "tourist"
+  // Hokkaido winter street things (playtest: more, and more local):
+  | "rickshaw" // 人力車, carries tourists round Otaru today; parked
+  | "herring-crates" // 鰊箱, stacked wooden fish crates
+  | "sled" // a child's wooden sled, low and easy to miss
+  | "snowman" // 雪だるま, Japanese two-ball snowman
   /** A street exhibit (core/exhibits.ts): drawn by render/exhibits.ts. */
   | "exhibit";
 
@@ -87,6 +92,10 @@ const SIZES: Record<ObstacleKind, { w: number; d: number; h: number }> = {
   crate: { w: 1.0, d: 1.0, h: 1.0 },
   bicycle: { w: 0.6, d: 1.7, h: 1.0 },
   tourist: { w: 0.55, d: 0.45, h: 1.7 },
+  rickshaw: { w: 1.1, d: 2.0, h: 1.6 },
+  "herring-crates": { w: 1.3, d: 0.9, h: 1.1 },
+  sled: { w: 0.6, d: 1.1, h: 0.35 },
+  snowman: { w: 0.9, d: 0.9, h: 1.3 },
   exhibit: { w: 0.9, d: 1.6, h: 0.9 },
 };
 /** Weighted kinds for obstacles out in the street. */
@@ -99,6 +108,13 @@ const ROW_KINDS: ObstacleKind[] = [
   "tourist",
   "tourist",
   "lamp-post",
+  "herring-crates",
+  "herring-crates",
+  "snowman",
+  "snowman",
+  "sled",
+  "sled",
+  "rickshaw",
 ];
 const BUILDINGS: BuildingKind[] = [
   "stone-warehouse",
@@ -192,7 +208,10 @@ export function generateTrack(
     lanes.push({ s, x: lane });
 
     const progress = s / length;
-    const count = r() < 0.25 + progress * 0.5 ? 2 : 1;
+    // Denser further down: up to three per row near the canal (the lane
+    // stays clear, so the street is still finishable; see bot.test.ts).
+    const v = r();
+    const count = v < progress * 0.3 ? 3 : v < 0.35 + progress * 0.45 ? 2 : 1;
     const row: Obstacle[] = [];
     for (let i = 0; i < count; i++) {
       const kind = pick(ROW_KINDS);
@@ -200,8 +219,19 @@ export function generateTrack(
       const limit = halfWidth - size.w / 2 - 0.2;
       for (let tries = 0; tries < 8; tries++) {
         const o = make(kind, (r() * 2 - 1) * limit, s + (r() - 0.5) * 2);
-        o.turn = kind === "tourist" ? (r() - 0.5) * Math.PI * 2 : 0;
-        if (clearOf(o, lane)) {
+        o.turn =
+          kind === "tourist"
+            ? (r() - 0.5) * Math.PI * 2
+            : kind === "rickshaw" || kind === "sled"
+              ? (r() - 0.5) * 0.6
+              : 0;
+        // Clear of the lane and not inside another obstacle of the row.
+        const apart = row.every(
+          (p) =>
+            Math.abs(p.s - o.s) > (p.d + o.d) / 2 + 0.2 ||
+            Math.abs(p.x - o.x) > halfAcross(p) + halfAcross(o) + 0.2,
+        );
+        if (clearOf(o, lane) && apart) {
           row.push(o);
           break;
         }
@@ -218,7 +248,7 @@ export function generateTrack(
       else n--;
     }
     obstacles.push(...row);
-    s += 11 + r() * 8 - progress * 3;
+    s += 10 + r() * 7 - progress * 3;
   }
 
   // Street furniture along the edges: lamp posts at a steady rhythm and

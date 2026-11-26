@@ -4,15 +4,40 @@
 // poses as the physics colliders, so what you see is what you hit.
 import * as THREE from "three";
 import { frameAt, frameQuat, pointAt, ribbon } from "../core/path";
+import { placeCaptions } from "../core/captions";
+import { facadesFor } from "../core/facades";
 import { rng } from "../core/random";
-import type { Building, Obstacle, Track } from "../core/track";
-import { buildingBox, obstaclePose } from "../physics/world";
+import type { Obstacle, Track } from "../core/track";
+import { obstaclePose, PLAYER } from "../physics/world";
 import { PALETTE, type PaletteName } from "../style/palette";
+import { drawBuilding } from "./buildings";
 import { local, Merger, placed } from "./merge";
-import { iceTexture, stoneTexture, woodTexture } from "./textures";
+import {
+  brickTexture,
+  clapboardTexture,
+  iceTexture,
+  kawaraTexture,
+  stoneTexture,
+  woodTexture,
+} from "./textures";
 
 const MAT_KEYS = [
   "snow",
+  "clapboard",
+  "lanternRed",
+  "verdigris",
+  "stucco",
+  "tileTan",
+  "tuff",
+  "roofTile",
+  "ceramic",
+  "clockFace",
+  "cream",
+  "ink",
+  "glassAmber",
+  "glassRose",
+  "footprint",
+  "icePatch",
   "stone",
   "stoneDark",
   "wood",
@@ -35,7 +60,7 @@ const MAT_KEYS = [
   "touristSky",
   "water",
 ] as const;
-type Mat = (typeof MAT_KEYS)[number];
+export type Mat = (typeof MAT_KEYS)[number];
 const COATS: Mat[] = [
   "touristMustard",
   "touristMoss",
@@ -66,6 +91,27 @@ function materials(): Record<Mat, THREE.Material> {
   m.lamp = glow("lamp", 2);
   m.icicle = std("icicle", { roughness: 0.2, flatShading: true });
   m.water = std("water", { roughness: 0.15, metalness: 0.2 });
+  m.roofTile = std("roofTile", {
+    map: kawaraTexture(THREE),
+    color: PALETTE.snow,
+  });
+  m.brick = std("brick", { map: brickTexture(THREE), color: PALETTE.snow });
+  m.verdigris = std("verdigris", { roughness: 0.6, metalness: 0.25 });
+  m.clapboard = std("clapboard", {
+    map: clapboardTexture(THREE),
+    color: PALETTE.snow,
+  });
+  m.lanternRed = glow("lanternRed", 0.8);
+  m.glassAmber = glow("glassAmber", 1.1);
+  m.glassRose = glow("glassRose", 1.0);
+  // Road decals sit a hair above the ice; offset so they never flicker.
+  const decal = {
+    polygonOffset: true,
+    polygonOffsetFactor: -2,
+    polygonOffsetUnits: -2,
+  };
+  m.footprint = std("footprint", { roughness: 0.95, ...decal });
+  m.icePatch = std("icePatch", { roughness: 0.06, metalness: 0.15, ...decal });
   return m;
 }
 
@@ -108,7 +154,14 @@ export function buildStreet(track: Track): THREE.Group {
     m.add("snow", g, new THREE.Matrix4());
   }
 
-  for (const b of track.buildings) building(m, track, b);
+  // The 12 gallery buildings get the looks from content/otaru-slope.md.
+  const captions = placeCaptions(track.buildings, L - PLAYER.startS);
+  const facades = facadesFor(track.buildings, captions);
+  for (const b of track.buildings) {
+    const f = facades.get(b.id);
+    if (f) drawBuilding(m, track, b, f);
+  }
+  roadDecals(m, track);
   for (const o of track.obstacles) obstacle(m, track, o);
 
   // The canal: dark water below the end of the street, an embankment edge,
@@ -161,163 +214,65 @@ export function buildStreet(track: Track): THREE.Group {
 
 const E = (x = 0, y = 0, z = 0) => new THREE.Euler(x, y, z);
 
-/** A building, upright, its front flush with the street edge. Local axes:
- *  x across (street is toward -side), y up from the ice at the facade
- *  middle, z along the street (-z is downhill). */
-function building(m: Merger<Mat>, track: Track, b: Building) {
-  const r = rng(b.look + 17);
-  const box = buildingBox(track, b);
-  const len = b.s1 - b.s0;
-  const ground = pointAt(
-    track.path,
-    b.side * (track.halfWidth + b.depth / 2),
-    0,
-    b.s0 + len / 2,
-  );
-  const M = placed(ground, box.rot);
-  const face = -b.side * (b.depth / 2);
-  const out = -b.side; // direction toward the street
-  const turnToStreet = b.side > 0 ? -Math.PI / 2 : Math.PI / 2;
-  const wall: Mat =
-    b.kind === "stone-warehouse"
-      ? "stone"
-      : b.kind === "wooden-shop"
-        ? "wood"
-        : "plaster";
-
-  m.add(
-    wall,
-    new THREE.BoxGeometry(b.depth, b.h + box.sink, len - 0.2),
-    local(M, 0, (b.h - box.sink) / 2, 0),
-  );
-
-  // Gabled roof along the street, snow on top, icicles on the street eave.
-  const roofH = 1.6 + b.depth * 0.12;
-  const shape = new THREE.Shape();
-  shape.moveTo(-b.depth / 2 - 0.45, 0);
-  shape.lineTo(0, roofH);
-  shape.lineTo(b.depth / 2 + 0.45, 0);
-  shape.closePath();
-  const roof = new THREE.ExtrudeGeometry(shape, {
-    depth: len,
-    bevelEnabled: false,
-  }).translate(0, 0, -len / 2);
-  const roofMat: Mat = b.kind === "wooden-shop" ? "roofRed" : "roofSlate";
-  m.add(roofMat, roof.clone(), local(M, 0, b.h, 0));
-  m.add(
-    "snow",
-    roof,
-    local(M, 0, b.h + roofH * 0.42, 0, E(), [0.97, 0.6, 1.01]),
-  );
-  for (let z = -len / 2 + 0.3; z < len / 2 - 0.2; z += 0.45 + r() * 0.3) {
-    const l = 0.15 + r() * 0.45;
-    m.add(
-      "icicle",
-      new THREE.ConeGeometry(0.05, l, 4),
-      local(M, out * (b.depth / 2 + 0.4), b.h - l / 2, z, E(Math.PI)),
+/** Footprints wandering down the street and patches of polished ice. */
+function roadDecals(m: Merger<Mat>, track: Track) {
+  const r = rng(track.seed + 7);
+  const W = track.halfWidth;
+  const flat = (
+    x: number,
+    h: number,
+    s: number,
+    yaw: number,
+    sx: number,
+    sz: number,
+  ) =>
+    local(
+      placed(pointAt(track.path, x, h, s), frameQuat(frameAt(track.path, s))),
+      0,
+      0,
+      0,
+      E(-Math.PI / 2, 0, yaw),
+      [sx, sz, 1],
     );
-  }
-
-  // Upper-floor windows on every building.
-  const n = Math.max(1, Math.floor(len / 3));
-  const slot = (i: number) => -len / 2 + (i + 0.5) * (len / n);
-  for (let i = 0; i < n; i++) {
-    if (b.h < 5.2) break;
-    const lit = r() < 0.7;
-    m.add(
-      b.kind === "stone-warehouse" ? "iron" : lit ? "window" : "woodDark",
-      new THREE.PlaneGeometry(1.1, 1.2),
-      local(M, face + out * 0.02, 3.9, slot(i), E(0, turnToStreet)),
-    );
-    if (b.kind === "wooden-shop") {
-      // Lattice bars over the window.
-      for (const dz of [-0.3, 0, 0.3])
-        m.add(
-          "woodDark",
-          new THREE.BoxGeometry(0.06, 1.2, 0.06),
-          local(M, face + out * 0.05, 3.9, slot(i) + dz),
-        );
+  // Footprints: trails of left/right prints.
+  for (let t = 0; t < 26; t++) {
+    let s = r() * (track.length - 10);
+    let x = (r() * 2 - 1) * (W - 0.8);
+    let heading = (r() - 0.5) * 0.8;
+    const steps = 10 + Math.floor(r() * 18);
+    for (let i = 0; i < steps; i++) {
+      const foot = i % 2 === 0 ? -1 : 1;
+      m.add(
+        "footprint",
+        new THREE.CircleGeometry(0.07, 8),
+        flat(x + foot * 0.11, 0.012, s, heading, 1, 1.9),
+      );
+      s += 0.68 * Math.cos(heading);
+      x = Math.max(-W + 0.4, Math.min(W - 0.4, x + 0.68 * Math.sin(heading)));
+      heading += (r() - 0.5) * 0.25;
     }
   }
-
-  if (b.kind === "stone-warehouse") {
-    // Darker plinth, a big plank door with iron bands.
+  // Ice patches: irregular glossy shapes.
+  for (let p = 0; p < 34; p++) {
+    const g = new THREE.CircleGeometry(1, 9);
+    const pos = g.getAttribute("position");
+    for (let i = 1; i < pos.count; i++) {
+      const k = 0.7 + r() * 0.5;
+      pos.setXY(i, pos.getX(i) * k, pos.getY(i) * k);
+    }
+    const s = 6 + r() * (track.length - 10);
+    const size = 0.6 + r() * 1.4;
     m.add(
-      "stoneDark",
-      new THREE.BoxGeometry(b.depth + 0.2, 0.9 + box.sink, len - 0.1),
-      local(M, 0, (0.9 - box.sink) / 2, 0),
-    );
-    const doorW = Math.min(2.4, len * 0.35);
-    m.add(
-      "woodDark",
-      new THREE.BoxGeometry(0.15, 2.6, doorW),
-      local(M, face + out * 0.05, 1.3, 0),
-    );
-    for (const y of [0.7, 1.9])
-      m.add(
-        "iron",
-        new THREE.BoxGeometry(0.18, 0.12, doorW + 0.05),
-        local(M, face + out * 0.07, y, 0),
-      );
-  } else {
-    // Shop or workshop: a wide lit window at street level.
-    const winLen = Math.min(len - 1.2, 5);
-    m.add(
-      b.kind === "glass-workshop" ? "glass" : "window",
-      new THREE.PlaneGeometry(winLen, 1.7),
-      local(M, face + out * 0.02, 1.4, 0, E(0, turnToStreet)),
-    );
-    // Sign board with a cap of snow.
-    const signLen = Math.min(4, len * 0.55);
-    m.add(
-      "woodDark",
-      new THREE.BoxGeometry(0.12, 0.55, signLen),
-      local(M, face + out * 0.1, 2.75, 0),
-    );
-    m.add(
-      "snow",
-      new THREE.BoxGeometry(0.3, 0.12, signLen),
-      local(M, face + out * 0.12, 3.08, 0),
-    );
-  }
-  if (b.kind === "wooden-shop") {
-    // Sloped canopy over the shop window, snow on it, and a door curtain.
-    const canLen = Math.min(len - 0.8, 5.6);
-    m.add(
-      "roofRed",
-      new THREE.BoxGeometry(1.1, 0.08, canLen),
-      local(M, face + out * 0.5, 2.35, 0, E(0, 0, out * 0.35)),
-    );
-    m.add(
-      "snow",
-      new THREE.BoxGeometry(1.0, 0.1, canLen),
-      local(M, face + out * 0.5, 2.43, 0, E(0, 0, out * 0.35)),
-    );
-    for (const dz of [-0.28, 0.28])
-      m.add(
-        "noren",
-        new THREE.PlaneGeometry(0.5, 0.8),
-        local(
-          M,
-          face + out * 0.06,
-          1.85,
-          -len / 2 + 1 + dz,
-          E(0, turnToStreet),
-        ),
-      );
-  }
-  if (b.kind === "glass-workshop") {
-    // A brick chimney at the back of the roof, capped with snow.
-    const z = (r() - 0.5) * (len - 2);
-    m.add(
-      "brick",
-      new THREE.BoxGeometry(0.8, 2.6, 0.8),
-      local(M, b.side * (b.depth / 4), b.h + 1.3, z),
-    );
-    m.add(
-      "snow",
-      new THREE.BoxGeometry(0.9, 0.15, 0.9),
-      local(M, b.side * (b.depth / 4), b.h + 2.65, z),
+      "icePatch",
+      g,
+      flat(
+        (r() * 2 - 1) * (W - 1),
+        0.02,
+        s,
+        r() * Math.PI,
+        size,
+        size * (1 + r()),
+      ),
     );
   }
 }
@@ -344,28 +299,51 @@ function obstacle(m: Merger<Mat>, track: Track, o: Obstacle) {
         local(M, 0, o.h / 2 + 0.05, 0),
       );
       break;
-    case "lamp-post":
+    case "lamp-post": {
+      // A gas lamp: round base, slim post, ladder bar, glazed lantern with
+      // a pointed cap. The lantern sits where the halo is (h/2 + 0.25).
       m.add(
         "iron",
-        new THREE.CylinderGeometry(o.w / 3, o.w / 2, o.h, 8),
-        M.clone(),
+        new THREE.CylinderGeometry(o.w / 2, o.w / 2, 0.5, 8),
+        local(M, 0, base + 0.25, 0),
+      );
+      m.add(
+        "iron",
+        new THREE.CylinderGeometry(0.045, 0.06, o.h - 0.5, 8),
+        local(M, 0, base + 0.25 + (o.h - 0.5) / 2, 0),
+      );
+      m.add(
+        "iron",
+        new THREE.BoxGeometry(0.5, 0.04, 0.04),
+        local(M, 0, o.h / 2 - 0.35, 0),
+      );
+      m.add(
+        "iron",
+        new THREE.BoxGeometry(0.34, 0.05, 0.34),
+        local(M, 0, o.h / 2 - 0.02, 0),
       );
       m.add(
         "lamp",
-        new THREE.BoxGeometry(0.4, 0.5, 0.4),
-        local(M, 0, o.h / 2 + 0.25, 0),
+        new THREE.CylinderGeometry(0.2, 0.15, 0.48, 4, 1),
+        local(M, 0, o.h / 2 + 0.25, 0, E(0, Math.PI / 4)),
       );
       m.add(
         "iron",
-        new THREE.ConeGeometry(0.38, 0.3, 4),
-        local(M, 0, o.h / 2 + 0.65, 0, E(0, Math.PI / 4)),
+        new THREE.ConeGeometry(0.3, 0.3, 4),
+        local(M, 0, o.h / 2 + 0.64, 0, E(0, Math.PI / 4)),
+      );
+      m.add(
+        "iron",
+        new THREE.SphereGeometry(0.05, 6, 4),
+        local(M, 0, o.h / 2 + 0.83, 0),
       );
       m.add(
         "snow",
-        new THREE.ConeGeometry(0.3, 0.14, 4),
-        local(M, 0, o.h / 2 + 0.83, 0, E(0, Math.PI / 4)),
+        new THREE.ConeGeometry(0.24, 0.12, 4),
+        local(M, 0, o.h / 2 + 0.74, 0, E(0, Math.PI / 4)),
       );
       break;
+    }
     case "bicycle": {
       // Along local z: two wheels, a frame, handlebars, a snowy seat.
       for (const z of [-0.55, 0.55])
@@ -401,6 +379,153 @@ function obstacle(m: Merger<Mat>, track: Track, o: Obstacle) {
       );
       break;
     }
+    case "rickshaw": {
+      // Parked rickshaw (人力車): two big wheels, a black hood, red seat
+      // and blanket, shafts resting on the snow. Long side along z.
+      for (const x of [-0.5, 0.5])
+        m.add(
+          "iron",
+          new THREE.TorusGeometry(0.62, 0.05, 6, 20),
+          local(M, x, base + 0.64, 0.2, E(0, Math.PI / 2)),
+        );
+      m.add(
+        "woodDark",
+        new THREE.CylinderGeometry(0.04, 0.04, 1.1, 6),
+        local(M, 0, base + 0.64, 0.2, E(0, 0, Math.PI / 2)),
+      );
+      m.add(
+        "lanternRed",
+        new THREE.BoxGeometry(0.9, 0.18, 0.6),
+        local(M, 0, base + 0.9, 0.25),
+      );
+      m.add(
+        "lanternRed",
+        new THREE.BoxGeometry(0.9, 0.6, 0.12),
+        local(M, 0, base + 1.15, 0.55),
+      );
+      m.add(
+        "ink",
+        new THREE.SphereGeometry(0.55, 10, 6, 0, Math.PI * 2, 0, Math.PI / 2),
+        local(M, 0, base + 1.2, 0.45, E(-0.5), [0.9, 0.75, 0.7]),
+      );
+      for (const x of [-0.4, 0.4])
+        m.add(
+          "woodDark",
+          new THREE.BoxGeometry(0.06, 0.06, 1.7),
+          local(M, x, base + 0.45, -0.75, E(-0.25)),
+        );
+      m.add(
+        "woodDark",
+        new THREE.BoxGeometry(0.9, 0.06, 0.06),
+        local(M, 0, base + 0.15, -1.55),
+      );
+      m.add(
+        "snow",
+        new THREE.BoxGeometry(0.8, 0.06, 0.5),
+        local(M, 0, base + 1.02, 0.2),
+      );
+      break;
+    }
+    case "herring-crates": {
+      // Stacked wooden fish crates (鰊箱), a little askew, snow on top.
+      const n = 3 + Math.floor(r() * 2);
+      for (let i = 0; i < n; i++) {
+        const hgt = o.h / n;
+        m.add(
+          "wood",
+          new THREE.BoxGeometry(o.w - 0.1, hgt - 0.03, o.d - 0.1),
+          local(
+            M,
+            (r() - 0.5) * 0.1,
+            base + hgt * (i + 0.5),
+            (r() - 0.5) * 0.08,
+            E(0, (r() - 0.5) * 0.12),
+          ),
+        );
+        m.add(
+          "woodDark",
+          new THREE.BoxGeometry(o.w - 0.05, 0.04, o.d - 0.05),
+          local(M, 0, base + hgt * (i + 1) - 0.03, 0),
+        );
+      }
+      m.add(
+        "snow",
+        new THREE.BoxGeometry(o.w - 0.12, 0.1, o.d - 0.12),
+        local(M, 0, o.h / 2 + 0.03, 0),
+      );
+      break;
+    }
+    case "sled": {
+      // A child's wooden sled: two curled runners, slats, a red tow rope.
+      for (const x of [-0.24, 0.24]) {
+        m.add(
+          "woodDark",
+          new THREE.BoxGeometry(0.05, 0.05, o.d),
+          local(M, x, base + 0.03, 0),
+        );
+        m.add(
+          "woodDark",
+          new THREE.TorusGeometry(0.1, 0.025, 4, 8, Math.PI),
+          local(M, x, base + 0.13, -o.d / 2, E(0, Math.PI / 2, Math.PI / 2)),
+        );
+        m.add(
+          "woodDark",
+          new THREE.BoxGeometry(0.04, 0.2, 0.04),
+          local(M, x, base + 0.13, o.d / 4),
+        );
+        m.add(
+          "woodDark",
+          new THREE.BoxGeometry(0.04, 0.2, 0.04),
+          local(M, x, base + 0.13, -o.d / 4),
+        );
+      }
+      m.add(
+        "wood",
+        new THREE.BoxGeometry(0.58, 0.05, o.d - 0.15),
+        local(M, 0, base + 0.25, 0.05),
+      );
+      m.add(
+        "lanternRed",
+        new THREE.TorusGeometry(0.22, 0.02, 4, 12, Math.PI),
+        local(M, 0, base + 0.08, -o.d / 2 - 0.2, E(-Math.PI / 2)),
+      );
+      m.add(
+        "snow",
+        new THREE.BoxGeometry(0.4, 0.05, 0.5),
+        local(M, 0.05, base + 0.3, 0.15),
+      );
+      break;
+    }
+    case "snowman": {
+      // Japanese snowman: two balls, charcoal eyes, a red bucket hat.
+      m.add(
+        "snow",
+        new THREE.SphereGeometry(0.45, 12, 10),
+        local(M, 0, base + 0.42, 0),
+      );
+      m.add(
+        "snow",
+        new THREE.SphereGeometry(0.32, 12, 10),
+        local(M, 0, base + 0.98, 0),
+      );
+      for (const x of [-0.11, 0.11])
+        m.add(
+          "ink",
+          new THREE.SphereGeometry(0.04, 6, 4),
+          local(M, x, base + 1.03, -0.29),
+        );
+      m.add(
+        "lanternRed",
+        new THREE.CylinderGeometry(0.17, 0.22, 0.24, 10),
+        local(M, 0, base + 1.32, 0, E(0.2)),
+      );
+      m.add(
+        "woodDark",
+        new THREE.CylinderGeometry(0.015, 0.015, 0.6, 4),
+        local(M, 0.42, base + 0.9, 0, E(0, 0, 1.0)),
+      );
+      break;
+    }
     case "tourist": {
       // A fellow visitor: legs, coat, head, a hat, a little camera.
       const coat = COATS[o.look % COATS.length] ?? "touristSky";
@@ -426,12 +551,7 @@ function obstacle(m: Merger<Mat>, track: Track, o: Obstacle) {
         new THREE.SphereGeometry(0.16, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2),
         local(M, 0, base + 1.53, 0),
       );
-      if (r() < 0.6)
-        m.add(
-          "iron",
-          new THREE.BoxGeometry(0.16, 0.1, 0.08),
-          local(M, 0, base + 1.35, -0.25),
-        );
+      // Cameras are animated in the view (render/view.ts, core/tourists.ts).
       break;
     }
   }

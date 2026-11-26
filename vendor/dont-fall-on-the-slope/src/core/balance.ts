@@ -2,8 +2,10 @@
 // The wobble is a smooth, seeded mix of sines, so it feels like losing
 // balance rather than random jitter. Pure; physics applies the result.
 
-/** Speed (m/s) where wobble starts, and where it is at full strength. */
-export const WOBBLE = { from: 9, full: 23, accel: 3.2, braceFactor: 0.35 };
+/** Speed (m/s) where wobble starts, and where it is at full strength.
+ *  Lowered from 9–23 after the slowdown (top speed now ≈ 8–16 m/s), so the
+ *  sway and the windmilling arms still show. */
+export const WOBBLE = { from: 5, full: 14, accel: 3.2, braceFactor: 0.35 };
 
 /** 0 when slow, rising to 1 at full speed. */
 export function instability(speed: number): number {

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  displayLabel,
   type FindInfo,
   laneAt,
   NOTICE_PROP,
@@ -126,5 +127,13 @@ describe("slidPast", () => {
       slidPast(POOL, [], ["wall", "fish", "sacks", "cart", "boxes"], passed),
     ).toBeUndefined();
     expect(slidPast(POOL, [], [], () => false)).toBeUndefined();
+  });
+});
+
+describe("displayLabel", () => {
+  it("capitalises the first word and turns ids into words", () => {
+    expect(displayLabel("shachihoko")).toBe("Shachihoko");
+    expect(displayLabel("herring-boxes")).toBe("Herring boxes");
+    expect(displayLabel("Canal")).toBe("Canal");
   });
 });

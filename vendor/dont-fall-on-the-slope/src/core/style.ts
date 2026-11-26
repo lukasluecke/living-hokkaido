@@ -31,3 +31,18 @@ export function closeCalls(
   }
   return out;
 }
+
+/** The guide comments on a close call at most this often (s). Every close
+ *  call still scores and ticks; only the card is rationed (playtest: one
+ *  per close call felt spammy). */
+export const COMMENT_GAP = 25;
+
+/** Should the guide comment on this close call? The first one always;
+ *  after that only when the last comment was COMMENT_GAP seconds ago. */
+export function shouldComment(
+  count: number,
+  lastAt: number,
+  now: number,
+): boolean {
+  return count === 1 || now - lastAt >= COMMENT_GAP;
+}
