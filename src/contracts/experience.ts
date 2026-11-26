@@ -21,6 +21,10 @@ export type Prefs = {
   reducedMotion: boolean;
   /** False when WebGL failed; parts render their HTML fallback. */
   webgl: boolean;
+  /** Visitor picked "Sketch": show code sketches, not generated models. */
+  sketchModels?: boolean;
+  /** Presenter switch: hide the model labels (chip and "About this model"). */
+  hideModelLabels?: boolean;
 };
 
 export type ExperienceState = {

@@ -12,8 +12,17 @@ export function PresentationBadge({ value }: { value: Presentation }) {
   return null;
 }
 
-export function RepresentationBadge({ value }: { value: Representation }) {
+export function RepresentationBadge({
+  value,
+  generated = false,
+}: {
+  value: Representation;
+  /** An AI-generated model is shown (never a scan or a reconstruction). */
+  generated?: boolean;
+}) {
   const t = useT();
+  if (generated)
+    return <span className={s.badge}>{t("AI-generated model")}</span>;
   const text = {
     illustrative: "Illustrative model",
     reconstruction: "Reconstruction",

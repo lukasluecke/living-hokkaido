@@ -7,12 +7,30 @@ import { useMemo } from "react";
 import * as THREE from "three";
 import type { Object3D } from "three";
 
+/** Generated GLBs ship glossy PBR maps: make them matte (no photo-real look). */
+function matte(o: Object3D) {
+  o.traverse((c) => {
+    const m = (c as THREE.Mesh).material as
+      | THREE.MeshStandardMaterial
+      | undefined;
+    if (!m || !(c as THREE.Mesh).isMesh || !m.isMeshStandardMaterial) return;
+    const n = m.clone();
+    n.roughness = 1;
+    n.metalness = 0;
+    n.roughnessMap = null;
+    n.metalnessMap = null;
+    n.normalMap = null;
+    (c as THREE.Mesh).material = n;
+  });
+  return o;
+}
+
 /**
- * Generated GLBs (Hyper3D Rodin) ship PBR materials. Swap them for toon
- * materials that keep the colour texture, and add a thin ink hull, so they
- * match the code-built objects (docs/STYLE.md: toon + ink outline).
+ * For the object viewer: toon materials that keep the colour texture, plus a
+ * thin ink hull, so a generated GLB matches the code-built objects
+ * (docs/STYLE.md: toon + ink outline). Rooms toon the matte material instead.
  */
-function toonify(o: Object3D) {
+export function toonify(o: Object3D) {
   const meshes: THREE.Mesh[] = [];
   o.traverse((c) => {
     if ((c as THREE.Mesh).isMesh && !c.userData.hull)
@@ -50,7 +68,7 @@ function toonify(o: Object3D) {
 export function useGlbClone(url: string, prepare?: (o: Object3D) => Object3D) {
   const { scene } = useGLTF(url);
   return useMemo(() => {
-    const o = toonify(scene.clone(true));
+    const o = matte(scene.clone(true));
     o.traverse((c) => {
       c.castShadow = true;
       c.receiveShadow = true;

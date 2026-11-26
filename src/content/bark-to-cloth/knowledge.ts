@@ -241,6 +241,16 @@ export const barkToCloth: KnowledgeEntry = {
       ],
     },
     {
+      id: "garment-generated",
+      text: "This model was made by an AI tool (Hyper3D Rodin) from a short text prompt for this demo. It is not a museum object, scan or reconstruction. It has no pattern on purpose: no curator has checked it, and Ainu robe patterns need a curator.",
+      citations: [
+        {
+          sourceId: "living-hokkaido-policy",
+          locator: "public/models/ATTRIBUTION.md, generated models",
+        },
+      ],
+    },
+    {
       id: "no-technique",
       text: "This grid invites close looking. It does not teach an authenticated weaving technique.",
       citations: [
