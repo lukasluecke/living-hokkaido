@@ -33,7 +33,15 @@ import type { OutOfPlaceProps } from "../integration/contracts";
 import { PALETTE } from "../style/palette";
 import { RES } from "../style/res";
 import { hex } from "../art/iso";
-import { type Button, drawChunkyBox, makeButton, makeText } from "../style/ui";
+import {
+  type Button,
+  drawChunkyBox,
+  drawIcon,
+  type IconPart,
+  makeButton,
+  makeIconButton,
+  makeText,
+} from "../style/ui";
 
 export type GameSceneData = OutOfPlaceProps & {
   /** Puts text in the host's aria-live region (screen readers). */
@@ -62,6 +70,238 @@ const AI_THINK_MS = 1800;
 const BRUSH_RADIUS = { S: 2, M: 5, L: 10 } as const;
 type BrushSize = keyof typeof BRUSH_RADIUS;
 const SIZES: BrushSize[] = ["S", "M", "L"];
+/** Panel icons (see drawIcon in style/ui.ts). */
+const ICON: Record<string, IconPart[]> = {
+  move: [
+    {
+      line: [
+        [-16, 0],
+        [16, 0],
+      ],
+    },
+    {
+      line: [
+        [0, -16],
+        [0, 16],
+      ],
+    },
+    {
+      line: [
+        [-11, -5],
+        [-16, 0],
+        [-11, 5],
+      ],
+    },
+    {
+      line: [
+        [11, -5],
+        [16, 0],
+        [11, 5],
+      ],
+    },
+    {
+      line: [
+        [-5, -11],
+        [0, -16],
+        [5, -11],
+      ],
+    },
+    {
+      line: [
+        [-5, 11],
+        [0, 16],
+        [5, 11],
+      ],
+    },
+  ],
+  brush: [
+    {
+      line: [
+        [15, -15],
+        [1, -1],
+      ],
+    },
+    { dot: [-5, 5, 6] },
+    {
+      line: [
+        [-8, 8],
+        [-15, 15],
+      ],
+    },
+  ],
+  eyedrop: [
+    {
+      line: [
+        [-13, 13],
+        [5, -5],
+      ],
+    },
+    { dot: [9, -9, 6] },
+    {
+      line: [
+        [0, -6],
+        [6, 0],
+      ],
+    },
+    { dot: [-15, 16, 2] },
+  ],
+  zoom: [
+    { ring: [-3, -3, 10] },
+    {
+      line: [
+        [5, 5],
+        [14, 14],
+      ],
+    },
+    {
+      line: [
+        [-8, -3],
+        [2, -3],
+      ],
+    },
+    {
+      line: [
+        [-3, -8],
+        [-3, 2],
+      ],
+    },
+  ],
+  fill: [
+    {
+      line: [
+        [-12, -6],
+        [-8, 13],
+        [8, 13],
+        [12, -6],
+        [-12, -6],
+      ],
+    },
+    {
+      line: [
+        [-9, -6],
+        [0, -15],
+        [9, -6],
+      ],
+    },
+    {
+      line: [
+        [15, -2],
+        [15, 8],
+      ],
+    },
+  ],
+  undo: [
+    {
+      line: [
+        [-8.3, 6.8],
+        [-8.8, 1.1],
+        [-6.4, -4.1],
+        [-1.8, -7.3],
+        [3.9, -7.8],
+        [9.1, -5.4],
+        [12.3, -0.8],
+        [12.8, 4.9],
+      ],
+    },
+    {
+      line: [
+        [-9.3, -1.2000000000000002],
+        [-8.3, 6.8],
+        [-0.3000000000000007, 4.8],
+      ],
+    },
+  ],
+  standing: [
+    { dot: [0, -14, 4.5] },
+    {
+      line: [
+        [0, -8],
+        [0, 5],
+      ],
+    },
+    {
+      line: [
+        [-8, -3],
+        [8, -3],
+      ],
+    },
+    {
+      line: [
+        [-6, 16],
+        [0, 5],
+        [6, 16],
+      ],
+    },
+  ],
+  sitting: [
+    { dot: [-3, -13, 4.5] },
+    {
+      line: [
+        [-3, -7],
+        [-3, 4],
+        [8, 4],
+        [8, 15],
+      ],
+    },
+    {
+      line: [
+        [-3, -2],
+        [6, 0],
+      ],
+    },
+    {
+      line: [
+        [-12, 8],
+        [0, 8],
+      ],
+    },
+  ],
+  kneeling: [
+    { dot: [0, -14, 4.5] },
+    {
+      line: [
+        [0, -8],
+        [0, 3],
+        [8, 9],
+        [8, 16],
+      ],
+    },
+    {
+      line: [
+        [0, 3],
+        [-4, 15],
+        [-14, 15],
+      ],
+    },
+    {
+      line: [
+        [0, -3],
+        [7, 1],
+      ],
+    },
+  ],
+  lying: [
+    { dot: [-13, 6, 4.5] },
+    {
+      line: [
+        [-7, 8],
+        [16, 8],
+      ],
+    },
+    {
+      line: [
+        [-1, 8],
+        [5, 1],
+      ],
+    },
+    {
+      line: [
+        [-18, 15],
+        [18, 15],
+      ],
+    },
+  ],
+};
 /** Side of the texture swatch the eyedropper takes from the scene (px). */
 const PATCH = 40;
 /** Recent paints kept in the panel's bottom row. */
@@ -91,14 +331,24 @@ const PHASE_TITLE: Record<Phase, string> = {
 
 // Tool panel layout (right side, over the empty backdrop).
 const PANEL_X0 = 960;
-const COL1 = 1037;
-const COL2 = 1193;
-const THIRDS = [1013, 1115, 1217];
-const BTN_W = 140;
-const BTN_H = 76;
-const ROWS = [110, 196, 300, 390, 494];
+/** Four columns of square icon buttons across the panel. */
+const QUAD = [1008, 1076, 1144, 1212];
+/** Trays (sections) of the panel: top and bottom edges. */
+const TRAY = {
+  tools: [38, 176],
+  paint: [188, 452],
+  pose: [464, 600],
+} as const;
+const TOOL_Y = 120;
+const SIZE_Y = 264;
+const ACTION_Y = 334;
+const POSE_Y = 548;
+/** The current paint, big, left of the brush sizes. */
+const SWATCH = { x: 1042, y: SIZE_Y, w: 122, h: 62 };
+/** Brush sizes S, M, L (narrow buttons right of the swatch). */
+const SIZE_X = [1133, 1179, 1225];
 const MAIN_BTN = { x: 1115, y: 650, w: 296, h: 84 };
-const RECENT_Y = 568;
+const RECENT_Y = 418;
 
 // Reveal: freeze, slow zoom on the hider, then the sting.
 const REVEAL_ZOOM = 2.3;
@@ -361,7 +611,7 @@ export class GameScene extends Phaser.Scene {
       makeText(this, 30, 62, 21, "creamSoft", { wordWrap: { width: 900 } }),
     );
 
-    // Disguise tool panel
+    // Disguise tool panel: three trays (tools, paint, pose) of icon buttons.
     this.panel = add(this.add.container(0, 0));
     const bg = this.add.graphics();
     drawChunkyBox(
@@ -373,57 +623,108 @@ export class GameScene extends Phaser.Scene {
       "backdropDeep",
       "backdropDeep",
     );
+    const trayX = PANEL_X0 + 10;
+    const trayW = 290;
+    for (const [top, bottom] of Object.values(TRAY)) {
+      bg.fillStyle(PALETTE.backdrop).fillRoundedRect(
+        trayX,
+        top,
+        trayW,
+        bottom - top,
+        12,
+      );
+      bg.lineStyle(2, PALETTE.backdropLight).strokeRoundedRect(
+        trayX,
+        top,
+        trayW,
+        bottom - top,
+        12,
+      );
+    }
     this.panel.add(bg);
-    const btn = (
+    const label = (y: number, t: string, keys: string) => {
+      this.panel.add(
+        makeText(this, trayX + 12, y, 17, "sunGlow").setText(t.toUpperCase()),
+      );
+      this.panel.add(
+        makeText(this, trayX + trayW - 12, y + 1, 15, "creamSoft")
+          .setOrigin(1, 0)
+          .setText(keys),
+      );
+    };
+    label(TRAY.tools[0] + 6, "Tools", "arrows move");
+    label(TRAY.paint[0] + 6, "Paint", "E pick · [ ] size");
+    label(TRAY.pose[0] + 6, "Pose", "keys 1–4");
+    const iconBtn = (
       x: number,
       y: number,
-      label: string,
+      w: number,
+      h: number,
+      text: string,
+      icon: IconPart[],
       fn: () => void,
-      w = BTN_W,
-      size = 26,
     ) => {
-      const b = makeButton(this, x, y, w, BTN_H, label, fn, size);
+      const b = makeIconButton(this, x, y, w, h, text, icon, fn);
       this.panel.add(b.root);
       return b;
     };
+    const tool = (i: number, t: string, text: string) =>
+      iconBtn(QUAD[i], TOOL_Y, 58, 88, text, ICON[t], () =>
+        t === "zoom" ? this.setZoom(!this.zoomed) : this.setTool(t as Tool),
+      );
     this.toolBtns = {
-      move: btn(COL1, ROWS[0], "Move", () => this.setTool("move")),
-      brush: btn(COL1, ROWS[1], "Brush", () => this.setTool("brush")),
-      eyedrop: btn(COL2, ROWS[1], "Eyedrop", () => this.setTool("eyedrop")),
+      move: tool(0, "move", "Move"),
+      brush: tool(1, "brush", "Brush"),
+      eyedrop: tool(2, "eyedrop", "Pick"),
     };
-    this.zoomBtn = btn(COL2, ROWS[0], "Zoom +", () =>
-      this.setZoom(!this.zoomed),
-    );
-    this.sizeBtns = {
-      S: btn(THIRDS[0], ROWS[2], "S", () => this.setBrushSize("S"), 88),
-      M: btn(THIRDS[1], ROWS[2], "M", () => this.setBrushSize("M"), 88),
-      L: btn(THIRDS[2], ROWS[2], "L", () => this.setBrushSize("L"), 88),
-    };
+    this.zoomBtn = tool(3, "zoom", "Zoom +");
+    // Current paint, then brush sizes drawn as dots.
     this.swatch = this.add.graphics();
     this.panel.add(this.swatch);
     this.swatchImg = this.add
-      .image(THIRDS[0], ROWS[3] - 3, "__DEFAULT")
+      .image(SWATCH.x, SWATCH.y - 3, "__DEFAULT")
       .setVisible(false);
     this.panel.add(this.swatchImg);
-    btn(THIRDS[1], ROWS[3], "Fill", () => this.fillAll(), 88, 24);
-    this.undoBtn = btn(THIRDS[2], ROWS[3], "Undo", () => this.undo(), 88, 24);
-    // Four practical shapes in one row (1–4).
-    const POSE_X = [1001, 1077, 1153, 1229];
+    const size = (i: number, s: BrushSize, r: number) =>
+      iconBtn(SIZE_X[i], SIZE_Y, 38, 62, "", [{ dot: [0, 0, r] }], () =>
+        this.setBrushSize(s),
+      );
+    this.sizeBtns = {
+      S: size(0, "S", 3),
+      M: size(1, "M", 6),
+      L: size(2, "L", 10),
+    };
+    // Wide buttons with the icon left of the word.
+    const action = (
+      x: number,
+      text: string,
+      icon: IconPart[],
+      fn: () => void,
+    ) => {
+      const b = makeButton(this, x, ACTION_Y, 134, 58, `     ${text}`, fn, 22);
+      const ig = this.add.graphics();
+      drawIcon(ig, icon, -36, -3);
+      b.root.addAt(ig, 2);
+      this.panel.add(b.root);
+      return b;
+    };
+    action(1042, "Fill", ICON.fill, () => this.fillAll());
+    this.undoBtn = action(1178, "Undo", ICON.undo, () => this.undo());
+    this.panel.add(
+      makeText(this, trayX + 12, RECENT_Y - 40, 15, "creamSoft").setText(
+        "Recent paints",
+      ),
+    );
     const poseBtn = (i: number, pose: Pose, text: string) =>
-      btn(POSE_X[i], ROWS[4], text, () => this.setPose(pose), 70, 20);
+      iconBtn(QUAD[i], POSE_Y, 58, 88, text, ICON[pose], () =>
+        this.setPose(pose),
+      );
     this.poseBtns = {
       standing: poseBtn(0, "standing", "Stand"),
       sitting: poseBtn(1, "sitting", "Sit"),
       kneeling: poseBtn(2, "kneeling", "Kneel"),
       lying: poseBtn(3, "lying", "Lie"),
     };
-    const label = (y: number, t: string) =>
-      this.panel.add(
-        makeText(this, PANEL_X0 + 14, y, 16, "creamSoft").setText(t),
-      );
-    label(ROWS[2] - 60, "Brush size");
-    label(ROWS[3] - 56, "Color");
-    label(ROWS[4] - 60, "Pose");
 
     // One main button for every phase: Skip / I'm hidden / Give up / Next / Play again.
     this.mainBtn = makeButton(
@@ -928,6 +1229,8 @@ export class GameScene extends Phaser.Scene {
       roundOver: "Play again",
     };
     this.mainBtn.setLabel(mainLabel[phase]);
+    // The one action that ends hiding stands out in gold.
+    this.mainBtn.setSelected(phase === "disguise");
   }
 
   private drawBanner() {
@@ -1273,7 +1576,9 @@ export class GameScene extends Phaser.Scene {
       this.textures
         .addCanvas("swatch-patch", p.patch)
         ?.setFilter(Phaser.Textures.FilterMode.NEAREST);
-      this.swatchImg?.setTexture("swatch-patch").setDisplaySize(80, 60);
+      this.swatchImg
+        ?.setTexture("swatch-patch")
+        .setDisplaySize(SWATCH.w - 8, SWATCH.h - 14);
     }
     this.swatchImg?.setVisible(!!p.patch);
     if (remember) {
@@ -1295,7 +1600,7 @@ export class GameScene extends Phaser.Scene {
     this.recentKeys = [];
     if (!this.panel) return;
     this.recent.forEach((p, i) => {
-      const x = PANEL_X0 + 46 + i * 72;
+      const x = QUAD[i];
       const root = this.add.container(x, RECENT_Y);
       const g = this.add.graphics();
       drawChunkyBox(g, 0, 0, 58, 40, p.color, p.color);
@@ -1329,10 +1634,10 @@ export class GameScene extends Phaser.Scene {
     this.swatch.clear();
     drawChunkyBox(
       this.swatch,
-      THIRDS[0],
-      ROWS[3],
-      88,
-      BTN_H,
+      SWATCH.x,
+      SWATCH.y,
+      SWATCH.w,
+      SWATCH.h,
       this.color,
       this.color,
     );

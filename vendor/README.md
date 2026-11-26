@@ -93,6 +93,13 @@ the diff):
    slope game's look. Backdrop and UI in its winter-dusk blue, its lamp
    gold and roof red (`style/palette.ts`, `index.html`); on the Otaru
    warehouse, warm-lit windows, snow on the ridge and eave, icicles.
+14. Out of Place, Lukas's requests, one commit: slope-style house fronts
+   (Otaru warehouse: plinth, lit lattice windows with open plaster fire
+   shutters, a tiled pent eave with snow and icicles, plaster fire walls,
+   a made-up painted mark; Sapporo wooden shop: lit lattice and shop floor,
+   snow, icicles), and a game control panel: Tools, Paint and Pose trays
+   with icon buttons (`makeIconButton`, `drawIcon` in `style/ui.ts`), brush
+   sizes as dots, recent paints in the Paint tray, a gold "I'm hidden".
 
 ## Sapporo Omusha (Shaw)
 
