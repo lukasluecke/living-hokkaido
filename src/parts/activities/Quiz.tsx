@@ -1,11 +1,13 @@
 "use client";
-// Quiz: pick one option. Wrong picks stay marked; the right pick shows the
-// explanation from the definition and the claims it rests on.
+// Quiz: first a short "Learn" note from the cited claims, so the answer can
+// be known; then pick one option. Wrong picks stay marked and open the note
+// again; the right pick shows the explanation and the claims it rests on.
 import { useT } from "@/i18n";
 import { useEffect, useRef, useState } from "react";
 import type { ActivityOf, Emit, ResolvedClaim } from "@/contracts";
 import s from "./Activities.module.css";
-import { quizScore } from "./logic";
+import { quizLesson, quizScore } from "./logic";
+import { LearnAgain, LearnFirst } from "./Learn";
 import { Sources } from "./Sources";
 
 const LETTERS = "ABCDEFGHIJ";
@@ -27,6 +29,15 @@ export function Quiz({
   const sent = useRef(false);
   const feedback = useRef<HTMLDivElement>(null);
   const last = tried.at(-1);
+  const lesson = quizLesson(a.claimIds, claims);
+  // With nothing to read, go straight to the question.
+  const [ready, setReady] = useState(lesson.length === 0);
+  const [noteOpen, setNoteOpen] = useState(false);
+  const question = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (ready && lesson.length > 0 && tried.length === 0)
+      question.current?.focus();
+  }, [ready, lesson.length, tried.length]);
 
   useEffect(() => {
     if (!solved || sent.current) return;
@@ -43,9 +54,21 @@ export function Quiz({
     feedback.current?.focus();
   }, [solved, tried.length, a.id, a.options.length, emit]);
 
+  if (!ready)
+    return <LearnFirst lines={lesson} onReady={() => setReady(true)} />;
+
   return (
     <div className={s.quiz}>
-      {a.question !== title && <p className={s.prompt}>{a.question}</p>}
+      {!solved && (
+        <LearnAgain lines={lesson} open={noteOpen} onOpen={setNoteOpen} />
+      )}
+      <p
+        ref={question}
+        tabIndex={-1}
+        className={a.question !== title ? s.prompt : s.srOnly}
+      >
+        {a.question}
+      </p>
       <fieldset className={s.options}>
         <legend className={s.srOnly}>{a.question}</legend>
         {a.options.map((o, i) => {
@@ -61,6 +84,7 @@ export function Quiz({
               onClick={() => {
                 if (solved || tried.includes(i)) return;
                 setTried([...tried, i]);
+                if (i !== a.answer) setNoteOpen(true);
               }}
             >
               <span className={s.letter} aria-hidden="true">
@@ -84,7 +108,13 @@ export function Quiz({
         {solved ? (
           <p>{a.explanation}</p>
         ) : last !== undefined ? (
-          <p>{t("Not quite. Look again and try another one.")}</p>
+          <p>
+            {t(
+              lesson.length > 0
+                ? "Not quite. Read the note again and try another one."
+                : "Not quite. Look again and try another one.",
+            )}
+          </p>
         ) : (
           <p>{t("Choose one answer.")}</p>
         )}

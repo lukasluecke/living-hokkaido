@@ -76,3 +76,9 @@ journal stamp appears after completion.
   comes from `/api/museum-assets/<key>` behind the demo password (Lukas);
   401 shows a password form, 404/503/no WebGL2 the list only. Phones and
   ≤4 GB devices: pixel ratio 1.25, 1M splats.
+- 2026-11-26: Lukas: every quiz and order task must be answerable from what
+  the visitor saw. `Learn.tsx` shows a "Learn first" note (the text of the
+  cited claims; for `sequence` each step's claim in the right order) before
+  the question, and "Read the note again" during it; a wrong pick opens the
+  note. No new content text: the note is the claims. The shell passes step
+  claims of a `sequence` in `claims`.

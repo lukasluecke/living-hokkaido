@@ -710,11 +710,13 @@ export function Shell({ pack: source }: { pack: ContentPack }) {
               <Activity
                 {...ctx}
                 activity={activity}
-                claims={claimsFor(
-                  pack,
-                  activity.knowledgeId,
-                  activity.claimIds,
-                )}
+                claims={claimsFor(pack, activity.knowledgeId, [
+                  ...activity.claimIds,
+                  // Order tasks teach each step's claim first.
+                  ...(activity.kind === "sequence"
+                    ? activity.steps.map((x) => x.claimId)
+                    : []),
+                ])}
                 found={journal.found.flatMap((key) =>
                   key.startsWith(`${activity.id}/`)
                     ? [key.slice(activity.id.length + 1)]
