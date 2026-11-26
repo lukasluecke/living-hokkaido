@@ -150,3 +150,8 @@ export const drag = (
 export const caption = (t: string): Step => ({ do: "caption", text: t });
 export const captionClear = (): Step => ({ do: "captionClear" });
 export const mark = (label: string): Step => ({ do: "mark", label });
+/** Scroll by dy pixels at the cursor, spread over ms. */
+export const wheel = (
+  dy: number,
+  opts: Partial<Common> & { ms?: number } = {},
+): Step => ({ do: "wheel", dy, ...opts });

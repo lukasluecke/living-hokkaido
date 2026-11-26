@@ -5,7 +5,7 @@
 //
 // This function is serialised by Playwright, so it must not use imports or
 // closures from this module.
-export function installOverlay(opts: { cursor: boolean }) {
+export function installOverlay(opts: { cursor: boolean; touch?: boolean }) {
   type Win = Window & {
     __demoEvents?: { type: string; at: number }[];
     __demo?: {
@@ -50,6 +50,13 @@ export function installOverlay(opts: { cursor: boolean }) {
     cursor.innerHTML =
       '<svg viewBox="0 0 22 22" width="22" height="22"><path d="M3 2l15 9-6.5 1.5L8.5 19z" fill="#fff" stroke="#111" stroke-width="1.5" stroke-linejoin="round"/></svg>';
     if (!opts.cursor) cursor.style.display = "none";
+    // Phone: a fingertip dot instead of an arrow.
+    if (opts.touch) {
+      cursor.innerHTML = "";
+      cursor.style.cssText +=
+        "width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;" +
+        "background:rgba(255,255,255,.45);border:2px solid rgba(20,24,28,.55);";
+    }
     const cap = document.createElement("div");
     cap.id = "__demo-caption";
     const count = document.createElement("div");

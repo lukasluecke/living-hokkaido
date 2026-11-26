@@ -20,7 +20,8 @@ import {
 } from "playwright";
 import type { Shot, Step, Target } from "./dsl";
 import { installOverlay } from "./overlay";
-import { preroll, shots } from "./steps";
+import { phoneOmushaPreroll, phonePreroll, phoneShots } from "./phone";
+import { preroll as deskPreroll, shots as deskShots } from "./steps";
 import { installVirtualClock } from "./vclock";
 
 const HELP = `Backup demo video recorder
@@ -56,6 +57,12 @@ Output: recordings/demo-<time>.mp4 (needs ffmpeg; else .webm) + markers.
   --state-in <file>   Start with a saved state: record a long flow in parts
                       (--shots a,b --state-out s.json, then --shots c,d
                       --state-in s.json) and join the MP4s with ffmpeg
+  --phone             Phone shot list (phone.ts) in a 390x844 portrait
+                      viewport: touch, mobile mode, 2x pixel ratio
+  --phone-omusha      With --phone --shots omusha: skip the tour to the
+                      Omusha step first (a separate take on a real GPU)
+  --media-dir <dir>   Serve /api/museum-assets/<key> from this folder
+                      (owl-story.mp4, omusha-mobile.sog; not in Git)
   --out <dir>         Output folder (default recordings)
   --list              List the shots and exit
 `;
@@ -65,7 +72,10 @@ const { values: opt } = parseArgs({
     url: { type: "string" },
     dev: { type: "boolean", default: false },
     "no-build": { type: "boolean", default: false },
-    size: { type: "string", default: "1920x1080" },
+    size: { type: "string" },
+    phone: { type: "boolean", default: false },
+    "phone-omusha": { type: "boolean", default: false },
+    "media-dir": { type: "string" },
     headed: { type: "boolean", default: false },
     browser: { type: "string", default: "chromium" },
     capture: { type: "string", default: "playwright" },
@@ -88,6 +98,13 @@ const { values: opt } = parseArgs({
   allowPositionals: false,
 });
 
+const shots = opt.phone ? phoneShots : deskShots;
+const preroll = opt["phone-omusha"]
+  ? phoneOmushaPreroll
+  : opt.phone
+    ? phonePreroll
+    : deskPreroll;
+
 const csv = (s?: string) =>
   s
     ?.split(",")
@@ -106,7 +123,9 @@ if (opt.list) {
   process.exit(0);
 }
 
-const [width, height] = (opt.size ?? "").split("x").map(Number);
+const [width, height] = (opt.size ?? (opt.phone ? "390x844" : "1920x1080"))
+  .split("x")
+  .map(Number);
 if (!width || !height) throw new Error(`Bad --size "${opt.size}" (use WxH)`);
 const speed = Number(opt.speed ?? (opt.rehearse ? 0.3 : 1));
 const capture = opt.rehearse ? "none" : opt.capture;
@@ -452,6 +471,11 @@ async function run(c: Ctx, s: Step, where: string): Promise<boolean> {
       return true;
     }
     console.error(`  ✗ ${where}: ${describe(s)}\n    ${why}`);
+    await c.page
+      .screenshot({
+        path: path.resolve(opt.out ?? "recordings", "failed-step.png"),
+      })
+      .catch(() => {});
     return false;
   }
 }
@@ -570,7 +594,8 @@ async function main() {
   try {
     context = await browser.newContext({
       viewport: { width, height },
-      deviceScaleFactor: 1,
+      deviceScaleFactor: opt.phone ? 2 : 1,
+      ...(opt.phone ? { isMobile: true, hasTouch: true } : {}),
       reducedMotion: opt["reduced-motion"] ? "reduce" : "no-preference",
       ...(opt["state-in"] ? { storageState: opt["state-in"] } : {}),
       ...(capture === "playwright"
@@ -606,10 +631,33 @@ async function main() {
         await route.fulfill({ json: reply });
       });
     }
+    const mediaDir = opt["media-dir"];
+    if (mediaDir) {
+      // Large museum media live in R2, not in Git. Serve local copies.
+      await context.route("**/api/museum-assets/*", async (route) => {
+        const key = new URL(route.request().url()).pathname.split("/").pop();
+        const file = key && path.join(mediaDir, key);
+        if (
+          !file ||
+          !/^[a-z0-9-]+\.(sog|spz|mp4|webm)$/.test(key) ||
+          !existsSync(file)
+        )
+          return route.continue();
+        await route.fulfill({
+          status: 200,
+          contentType: key.endsWith(".mp4")
+            ? "video/mp4"
+            : key.endsWith(".webm")
+              ? "video/webm"
+              : "application/octet-stream",
+          body: route.request().method() === "HEAD" ? "" : readFileSync(file),
+        });
+      });
+    }
     // Passed as source text with a __name shim: tsx (esbuild) adds __name()
     // calls to functions, and that helper does not exist in the page.
     await context.addInitScript({
-      content: `var __name = (f) => f; (${installOverlay.toString()})(${JSON.stringify({ cursor: !opt["no-cursor"] })});`,
+      content: `var __name = (f) => f; (${installOverlay.toString()})(${JSON.stringify({ cursor: !opt["no-cursor"], touch: opt.phone })});`,
     });
     const page = await context.newPage();
     const pageStart = Date.now();
