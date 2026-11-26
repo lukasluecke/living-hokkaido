@@ -53,11 +53,15 @@ function Director({
   lift,
   props,
   onInside,
+  finish,
 }: {
   controls: React.RefObject<CameraControls | null>;
   lift: { current: number };
   props: DetailScenePartProps;
   onInside: () => void;
+  /** Set to a function that ends the entry at once (a click on an object
+   *  during the entry). */
+  finish: React.RefObject<(() => void) | null>;
 }) {
   const { scene, prefs, emit, focusedArtifactId } = props;
   const liftTarget = useRef(0);
@@ -78,55 +82,73 @@ function Director({
     let cancelled = false;
     const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
     const done = () => {
+      if (entered.current) return;
       entered.current = true;
+      c.smoothTime = 0.45;
       onInside();
       emit({ type: "scene.ready", sceneId: scene.id });
+    };
+    // Objects work during the entry (Lukas: the slow end was too long). A
+    // click ends the entry: roof up, normal camera speed, scene ready.
+    finish.current = () => {
+      cancelled = true;
+      liftTarget.current = 1;
+      c.smoothTime = 0.45;
+      done();
+    };
+    // The scene counts as ready once the camera is on its way home; the
+    // slow settle at the end no longer blocks the objects.
+    const home = (smooth: boolean) => {
+      look(c, scene.views.home, smooth);
+      return wait(smooth ? 450 : 0);
     };
     (async () => {
       if (scene.entry === "fly-in" && !prefs.reducedMotion) {
         // Outdoor: no roof; glide from high above down to the home view.
-        c.smoothTime = 1.1;
+        c.smoothTime = 0.7;
         await look(c, scene.views.outside, false);
-        await wait(300);
+        await wait(200);
         if (cancelled) return;
-        await look(c, scene.views.home, true);
+        await home(true);
         if (cancelled) return;
-        c.smoothTime = 0.45;
         done();
         return;
       }
       if (prefs.reducedMotion || scene.entry !== "roof-lift") {
         liftTarget.current = 1;
         lift.current = 1;
-        await look(c, scene.views.home, false);
+        await home(false);
         done();
         return;
       }
-      c.smoothTime = 0.9;
+      c.smoothTime = 0.6;
       liftTarget.current = 0;
       lift.current = 0;
       await look(c, scene.views.outside, false);
-      await wait(500);
+      await wait(350);
       if (cancelled) return;
       liftTarget.current = 1;
-      await wait(1100);
+      await wait(800);
       if (cancelled) return;
-      await look(c, scene.views.home, true);
+      await home(true);
       if (cancelled) return;
-      c.smoothTime = 0.45;
       done();
     })();
     return () => {
       cancelled = true;
+      finish.current = null;
     };
   }, [scene.id]);
 
   useEffect(() => {
     const c = controls.current;
-    if (!c || !entered.current) return;
+    if (!c) return;
+    // A card or key picked an object during the entry: end the entry first.
+    if (!entered.current && focusedArtifactId) finish.current?.();
+    if (!entered.current) return;
     const p = scene.placements.find((x) => x.artifactId === focusedArtifactId);
     look(c, p ? p.focusView : scene.views.home, !prefs.reducedMotion);
-  }, [focusedArtifactId, scene, controls, prefs.reducedMotion]);
+  }, [focusedArtifactId, scene, controls, prefs.reducedMotion, finish]);
   return null;
 }
 
@@ -159,6 +181,7 @@ export function Room(props: RoomProps) {
   const controls = useRef<CameraControls>(null);
   const lift = useRef(0);
   const [inside, setInside] = useState(false);
+  const finish = useRef<(() => void) | null>(null);
   return (
     <>
       <Setting kind={scene.setting} lift={lift} {...props} />
@@ -167,11 +190,12 @@ export function Room(props: RoomProps) {
         <ArtifactShell
           key={p.artifactId}
           placement={p}
-          hovered={inside && hovered === p.artifactId}
+          hovered={hovered === p.artifactId}
           focused={focusedArtifactId === p.artifactId}
           onHover={setHovered}
           onSelect={(id) => {
-            if (!inside) return;
+            // During the entry a click ends it, then focuses the object.
+            if (!inside) finish.current?.();
             if (focusedArtifactId === id) emit({ type: "artifact.blur" });
             else emit({ type: "artifact.focus", artifactId: id });
           }}
@@ -207,6 +231,7 @@ export function Room(props: RoomProps) {
         lift={lift}
         props={props}
         onInside={() => setInside(true)}
+        finish={finish}
       />
       <Projector overlay={props.overlay} />
       <EffectComposer multisampling={0}>
