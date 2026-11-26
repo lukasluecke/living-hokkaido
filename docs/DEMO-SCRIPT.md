@@ -1,5 +1,8 @@
 # Demo script (2–3 minutes)
 
+For the recorded presentation video (phone viewport with a side panel), see
+[DEMO-SCRIPT-PHONE.md](DEMO-SCRIPT-PHONE.md).
+
 Live site: <https://living-hokkaido.luecke.workers.dev>. Backup video:
 `npm run demo:video` (see [scripts/demo-video/README.md](../scripts/demo-video/README.md)).
 

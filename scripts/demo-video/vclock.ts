@@ -91,6 +91,8 @@ export function installVirtualClock() {
   const proto = HTMLMediaElement.prototype;
   const realPause = proto.pause;
   proto.play = function (this: Media) {
+    // Native controls would show the real (paused) state; hide them.
+    this.controls = false;
     if (!this.__vplay) {
       this.__vplay = true;
       playing.add(this);
