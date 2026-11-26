@@ -58,7 +58,7 @@ export function IslandPart(props: IslandPartProps) {
         </Suspense>
         <QualityGovernor />
       </Canvas>
-      <div className={c.pins}>
+      <div className={c.pins} data-calm={props.calm || undefined}>
         {content.island.locations.map((l) => (
           <button
             key={l.id}
@@ -77,7 +77,7 @@ export function IslandPart(props: IslandPartProps) {
           </button>
         ))}
       </div>
-      {view === "island" && (
+      {view === "island" && !props.calm && (
         <PlaceTray
           {...props}
           onSelect={select}

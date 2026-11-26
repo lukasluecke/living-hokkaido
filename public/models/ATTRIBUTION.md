@@ -103,3 +103,21 @@ no facts. Generated 2026-11-26 with the same settings and style suffix (about
 --texture-compress webp --texture-size 512 --simplify true
 --simplify-ratio 0.5`; the scene scales them to size at load.
 
+
+## Round 4 (owl-film look, today and night postcards)
+
+Same settings and style suffix as round 3 (for "today", modern houses and
+street lights were allowed; for the mine, poles and wires).
+
+| Key | Shown for | PixVerse video id | Prompt (start) |
+|---|---|---|---|
+| era-5-today-v3.mp4 | era "today" (replaces era-4-meiji.mp4) | 437336738241660 | Present day, blue hour at a quiet river mouth in Hokkaido: a small calm town of ordinary low houses … a rebuilt traditional house of thatched grass and bark in a small museum park … a person in an ordinary winter coat walks along the river path. |
+| place-mine-night.mp4 | scene "coal-mountain" (replaces place-mine.mp4) | 437336757732910 | Night in a coal mining town in snowy mountains in the mid 20th century, a tall wooden mine headframe, heaps of coal, warm lit windows, smoke from chimneys. |
+| place-coast-night.mp4 | scene "herring-coast" (replaces place-coast.mp4) | 437337291430806 | Night on a cold northern sea coast in early spring, wild and empty, before electricity, no poles, antennas or wires: moonlight on waves, pebble beach, wooden fishing boats, nets drying on wooden racks, a lantern-lit wooden shed. |
+| place-hills-night.mp4 | scene "animal-hills" (replaces place-hills.mp4) | 437337298264161 | Blue hour over rolling grassy hills in Hokkaido, wild and empty, no poles or wires, low mist, a few sika deer with small antlers and pale spots grazing at the forest edge, moonlight. |
+
+Not shipped: era-5-today v3a 437336735133104 (sign board, car), place-mine-night
+v3a 437336755064313 (backup, CG look), place-coast-night 437336742036221 (TV
+antenna), 437336744712747 (pole, tyres), 437337294614206 (pole),
+place-hills-night 437336748094187 (poles), 437336752144567 (pole, CG look),
+437337300952363 (distant poles).

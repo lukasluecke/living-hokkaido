@@ -13,6 +13,11 @@ import s from "./Hud.module.css";
 import type { Station } from "./route";
 import { DEMO_NOTE, SHOW_DISCLAIMERS } from "@/design/disclaimers";
 
+/** Lukas, 2026-11-26: no season switcher in the header for now (it is
+ *  winter; the switcher added little). The season code stays; set this to
+ *  true to show the control again. "Over time" moves into the ☰ menu. */
+const SHOW_SEASON_MENU = false;
+
 const P = {
   spring:
     "M12 4c1.4 2 1.4 4 0 6-1.4-2-1.4-4 0-6Zm0 16c-1.4-2-1.4-4 0-6 1.4 2 1.4 4 0 6ZM4 12c2-1.4 4-1.4 6 0-2 1.4-4 1.4-6 0Zm16 0c-2 1.4-4 1.4-6 0 2-1.4 4-1.4 6 0Z",
@@ -49,7 +54,10 @@ export function Hud({
   onOverTime,
   onResetProgress,
   inert,
+  calm,
 }: {
+  /** First look: leave out the route rail (progressive disclosure). */
+  calm?: boolean;
   /** An overlay covers the page: take the HUD out of focus order. */
   inert?: boolean;
   season: SeasonState;
@@ -113,41 +121,43 @@ export function Hud({
           </small>
         )}
       </strong>
-      <nav className={s.rail} aria-label={t("Your route")}>
-        <ol>
-          {stations.map((st, i) => {
-            const text = `${st.label}${st.sub ? ` ${st.sub}` : ""}`;
-            return (
-              <li key={st.id} data-status={st.status}>
-                {i > 0 && <span className={s.seg} aria-hidden="true" />}
-                <button
-                  type="button"
-                  className={s.station}
-                  title={text}
-                  disabled={!st.event}
-                  aria-current={st.status === "now" ? "step" : undefined}
-                  aria-label={`${text}${st.status === "done" ? t(", done") : ""}`}
-                  onClick={() => st.event && emit(st.event)}
-                >
-                  <i aria-hidden="true">
-                    {st.status === "done" ? (
-                      <LineIcon d={UI_ICON.check} size={14} />
-                    ) : (
-                      <LineIcon d={UI_ICON[st.id]} size={14} />
-                    )}
-                  </i>
-                  <span className={s.stationLabel}>
-                    {st.label}
-                    {st.sub && st.status === "now" && (
-                      <span className={s.sub}> {st.sub}</span>
-                    )}
-                  </span>
-                </button>
-              </li>
-            );
-          })}
-        </ol>
-      </nav>
+      {!calm && (
+        <nav className={s.rail} aria-label={t("Your route")}>
+          <ol>
+            {stations.map((st, i) => {
+              const text = `${st.label}${st.sub ? ` ${st.sub}` : ""}`;
+              return (
+                <li key={st.id} data-status={st.status}>
+                  {i > 0 && <span className={s.seg} aria-hidden="true" />}
+                  <button
+                    type="button"
+                    className={s.station}
+                    title={text}
+                    disabled={!st.event}
+                    aria-current={st.status === "now" ? "step" : undefined}
+                    aria-label={`${text}${st.status === "done" ? t(", done") : ""}`}
+                    onClick={() => st.event && emit(st.event)}
+                  >
+                    <i aria-hidden="true">
+                      {st.status === "done" ? (
+                        <LineIcon d={UI_ICON.check} size={14} />
+                      ) : (
+                        <LineIcon d={UI_ICON[st.id]} size={14} />
+                      )}
+                    </i>
+                    <span className={s.stationLabel}>
+                      {st.label}
+                      {st.sub && st.status === "now" && (
+                        <span className={s.sub}> {st.sub}</span>
+                      )}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
+        </nav>
+      )}
       <div className={s.tools}>
         <button
           type="button"
@@ -184,25 +194,27 @@ export function Hud({
             />
           )}
         </SoundToggle>
-        <button
-          ref={menuBtn}
-          type="button"
-          className={`${s.round} ${s.seasonBtn}`}
-          aria-label={t("Menu: seasons and timelapse")}
-          aria-expanded={menu === "season"}
-          aria-controls="hud-menu"
-          onClick={() => setMenu((m) => (m === "season" ? null : "season"))}
-        >
-          <Icon d={P[now]} fill={now === "spring"} />
-          {/* The season name says what the button changes (testers missed
+        {SHOW_SEASON_MENU && (
+          <button
+            ref={menuBtn}
+            type="button"
+            className={`${s.round} ${s.seasonBtn}`}
+            aria-label={t("Menu: seasons and timelapse")}
+            aria-expanded={menu === "season"}
+            aria-controls="hud-menu"
+            onClick={() => setMenu((m) => (m === "season" ? null : "season"))}
+          >
+            <Icon d={P[now]} fill={now === "spring"} />
+            {/* The season name says what the button changes (testers missed
               the bare icon). Hidden on phones, where the HUD is tight. */}
-          <span className={s.seasonName} aria-hidden="true">
-            {t(now)}
-          </span>
-          <span className={s.caret} aria-hidden="true">
-            ▾
-          </span>
-        </button>
+            <span className={s.seasonName} aria-hidden="true">
+              {t(now)}
+            </span>
+            <span className={s.caret} aria-hidden="true">
+              ▾
+            </span>
+          </button>
+        )}
         <button
           ref={moreBtn}
           type="button"
@@ -233,6 +245,19 @@ export function Hud({
                   </>
                 )}
               </SoundToggle>
+              {!SHOW_SEASON_MENU && onOverTime && (
+                <button
+                  type="button"
+                  className={s.item}
+                  onClick={() => {
+                    setMenu(null);
+                    onOverTime();
+                  }}
+                >
+                  <Icon d="M7 3h10M7 21h10M8 3c0 5 8 6 8 9s-8 4-8 9M16 3c0 5-8 6-8 9s8 4 8 9" />
+                  {t("Over time")}
+                </button>
+              )}
               <a className={s.item} href="/contribute">
                 <Icon d="M4 20l4-1 11-11-3-3L5 16l-1 4Zm10-13 3 3" />
                 {t("Contribute a story")}
@@ -253,7 +278,7 @@ export function Hud({
             <p className={s.about}>{t(DEMO_NOTE)}</p>
           </div>
         )}
-        {menu === "season" && (
+        {SHOW_SEASON_MENU && menu === "season" && (
           <div id="hud-menu" ref={menuBox} className={s.menu}>
             <p className={s.cap}>{t("Season")}</p>
             <div
