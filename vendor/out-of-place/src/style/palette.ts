@@ -2,10 +2,11 @@
 // Rules: no pure black or pure white; outlines are dark-tinted; flat 2–3 tones per material.
 
 export const PALETTE = {
-  // Backdrop (night-teal) that every scene island and UI floats on
-  backdropDeep: 0x142833,
-  backdrop: 0x1d3644,
-  backdropLight: 0x2a4a5a,
+  // Backdrop that every scene island and UI floats on: the winter-dusk blue
+  // of Don't Fall on the Slope, so the two games read as one set.
+  backdropDeep: 0x141d31,
+  backdrop: 0x1d2a44,
+  backdropLight: 0x32466b,
 
   // Foliage
   pineDark: 0x2f5d3a,
@@ -53,13 +54,18 @@ export const PALETTE = {
   woolLight: 0x55566a,
 
   // Roof accents
-  persimmonDark: 0x9e3f2d,
+  persimmonDark: 0x8f3a2c,
   persimmon: 0xc8553d,
   slateBlueDark: 0x3b5168,
   slateBlue: 0x4f6b88,
 
-  // Light and shadow
-  sunGlow: 0xf3c77a,
+  // Light and shadow (sunGlow is the slope game's warm lamp gold)
+  sunGlow: 0xffc277,
+  windowLit: 0xf2a85a,
+  // Winter: snow on roofs, icicles on eaves (as in the slope game)
+  snow: 0xe9edf2,
+  snowShade: 0xbac6d6,
+  icicle: 0xcfe3ee,
   coolShadow: 0x3a4e63,
 
   // Nuri (player character): unglazed clay
@@ -78,7 +84,7 @@ export const PALETTE = {
 
 export type PaletteKey = keyof typeof PALETTE;
 
-/** CSS hex string for Phaser text styles and HTML ("#1d3644"). */
+/** CSS hex string for Phaser text styles and HTML ("#1d2a44"). */
 export function css(key: PaletteKey): string {
   return "#" + PALETTE[key].toString(16).padStart(6, "0");
 }

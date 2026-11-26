@@ -89,6 +89,10 @@ the diff):
    guesses every ~2.7 s; a guess lands on Nuri more often when the blend
    score is low, clay is bare, or time runs on. A local heuristic, no
    server or model. One-player modes skip the handoff cover.
+13. Out of Place, Lukas's request, one commit: a first step toward the
+   slope game's look. Backdrop and UI in its winter-dusk blue, its lamp
+   gold and roof red (`style/palette.ts`, `index.html`); on the Otaru
+   warehouse, warm-lit windows, snow on the ridge and eave, icicles.
 
 ## Sapporo Omusha (Shaw)
 
