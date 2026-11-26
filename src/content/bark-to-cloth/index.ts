@@ -6,6 +6,7 @@ import {
 import { activities } from "./activities";
 import { areaActivities, areaArtifacts, areaScenes } from "./area-scenes";
 import { artifacts } from "./artifacts";
+import { withEraClips, withSceneClips } from "./clips";
 import { withGenerated } from "./generated-models";
 import { gameActivities, gameActivityIdsByScene, gameKnowledge } from "./games";
 import { guide } from "./guide";
@@ -43,7 +44,7 @@ export const barkToClothRaw = {
     listeningGrove,
     makersClearing,
     memoryCabin,
-    ...areaScenes.map((sc) => ({
+    ...withSceneClips(areaScenes).map((sc) => ({
       ...sc,
       activityIds: [
         ...(sc.activityIds ?? []),
@@ -63,7 +64,7 @@ export const barkToClothRaw = {
   stamps,
   guide,
   memories,
-  timelines: [houseTimeline],
+  timelines: [withEraClips(houseTimeline)],
   // "Ask the owl" example questions, by where the visitor is. Questions
   // only; answers come from cited claims (tests/ask.test.ts checks that each
   // one finds a claim in its place).

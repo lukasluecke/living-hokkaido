@@ -8,6 +8,7 @@ import s from "../shared/Fallback.module.css";
 import { QualityGovernor, useQuality } from "../shared/Quality";
 import { Room } from "./Room";
 import attn from "../shared/Attention.module.css";
+import { ClipPlayer } from "../shared/Clip";
 import c from "./Scene.module.css";
 import t from "./Tray.module.css";
 import { groupActivities, kindCaption } from "../shared/activityGroups";
@@ -128,6 +129,16 @@ export function DetailScenePart(props: DetailScenePartProps) {
             </span>
           )}
       </div>
+      {scene.clip && !focusedArtifactId && (
+        <div className={c.clip}>
+          <ClipPlayer
+            key={scene.id}
+            clip={scene.clip}
+            reducedMotion={prefs.reducedMotion}
+            hideLabels={prefs.hideModelLabels}
+          />
+        </div>
+      )}
       <Tray {...props} label={label} activities={roomActivities(props)} />
     </div>
   );

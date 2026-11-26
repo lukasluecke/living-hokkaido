@@ -1,5 +1,6 @@
 // Detail scenes: one small interior world per open location.
 import { z } from "zod";
+import { clipSchema } from "./media";
 import { idSchema } from "./ids";
 import { cameraViewSchema, vec3Schema } from "./space";
 
@@ -48,6 +49,8 @@ export const detailSceneSchema = z.object({
   activityIds: z.array(idSchema).default([]),
   /** Rendering technique, for the reveal and the asset manifest. */
   technique: z.enum(["low-poly", "splat", "scan"]).default("low-poly"),
+  /** Optional ambient "postcard" clip of the place ("Watch"). */
+  clip: clipSchema.optional(),
 });
 export type DetailScene = z.infer<typeof detailSceneSchema>;
 export type DetailSceneInput = z.input<typeof detailSceneSchema>;

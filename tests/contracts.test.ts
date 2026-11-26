@@ -457,3 +457,34 @@ test("place: stage hills and the hill things parse (additive enum values)", () =
   });
   assert.ok(r.success);
 });
+
+test("clips: only plain .mp4 keys; eras and area scenes carry their clip", async () => {
+  const { clipSchema } = await import("@/contracts");
+  assert.equal(
+    clipSchema.safeParse({ key: "../x.mp4", title: "a", note: "b", tool: "c" })
+      .success,
+    false,
+  );
+  assert.equal(
+    clipSchema.safeParse({
+      key: "era-1-pit.mp4",
+      title: "a",
+      note: "b",
+      tool: "c",
+    }).success,
+    true,
+  );
+  const t = pack.timelines[0];
+  for (const e of t.eras) if (e.clip) assert.match(e.clip.note, /AI-imagined/);
+  assert.ok(pack.scenes.some((s) => s.clip));
+});
+
+test("media ranges: start-end, open end, suffix, bad", async () => {
+  const { parseRange } = await import("@/integrations/media");
+  assert.equal(parseRange(null, 100), null);
+  assert.deepEqual(parseRange("bytes=0-9", 100), { offset: 0, length: 10 });
+  assert.deepEqual(parseRange("bytes=90-", 100), { offset: 90, length: 10 });
+  assert.deepEqual(parseRange("bytes=-5", 100), { offset: 95, length: 5 });
+  assert.equal(parseRange("bytes=200-", 100), "bad");
+  assert.equal(parseRange("items=0-1", 100), "bad");
+});

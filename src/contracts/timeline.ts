@@ -4,6 +4,7 @@
 // renderer. They are not cultural statements and never stand alone: the
 // era's claims carry the facts.
 import { z } from "zod";
+import { clipSchema } from "./media";
 import { idSchema } from "./ids";
 
 /** House form shown in an era (illustrative shapes, see the era claims). */
@@ -51,6 +52,8 @@ export const timelineEraSchema = z.object({
     /** Show a raised storehouse next to the house. */
     storehouse: z.boolean().default(false),
   }),
+  /** Optional AI-imagined clip of this era ("Watch"). */
+  clip: clipSchema.optional(),
 });
 export type TimelineEra = z.infer<typeof timelineEraSchema>;
 

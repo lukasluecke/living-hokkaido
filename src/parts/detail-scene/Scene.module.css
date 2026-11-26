@@ -75,3 +75,19 @@
   white-space: nowrap;
 }
 /* The object tray and Try here sheet: Tray.module.css. */
+
+/* "Watch" postcard clip of the place (scene.clip), top right under the HUD. */
+.clip {
+  position: absolute;
+  top: 76px;
+  right: 16px;
+  width: min(360px, calc(100% - 32px));
+  padding: 4px 12px;
+  background: var(--fl-paper);
+  color: var(--fl-ink);
+  border: 2px solid var(--fl-edge);
+  border-radius: 12px;
+  box-shadow: var(--fl-shadow);
+  font-family: var(--fl-body);
+  z-index: 1;
+}
