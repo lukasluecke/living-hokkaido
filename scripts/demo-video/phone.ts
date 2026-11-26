@@ -228,11 +228,9 @@ export const phoneShots: Shot[] = [
       // the Linux container (see steps.ts).
       click(button("Play"), { synthetic: true }),
       hold(3000),
-      click(button("Slip"), {
-        synthetic: true,
-        fallback: press("Enter"),
-        optional: true,
-      }),
+      // The game starts with Enter ("Slip" is gone; a missing optional
+      // button waits minutes in frame mode).
+      press("Enter"),
       hold(1200),
       press("ArrowLeft"),
       hold(1200),
