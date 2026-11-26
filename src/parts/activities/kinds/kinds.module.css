@@ -562,7 +562,7 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
-/* Story refrain (sakehe): shown in its own script, never voiced. */
+/* Story refrain (sakehe): shown in its own script; voiced only as a labelled AI imitation when the activity opts in. */
 .root :global(.caption):global(.refrain) {
   font-family: ui-serif, "Hiragino Mincho ProN", Georgia, serif;
   color: #6a4a12;

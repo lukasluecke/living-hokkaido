@@ -93,7 +93,9 @@ export const mediaRefSchema = z.discriminatedUnion("kind", [
   }),
   /**
    * A pre-generated AI voice (text to speech) for a fictional narrator, never
-   * for a person or a cultural authority, and never for Ainu text. Files:
+   * for a person or a cultural authority. Ainu text only when `refrain` is
+   * true (an AI imitation of the refrain, labelled as such; Lukas,
+   * 2026-11-26), file `refrain.mp3`. Files:
    * `/audio/voice/<group>/<lineId>.mp3` plus `index.json` (VoiceIndex), made
    * by scripts/audio/voices.ts. The UI must label it "AI voice". English
    * only; other languages fall back to captions or the device voice.
@@ -102,6 +104,8 @@ export const mediaRefSchema = z.discriminatedUnion("kind", [
     kind: z.literal("ai-voice"),
     group: idSchema,
     credit: z.string().min(1).default("AI voice (ElevenLabs) · illustrative"),
+    /** Also voice the story's refrain (AI imitation, not a recitation). */
+    refrain: z.boolean().default(false),
   }),
 ]);
 export type MediaRef = z.infer<typeof mediaRefSchema>;

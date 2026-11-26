@@ -339,7 +339,7 @@ export const owlStory: ActivityInput = {
   narrator: {
     character: "owl",
     credit: "Read by the owl guide · a fictional character",
-    voice: { kind: "ai-voice", group: "story-owl" },
+    voice: { kind: "ai-voice", group: "story-owl", refrain: true },
   },
   refrain: {
     text: "トゥノヤケ レノヤケ クントゥムケ カムイムイケ カムイチカッポ フム フム",

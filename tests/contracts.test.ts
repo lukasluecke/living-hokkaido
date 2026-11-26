@@ -509,6 +509,13 @@ test("ai-voice media ref: default label, owl stories use it", async () => {
   assert.ok(stories.length > 0);
   for (const a of stories)
     if (a.kind === "story") assert.equal(a.narrator.voice.kind, "ai-voice");
+  assert.equal(m.kind === "ai-voice" && m.refrain, false);
+  const owl = stories.find((a) => a.id === "story-owl");
+  assert.ok(
+    owl?.kind === "story" &&
+      owl.narrator.voice.kind === "ai-voice" &&
+      owl.narrator.voice.refrain,
+  );
 });
 
 test("films: source from one config value; grove has the owl film", async () => {

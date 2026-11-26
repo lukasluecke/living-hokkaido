@@ -57,8 +57,15 @@ export function Story({
   const canVoiceStory =
     useAi ||
     (voice.kind === "device-voice-placeholder" && deviceVoice.available());
-  // No voice ever reads the refrain (it is not English).
-  const canVoice = canVoiceStory && line?.role !== "refrain";
+  // The refrain is voiced only as an opted-in AI imitation; the device
+  // voice never reads it (it is not English).
+  const aiRefrain =
+    useAi &&
+    voice.kind === "ai-voice" &&
+    voice.refrain &&
+    !!ai?.index.lines.refrain;
+  const canVoice = canVoiceStory && (line?.role !== "refrain" || aiRefrain);
+  const voiceId = line?.role === "refrain" ? "refrain" : line?.id;
   // The AI voice starts on; the device placeholder stays opt-in.
   useEffect(() => {
     if (ai) setVoiceOn(true);
@@ -103,8 +110,9 @@ export function Story({
   useEffect(() => {
     if (!playing || atPause || done || !voiceOn || !canVoice || !line) return;
     if (!useAi || !ai) return;
-    const starts = ai.index.lines[line.id]?.words ?? [];
-    const audio = new Audio(ai.url(line.id));
+    const id = voiceId ?? line.id;
+    const starts = ai.index.lines[id]?.words ?? [];
+    const audio = new Audio(ai.url(id));
     let t: ReturnType<typeof setTimeout> | undefined;
     audio.ontimeupdate = () =>
       setWord(
@@ -127,7 +135,18 @@ export function Story({
       clearTimeout(t);
       audio.pause();
     };
-  }, [playing, atPause, done, voiceOn, canVoice, line, useAi, ai, advance]);
+  }, [
+    playing,
+    atPause,
+    done,
+    voiceOn,
+    canVoice,
+    line,
+    voiceId,
+    useAi,
+    ai,
+    advance,
+  ]);
 
   // Device voice placeholder: word boundaries drive the caption.
   useEffect(() => {
@@ -285,7 +304,12 @@ export function Story({
                     </p>
                   )}
                   <p className="frame-note">
-                    Refrain · {refrain.credit} · not read by any voice
+                    Refrain · {refrain.credit}
+                    {aiRefrain
+                      ? SHOW_DISCLAIMERS
+                        ? " · AI imitation, not a real recitation"
+                        : ""
+                      : " · not read by any voice"}
                   </p>
                   <Cite
                     claim={claims[refrain.claimId]}

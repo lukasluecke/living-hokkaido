@@ -26,8 +26,14 @@ try {
   process.loadEnvFile(".env.local");
 } catch {}
 const KEY = process.env.ELEVENLABS_API_KEY?.trim();
-// George (premade): warm, measured. Override with ELEVENLABS_OWL_VOICE.
-const VOICE = process.env.ELEVENLABS_OWL_VOICE ?? "JBFqnCBsd6RMkjVDRZzb";
+// "Living Hokkaido owl guide": designed with ElevenLabs Voice Design
+// (2026-11-26) from: "An older woman in her seventies, a gentle village
+// storyteller. Warm, low and a little husky voice, calm and unhurried, with
+// soft breaths between phrases. She speaks like a kind guardian owl
+// remembering long ago, tender and dignified, never theatrical. Soft and
+// intimate, close to the microphone." No cloned person.
+// Override with ELEVENLABS_OWL_VOICE.
+const VOICE = process.env.ELEVENLABS_OWL_VOICE ?? "aLbEsWOUStPIYvDVdp7K";
 const MODEL = process.env.ELEVENLABS_TTS_MODEL ?? "eleven_multilingual_v2";
 const FORMAT = "mp3_22050_32";
 const OUT = join(process.cwd(), "public", "audio", "voice");
@@ -47,11 +53,16 @@ type Line = { id: string; text: string };
 
 function storyLines(a: unknown): Line[] {
   const s = a as ActivityOf<"story">;
-  return s.chapters.flatMap((c) =>
+  const lines = s.chapters.flatMap((c) =>
     c.lines.flatMap((l) =>
       l.role === "refrain" ? [] : [{ id: l.id, text: l.text }],
     ),
   );
+  // The refrain only when the activity opts in (AI imitation, labelled).
+  const v = s.narrator.voice as { kind: string; refrain?: boolean };
+  if (v.kind === "ai-voice" && v.refrain && s.refrain)
+    lines.push({ id: "refrain", text: s.refrain.text });
+  return lines;
 }
 
 const story = activityKinds.find((a) => a.kind === "story");

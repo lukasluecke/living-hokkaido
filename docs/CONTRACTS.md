@@ -36,7 +36,7 @@ Two layers:
 
 | Version | Change |
 |---|---|
-| 1 (additive) | `MediaRef` kind `ai-voice` (`group`, `credit` default "AI voice (ElevenLabs) · illustrative") and `VoiceIndex` (`public/audio/voice/<group>/index.json`, word start times). Pre-generated TTS for the fictional owl only, never for Ainu text; English only, else captions. |
+| 1 (additive) | `MediaRef` kind `ai-voice` (`group`, `credit` default "AI voice (ElevenLabs) · illustrative") and `VoiceIndex` (`public/audio/voice/<group>/index.json`, word start times). Pre-generated TTS for the fictional owl only; English only, else captions. `refrain` (default `false`) also voices the story refrain as a labelled AI imitation. |
 | 1 (additive) | `place`: stage `hills` (Animal hills) and things `deer`, `bear`, `hare`, `salmon`, `set-bow`, `pelt`, `fish-owl`. New enum values only, so old content still parses. |
 | 1 (additive) | `factHotspots(artifact)` and `modelNotes(artifact)` helpers in `artifact.ts`: hotspots of kind `disclaimer` ("About this model") are a footnote on the card, not a Look closer row, a viewer dot or a journal count (Lukas, 2026-11-26). |
 | 1 (additive) | Exhibits for `slope-run` (Lukas, 2026-11-25): each find gets `look` (`warehouse-wall`, `shachihoko`, `straw-sacks`, `sack-cart`, `herring-boxes`, `canal`; default `straw-sacks`). `ActivityResult.found` (optional ids found in the run). `JournalState.found` (`"<activityId>/<id>"`, default `[]`, so saved journals still parse). `ActivityPartProps.found` (optional, from the journal). |
