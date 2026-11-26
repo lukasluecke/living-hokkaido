@@ -176,6 +176,20 @@ li[data-status="now"] .station i {
   padding: 0;
   border-radius: 50%;
 }
+/* Season menu button: a labelled chip on wide screens. */
+.seasonBtn {
+  width: auto;
+  gap: 6px;
+  padding: 0 12px 0 10px;
+  border-radius: 999px;
+}
+.seasonName {
+  text-transform: capitalize;
+}
+.caret {
+  font-size: 10px;
+  opacity: 0.7;
+}
 .counter:focus-visible,
 .round:focus-visible,
 .menu button:focus-visible,
@@ -303,6 +317,14 @@ li:not([data-status="now"]) .stationLabel {
   }
   .round {
     width: 36px;
+  }
+  .seasonBtn {
+    padding: 0;
+    border-radius: 50%;
+  }
+  .seasonName,
+  .caret {
+    display: none;
   }
   .lang {
     min-width: 36px;

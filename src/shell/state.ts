@@ -8,6 +8,9 @@ import {
   type Prefs,
 } from "@/contracts";
 
+/** Season value of winter (0 spring … 3 winter). */
+export const WINTER = 3;
+
 export function initialState(prefs: Prefs): ExperienceState {
   return {
     view: "island",
@@ -17,7 +20,9 @@ export function initialState(prefs: Prefs): ExperienceState {
     artifactId: null,
     activityId: null,
     reveal: null,
-    season: { ...DEFAULT_SEASON, playing: false },
+    // Start in winter: Hokkaido is known as a snowy island (Lukas). The
+    // shell plays a short intro timelapse up to it (Shell.tsx).
+    season: { ...DEFAULT_SEASON, value: WINTER, playing: false },
     prefs,
   };
 }
