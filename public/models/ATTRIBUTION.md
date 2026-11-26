@@ -59,3 +59,22 @@ meets a cold sea, forested hills behind, Hokkaido."
 Known flaws: place-hills shows deer that look European and a wire fence;
 place-mine has letterbox bars. Not shipped: era-2-flat 437313758878851 (modern
 shed, utility pole), era-3-cise 437313764144673 (stilt houses, modern houses).
+
+## Round 3 (owl-film look)
+
+PixVerse V6 text-to-video, 5 s, 720p, ambient audio, from text prompts only.
+The owl film's frames were looked at as a style guide, not used as input. Every
+prompt ends with: "Blue-hour moonlight and warm hearth glow, ground-level slow
+push-in, shallow depth of field, soft film grain, cinematic, calm. No modern
+buildings, no utility poles, no wires, no fences, no vehicles, no text, no
+logos, no music." People wear plain robes or work clothes; no motifs were asked
+for. Full prompts: project file generated-assets/PROMPTS-3.md.
+
+| Key | Shown for | PixVerse video id | Prompt (start) |
+|---|---|---|---|
+| era-2-flat-v2.mp4 | era "flat-ground" | 437320674821999 | Evening at a river mouth in Hokkaido, a few thatched houses built on flat ground with walls of grass and bark … two people in plain long robes of light brown woven plant-fibre cloth walk slowly between the houses. |
+| place-forest-night.mp4 | scene "survey-forest" (replaces place-forest.mp4) | 437320700238999 | Night in a dense Hokkaido forest of spruce and birch in winter … a straight line of wooden survey stakes … a single lantern hanging on a stake. |
+
+Not shipped: era-3-cise-v2 437320679580883 (overhead wires, fences, metal
+chimneys), era-4-meiji-v2 437320686122909 (utility poles), era-1-pit-night
+437320693628848 (rail fences, looks like a 3D render).
